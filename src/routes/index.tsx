@@ -1,8 +1,9 @@
 import * as React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
-import Home from "@/pages/home";
+
 import About from "@/pages/about";
+import Login from "@/pages/auth/login";
 
 function AppRoutes() {
   return (
@@ -23,7 +24,7 @@ function AppRoutes() {
 
       <div className="p-4">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Login />} />
           <Route path="/about" element={<About />} />
         </Routes>
       </div>

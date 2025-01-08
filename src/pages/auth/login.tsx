@@ -1,136 +1,88 @@
-"use client";
+import React, { useState } from "react";
 
-import * as React from "react";
-import { Minus, Plus } from "lucide-react";
-import { Bar, BarChart, ResponsiveContainer } from "recharts";
+const Login = ({ onLogin }: { onLogin: () => void }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-
-const data = [
-  {
-    goal: 400,
-  },
-  {
-    goal: 300,
-  },
-  {
-    goal: 200,
-  },
-  {
-    goal: 300,
-  },
-  {
-    goal: 200,
-  },
-  {
-    goal: 278,
-  },
-  {
-    goal: 189,
-  },
-  {
-    goal: 239,
-  },
-  {
-    goal: 300,
-  },
-  {
-    goal: 200,
-  },
-  {
-    goal: 278,
-  },
-  {
-    goal: 189,
-  },
-  {
-    goal: 349,
-  },
-];
-
-export function DrawerDemo() {
-  const [goal, setGoal] = React.useState(350);
-
-  function onClick(adjustment: number) {
-    setGoal(Math.max(200, Math.min(400, goal + adjustment)));
-  }
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    onLogin();
+  };
 
   return (
-    <Drawer>
-      <DrawerTrigger asChild>
-        <Button variant="outline">Open Drawer</Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <div className="mx-auto w-full max-w-sm">
-          <DrawerHeader>
-            <DrawerTitle>Move Goal</DrawerTitle>
-            <DrawerDescription>Set your daily activity goal.</DrawerDescription>
-          </DrawerHeader>
-          <div className="p-4 pb-0">
-            <div className="flex items-center justify-center space-x-2">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 shrink-0 rounded-full"
-                onClick={() => onClick(-10)}
-                disabled={goal <= 200}
-              >
-                <Minus />
-                <span className="sr-only">Decrease</span>
-              </Button>
-              <div className="flex-1 text-center">
-                <div className="text-7xl font-bold tracking-tighter">
-                  {goal}
-                </div>
-                <div className="text-[0.70rem] uppercase text-muted-foreground">
-                  Calories/day
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-white">
+      <div className="flex max-w-4xl w-full bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="w-1/2 p-8">
+          <h2 className="text-3xl font-bold mb-6 text-center">LOGIN</h2>
+          <form onSubmit={handleLogin}>
+            <div className="mb-4">
+              <label className="block text-gray-700">
+                <span className="flex items-center">
+                  <i className="fas fa-envelope mr-2"></i>
+                  Email
+                </span>
+              </label>
+              <input
+                type="email"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                placeholder="Email@Example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700">
+                <span className="flex items-center">
+                  <i className="fas fa-lock mr-2"></i>
+                  Password
+                </span>
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  placeholder="****************"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <div className="absolute inset-y-0 right-4 flex items-center">
+                  <i className="fas fa-eye"></i>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 shrink-0 rounded-full"
-                onClick={() => onClick(10)}
-                disabled={goal >= 400}
-              >
-                <Plus />
-                <span className="sr-only">Increase</span>
-              </Button>
             </div>
-            <div className="mt-3 h-[120px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
-                  <Bar
-                    dataKey="goal"
-                    style={
-                      {
-                        fill: "hsl(var(--foreground))",
-                        opacity: 0.9,
-                      } as React.CSSProperties
-                    }
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+
+            <div className="flex justify-between items-center mb-6">
+              <label className="flex items-center text-sm">
+                <input type="checkbox" className="mr-2" />
+                Remember Password
+              </label>
+              <a href="#" className="text-blue-500 text-sm">
+                Forgot Password
+              </a>
             </div>
-          </div>
-          <DrawerFooter>
-            <Button>Submit</Button>
-            <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DrawerClose>
-          </DrawerFooter>
+
+            <button
+              type="submit"
+              className="w-full bg-black text-white py-3 rounded-lg text-lg hover:bg-gray-800"
+            >
+              LOGIN
+            </button>
+          </form>
         </div>
-      </DrawerContent>
-    </Drawer>
+
+        <div className="w-1/2 flex items-center justify-center bg-blue-50">
+          <img
+            src="/login-illustration.png"
+            alt="Login Illustration"
+            className="max-w-xs"
+          />
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default Login;
