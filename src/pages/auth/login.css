@@ -1,0 +1,16 @@
+.animated-bg {
+    background-size: 200% 100%; 
+    animation: gradient-pingpong 4s ease-in-out infinite; 
+  }
+
+  @keyframes gradient-pingpong {
+    0% {
+      background-position: 100% 0; 
+    }
+    50% {
+      background-position: 0% 0; 
+    }
+    100% {
+      background-position: 100% 0; 
+    }
+  }
