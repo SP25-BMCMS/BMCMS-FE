@@ -23,7 +23,7 @@ const Login = () => {
       localStorage.setItem('bmcms_refresh_token', response.refreshToken);
 
       // Chuyển hướng đến trang dashboard
-      // navigate('/dashboard');
+      navigate('/dashboard');
     } catch (error) {
       setError("Invalid email or password");
     }
