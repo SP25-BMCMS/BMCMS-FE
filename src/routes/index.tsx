@@ -4,6 +4,7 @@ import Login from "@/pages/auth/login";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PublicRoute from "@/components/auth/PublicRoute";
+import Resident from "@/pages/Resident";
 
 function AppRoutes() {
   return (
@@ -19,7 +20,7 @@ function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<div>Dashboard Content</div>} />
-            <Route path="/customer" element={<div>Customer Content</div>} />
+            <Route path="/resident" element={<Resident />} />
             <Route path="/staff" element={<div>Staff Content</div>} />
             <Route path="/tasks" element={<div>Tasks Content</div>} />
             <Route path="/pictures" element={<div>Pictures Content</div>} />
