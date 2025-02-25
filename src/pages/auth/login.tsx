@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import useToast from "@/hooks/use-toash";
 import '../auth/login.css';
 import loginImage from "../../image/login-screen.png"
 import authApi from "@/services/auth";
@@ -7,6 +8,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const toast = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,11 +21,14 @@ const Login = () => {
       localStorage.setItem('bmcms_token', response.accessToken);
       localStorage.setItem('bmcms_refresh_token', response.refreshToken);
       
+      toast.success("Đăng nhập thành công");
 
       window.location.reload(); 
       
     } catch (error: any) {
-      setError(error.message || "Tên đăng nhập hoặc mật khẩu không đúng");
+      const errorMessage = error.message || "Tên đăng nhập hoặc mật khẩu không đúng";
+      setError(errorMessage);
+      toast.error(errorMessage); // Hiển thị toast lỗi
     }
   };
 

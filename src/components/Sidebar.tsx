@@ -12,6 +12,7 @@ import {
   RiMenuUnfoldLine,
   RiLogoutBoxRLine
 } from 'react-icons/ri';
+import toast from 'react-hot-toast';
 
 interface SidebarItem {
   title: string;
@@ -43,6 +44,7 @@ const Sidebar = () => {
   const handleLogout = () =>{
     localStorage.removeItem('bmcms_token')
     localStorage.removeItem('bmcms_refresh_token')
+    toast.success("Đăng xuat thanh cong");
     navigate('/login')
   }
 
