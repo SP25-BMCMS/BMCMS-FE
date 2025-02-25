@@ -1,15 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import '../auth/login.css';
 import loginImage from "../../image/login-screen.png"
 import authApi from "@/services/auth";
-
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,14 +18,14 @@ const Login = () => {
       // Lưu token vào localStorage
       localStorage.setItem('bmcms_token', response.accessToken);
       localStorage.setItem('bmcms_refresh_token', response.refreshToken);
+      
 
-      // Chuyển hướng đến trang dashboard
-      navigate('/dashboard');
-    } catch (error) {
-      setError("Invalid email or password");
+      window.location.reload(); 
+      
+    } catch (error: any) {
+      setError(error.message || "Tên đăng nhập hoặc mật khẩu không đúng");
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center animation-bg justify-center bg-gradient-to-r from-[#94EBFF] via-[#D3F5FF] to-white">
@@ -36,6 +33,11 @@ const Login = () => {
         {/* Phần Login Box */}
         <div className="w-1/2 h-[500px] p-8 bg-white shadow-lg rounded-lg border-4 border-[#0AEEFE]">
           <h2 className="text-3xl font-bold mb-6 text-center">LOGIN</h2>
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleLogin}>
             <div className="mb-4">
               <label className="block text-gray-700">

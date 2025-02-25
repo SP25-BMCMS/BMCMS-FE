@@ -9,7 +9,8 @@ import {
   RiImageLine,
   RiTimeLine,
   RiMenuFoldLine,
-  RiMenuUnfoldLine
+  RiMenuUnfoldLine,
+  RiLogoutBoxRLine
 } from 'react-icons/ri';
 
 interface SidebarItem {
@@ -39,6 +40,11 @@ const Sidebar = () => {
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+  const handleLogout = () =>{
+    localStorage.removeItem('bmcms_token')
+    localStorage.removeItem('bmcms_refresh_token')
+    navigate('/login')
+  }
 
   return (
     <div 
@@ -70,6 +76,15 @@ const Sidebar = () => {
             )}
           </div>
         ))}
+        <div 
+        onClick={handleLogout}
+        className='flex items-center px-4 py-3 mt-auto cursor-pointer hover:bg-red-100 text-red-4600'
+        >
+          <span className='text-xl'><RiLogoutBoxRLine/></span>
+          {!isCollapsed && (
+            <span className='ml-4'>Logout</span>
+          )}
+        </div>
       </nav>
     </div>
   );
