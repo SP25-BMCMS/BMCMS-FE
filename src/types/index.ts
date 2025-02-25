@@ -9,3 +9,9 @@ export type GetCurrentUserAPIResponse ={
     username: string,
     email: string,
 }
+export type Residents ={
+    id: string,
+    name: string,
+    createdDate: string,
+    status: 'active' | 'inactive';
+}

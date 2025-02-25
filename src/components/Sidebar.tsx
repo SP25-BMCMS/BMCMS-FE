@@ -1,7 +1,6 @@
-
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { 
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
   RiDashboardLine,
   RiTeamLine,
   RiUserSettingsLine,
@@ -9,22 +8,19 @@ import {
   RiImageLine,
   RiTimeLine,
   RiMenuFoldLine,
-  RiMenuUnfoldLine
-} from 'react-icons/ri';
+  RiMenuUnfoldLine,
+  RiLogoutBoxRLine,
+} from "react-icons/ri";
+import toast from "react-hot-toast";
 
-interface SidebarItem {
-  title: string;
-  path: string;
-  icon: React.ReactNode;
-}
-
-const sidebarItems: SidebarItem[] = [
-  { title: 'Dashboard', path: '/dashboard', icon: <RiDashboardLine /> },
-  { title: 'Customer', path: '/customer', icon: <RiTeamLine /> },
-  { title: 'Staff Manager', path: '/staff', icon: <RiUserSettingsLine /> },
-  { title: 'Task Management', path: '/tasks', icon: <RiTaskLine /> },
-  { title: 'Picture Management', path: '/pictures', icon: <RiImageLine /> },
-  { title: 'WorkLog', path: '/worklog', icon: <RiTimeLine /> },
+// Danh sách sidebar items (export để dùng trong DashboardLayout.tsx)
+export const sidebarItems = [
+  { title: "Dashboard", path: "/dashboard", icon: <RiDashboardLine /> },
+  { title: "Residents", path: "/resident", icon: <RiTeamLine /> },
+  { title: "Staff Manager", path: "/staff", icon: <RiUserSettingsLine /> },
+  { title: "Task Management", path: "/tasks", icon: <RiTaskLine /> },
+  { title: "Picture Management", path: "/pictures", icon: <RiImageLine /> },
+  { title: "WorkLog", path: "/worklog", icon: <RiTimeLine /> },
 ];
 
 const Sidebar = () => {
@@ -40,10 +36,17 @@ const Sidebar = () => {
     return location.pathname === path;
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("bmcms_token");
+    localStorage.removeItem("bmcms_refresh_token");
+    toast.success("Đăng xuất thành công");
+    navigate("/");
+  };
+
   return (
-    <div 
+    <div
       className={`bg-gray-100 min-h-screen transition-all duration-300 ${
-        isCollapsed ? 'w-20' : 'w-64'
+        isCollapsed ? "w-20" : "w-64"
       }`}
     >
       <div className="flex p-4">
@@ -58,18 +61,22 @@ const Sidebar = () => {
             key={index}
             onClick={() => navigate(item.path)}
             className={`flex items-center px-4 py-3 cursor-pointer
-              ${isActive(item.path) 
-                ? 'bg-[#c7c7c7] text-black' 
-                : 'hover:bg-gray-200'
-              }
-              ${!isCollapsed ? 'gap-4' : 'justify-center'}`}
+              ${isActive(item.path) ? "bg-[#c7c7c7] text-black" : "hover:bg-gray-200"}
+              ${!isCollapsed ? "gap-4" : "justify-center"}`}
           >
             <span className="text-xl">{item.icon}</span>
-            {!isCollapsed && (
-              <span className="text-gray-700">{item.title}</span>
-            )}
+            {!isCollapsed && <span className="text-gray-700">{item.title}</span>}
           </div>
         ))}
+        <div
+          onClick={handleLogout}
+          className="flex items-center px-4 py-3 mt-auto cursor-pointer hover:bg-red-100 text-red-600"
+        >
+          <span className="text-xl">
+            <RiLogoutBoxRLine />
+          </span>
+          {!isCollapsed && <span className="ml-4">Logout</span>}
+        </div>
       </nav>
     </div>
   );
