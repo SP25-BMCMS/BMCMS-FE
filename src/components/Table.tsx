@@ -1,4 +1,3 @@
-// Table.tsx
 import React, { ReactNode } from 'react';
 
 export type Column<T> = {
