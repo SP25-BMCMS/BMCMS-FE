@@ -1,15 +1,33 @@
 import React, { useState } from 'react';
-import Table, { Column } from '@/components/table';
+import Table, {Column} from '@/components/Table';
 import { Residents } from '@/types';
 import { mockResidents } from '@/mock/mockData';
+import DropdownMenu from '@/components/DropDownMenu';
 import SearchInput from '@/components/SearchInput';
 import FilterDropdown from '@/components/FilterDropdown';
 import AddButton from '@/components/AddButton';
-
+import AddResident from '@/components/Residents/AddResidents';
+import { Toaster } from 'react-hot-toast';
+import { useAddNewResident } from '@/components/Residents/use-add-new-residents';
 
 const Resident: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [residents, setResidents] = useState<Residents[]>(mockResidents);
   
+  // Use the hook for adding residents
+  const { 
+    isLoading, 
+    isModalOpen, 
+    openModal, 
+    closeModal, 
+    addResident 
+  } = useAddNewResident({
+    onAddSuccess: (newResident) => {
+      // Update the residents state when a new resident is successfully added
+      setResidents([...residents, newResident]);
+    }
+  });
+
   const filterOptions = [
     { value: 'all', label: 'All' },
     { value: 'active', label: 'Active' },
@@ -52,25 +70,29 @@ const Resident: React.FC = () => {
       )
     },
     {
-      key: 'actions',
-      title: 'Actions',
-      render: () => (
-        <div className="text-right">
-          <button className="text-gray-400 hover:text-gray-600">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
-            </svg>
-          </button>
-        </div>
-      ),
-      width: '80px'
+        key: 'action',
+        title: 'Action',
+        render:(item) =>(
+            <DropdownMenu 
+            onViewDetail={()=> console.log('View detail clicked')}
+            onChangeStatus={()=> console.log("Change Status", item)}
+            onRemove={()=> console.log("Remove", item)}/>
+        ),
+        width: '80px',
     }
   ];
 
+  // Handle submission from the AddResident component
+  const handleAddResident = async (residentData: any) => {
+    await addResident(residentData);
+  };
+
   return (
     <div className="w-full mt-[60px]">
+      {/* Add Toast container */}
+      <Toaster position="top-right" />
+      
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
-        {/* Phần Search - sử dụng component SearchInput */}
         <SearchInput 
           placeholder="Search by ID"
           value={searchTerm}
@@ -78,27 +100,31 @@ const Resident: React.FC = () => {
           className="w-[20rem] max-w-xs"
         />
         
-        {/* Phần Filter - sử dụng component FilterDropdown */}
         <FilterDropdown 
           options={filterOptions}
           onSelect={(value) => console.log('Selected filter:', value)}
         />
         
-        {/* Nút Add User - sử dụng component AddButton */}
         <AddButton 
           label="Add User"
-          onClick={() => console.log('Add user clicked')}
+          onClick={openModal} // Use the openModal function from the hook
         />
       </div>
       
-      {/* Sử dụng component Table */}
       <Table<Residents>
-        data={mockResidents}
+        data={residents} // Use the state residents instead of mockResidents
         columns={columns}
         keyExtractor={(item) => item.id}
         onRowClick={(item) => console.log('Row clicked:', item)}
-        className="w-[95%] mx-auto" // Điều chỉnh độ rộng của container bao quanh bảng
-        tableClassName="w-full" // Điều chỉnh độ rộng của bảng
+        className="w-[95%] mx-auto"
+        tableClassName="w-full"
+      />
+      
+      <AddResident 
+        isOpen={isModalOpen} // Use the state from the hook
+        onClose={closeModal} // Use the closeModal function from the hook
+        onAdd={handleAddResident}
+        isLoading={isLoading} // Pass loading state to show loading indicator
       />
     </div>
   );
