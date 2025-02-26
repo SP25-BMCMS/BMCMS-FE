@@ -6,9 +6,11 @@ import DropdownMenu from '@/components/DropDownMenu';
 import SearchInput from '@/components/SearchInput';
 import FilterDropdown from '@/components/FilterDropdown';
 import AddButton from '@/components/AddButton';
-import AddResident from '@/components/Residents/AddResidents';
+import AddResident from '@/components/Residents/AddResidents/AddResidents';
+import RemoveResident from '@/components/Residents/RemoveResidents/RemoveResidents';
 import { Toaster } from 'react-hot-toast';
-import { useAddNewResident } from '@/components/Residents/use-add-new-residents';
+import { useAddNewResident } from '@/components/Residents/AddResidents/use-add-new-residents';
+import { useRemoveResident } from '@/components/Residents/RemoveResidents/use-remove-residents';
 
 const Resident: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -25,6 +27,20 @@ const Resident: React.FC = () => {
     onAddSuccess: (newResident) => {
       // Update the residents state when a new resident is successfully added
       setResidents([...residents, newResident]);
+    }
+  });
+
+  const {
+    isModalOpen: isRemoveModalOpen,
+    isLoading: isRemoving,
+    residentToRemove,
+    openModal: openRemoveModal,
+    closeModal: closeRemoveModal,
+    removeResident
+  } = useRemoveResident({
+    onRemoveSuccess: (removedResidentId) => {
+      // Cập nhật danh sách residents khi xóa thành công
+      setResidents(residents.filter(r => r.id !== removedResidentId));
     }
   });
 
@@ -76,7 +92,7 @@ const Resident: React.FC = () => {
             <DropdownMenu 
             onViewDetail={()=> console.log('View detail clicked')}
             onChangeStatus={()=> console.log("Change Status", item)}
-            onRemove={()=> console.log("Remove", item)}/>
+            onRemove={()=> openRemoveModal(item)}/>
         ),
         width: '80px',
     }
@@ -125,6 +141,13 @@ const Resident: React.FC = () => {
         onClose={closeModal} // Use the closeModal function from the hook
         onAdd={handleAddResident}
         isLoading={isLoading} // Pass loading state to show loading indicator
+      />
+       <RemoveResident 
+        isOpen={isRemoveModalOpen}
+        onClose={closeRemoveModal}
+        onConfirm={removeResident}
+        isLoading={isRemoving}
+        resident={residentToRemove}
       />
     </div>
   );
