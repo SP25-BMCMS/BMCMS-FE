@@ -41,7 +41,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-300 shadow-lg rounded-md">
+        <div className="fixed right-0 mt-2 w-44 bg-white border border-gray-300 shadow-lg rounded-md z-50 mr-[3.5rem]">
           <button
             onClick={onViewDetail}
             className="flex items-center w-full px-4 py-2 text-blue-700 hover:bg-gray-100"

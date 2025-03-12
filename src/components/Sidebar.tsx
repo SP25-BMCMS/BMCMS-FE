@@ -5,12 +5,13 @@ import {
   RiTeamLine,
   RiUserSettingsLine,
   RiTaskLine,
-  RiImageLine,
   RiTimeLine,
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiLogoutBoxRLine,
 } from "react-icons/ri";
+import { FaRegBuilding } from "react-icons/fa";
+import { FaHouseCrack } from "react-icons/fa6";
 import toast from "react-hot-toast";
 
 // Danh sách sidebar items (export để dùng trong DashboardLayout.tsx)
@@ -19,7 +20,8 @@ export const sidebarItems = [
   { title: "Residents", path: "/resident", icon: <RiTeamLine /> },
   { title: "Staff Manager", path: "/staff", icon: <RiUserSettingsLine /> },
   { title: "Task Management", path: "/tasks", icon: <RiTaskLine /> },
-  { title: "Picture Management", path: "/pictures", icon: <RiImageLine /> },
+  { title: "BuildingManagent", path: "/building", icon: <FaRegBuilding /> },
+  { title: "crackManagent", path: "/crack", icon: <FaHouseCrack /> },
   { title: "WorkLog", path: "/worklog", icon: <RiTimeLine /> },
 ];
 
