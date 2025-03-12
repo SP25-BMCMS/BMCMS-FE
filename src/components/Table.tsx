@@ -36,7 +36,7 @@ const Table = <T extends {}>({
   loadingComponent,
 }: TableProps<T>) => {
   return (
-    <div className={`overflow-x-auto border border-black rounded-md ${className}`}>
+    <div className={`overflow-x-auto border border-black rounded-md ${className} overflow-visible`}>
       <table className={`min-w-full divide-y divide-gray-200 ${tableClassName}`}>
         <thead className={headerClassName}>
           <tr>
