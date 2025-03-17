@@ -43,3 +43,12 @@ export type Crack = {
     aiDetectedImage?: string;
     aiDetectedImage2?: string;
   };
+
+export interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  assignedTo: string;
+  createdAt: string;
+}

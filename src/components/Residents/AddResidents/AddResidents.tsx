@@ -114,20 +114,20 @@ const AddResident: React.FC<AddResidentProps> = ({
 
           {/* Role */}
           <div className="flex items-center">
-            <label className="w-1/3 text-sm font-medium text-gray-700">
-              Role
-            </label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-2/3 px-3 py-2 border border-black rounded-[7px] shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="resident">Resident</option>
-              <option value="visitor">Visitor</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
+  <label className="w-1/3 text-sm font-medium text-gray-700">Role</label>
+  {["resident"].length > 1 ? (
+    <select
+      name="role"
+      value={formData.role}
+      onChange={handleChange}
+      className="w-2/3 px-3 py-2 border border-black rounded-[7px] shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+    >
+      <option value="resident">Resident</option>
+    </select>
+  ) : (
+    <span className="w-2/3 px-3 py-2 border border-black rounded-[7px] shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">{formData.role}</span>
+  )}
+</div>
 
           {/* Area */}
           <div className="flex items-center">

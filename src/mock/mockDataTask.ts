@@ -1,0 +1,61 @@
+
+import { Task } from '../types';
+
+export const mockTasks: Task[] = [
+  {
+    id: 1001,
+    title: 'Fix plumbing issue in Building A',
+    description: 'Water leak reported on the 3rd floor near apartment 304',
+    status: 'pending',
+    assignedTo: 'John Smith',
+    createdAt: '2025-03-10'
+  },
+  {
+    id: 1002,
+    title: 'Electrical maintenance in Building B',
+    description: 'Scheduled maintenance for electrical systems in Building B',
+    status: 'in_progress',
+    assignedTo: 'Emily Johnson',
+    createdAt: '2025-03-12'
+  },
+  {
+    id: 1003,
+    title: 'Replace broken window in lobby',
+    description: 'Front lobby window needs replacement due to crack',
+    status: 'completed',
+    assignedTo: 'Michael Chen',
+    createdAt: '2025-03-05'
+  },
+  {
+    id: 1004,
+    title: 'HVAC system inspection',
+    description: 'Routine inspection of HVAC systems in all buildings',
+    status: 'in_progress',
+    assignedTo: 'Sarah Williams',
+    createdAt: '2025-03-15'
+  },
+  {
+    id: 1005,
+    title: 'Paint common areas in Building C',
+    description: 'Repainting walls in common areas of Building C',
+    status: 'pending',
+    assignedTo: 'David Lee',
+    createdAt: '2025-03-16'
+  },
+  {
+    id: 1006,
+    title: 'Security camera installation',
+    description: 'Install new security cameras at entrance points',
+    status: 'completed',
+    assignedTo: 'Lisa Garcia',
+    createdAt: '2025-03-07'
+  },
+  {
+    id: 1007,
+    title: 'Landscaping maintenance',
+    description: 'Trim trees and bushes around property perimeter',
+    status: 'pending',
+    assignedTo: 'Robert Taylor',
+    createdAt: '2025-03-14'
+  }
+];
