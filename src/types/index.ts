@@ -23,11 +23,22 @@ export type Staff ={
     role: 'Staff' | 'Leader' | 'Manager';
 }
 
+
 export type Building ={
     id: string,
     name: string,
     createdDate: string;
     status: 'under_construction' | 'operational';
+}
+export interface BuildingResponse {
+  buildingId: string;
+  name: string;
+  description: string;
+  numberFloor: number;
+  imageCover: string;
+  areaId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 export type Crack = {
     id: string;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Table, { Column } from '@/components/Table';
-import { mockBuildings } from '@/mock/mockDataBuiding';
+import { BuildingResponse,Area } from '@/types';
+import { getBuildings } from '@/services/building';
 import { getAreaList } from '@/services/areas';
 import { PiMapPinAreaBold } from "react-icons/pi";
 import { FaRegBuilding } from "react-icons/fa";
@@ -10,34 +11,53 @@ import FilterDropdown from '@/components/FilterDropdown';
 import AddButton from '@/components/AddButton';
 import AddAreaModal from '@/components/BuildingManager/areas/addAreas/AddAreaModal';
 
-// Define the Building type
-export type Building = {
-  id: string;
-  name: string;
-  createdDate: string;
-  status: 'under_construction' | 'operational';
-};
-
 const Building: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [buildings, setBuildings] = useState<Building[]>(mockBuildings);
+  const [buildings, setBuildings] = useState<BuildingResponse[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch buildings when component mounts
+  useEffect(() => {
+    const fetchBuildings = async () => {
+      setIsLoading(true);
+      try {
+        const buildingsData = await getBuildings();
+        setBuildings(buildingsData);
+      } catch (error) {
+        console.error('Failed to fetch buildings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBuildings();
+  }, [refreshTrigger]);
 
   // Fetch areas when component mounts or refreshTrigger changes
   useEffect(() => {
     const fetchAreas = async () => {
       try {
-        await getAreaList();
-        // Nếu bạn muốn hiển thị danh sách area, bạn có thể lưu chúng vào state
-        // setAreas(areaList);
+        const areasData = await getAreaList();
+        setAreas(areasData);
       } catch (error) {
         console.error('Failed to fetch areas:', error);
       }
     };
-
     fetchAreas();
   }, [refreshTrigger]);
+
+  const getAreaName = (areaId: string): string => {
+    const area = areas.find((a) => a.areaId === areaId);
+    return area ? area.name : 'N/A';
+  };
+  useEffect(() => {
+    console.log('Areas:', areas);
+    console.log('Buildings:', buildings);
+  }, [areas, buildings]);
+
 
   const filterOptions = [
     { value: 'all', label: 'All' },
@@ -45,7 +65,7 @@ const Building: React.FC = () => {
     { value: 'under_construction', label: 'Under Construction' },
   ];
 
-  const columns: Column<Building>[] = [
+  const columns: Column<BuildingResponse>[] = [
     {
       key: 'index',
       title: 'No',
@@ -53,9 +73,18 @@ const Building: React.FC = () => {
       width: '60px'
     },
     {
-      key: 'id',
+      key: 'buildingId',
       title: 'Building ID',
-      render: (item) => <span className="text-sm text-gray-500">{item.id}</span>
+      render: (item) => <span className="text-sm text-gray-500">{item.buildingId}</span>
+    },
+    {
+      key: 'areaId',
+      title: 'Area Name',
+      render: (item) => (
+        <span className="text-sm text-gray-500">
+          {getAreaName(item.areaId)}
+        </span>
+      )
     },
     {
       key: 'name',
@@ -63,26 +92,14 @@ const Building: React.FC = () => {
       render: (item) => <span className="text-sm font-medium text-gray-900">{item.name}</span>
     },
     {
-      key: 'createdDate',
-      title: 'Created Date',
-      render: (item) => (
-        <span className="text-sm text-gray-500">
-          {item.status === 'under_construction' ? '--/--/----' : item.createdDate}
-        </span>
-      )
+      key:'Floor',
+      title: 'Floor',
+      render: (item) => <span className="text-sm text-gray-500">{item.numberFloor}</span>
     },
     {
-      key: 'status',
-      title: 'Status',
-      render: (item) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-          item.status === 'operational' 
-            ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]' 
-            : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
-        }`}>
-          {item.status === 'operational' ? 'Operational' : 'Under Construction'}
-        </span>
-      )
+      key: 'createdAt',
+      title: 'Created Date',
+      render: (item) => <span className="text-sm text-gray-500">{new Date(item.createdAt).toLocaleDateString()}</span>
     },
     {
       key: 'action',
@@ -132,14 +149,20 @@ const Building: React.FC = () => {
         />
       </div>
       
-      <Table<Building>
-        data={buildings}
-        columns={columns}
-        keyExtractor={(item) => item.id}
-        onRowClick={(item) => console.log('Row clicked:', item)}
-        className="w-[95%] mx-auto"
-        tableClassName="w-full"
-      />
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <p>Đang tải dữ liệu...</p>
+        </div>
+      ) : (
+        <Table<BuildingResponse>
+          data={buildings}
+          columns={columns}
+          keyExtractor={(item) => item.buildingId}
+          onRowClick={(item) => console.log('Row clicked:', item)}
+          className="w-[95%] mx-auto"
+          tableClassName="w-full"
+        />
+      )}
 
       {/* Add Area Modal */}
       <AddAreaModal 
