@@ -13,22 +13,4 @@ export const mockResidents: Residents[] = [
     createdDate: "13/02/2021",
     status: "inactive",
   },
-  {
-    id: "123111",
-    name: "Duong Quang Huy",
-    createdDate: "13/02/2021",
-    status: "inactive",
-  },
-  {
-    id: "123111",
-    name: "Duong Quang Huy",
-    createdDate: "13/02/2021",
-    status: "inactive",
-  },
-  {
-    id: "123111",
-    name: "Duong Quang Huy",
-    createdDate: "13/02/2021",
-    status: "inactive",
-  },
 ];

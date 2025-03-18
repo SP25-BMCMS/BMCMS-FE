@@ -23,11 +23,22 @@ export type Staff ={
     role: 'Staff' | 'Leader' | 'Manager';
 }
 
+
 export type Building ={
     id: string,
     name: string,
     createdDate: string;
     status: 'under_construction' | 'operational';
+}
+export interface BuildingResponse {
+  buildingId: string;
+  name: string;
+  description: string;
+  numberFloor: number;
+  imageCover: string;
+  areaId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 export type Crack = {
     id: string;
@@ -43,3 +54,24 @@ export type Crack = {
     aiDetectedImage?: string;
     aiDetectedImage2?: string;
   };
+
+export interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  assignedTo: string;
+  createdAt: string;
+}
+//area
+export type Area = {
+    areaId: string;
+    name: string;
+    description: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  export interface AddAreaRequest {
+    name: string;
+    description: string;
+  }

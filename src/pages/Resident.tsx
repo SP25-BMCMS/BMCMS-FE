@@ -11,6 +11,7 @@ import RemoveResident from '@/components/Residents/RemoveResidents/RemoveResiden
 import { Toaster } from 'react-hot-toast';
 import { useAddNewResident } from '@/components/Residents/AddResidents/use-add-new-residents';
 import { useRemoveResident } from '@/components/Residents/RemoveResidents/use-remove-residents';
+import { FiUserPlus } from "react-icons/fi";
 
 const Resident: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -123,6 +124,7 @@ const Resident: React.FC = () => {
         
         <AddButton 
           label="Add User"
+          icon={<FiUserPlus />}
           onClick={openModal} // Use the openModal function from the hook
         />
       </div>

@@ -15,6 +15,7 @@ import Building from "@/pages/BuildingManagement";
 import CrackManagement from "@/pages/CrackManagement";
 import DetailCrack from "@/components/crackManager/DetailCrack/DetailCrack";
 import DetailLayout from "@/layouts/DetailLayout";
+import TaskManagement from "@/pages/TaskManagement";
 
 function AppRoutes() {
   return (
@@ -32,7 +33,7 @@ function AppRoutes() {
             <Route path="/dashboard" element={<div>Dashboard Content</div>} />
             <Route path="/resident" element={<Resident />} />
             <Route path="/staff" element={<StaffManagement />} />
-            <Route path="/tasks" element={<div>Tasks Content</div>} />
+            <Route path="/tasks" element={<TaskManagement/>} />
             <Route path="/building" element={<Building />} />
             <Route path="/worklog" element={<div>WorkLog Content</div>} />
             <Route path="/crack" element={<CrackManagement />} />
@@ -43,7 +44,7 @@ function AppRoutes() {
         </Route>
 
 
-        {/* Đường dẫn mặc định - chuyển hướng dựa trên trạng thái xác thực */}
+        {/* Đường dẫn mặc định - chuyển hướng dựa trên trạng thái xác thực tạm thời tắt sau khi sửa xong có thể mở lại */}
         <Route
           path="*"
           element={
@@ -54,6 +55,7 @@ function AppRoutes() {
             )
           }
         />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
   );
