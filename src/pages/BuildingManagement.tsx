@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Table, { Column } from '@/components/Table';
 import { mockBuildings } from '@/mock/mockDataBuiding';
+import { getAreaList } from '@/services/areas';
+import { PiMapPinAreaBold } from "react-icons/pi";
+import { FaRegBuilding } from "react-icons/fa";
 import DropdownMenu from '@/components/DropDownMenu';
 import SearchInput from '@/components/SearchInput';
 import FilterDropdown from '@/components/FilterDropdown';
 import AddButton from '@/components/AddButton';
+import AddAreaModal from '@/components/BuildingManager/areas/addAreas/AddAreaModal';
 
 // Define the Building type
 export type Building = {
@@ -17,6 +21,23 @@ export type Building = {
 const Building: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [buildings, setBuildings] = useState<Building[]>(mockBuildings);
+  const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Fetch areas when component mounts or refreshTrigger changes
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        await getAreaList();
+        // Nếu bạn muốn hiển thị danh sách area, bạn có thể lưu chúng vào state
+        // setAreas(areaList);
+      } catch (error) {
+        console.error('Failed to fetch areas:', error);
+      }
+    };
+
+    fetchAreas();
+  }, [refreshTrigger]);
 
   const filterOptions = [
     { value: 'all', label: 'All' },
@@ -77,6 +98,11 @@ const Building: React.FC = () => {
     }
   ];
 
+  const handleAddAreaSuccess = () => {
+    // Trigger a refresh of the area list
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <div className="w-full mt-[60px]">
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
@@ -92,8 +118,15 @@ const Building: React.FC = () => {
           onSelect={(value) => console.log('Selected filter:', value)}
         />
         
+        <AddButton
+          label='Add Area'
+          className='w-[154px]'
+          icon={<PiMapPinAreaBold/>}
+          onClick={() => setIsAddAreaModalOpen(true)}
+        />
         <AddButton 
           label="Add Building"
+          icon={<FaRegBuilding />}
           className='w-[154px]'
           onClick={() => console.log('Add Building clicked')}
         />
@@ -106,6 +139,13 @@ const Building: React.FC = () => {
         onRowClick={(item) => console.log('Row clicked:', item)}
         className="w-[95%] mx-auto"
         tableClassName="w-full"
+      />
+
+      {/* Add Area Modal */}
+      <AddAreaModal 
+        isOpen={isAddAreaModalOpen}
+        onClose={() => setIsAddAreaModalOpen(false)}
+        onSuccess={handleAddAreaSuccess}
       />
     </div>
   );

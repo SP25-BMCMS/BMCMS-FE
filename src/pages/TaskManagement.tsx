@@ -6,16 +6,11 @@ import DropdownMenu from '@/components/DropDownMenu';
 import SearchInput from '@/components/SearchInput';
 import FilterDropdown from '@/components/FilterDropdown';
 import AddButton from '@/components/AddButton';
+import { Task } from '@/types';
+import { MdOutlineAddTask } from "react-icons/md";
 
 // Define the Task type (using your provided interface)
-type Task = {
-  id: number;
-  title: string;
-  description: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  assignedTo: string;
-  createdAt: string;
-};
+
 
 const TaskManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -105,6 +100,7 @@ const TaskManagement: React.FC = () => {
         
         <AddButton 
           label="Add Task"
+          icon={<MdOutlineAddTask />}
           className='w-[154px]'
           onClick={() => console.log('Add Task clicked')}
         />

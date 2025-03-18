@@ -52,3 +52,15 @@ export interface Task {
   assignedTo: string;
   createdAt: string;
 }
+//area
+export type Area = {
+    areaId: string;
+    name: string;
+    description: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  export interface AddAreaRequest {
+    name: string;
+    description: string;
+  }

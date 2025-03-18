@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Table, { Column } from "@/components/Table";
 import { Staff } from "@/types";
 import { mockStaff } from "@/mock/mockDataStaff";
+import { FiUserPlus } from "react-icons/fi";
 import DropdownMenu from "@/components/DropDownMenu";
 import SearchInput from "@/components/SearchInput";
 import FilterDropdown from "@/components/FilterDropdown";
@@ -116,6 +117,7 @@ const StaffManagement: React.FC = () => {
 
         <AddButton
           label="Add Staff"
+          icon={<FiUserPlus />}
           onClick={() => console.log("Add staff button clicked")}
         />
       </div>
