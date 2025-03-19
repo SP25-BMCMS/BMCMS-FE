@@ -2,8 +2,6 @@
 import apiInstance from '@/lib/axios';
 import { BuildingResponse, BuildingsListResponse } from '@/types';
 
-
-
 // Hàm lấy danh sách tòa nhà
 export const getBuildings = async (): Promise<BuildingResponse[]> => {
   try {
@@ -16,3 +14,4 @@ export const getBuildings = async (): Promise<BuildingResponse[]> => {
     throw error;
   }
 };
+

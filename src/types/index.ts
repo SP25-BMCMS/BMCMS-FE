@@ -23,13 +23,7 @@ export type Staff ={
     role: 'Staff' | 'Leader' | 'Manager';
 }
 
-
-export type Building ={
-    id: string,
-    name: string,
-    createdDate: string;
-    status: 'under_construction' | 'operational';
-}
+//building
 export interface BuildingResponse {
   buildingId: string;
   name: string;
@@ -38,8 +32,17 @@ export interface BuildingResponse {
   imageCover: string;
   areaId: string;
   createdAt: string;
+  construction_date:string;
+  completion_date:string;
+  Status: string;
   updatedAt: string;
 }
+export interface BuildingsListResponse {
+  statusCode: number;
+  message: string;
+  data: BuildingResponse[];
+}
+//crack
 export type Crack = {
     id: string;
     reportDescription: string;
@@ -54,7 +57,7 @@ export type Crack = {
     aiDetectedImage?: string;
     aiDetectedImage2?: string;
   };
-
+//task
 export interface Task {
   id: number;
   title: string;
