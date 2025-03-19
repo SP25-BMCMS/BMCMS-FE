@@ -9,12 +9,27 @@ export type GetCurrentUserAPIResponse ={
     username: string,
     email: string,
 }
-export type Residents ={
-    id: string,
-    name: string,
-    createdDate: string,
-    status: 'active' | 'inactive';
-}
+//residents
+export type Residents = {
+  userId: string;
+  username: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+  createdDate: string;
+  apartments?: {
+    apartmentName: string;
+    buildingId: string;
+  }[];
+};
+
+export type ResidentsApiResponse = {
+  success: boolean;
+  data: Residents[];
+};
+
+//Staff
 export type Staff ={
     id:string,
     name: string,
