@@ -42,6 +42,16 @@ export interface BuildingsListResponse {
   message: string;
   data: BuildingResponse[];
 }
+export interface AddBuildingRequest {
+  name: string;
+  description: string;
+  numberFloor: number;
+  imageCover: string;
+  areaId: string;
+  construction_date: string;
+  completion_date: string;
+  status: 'operational' | 'under_construction';
+}
 //crack
 export type Crack = {
     id: string;

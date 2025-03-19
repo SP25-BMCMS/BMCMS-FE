@@ -5,6 +5,7 @@ import { getBuildings } from "@/services/building";
 import { getAreaList } from "@/services/areas";
 import { PiMapPinAreaBold } from "react-icons/pi";
 import { FaRegBuilding } from "react-icons/fa";
+import AddBuildingModal from "@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal";
 import DropdownMenu from "@/components/DropDownMenu";
 import SearchInput from "@/components/SearchInput";
 import FilterDropdown from "@/components/FilterDropdown";
@@ -16,6 +17,7 @@ const Building: React.FC = () => {
   const [buildings, setBuildings] = useState<BuildingResponse[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
+  const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -106,13 +108,6 @@ const Building: React.FC = () => {
       ),
     },
     {
-      key: "construction date",
-      title: "Construction Date",
-      render: (item) => (
-        <span className="text-sm text-gray-500">{item.construction_date}</span>
-      ),
-    },
-    {
       key: "completion Date",
       title: "completion Date",
       render: (item) => (
@@ -178,7 +173,7 @@ const Building: React.FC = () => {
           label="Add Building"
           icon={<FaRegBuilding />}
           className="w-[154px]"
-          onClick={() => console.log("Add Building clicked")}
+          onClick={() => setIsAddBuildingModalOpen(true)}
         />
       </div>
 
@@ -202,6 +197,11 @@ const Building: React.FC = () => {
         isOpen={isAddAreaModalOpen}
         onClose={() => setIsAddAreaModalOpen(false)}
         onSuccess={handleAddAreaSuccess}
+      />
+      <AddBuildingModal
+        isOpen={isAddBuildingModalOpen}
+        onClose={() => setIsAddBuildingModalOpen(false)}
+        onSuccess={handleAddAreaSuccess} // Có thể sử dụng lại hàm này vì cũng cần refresh dữ liệu
       />
     </div>
   );
