@@ -31,7 +31,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
 
   useEffect(() => {
     if (formData.status === "under_construction") {
-      // Nếu trạng thái là đang xây dựng, định dạng lại ngày hoàn thành
+      // If the status is under construction, format the completion date
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
       const month = String(today.getMonth() + 1).padStart(2, "0");
@@ -53,8 +53,8 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
           setFormData((prev) => ({ ...prev, areaId: areasData[0].areaId }));
         }
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách khu vực:", error);
-        toast.error("Không thể tải danh sách khu vực!");
+        console.error("Error fetching area list:", error);
+        toast.error("Unable to load area list!");
       }
     };
 
@@ -76,21 +76,21 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
         [name]: parseInt(value) || 1,
       }));
     } else if (name === "status") {
-      // Khi thay đổi status
+      // When the status changes
       if (value === "under_construction") {
-        // Nếu chọn đang xây dựng, đặt ngày hoàn thành là DD/MM/YYYY
+        // If "under construction" is selected, set completion date as DD/MM/YYYY
         const today = new Date();
-  const day = String(today.getDate()).padStart(2, "0");
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const year = today.getFullYear();
+        const day = String(today.getDate()).padStart(2, "0");
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const year = today.getFullYear();
 
-  setFormData((prev) => ({
-    ...prev,
-    status: value,
-    completion_date: `${day}/${month}/${year}`,
+        setFormData((prev) => ({
+          ...prev,
+          status: value,
+          completion_date: `${day}/${month}/${year}`,
         }));
       } else {
-        // Nếu chọn đang hoạt động, đặt lại ngày hoàn thành
+        // If "operational" is selected, reset the completion date
         setFormData((prev) => ({
           ...prev,
           status: value,
@@ -109,13 +109,13 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
     setIsLoading(true);
 
     if (!formData.name.trim()) {
-      toast.error("Tên tòa nhà không được để trống!");
+      toast.error("Building name cannot be empty!");
       setIsLoading(false);
       return;
     }
 
     if (!formData.areaId) {
-      toast.error("Vui lòng chọn khu vực!");
+      toast.error("Please select an area!");
       setIsLoading(false);
       return;
     }
@@ -132,7 +132,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
         status: formData.status as "operational" | "under_construction",
       });
 
-      toast.success("Thêm tòa nhà thành công!");
+      toast.success("Building added successfully!");
 
       // Reset form
       setFormData({
@@ -149,34 +149,34 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
       onSuccess();
       onClose();
     } catch (err) {
-      console.error("Lỗi khi thêm tòa nhà:", err);
-      toast.error("Lỗi khi thêm tòa nhà mới!");
+      console.error("Error adding building:", err);
+      toast.error("Error adding new building!");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Thêm tòa nhà mới">
+    <Modal isOpen={isOpen} onClose={onClose} title="Add New Building">
       <div className="p-6 space-y-4">
         <div className="space-y-4">
           <div className="flex items-center">
             <label className="w-1/3 text-sm font-medium text-gray-700">
-              Tên tòa nhà
+              Building Name
             </label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Nhập tên tòa nhà"
+              placeholder="Enter building name"
               className="w-2/3 px-3 py-2 border border-black rounded-[7px] shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
 
           <div className="flex items-center">
             <label className="w-1/3 text-sm font-medium text-gray-700">
-              Số tầng
+              Number of Floors
             </label>
             <input
               type="number"
@@ -190,21 +190,21 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
 
           <div className="flex items-center">
             <label className="w-1/3 text-sm font-medium text-gray-700">
-              Hình ảnh (URL)
+              Image (URL)
             </label>
             <input
               type="text"
               name="imageCover"
               value={formData.imageCover}
               onChange={handleChange}
-              placeholder="Nhập URL hình ảnh"
+              placeholder="Enter image URL"
               className="w-2/3 px-3 py-2 border border-black rounded-[7px] shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
 
           <div className="flex items-center">
             <label className="w-1/3 text-sm font-medium text-gray-700">
-              Khu vực
+              Area
             </label>
             <select
               name="areaId"
@@ -212,7 +212,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
               onChange={handleChange}
               className="w-2/3 px-3 py-2 border border-black rounded-[7px] shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value="">Chọn khu vực</option>
+              <option value="">Select area</option>
               {areas.map((area) => (
                 <option key={area.areaId} value={area.areaId}>
                   {area.name}
@@ -223,7 +223,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
 
           <div className="flex items-center">
             <label className="w-1/3 text-sm font-medium text-gray-700">
-              Ngày khởi công
+              Construction Date
             </label>
             <input
               type="date"
@@ -236,7 +236,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
 
           <div className="flex items-center">
             <label className="w-1/3 text-sm font-medium text-gray-700">
-              Trạng thái
+              Status
             </label>
             <div className="w-2/3 flex space-x-4">
               <label className="inline-flex items-center">
@@ -248,7 +248,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                   onChange={handleChange}
                   className="form-radio h-4 w-4 text-indigo-600"
                 />
-                <span className="ml-2">Đang hoạt động</span>
+                <span className="ml-2">Operational</span>
               </label>
               <label className="inline-flex items-center">
                 <input
@@ -259,15 +259,15 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                   onChange={handleChange}
                   className="form-radio h-4 w-4 text-indigo-600"
                 />
-                <span className="ml-2">Đang xây dựng</span>
+                <span className="ml-2">Under construction</span>
               </label>
             </div>
           </div>
 
-          {/* Điều chỉnh trường ngày hoàn thành */}
+          {/* Adjust completion date field */}
           <div className="flex items-center">
             <label className="w-1/3 text-sm font-medium text-gray-700">
-              Ngày hoàn thành
+              Completion Date
             </label>
             {formData.status === "under_construction" ? (
               <input
@@ -290,13 +290,13 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
 
           <div className="flex items-center">
             <label className="w-1/3 text-sm font-medium text-gray-700">
-              Mô tả
+              Description
             </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Nhập mô tả tòa nhà"
+              placeholder="Enter building description"
               className="w-2/3 px-3 py-2 border border-black rounded-[7px] shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               rows={4}
             />
@@ -310,7 +310,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
             className="px-4 py-2 text-sm font-medium text-red-600 underline hover:text-red-700"
             disabled={isLoading}
           >
-            Hủy
+            Cancel
           </button>
           <button
             type="button"
@@ -318,7 +318,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
             className="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             disabled={isLoading}
           >
-            {isLoading ? "Đang xử lý..." : "Thêm"}
+            {isLoading ? "Processing..." : "Add"}
           </button>
         </div>
       </div>

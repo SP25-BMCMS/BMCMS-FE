@@ -72,12 +72,12 @@ const Building: React.FC = () => {
     setIsDeleting(true);
     try {
       await deleteBuilding(selectedBuilding.buildingId);
-      toast.success("Xóa tòa nhà thành công!");
+      toast.success("Delete building successfully!");
       setRefreshTrigger((prev) => prev + 1);
       setIsRemoveBuildingModalOpen(false);
     } catch (error) {
       console.error("Failed to delete building:", error);
-      toast.error("Lỗi khi xóa tòa nhà!");
+      toast.error("Failed to delete building!");
     } finally {
       setIsDeleting(false);
     }

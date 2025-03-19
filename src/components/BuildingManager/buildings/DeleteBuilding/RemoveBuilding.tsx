@@ -23,16 +23,15 @@ const RemoveBuilding: React.FC<RemoveBuildingProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Xác nhận xóa"
+      title="Remove Building"
       size="sm"
     >
       <div className="space-y-4">
         <p className="text-gray-700">
-          Bạn có chắc chắn muốn xóa tòa nhà{" "}
-          <span className="font-medium">{building.name}</span> (ID:{" "}
-          {building.buildingId})?
+          Do you want to remove this Building{" "}
+          <span className="font-medium">{building.name}</span>?
         </p>
-        <p className="text-sm text-gray-500">Hành động này không thể hoàn tác.</p>
+        <p className="text-sm text-gray-500">This Action will not be undone.</p>
         <div className="flex justify-center space-x-3 pt-2">
           <button
             onClick={onClose}
@@ -68,10 +67,10 @@ const RemoveBuilding: React.FC<RemoveBuildingProps> = ({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Đang xóa...
+                Deleting...
               </div>
             ) : (
-              "Xóa"
+              "Delete"
             )}
           </button>
         </div>
