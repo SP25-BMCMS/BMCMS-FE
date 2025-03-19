@@ -103,7 +103,17 @@ const Resident: React.FC = () => {
     {
       key: 'Gender',
       title: 'Gender',
-      render: (item) => <span className="text-sm text-gray-500">{item.gender}</span>
+      render: (item) => (
+        <span
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            item.gender === "Male"
+              ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
+              : "bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]"
+          }`}
+        >
+          {item.gender}
+        </span>
+      ),
     },
     {
       key: 'Date Of Birth',
