@@ -26,4 +26,13 @@ export const addBuilding = async (buildingData: AddBuildingRequest): Promise<Bui
     throw error;
   }
 };
+export const deleteBuilding = async (buildingId: string): Promise<void> => {
+  try {
+    const url = import.meta.env.VITE_DELETE_BUIDLING.replace('{id}', buildingId);
+    await apiInstance.delete(url);
+  } catch (error) {
+    console.error('Error deleting building:', error);
+    throw error;
+  }
+};
 

@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Table, { Column } from "@/components/Table";
 import { BuildingResponse, Area } from "@/types";
-import { getBuildings } from "@/services/building";
+import { getBuildings, deleteBuilding } from "@/services/building";
 import { getAreaList } from "@/services/areas";
 import { PiMapPinAreaBold } from "react-icons/pi";
 import { FaRegBuilding } from "react-icons/fa";
 import AddBuildingModal from "@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal";
+import RemoveBuilding from "@/components/BuildingManager/buildings/DeleteBuilding/RemoveBuilding";
 import DropdownMenu from "@/components/DropDownMenu";
 import SearchInput from "@/components/SearchInput";
 import FilterDropdown from "@/components/FilterDropdown";
 import AddButton from "@/components/AddButton";
 import AddAreaModal from "@/components/BuildingManager/areas/addAreas/AddAreaModal";
+import toast from "react-hot-toast";
 
 const Building: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -18,6 +20,9 @@ const Building: React.FC = () => {
   const [areas, setAreas] = useState<Area[]>([]);
   const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
   const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
+  const [isRemoveBuildingModalOpen, setIsRemoveBuildingModalOpen] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState<BuildingResponse | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,10 +60,28 @@ const Building: React.FC = () => {
     const area = areas.find((a) => a.areaId === areaId);
     return area ? area.name : "N/A";
   };
-  useEffect(() => {
-    console.log("Areas:", areas);
-    console.log("Buildings:", buildings);
-  }, [areas, buildings]);
+
+  const handleRemoveBuilding = (building: BuildingResponse) => {
+    setSelectedBuilding(building);
+    setIsRemoveBuildingModalOpen(true);
+  };
+
+  const confirmRemoveBuilding = async () => {
+    if (!selectedBuilding) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteBuilding(selectedBuilding.buildingId);
+      toast.success("Xóa tòa nhà thành công!");
+      setRefreshTrigger((prev) => prev + 1);
+      setIsRemoveBuildingModalOpen(false);
+    } catch (error) {
+      console.error("Failed to delete building:", error);
+      toast.error("Lỗi khi xóa tòa nhà!");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const filterOptions = [
     { value: "all", label: "All" },
@@ -136,15 +159,15 @@ const Building: React.FC = () => {
         <DropdownMenu
           onViewDetail={() => console.log("View detail clicked")}
           onChangeStatus={() => console.log("Change Status", item)}
-          onRemove={() => console.log("Remove", item)}
+          onRemove={() => handleRemoveBuilding(item)}
         />
       ),
       width: "80px",
     },
   ];
 
-  const handleAddAreaSuccess = () => {
-    // Trigger a refresh of the area list
+  const handleAddSuccess = () => {
+    // Trigger a refresh of the data
     setRefreshTrigger((prev) => prev + 1);
   };
 
@@ -196,12 +219,23 @@ const Building: React.FC = () => {
       <AddAreaModal
         isOpen={isAddAreaModalOpen}
         onClose={() => setIsAddAreaModalOpen(false)}
-        onSuccess={handleAddAreaSuccess}
+        onSuccess={handleAddSuccess}
       />
+      
+      {/* Add Building Modal */}
       <AddBuildingModal
         isOpen={isAddBuildingModalOpen}
         onClose={() => setIsAddBuildingModalOpen(false)}
-        onSuccess={handleAddAreaSuccess} // Có thể sử dụng lại hàm này vì cũng cần refresh dữ liệu
+        onSuccess={handleAddSuccess}
+      />
+      
+      {/* Remove Building Modal */}
+      <RemoveBuilding
+        isOpen={isRemoveBuildingModalOpen}
+        onClose={() => setIsRemoveBuildingModalOpen(false)}
+        onConfirm={confirmRemoveBuilding}
+        isLoading={isDeleting}
+        building={selectedBuilding}
       />
     </div>
   );
