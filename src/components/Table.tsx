@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export type Column<T> = {
   key: string;
@@ -20,6 +21,27 @@ type TableProps<T> = {
   emptyText?: string;
   isLoading?: boolean;
   loadingComponent?: ReactNode;
+  animated?: boolean;
+};
+
+const rowVariants = {
+  hidden: { opacity: 0, y: -5 },
+  visible: (index: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: index * 0.1,
+      duration: 0.5,
+      type: "spring",
+      stiffness: 100,
+      damping: 10
+    }
+  }),
+  exit: { 
+    opacity: 0, 
+    y: 20,
+    transition: { duration: 0.3 }
+  }
 };
 
 const Table = <T extends {}>({
@@ -34,7 +56,73 @@ const Table = <T extends {}>({
   emptyText = 'Không có dữ liệu',
   isLoading = false,
   loadingComponent,
+  animated = true,
 }: TableProps<T>) => {
+  // Animated row component
+  const AnimatedRow = ({ item, index }: { item: T, index: number }) => (
+    <motion.tr
+      key={keyExtractor(item)}
+      variants={rowVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      custom={index}
+      className={onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
+      onClick={() => onRowClick && onRowClick(item)}
+    >
+      {columns.map((column) => (
+        <td 
+          key={`${keyExtractor(item)}-${column.key}`} 
+          className="px-6 py-4 whitespace-nowrap border-b border-black"
+        >
+          {column.render ? column.render(item, index) : (item as any)[column.key]}
+        </td>
+      ))}
+    </motion.tr>
+  );
+
+  // Regular row component
+  const RegularRow = ({ item, index }: { item: T, index: number }) => (
+    <tr
+      key={keyExtractor(item)}
+      className={onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
+      onClick={() => onRowClick && onRowClick(item)}
+    >
+      {columns.map((column) => (
+        <td 
+          key={`${keyExtractor(item)}-${column.key}`} 
+          className="px-6 py-4 whitespace-nowrap border-b border-black"
+        >
+          {column.render ? column.render(item, index) : (item as any)[column.key]}
+        </td>
+      ))}
+    </tr>
+  );
+
+  // Loading animation
+  const loadingVariants = {
+    animate: {
+      rotate: 360,
+      scale: [1, 1.2, 1],
+      transition: {
+        duration: 1.5,
+        repeat: Infinity,
+        ease: "linear"
+      }
+    }
+  };
+
+  const LoadingAnimation = () => (
+    <div className="flex justify-center items-center py-4">
+      <motion.div
+        animate="animate"
+        variants={loadingVariants}
+        className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"
+      />
+      <span className="ml-3">Đang tải dữ liệu...</span>
+    </div>
+  );
+
   return (
     <div className={`overflow-x-auto border border-black rounded-md ${className} overflow-visible`}>
       <table className={`min-w-full divide-y divide-gray-200 ${tableClassName}`}>
@@ -55,7 +143,7 @@ const Table = <T extends {}>({
           {isLoading ? (
             <tr>
               <td colSpan={columns.length} className="px-6 py-4 text-center">
-                {loadingComponent || 'Đang tải dữ liệu...'}
+                {loadingComponent || <LoadingAnimation />}
               </td>
             </tr>
           ) : data.length === 0 ? (
@@ -65,19 +153,15 @@ const Table = <T extends {}>({
               </td>
             </tr>
           ) : (
-            data.map((item, index) => (
-              <tr
-                key={keyExtractor(item)}
-                className={onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
-                onClick={() => onRowClick && onRowClick(item)}
-              >
-                {columns.map((column) => (
-                  <td key={`${keyExtractor(item)}-${column.key}`} className="px-6 py-4 whitespace-nowrap border-b border-black">
-                    {column.render ? column.render(item, index) : (item as any)[column.key]}
-                  </td>
-                ))}
-              </tr>
-            ))
+            <AnimatePresence>
+              {data.map((item, index) => 
+                animated ? (
+                  <AnimatedRow key={keyExtractor(item)} item={item} index={index} />
+                ) : (
+                  <RegularRow key={keyExtractor(item)} item={item} index={index} />
+                )
+              )}
+            </AnimatePresence>
           )}
         </tbody>
       </table>
