@@ -2,6 +2,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import authApi from "@/services/auth";
+import { motion } from "framer-motion";
 
 const ProtectedRoute = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -32,8 +33,22 @@ const ProtectedRoute = () => {
   }, []);
 
   if (isLoading) {
-    // Bạn có thể thêm hiệu ứng loading ở đây
-    return <div>Đang tải...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full"
+        />
+      </div>
+    );
   }
   
   if (!isAuthenticated) {
@@ -41,8 +56,17 @@ const ProtectedRoute = () => {
     return <Navigate to="/" replace />;
   }
 
-  // Render các route con
-  return <Outlet />;
+  // Render các route con với animation
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full h-full"
+    >
+      <Outlet />
+    </motion.div>
+  );
 };
 
 export default ProtectedRoute;
