@@ -30,13 +30,31 @@ export type ResidentsApiResponse = {
 };
 
 //Staff
-export type Staff ={
-    id:string,
-    name: string,
-    createdDate: string,
-    status: 'active' | 'inactive',
-    role: 'Staff' | 'Leader' | 'Manager';
+export interface StaffResponse {
+  isSuccess: boolean;
+  message: string;
+  data: StaffData[];
 }
+
+export interface StaffData {
+  userId: string;
+  username: string;
+  email: string;
+  phone: string;
+  role: string;
+  dateOfBirth: string;
+  gender: string;
+}
+export type Staff = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: 'Staff' | 'Leader' | 'Manager' | 'Admin';
+  dateOfBirth: string;
+  gender: string;
+  createdDate: string;
+};
 
 //building
 export interface BuildingResponse {

@@ -1,16 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Table, { Column } from "@/components/Table";
 import { Staff } from "@/types";
-import { mockStaff } from "@/mock/mockDataStaff";
 import { FiUserPlus } from "react-icons/fi";
 import DropdownMenu from "@/components/DropDownMenu";
 import SearchInput from "@/components/SearchInput";
 import FilterDropdown from "@/components/FilterDropdown";
 import AddButton from "@/components/AddButton";
+import { getAllStaff } from "@/services/staffs";
+import { StaffData } from "@/types";
 
 const StaffManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [staffList, setStaffList] = useState<Staff[]>(mockStaff);
+  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchStaffData = async () => {
+      try {
+        const response = await getAllStaff();
+        if (response.isSuccess) {
+          // Chuyển đổi dữ liệu API sang định dạng Staff
+          const formattedStaff: Staff[] = response.data.map((staff: StaffData) => ({
+            id: staff.userId,
+            name: staff.username,
+            email: staff.email,
+            phone: staff.phone,
+            role: staff.role as Staff['role'],
+            dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
+            gender: staff.gender,
+            createdDate: new Date().toLocaleDateString(), // Tạo ngày hiện tại cho createdDate
+          }));
+          setStaffList(formattedStaff);
+        }
+      } catch (error) {
+        console.error("Failed to fetch staff data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStaffData();
+  }, []);
 
   const filterOptions = [
     { value: "all", label: "All" },
@@ -28,13 +58,6 @@ const StaffManagement: React.FC = () => {
       width: "60px",
     },
     {
-      key: "id",
-      title: "Staff ID",
-      render: (item) => (
-        <span className="text-sm text-gray-500">{item.id}</span>
-      ),
-    },
-    {
       key: "name",
       title: "Staff Name",
       render: (item) => (
@@ -42,11 +65,18 @@ const StaffManagement: React.FC = () => {
       ),
     },
     {
-      key: "createdDate",
-      title: "Created Date",
+      key: "email",
+      title: "Email",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.createdDate}</span>
+        <span className="text-sm text-gray-500">{item.email}</span>
       ),
+    },
+    {
+      key: "phone",
+      title: "Phone",
+      render: (item) => (
+        <span className="text-sm text-gray-500">{item.phone}</span>
+      )
     },
     {
       key: "role",
@@ -59,6 +89,8 @@ const StaffManagement: React.FC = () => {
             "bg-[#F213FE] bg-opacity-30 border border-[#F213FE] text-[#F213FE]",
           Manager:
             "bg-[#360AFE] bg-opacity-30 border border-[#360AFE] text-[#360AFE]",
+          Admin:
+            "bg-[#50f186] bg-opacity-30 border border-[#50f186] text-[#00ff90]",
         };
         return (
           <span
@@ -66,24 +98,38 @@ const StaffManagement: React.FC = () => {
               roleColors[item.role] || "text-gray-700 border border-gray-300"
             }`}
           >
-            {item.role.charAt(0).toUpperCase() + item.role.slice(1)}
+            {item.role}
           </span>
         );
       },
     },
     {
-      key: "status",
-      title: "Status",
+      key: "Gender",
+      title: "Gender",
       render: (item) => (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.status === "active"
-              ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
-              : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
+            item.gender === "Male"
+              ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
+              : "bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]"
           }`}
         >
-          {item.status === "active" ? "Active" : "Inactive"}
+          {item.gender}
         </span>
+      ),
+    },
+    {
+      key: "dateOfBirth",
+      title: "Date Of Birth",
+      render: (item) => (
+        <span className="text-sm text-gray-500">{item.dateOfBirth}</span>
+      ),
+    },
+    {
+      key: "createdDate",
+      title: "Created Date",
+      render: (item) => (
+        <span className="text-sm text-gray-500">{item.createdDate}</span>
       ),
     },
     {
@@ -122,14 +168,18 @@ const StaffManagement: React.FC = () => {
         />
       </div>
 
-      <Table<Staff>
-        data={staffList}
-        columns={columns}
-        keyExtractor={(item) => item.id}
-        onRowClick={(item) => console.log("Row clicked:", item)}
-        className="w-[95%] mx-auto"
-        tableClassName="w-full"
-      />
+      {loading ? (
+        <div className="text-center py-4">Đang tải dữ liệu...</div>
+      ) : (
+        <Table<Staff>
+          data={staffList}
+          columns={columns}
+          keyExtractor={(item) => item.id}
+          onRowClick={(item) => console.log("Row clicked:", item)}
+          className="w-[95%] mx-auto"
+          tableClassName="w-full"
+        />
+      )}
     </div>
   );
 };
