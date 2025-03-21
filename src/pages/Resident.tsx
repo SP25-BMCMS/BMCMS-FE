@@ -11,7 +11,8 @@ import { Toaster } from 'react-hot-toast';
 import { useAddNewResident } from '@/components/Residents/AddResidents/use-add-new-residents';
 import { useRemoveResident } from '@/components/Residents/RemoveResidents/use-remove-residents';
 import { FiUserPlus } from "react-icons/fi";
-import { getAllResidents } from '@/services/residents';
+import { getAllResidents, updateResidentStatus } from '@/services/residents';
+import { toast } from 'react-hot-toast';
 
 const Resident: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -32,6 +33,8 @@ const Resident: React.FC = () => {
           id: resident.userId, // Sử dụng userId làm id
           name: resident.username, // Sử dụng username làm name
           createdDate: new Date().toLocaleDateString(), // Nếu API không có createdDate
+          // Đảm bảo accountStatus được giữ nguyên từ API
+          accountStatus: resident.accountStatus || 'Inactive'
         }));
         
         setResidents(formattedResidents);
@@ -42,11 +45,33 @@ const Resident: React.FC = () => {
         setLoading(false);
       }
     };
-
+  
     fetchResidents();
   }, []);
   
   // Các hook và state khác giữ nguyên
+  const handleChangeStatus = async (resident: Residents) => {
+    try {
+      // Xác định trạng thái mới (đảo ngược trạng thái hiện tại)
+      const newStatus = resident.accountStatus === 'Active' ? 'Inactive' : 'Active';
+      
+      // Gọi API để cập nhật trạng thái
+      await updateResidentStatus(resident.userId, newStatus);
+      
+      // Cập nhật state để hiển thị thay đổi ngay lập tức
+      setResidents(residents.map(r => 
+        r.userId === resident.userId ? { ...r, accountStatus: newStatus } : r
+      ));
+      
+      // Hiển thị thông báo thành công
+      toast.success(`Resident status changed to ${newStatus}`);
+    } catch (error) {
+      console.error('Failed to change resident status:', error);
+      toast.error('Failed to change resident status');
+    }
+  };
+
+
   const { 
     isLoading, 
     isModalOpen, 
@@ -120,20 +145,29 @@ const Resident: React.FC = () => {
       title: 'Date Of Birth',
       render: (item) => {
         try {
+          // Kiểm tra nếu dateOfBirth là undefined hoặc null
+          if (!item.dateOfBirth) {
+            return <span className="text-sm text-gray-500">N/A</span>;
+          }
           
-          const dateParts = item.dateOfBirth.split(' ');
-          const day = dateParts[2];
-          const month = {
-            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
-            'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
-          }[dateParts[1]];
-          const year = dateParts[3];
+          // Tạo đối tượng Date từ chuỗi ngày tháng
+          const date = new Date(item.dateOfBirth);
           
+          // Kiểm tra xem date có hợp lệ không
+          if (isNaN(date.getTime())) {
+            return <span className="text-sm text-gray-500">Invalid date</span>;
+          }
+          
+          // Format ngày tháng theo định dạng dd/mm/yyyy
+          const day = date.getDate().toString().padStart(2, '0');
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const year = date.getFullYear();
           
           const formattedDate = `${day}/${month}/${year}`;
           return <span className="text-sm text-gray-500">{formattedDate}</span>;
         } catch (error) {
-          return <span className="text-sm text-gray-500">{item.dateOfBirth}</span>;
+          console.error("Error formatting date:", error);
+          return <span className="text-sm text-gray-500">Error</span>;
         }
       }
     },
@@ -143,26 +177,26 @@ const Resident: React.FC = () => {
       title: 'Created Date',
       render: (item) => <span className="text-sm text-gray-500">{item.createdDate}</span>
     },
-    // {
-    //   key: 'status',
-    //   title: 'Status',
-    //   render: (item) => (
-    //     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-    //       (item.status === 'active') 
-    //         ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]' 
-    //         : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
-    //     }`}>
-    //       {(item.status === 'active') ? 'Active' : 'Inactive'}
-    //     </span>
-    //   )
-    // },
+    {
+      key: 'status',
+      title: 'Status',
+      render: (item) => (
+        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+          (item.accountStatus === 'Active') 
+            ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]' 
+            : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+        }`}>
+          {item.accountStatus}
+        </span>
+      )
+    },
     {
       key: 'action',
       title: 'Action',
       render:(item) => (
         <DropdownMenu 
           onViewDetail={() => console.log('View detail clicked')}
-          onChangeStatus={() => console.log("Change Status", item)}
+          onChangeStatus={() => handleChangeStatus(item)}
           onRemove={() => openRemoveModal(item)}
         />
       ),

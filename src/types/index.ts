@@ -16,6 +16,7 @@ export type Residents = {
   email: string;
   phone: string;
   dateOfBirth: string;
+  accountStatus: 'Active' | 'Inactive'; // Thêm trường này
   gender: string;
   createdDate: string;
   apartments?: {
