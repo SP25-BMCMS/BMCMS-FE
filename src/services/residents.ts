@@ -47,6 +47,11 @@ export const updateResidentStatus = async (residentId: string, newStatus: 'Activ
     const url = `${API_SECRET}${STATUS_RESIDENT_API.replace('{id}', residentId)}`;
     const response = await axios.patch(url, {
       accountStatus: newStatus
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('bmcms_token')}`
+      }
     });
     
     return response.data;
@@ -55,3 +60,4 @@ export const updateResidentStatus = async (residentId: string, newStatus: 'Activ
     throw error;
   }
 };
+
