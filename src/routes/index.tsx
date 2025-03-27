@@ -37,6 +37,7 @@ function AppRoutes() {
             <Route path="/building" element={<Building />} />
             <Route path="/worklog" element={<div>WorkLog Content</div>} />
             <Route path="/crack" element={<CrackManagement />} />
+            <Route path="/calendar" element={<div>Calendar Content</div>} />
           </Route>
           <Route element={<DetailLayout />}>
             <Route path="/crack/detail/:id" element={<DetailCrack />} />
