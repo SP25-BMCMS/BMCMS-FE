@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import Sidebar from "@/components/Sidebar";
-import { sidebarItems } from "@/components/Sidebar"; // Import sidebarItems để lấy tiêu đề động
+import Sidebar from "@/components/layout/Sidebar";
+import { sidebarItems } from "@/components/layout/Sidebar"; // Import sidebarItems để lấy tiêu đề động
 
 const DashboardLayout = () => {
   const isAuthenticated = localStorage.getItem("bmcms_token");
@@ -10,10 +10,27 @@ const DashboardLayout = () => {
     return <Navigate to="/" replace />;
   }
 
-  // Lấy tiêu đề động từ sidebarItems dựa vào đường dẫn hiện tại
-  const currentTitle =
-    sidebarItems.find((item) => item.path === location.pathname)?.title ||
-    "Dashboard";
+  // Hàm lấy tiêu đề động từ sidebarItems dựa vào đường dẫn hiện tại
+  const getCurrentTitle = () => {
+    // Kiểm tra các mục cấp cao nhất
+    const mainItem = sidebarItems.find((item) => item.path === location.pathname);
+    if (mainItem) return mainItem.title;
+    
+    // Kiểm tra các mục con
+    for (const item of sidebarItems) {
+      if (item.children) {
+        const childItem = item.children.find(
+          (child) => child.path === location.pathname
+        );
+        if (childItem) return childItem.title;
+      }
+    }
+    
+    // Mặc định trả về Dashboard nếu không tìm thấy
+    return "Dashboard";
+  };
+
+  const currentTitle = getCurrentTitle();
 
   return (
     <div className="flex">
