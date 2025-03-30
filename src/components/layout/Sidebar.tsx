@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react"
+import { useNavigate, useLocation } from "react-router-dom"
 import {
   RiDashboardLine,
   RiTeamLine,
@@ -9,147 +9,125 @@ import {
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiLogoutBoxRLine,
-} from "react-icons/ri";
-import { IoIosArrowDown } from "react-icons/io";
-import { FaRegBuilding } from "react-icons/fa";
-import { FaHouseCrack } from "react-icons/fa6";
-import toast from "react-hot-toast";
-import "@/assets/css/Sidebar.css";
+} from "react-icons/ri"
+import { IoIosArrowDown } from "react-icons/io"
+import { FaRegBuilding } from "react-icons/fa"
+import { FaHouseCrack } from "react-icons/fa6"
+import toast from "react-hot-toast"
+import "@/assets/css/Sidebar.css"
 
-// Danh sách sidebar items (export để dùng trong DashboardLayout.tsx)
 export const sidebarItems = [
   { title: "Dashboard", path: "/dashboard", icon: <RiDashboardLine /> },
   { title: "Residents", path: "/resident", icon: <RiTeamLine /> },
   { title: "Staff Manager", path: "/staff", icon: <RiUserSettingsLine /> },
   { title: "Task Management", path: "/tasks", icon: <RiTaskLine /> },
-  { title: "BuildingManagent", path: "/building", icon: <FaRegBuilding /> },
-  { title: "crackManagent", path: "/crack", icon: <FaHouseCrack /> },
+  {
+    title: "Building Management",
+    path: "/building",
+    icon: <FaRegBuilding />
+  },
+  {
+    title: "Crack Management",
+    path: "/crack",
+    icon: <FaHouseCrack />
+  },
   {
     title: "TimeSheet",
     icon: <RiTimeLine />,
     children: [
-      { title: "WorkLog", path: "/worklog" },
+      { title: "Work Log", path: "/worklog" },
       { title: "Calendar", path: "/calendar" },
     ],
   },
-];
+]
 
 const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [openDropdown, setOpenDropdown] = useState("");
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [openDropdown, setOpenDropdown] = useState("")
 
   React.useEffect(() => {
-    // Tìm item cha của path hiện tại
-    const parentItem = sidebarItems.find(item => 
-      item.children && item.children.some(child => child.path === location.pathname)
-    );
-    
-    if (parentItem) {
-      // Nếu tìm thấy, mở dropdown của item cha
-      setOpenDropdown(parentItem.title);
-    } else {
-      // Nếu không tìm thấy, đóng tất cả dropdown
-      setOpenDropdown("");
-    }
-  }, [location.pathname]);
-  
+    const parentItem = sidebarItems.find(item =>
+      item.children?.some(child => child.path === location.pathname)
+    )
+    setOpenDropdown(parentItem?.title || "")
+  }, [location.pathname])
 
   const toggleDropdown = (title: string) => {
-    setOpenDropdown(openDropdown === title ? "" : title);
-  };
+    setOpenDropdown(prev => prev === title ? "" : title)
+  }
 
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
-  const isActive = (
-    path?: string,
-    children?: { title: string; path: string }[]
-  ) => {
-    if (path && location.pathname === path) {
-      return true;
-    }
-
-    // Kiểm tra nếu có children và một trong các children đang active
-    if (children) {
-      return children.some((child) => location.pathname === child.path);
-    }
-
-    return false;
-  };
+  const isActive = (path?: string, children?: { path: string }[]) => {
+    return path === location.pathname ||
+      children?.some(child => child.path === location.pathname)
+  }
 
   const handleLogout = () => {
-    localStorage.removeItem("bmcms_token");
-    localStorage.removeItem("bmcms_refresh_token");
-    toast.success("Đăng xuất thành công");
-    navigate("/");
-  };
+    localStorage.removeItem("bmcms_token")
+    localStorage.removeItem("bmcms_refresh_token")
+    toast.success("Đăng xuất thành công")
+    navigate("/")
+  }
 
   return (
-    <div
-      className={`bg-gray-100 min-h-screen transition-all duration-300 ${
-        isCollapsed ? "w-20" : "w-64"
-      }`}
-    >
-      <div className="flex p-4">
+    <div className={`bg-white min-h-screen shadow-xl border-r border-gray-200 
+      transition-all duration-300 ${isCollapsed ? "w-20" : "w-64"} sticky top-0`}>
+
+      {/* Collapse Button */}
+      <div className="flex p-4 border-b border-gray-200">
         <button
-          onClick={toggleSidebar}
-          className="text-gray-600 hover:text-gray-800"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
         >
           {isCollapsed ? (
-            <RiMenuUnfoldLine size={30} />
+            <RiMenuUnfoldLine size={24} className="text-blue-600" />
           ) : (
-            <RiMenuFoldLine size={30} />
+            <RiMenuFoldLine size={24} className="text-blue-600" />
           )}
         </button>
       </div>
 
-      <nav className="mt-4 flex flex-col gap-[52px]">
-        {sidebarItems.map((item, index) => (
-          <div key={index}>
+      {/* Menu Items */}
+      <nav className="mt-4 flex flex-col gap-2 px-2">
+        {sidebarItems.map((item) => (
+          <div key={item.title}>
             <div
-              onClick={() =>
-                item.children ? toggleDropdown(item.title) : navigate(item.path)
-              }
-              className={`flex items-center px-4 py-3 cursor-pointer
-                ${
-                  isActive(item.path, item.children)
-                    ? "bg-[#c7c7c7] text-black"
-                    : "hover:bg-gray-200"
-                }
+              onClick={() => item.children ? toggleDropdown(item.title) : navigate(item.path)}
+              className={`flex items-center p-3 rounded-lg cursor-pointer
+                transition-all duration-200 group
+                ${isActive(item.path, item.children)
+                  ? "bg-blue-100 text-blue-600 font-semibold"
+                  : "hover:bg-gray-100"}
                 ${!isCollapsed ? "justify-between" : "justify-center"}`}
             >
-              <div
-                className={`flex items-center ${!isCollapsed ? "gap-4" : ""}`}
-              >
-                <span className="text-xl">{item.icon}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xl text-gray-600 group-hover:text-blue-600">
+                  {item.icon}
+                </span>
                 {!isCollapsed && (
-                  <span className="text-gray-700">{item.title}</span>
+                  <span className="text-sm">{item.title}</span>
                 )}
               </div>
+
               {!isCollapsed && item.children && (
-                <span
-                  className={`icon-wrapper ${
-                    openDropdown === item.title ? "icon-rotate" : ""
-                  }`}
-                >
-                  <IoIosArrowDown className="text-gray-600" />
-                </span>
+                <IoIosArrowDown className={`transition-transform duration-300 ${openDropdown === item.title ? 'rotate-180' : ''
+                  } text-gray-400`} />
               )}
             </div>
+
+            {/* Dropdown Menu */}
             {item.children && openDropdown === item.title && !isCollapsed && (
-              <div className="ml-8">
-                {item.children.map((child, childIndex) => (
+              <div className="ml-4 pl-3 border-l-2 border-gray-100 animate-slideDown">
+                {item.children.map((child) => (
                   <div
-                    key={childIndex}
+                    key={child.path}
                     onClick={() => navigate(child.path)}
-                    className={`py-2 px-4 cursor-pointer hover:bg-gray-200 ${
-                      location.pathname === child.path
-                        ? "bg-[#e0e0e0] font-medium"
-                        : ""
-                    }`}
+                    className={`py-2 px-3 rounded-lg cursor-pointer text-sm
+                      transition-colors duration-200
+                      ${location.pathname === child.path
+                        ? "bg-blue-50 text-blue-600"
+                        : "hover:bg-gray-100"}`}
                   >
                     {child.title}
                   </div>
@@ -159,18 +137,21 @@ const Sidebar = () => {
           </div>
         ))}
 
+        {/* Logout Button */}
         <div
           onClick={handleLogout}
-          className="flex items-center px-4 py-3 mt-auto cursor-pointer hover:bg-red-100 text-red-600"
+          className="mt-auto mx-2 mb-4 p-3 rounded-lg cursor-pointer
+            text-red-600 hover:bg-red-50 transition-colors
+            border-t border-gray-100"
         >
-          <span className="text-xl">
-            <RiLogoutBoxRLine />
-          </span>
-          {!isCollapsed && <span className="ml-4">Logout</span>}
+          <div className="flex items-center gap-3">
+            <RiLogoutBoxRLine size={20} />
+            {!isCollapsed && <span className="text-sm">Đăng xuất</span>}
+          </div>
         </div>
       </nav>
     </div>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar
