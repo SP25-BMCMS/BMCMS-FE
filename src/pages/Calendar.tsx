@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -24,15 +24,20 @@ const Calendar: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<TaskEvent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateMode, setIsCreateMode] = useState(false);
-  const [newEvent, setNewEvent] = useState<Partial<TaskEvent>>({
+  const formRef = useRef<HTMLFormElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [initialFormData, setInitialFormData] = useState<Partial<TaskEvent>>({
     title: '',
+    start: '',
+    end: '',
+    allDay: false,
     description: '',
     assignedTo: '',
     status: 'pending',
     priority: 'medium',
     location: ''
   });
-
+  
   // Mock data - Trong thực tế, bạn sẽ lấy dữ liệu từ API
   useEffect(() => {
     // Giả lập dữ liệu sự kiện
@@ -103,8 +108,39 @@ const Calendar: React.FC = () => {
     setEvents(formattedEvents);
   }, []);
 
+  // Xử lý click bên ngoài modal để đóng nó
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      // Nếu click bên ngoài modal và không phải trên form input, đóng modal
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        // Kiểm tra xem người dùng có đang nhập liệu không
+        const activeElement = document.activeElement;
+        if (activeElement && (
+          activeElement.tagName === 'INPUT' || 
+          activeElement.tagName === 'TEXTAREA' || 
+          activeElement.tagName === 'SELECT'
+        )) {
+          // Người dùng đang nhập liệu, không đóng modal
+          return;
+        }
+        setIsModalOpen(false);
+        setSelectedEvent(null);
+        setIsCreateMode(false);
+      }
+    }
+
+    // Chỉ thêm sự kiện nếu modal đang mở
+    if (isModalOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isModalOpen]);
+
   // Xác định màu sắc dựa trên trạng thái
-  const getStatusColor = (status: string) => {
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case 'pending':
         return '#f44336'; // Đỏ
@@ -115,10 +151,10 @@ const Calendar: React.FC = () => {
       default:
         return '#2196f3'; // Xanh dương
     }
-  };
+  }, []);
   
   // Xác định màu viền dựa trên mức độ ưu tiên
-  const getPriorityBorderColor = (priority?: string) => {
+  const getPriorityBorderColor = useCallback((priority?: string) => {
     switch (priority) {
       case 'high':
         return '#d32f2f'; // Đỏ đậm
@@ -129,10 +165,10 @@ const Calendar: React.FC = () => {
       default:
         return '#1976d2'; // Xanh dương đậm
     }
-  };
+  }, []);
 
   // Xử lý khi click vào sự kiện
-  const handleEventClick = (clickInfo: EventClickArg) => {
+  const handleEventClick = useCallback((clickInfo: EventClickArg) => {
     const event = clickInfo.event;
     setSelectedEvent({
       id: event.id,
@@ -148,11 +184,11 @@ const Calendar: React.FC = () => {
     });
     setIsCreateMode(false);
     setIsModalOpen(true);
-  };
+  }, []);
 
   // Xử lý khi chọn một ngày/khoảng thời gian trên lịch
-  const handleDateSelect = (selectInfo: DateSelectArg) => {
-    setNewEvent({
+  const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
+    setInitialFormData({
       title: '',
       start: selectInfo.startStr,
       end: selectInfo.endStr,
@@ -166,40 +202,53 @@ const Calendar: React.FC = () => {
     
     setIsCreateMode(true);
     setIsModalOpen(true);
-  };
+  }, []);
 
   // Xử lý lưu sự kiện mới
-  const handleSaveEvent = () => {
-    if (!newEvent.title?.trim()) {
+  const handleSaveEvent = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formRef.current) return;
+    
+    const formData = new FormData(formRef.current);
+    const title = formData.get('title') as string;
+    const status = formData.get('status') as string;
+    const priority = formData.get('priority') as string;
+    const description = formData.get('description') as string;
+    const assignedTo = formData.get('assignedTo') as string;
+    const location = formData.get('location') as string;
+    
+    if (!title.trim()) {
       alert('Vui lòng nhập tiêu đề sự kiện');
       return;
     }
     
     const eventToAdd = {
-      ...newEvent,
       id: String(Date.now()),
-      backgroundColor: getStatusColor(newEvent.status || 'pending'),
-      borderColor: getPriorityBorderColor(newEvent.priority),
+      title,
+      start: initialFormData.start,
+      end: initialFormData.end,
+      allDay: initialFormData.allDay,
+      status: status || 'pending',
+      priority,
+      description,
+      assignedTo,
+      location,
+      backgroundColor: getStatusColor(status || 'pending'),
+      borderColor: getPriorityBorderColor(priority),
       textColor: '#ffffff'
     };
     
-    setEvents([...events, eventToAdd as EventInput]);
+    setEvents(prev => [...prev, eventToAdd as EventInput]);
     setIsModalOpen(false);
-    setNewEvent({
-      title: '',
-      description: '',
-      assignedTo: '',
-      status: 'pending',
-      priority: 'medium',
-      location: ''
-    });
-  };
+    setIsCreateMode(false);
+  }, [initialFormData, getStatusColor, getPriorityBorderColor]);
 
   // Xử lý cập nhật trạng thái sự kiện
-  const handleUpdateStatus = (newStatus: 'pending' | 'in_progress' | 'completed') => {
+  const handleUpdateStatus = useCallback((newStatus: 'pending' | 'in_progress' | 'completed') => {
     if (!selectedEvent) return;
     
-    const updatedEvents = events.map(event => {
+    setEvents(prev => prev.map(event => {
       if (event.id === selectedEvent.id) {
         return {
           ...event,
@@ -208,17 +257,19 @@ const Calendar: React.FC = () => {
         };
       }
       return event;
-    });
+    }));
     
-    setEvents(updatedEvents);
-    setSelectedEvent({
-      ...selectedEvent,
-      status: newStatus
+    setSelectedEvent(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        status: newStatus
+      };
     });
-  };
+  }, [selectedEvent, getStatusColor]);
 
   // Hiển thị nội dung sự kiện tùy chỉnh
-  const renderEventContent = (eventContent: EventContentArg) => {
+  const renderEventContent = useCallback((eventContent: EventContentArg) => {
     return (
       <div className="fc-event-content flex flex-col p-1">
         <div className="font-semibold">{eventContent.event.title}</div>
@@ -230,55 +281,49 @@ const Calendar: React.FC = () => {
         )}
       </div>
     );
-  };
+  }, []);
+
+  // Xử lý đóng modal
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedEvent(null);
+    setIsCreateMode(false);
+  }, []);
 
   // Modal hiển thị chi tiết sự kiện
-  const EventModal = () => {
+  const EventModal = React.memo(() => {
     if (!isModalOpen) return null;
 
-    const handleClose = () => {
-      setIsModalOpen(false);
-      setSelectedEvent(null);
-      setIsCreateMode(false);
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setNewEvent(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    };
-
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-50">
-        <div className="absolute inset-0 bg-black opacity-50" onClick={handleClose}></div>
-        <div className="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+      <div className="fixed inset-0 flex items-center justify-center z-50" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute inset-0 bg-black opacity-50" onClick={handleCloseModal}></div>
+        <div ref={modalRef} className="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
           {isCreateMode ? (
             // Form tạo sự kiện mới
             <>
               <h2 className="text-xl font-semibold mb-4">Tạo sự kiện mới</h2>
               
-              <div className="space-y-4">
+              <form ref={formRef} onSubmit={handleSaveEvent} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tiêu đề</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="title">Tiêu đề</label>
                   <input
+                    id="title"
                     type="text"
                     name="title"
-                    value={newEvent.title || ''}
-                    onChange={handleChange}
+                    defaultValue=""
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nhập tiêu đề sự kiện"
+                    autoFocus
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="status">Trạng thái</label>
                     <select
+                      id="status"
                       name="status"
-                      value={newEvent.status}
-                      onChange={handleChange}
+                      defaultValue="pending"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="pending">Chờ xử lý</option>
@@ -288,11 +333,11 @@ const Calendar: React.FC = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Mức độ ưu tiên</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="priority">Mức độ ưu tiên</label>
                     <select
+                      id="priority"
                       name="priority"
-                      value={newEvent.priority}
-                      onChange={handleChange}
+                      defaultValue="medium"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="low">Thấp</option>
@@ -303,35 +348,35 @@ const Calendar: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Người thực hiện</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="assignedTo">Người thực hiện</label>
                   <input
+                    id="assignedTo"
                     type="text"
                     name="assignedTo"
-                    value={newEvent.assignedTo || ''}
-                    onChange={handleChange}
+                    defaultValue=""
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nhập tên người thực hiện"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Địa điểm</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="location">Địa điểm</label>
                   <input
+                    id="location"
                     type="text"
                     name="location"
-                    value={newEvent.location || ''}
-                    onChange={handleChange}
+                    defaultValue=""
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nhập địa điểm"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="description">Mô tả</label>
                   <textarea
+                    id="description"
                     name="description"
-                    value={newEvent.description || ''}
-                    onChange={handleChange}
+                    defaultValue=""
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nhập mô tả công việc"
                     rows={3}
@@ -341,27 +386,28 @@ const Calendar: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Thời gian</label>
                   <div className="text-sm text-gray-500">
-                    {new Date(newEvent.start || '').toLocaleString()} 
-                    {newEvent.end ? ` - ${new Date(newEvent.end).toLocaleString()}` : ''}
-                    {newEvent.allDay ? ' (Cả ngày)' : ''}
+                    {new Date(initialFormData.start || '').toLocaleString()} 
+                    {initialFormData.end ? ` - ${new Date(initialFormData.end).toLocaleString()}` : ''}
+                    {initialFormData.allDay ? ' (Cả ngày)' : ''}
                   </div>
                 </div>
-              </div>
-              
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
-                  onClick={handleClose}
-                >
-                  Hủy
-                </button>
-                <button
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                  onClick={handleSaveEvent}
-                >
-                  Lưu
-                </button>
-              </div>
+                
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
+                    onClick={handleCloseModal}
+                    type="button"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    type="submit"
+                  >
+                    Lưu
+                  </button>
+                </div>
+              </form>
             </>
           ) : (
             // Hiển thị chi tiết sự kiện
@@ -425,6 +471,7 @@ const Calendar: React.FC = () => {
                         selectedEvent.status === 'pending' ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'
                       } transition`}
                       onClick={() => handleUpdateStatus('pending')}
+                      type="button"
                     >
                       Chờ xử lý
                     </button>
@@ -433,6 +480,7 @@ const Calendar: React.FC = () => {
                         selectedEvent.status === 'in_progress' ? 'bg-orange-600' : 'bg-orange-500 hover:bg-orange-600'
                       } transition`}
                       onClick={() => handleUpdateStatus('in_progress')}
+                      type="button"
                     >
                       Đang thực hiện
                     </button>
@@ -441,6 +489,7 @@ const Calendar: React.FC = () => {
                         selectedEvent.status === 'completed' ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'
                       } transition`}
                       onClick={() => handleUpdateStatus('completed')}
+                      type="button"
                     >
                       Hoàn thành
                     </button>
@@ -450,7 +499,8 @@ const Calendar: React.FC = () => {
                 <div className="mt-6 flex justify-end">
                   <button
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                    onClick={handleClose}
+                    onClick={handleCloseModal}
+                    type="button"
                   >
                     Đóng
                   </button>
@@ -461,7 +511,7 @@ const Calendar: React.FC = () => {
         </div>
       </div>
     );
-  };
+  });
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
