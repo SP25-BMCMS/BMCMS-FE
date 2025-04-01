@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import {
   RiDashboardLine,
@@ -41,18 +41,32 @@ export const sidebarItems = [
   },
 ]
 
-const Sidebar = () => {
+interface SidebarProps {
+  onToggle?: (isCollapsed: boolean) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const [openDropdown, setOpenDropdown] = useState("")
 
-  React.useEffect(() => {
+  useEffect(() => {
     const parentItem = sidebarItems.find(item =>
       item.children?.some(child => child.path === location.pathname)
     )
     setOpenDropdown(parentItem?.title || "")
   }, [location.pathname])
+
+  const toggleSidebar = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    
+    // Thông báo cho component cha
+    if (onToggle) {
+      onToggle(newState);
+    }
+  }
 
   const toggleDropdown = (title: string) => {
     setOpenDropdown(prev => prev === title ? "" : title)
@@ -71,13 +85,13 @@ const Sidebar = () => {
   }
 
   return (
-    <div className={`bg-white min-h-screen shadow-xl border-r border-gray-200 
-      transition-all duration-300 ${isCollapsed ? "w-20" : "w-64"} sticky top-0`}>
+    <div className={`bg-white h-screen shadow-xl border-r border-gray-200 
+      transition-all duration-300 ${isCollapsed ? "w-20" : "w-64"} fixed top-0 left-0 z-30`}>
 
       {/* Collapse Button */}
-      <div className="flex p-4 border-b border-gray-200">
+      <div className="flex p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={toggleSidebar}
           className="text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
         >
           {isCollapsed ? (
@@ -89,67 +103,69 @@ const Sidebar = () => {
       </div>
 
       {/* Menu Items */}
-      <nav className="mt-4 flex flex-col gap-2 px-2">
-        {sidebarItems.map((item) => (
-          <div key={item.title}>
-            <div
-              onClick={() => item.children ? toggleDropdown(item.title) : navigate(item.path)}
-              className={`flex items-center p-3 rounded-lg cursor-pointer
-                transition-all duration-200 group
-                ${isActive(item.path, item.children)
-                  ? "bg-blue-100 text-blue-600 font-semibold"
-                  : "hover:bg-gray-100"}
-                ${!isCollapsed ? "justify-between" : "justify-center"}`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl text-gray-600 group-hover:text-blue-600">
-                  {item.icon}
-                </span>
-                {!isCollapsed && (
-                  <span className="text-sm">{item.title}</span>
+      <div className="h-[calc(100vh-64px)] overflow-y-auto">
+        <nav className="mt-4 flex flex-col gap-2 px-2 pb-20">
+          {sidebarItems.map((item) => (
+            <div key={item.title}>
+              <div
+                onClick={() => item.children ? toggleDropdown(item.title) : navigate(item.path)}
+                className={`flex items-center p-3 rounded-lg cursor-pointer
+                  transition-all duration-200 group
+                  ${isActive(item.path, item.children)
+                    ? "bg-blue-100 text-blue-600 font-semibold"
+                    : "hover:bg-gray-100"}
+                  ${!isCollapsed ? "justify-between" : "justify-center"}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl text-gray-600 group-hover:text-blue-600">
+                    {item.icon}
+                  </span>
+                  {!isCollapsed && (
+                    <span className="text-sm">{item.title}</span>
+                  )}
+                </div>
+
+                {!isCollapsed && item.children && (
+                  <IoIosArrowDown className={`transition-transform duration-300 ${openDropdown === item.title ? 'rotate-180' : ''
+                    } text-gray-400`} />
                 )}
               </div>
 
-              {!isCollapsed && item.children && (
-                <IoIosArrowDown className={`transition-transform duration-300 ${openDropdown === item.title ? 'rotate-180' : ''
-                  } text-gray-400`} />
+              {/* Dropdown Menu */}
+              {item.children && openDropdown === item.title && !isCollapsed && (
+                <div className="ml-4 pl-3 border-l-2 border-gray-100 animate-slideDown">
+                  {item.children.map((child) => (
+                    <div
+                      key={child.path}
+                      onClick={() => navigate(child.path)}
+                      className={`py-2 px-3 rounded-lg cursor-pointer text-sm
+                        transition-colors duration-200
+                        ${location.pathname === child.path
+                          ? "bg-blue-50 text-blue-600"
+                          : "hover:bg-gray-100"}`}
+                    >
+                      {child.title}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
+          ))}
 
-            {/* Dropdown Menu */}
-            {item.children && openDropdown === item.title && !isCollapsed && (
-              <div className="ml-4 pl-3 border-l-2 border-gray-100 animate-slideDown">
-                {item.children.map((child) => (
-                  <div
-                    key={child.path}
-                    onClick={() => navigate(child.path)}
-                    className={`py-2 px-3 rounded-lg cursor-pointer text-sm
-                      transition-colors duration-200
-                      ${location.pathname === child.path
-                        ? "bg-blue-50 text-blue-600"
-                        : "hover:bg-gray-100"}`}
-                  >
-                    {child.title}
-                  </div>
-                ))}
-              </div>
-            )}
+          {/* Logout Button */}
+          <div
+            onClick={handleLogout}
+            className="mt-auto p-3 rounded-lg cursor-pointer
+              text-red-600 hover:bg-red-50 transition-colors
+              border-t border-gray-100 mx-2"
+          >
+            <div className="flex items-center gap-3">
+              <RiLogoutBoxRLine size={20} />
+              {!isCollapsed && <span className="text-sm">Đăng xuất</span>}
+            </div>
           </div>
-        ))}
-
-        {/* Logout Button */}
-        <div
-          onClick={handleLogout}
-          className="mt-auto mx-2 mb-4 p-3 rounded-lg cursor-pointer
-            text-red-600 hover:bg-red-50 transition-colors
-            border-t border-gray-100"
-        >
-          <div className="flex items-center gap-3">
-            <RiLogoutBoxRLine size={20} />
-            {!isCollapsed && <span className="text-sm">Đăng xuất</span>}
-          </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
     </div>
   )
 }

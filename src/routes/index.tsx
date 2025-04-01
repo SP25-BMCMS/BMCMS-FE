@@ -16,7 +16,7 @@ import CrackManagement from "@/pages/CrackManagement";
 import DetailCrack from "@/components/crackManager/DetailCrack/DetailCrack";
 import DetailLayout from "@/layouts/DetailLayout";
 import TaskManagement from "@/pages/TaskManagement";
-
+import Calendar from "@/pages/Calendar";
 function AppRoutes() {
   return (
     <Router>
@@ -37,7 +37,7 @@ function AppRoutes() {
             <Route path="/building" element={<Building />} />
             <Route path="/worklog" element={<div>WorkLog Content</div>} />
             <Route path="/crack" element={<CrackManagement />} />
-            <Route path="/calendar" element={<div>Calendar Content</div>} />
+            <Route path="/calendar" element={<Calendar />} />
           </Route>
           <Route element={<DetailLayout />}>
             <Route path="/crack/detail/:id" element={<DetailCrack />} />
