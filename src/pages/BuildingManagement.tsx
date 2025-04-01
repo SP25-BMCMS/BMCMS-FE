@@ -12,7 +12,9 @@ import SearchInput from "@/components/SearchInput";
 import FilterDropdown from "@/components/FilterDropdown";
 import AddButton from "@/components/AddButton";
 import AddAreaModal from "@/components/BuildingManager/areas/addAreas/AddAreaModal";
+import Pagination from "@/components/Pagination";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
 const Building: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -25,23 +27,46 @@ const Building: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch buildings when component mounts
+  // Handle search without delay
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  // Fetch buildings with pagination and search
   useEffect(() => {
     const fetchBuildings = async () => {
       setIsLoading(true);
       try {
-        const buildingsData = await getBuildings();
-        setBuildings(buildingsData);
+        const params = {
+          page: currentPage,
+          limit: itemsPerPage,
+          search: searchTerm,
+          status: selectedStatus === "all" ? undefined : 
+            (selectedStatus as "operational" | "under_construction"),
+        };
+        const response = await getBuildings(params);
+        setBuildings(response.data);
+        setTotalItems(response.pagination.total);
+        setTotalPages(response.pagination.totalPages);
       } catch (error) {
         console.error("Failed to fetch buildings:", error);
+        toast.error("Failed to fetch buildings");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchBuildings();
-  }, [refreshTrigger]);
+  }, [currentPage, itemsPerPage, searchTerm, selectedStatus, refreshTrigger]);
 
   // Fetch areas when component mounts or refreshTrigger changes
   useEffect(() => {
@@ -51,6 +76,7 @@ const Building: React.FC = () => {
         setAreas(areasData);
       } catch (error) {
         console.error("Failed to fetch areas:", error);
+        toast.error("Failed to fetch areas");
       }
     };
     fetchAreas();
@@ -72,7 +98,7 @@ const Building: React.FC = () => {
     setIsDeleting(true);
     try {
       await deleteBuilding(selectedBuilding.buildingId);
-      toast.success("Delete building successfully!");
+      toast.success("Building deleted successfully!");
       setRefreshTrigger((prev) => prev + 1);
       setIsRemoveBuildingModalOpen(false);
     } catch (error) {
@@ -94,7 +120,7 @@ const Building: React.FC = () => {
       key: "index",
       title: "No",
       render: (_, index) => (
-        <span className="text-sm text-gray-500">{index + 1}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
       ),
       width: "60px",
     },
@@ -102,39 +128,39 @@ const Building: React.FC = () => {
       key: "name",
       title: "Building Name",
       render: (item) => (
-        <span className="text-sm font-medium text-gray-900">{item.name}</span>
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
       ),
     },
     {
       key: "areaId",
       title: "Area Name",
       render: (item) => (
-        <span className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {getAreaName(item.areaId)}
-        </span>
+        </div>
       ),
     },
     {
       key: "Floor",
       title: "Floor",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.numberFloor}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.numberFloor}</div>
       ),
     },
     {
       key: "createdAt",
       title: "Created Date",
       render: (item) => (
-        <span className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {new Date(item.createdAt).toLocaleDateString()}
-        </span>
+        </div>
       ),
     },
     {
       key: "completion Date",
-      title: "completion Date",
+      title: "Completion Date",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.completion_date}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.completion_date}</div>
       ),
     },
     {
@@ -167,23 +193,43 @@ const Building: React.FC = () => {
   ];
 
   const handleAddSuccess = () => {
-    // Trigger a refresh of the data
     setRefreshTrigger((prev) => prev + 1);
   };
+
+  // Loading animation for standalone use
+  const loadingVariants = {
+    rotate: 360,
+    transition: {
+      duration: 1,
+      repeat: Infinity,
+      ease: "linear"
+    }
+  };
+
+  const LoadingIndicator = () => (
+    <div className="flex flex-col justify-center items-center h-64">
+      <motion.div
+        animate={loadingVariants}
+        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
+      />
+      <p className="text-gray-700 dark:text-gray-300">Loading buildings data...</p>
+    </div>
+  );
 
   return (
     <div className="w-full mt-[60px]">
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
         <SearchInput
-          placeholder="Search by ID"
+          placeholder="Search by building name or description"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           className="w-[20rem] max-w-xs"
         />
 
         <FilterDropdown
           options={filterOptions}
-          onSelect={(value) => console.log("Selected filter:", value)}
+          selectedValue={selectedStatus}
+          onSelect={setSelectedStatus}
         />
 
         <AddButton
@@ -201,18 +247,28 @@ const Building: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <p>Đang tải dữ liệu...</p>
-        </div>
+        <LoadingIndicator />
       ) : (
-        <Table<BuildingResponse>
-          data={buildings}
-          columns={columns}
-          keyExtractor={(item) => item.buildingId}
-          onRowClick={(item) => console.log("Row clicked:", item)}
-          className="w-[95%] mx-auto"
-          tableClassName="w-full"
-        />
+        <>
+          <Table<BuildingResponse>
+            data={buildings}
+            columns={columns}
+            keyExtractor={(item) => item.buildingId}
+            onRowClick={(item) => console.log("Row clicked:", item)}
+            className="w-[95%] mx-auto"
+            tableClassName="w-full"
+          />
+          
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onLimitChange={setItemsPerPage}
+            className="w-[95%] mx-auto mt-4"
+          />
+        </>
       )}
 
       {/* Add Area Modal */}

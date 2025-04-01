@@ -1,0 +1,122 @@
+/* Custom styling for Calendar component with animated view selector underline */
+
+/* Remove default button styling for view buttons */
+.custom-calendar-view .fc-dayGridMonth-button,
+.custom-calendar-view .fc-timeGridWeek-button,
+.custom-calendar-view .fc-timeGridDay-button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  margin: 0 0.25rem !important;
+  transition: color 0.3s ease !important;
+}
+
+/* Light theme colors */
+.custom-calendar-view .fc-dayGridMonth-button,
+.custom-calendar-view .fc-timeGridWeek-button,
+.custom-calendar-view .fc-timeGridDay-button {
+  color: #6b7280 !important;
+}
+
+.custom-calendar-view .fc-dayGridMonth-button:hover,
+.custom-calendar-view .fc-timeGridWeek-button:hover,
+.custom-calendar-view .fc-timeGridDay-button:hover {
+  color: #111827 !important;
+}
+
+/* Dark theme colors */
+.dark .custom-calendar-view .fc-dayGridMonth-button,
+.dark .custom-calendar-view .fc-timeGridWeek-button,
+.dark .custom-calendar-view .fc-timeGridDay-button {
+  color: #9ca3af !important;
+}
+
+.dark .custom-calendar-view .fc-dayGridMonth-button:hover,
+.dark .custom-calendar-view .fc-timeGridWeek-button:hover,
+.dark .custom-calendar-view .fc-timeGridDay-button:hover {
+  color: #f3f4f6 !important;
+}
+
+/* Animated underline for active button */
+.custom-calendar-view .fc-dayGridMonth-button::after,
+.custom-calendar-view .fc-timeGridWeek-button::after,
+.custom-calendar-view .fc-timeGridDay-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background-color: #3b82f6;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.dark .custom-calendar-view .fc-dayGridMonth-button::after,
+.dark .custom-calendar-view .fc-timeGridWeek-button::after,
+.dark .custom-calendar-view .fc-timeGridDay-button::after {
+  background-color: #60a5fa;
+}
+
+/* Active state styling */
+.custom-calendar-view .fc-dayGridMonth-button.fc-button-active,
+.custom-calendar-view .fc-timeGridWeek-button.fc-button-active,
+.custom-calendar-view .fc-timeGridDay-button.fc-button-active {
+  background: transparent !important;
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+}
+
+.dark .custom-calendar-view .fc-dayGridMonth-button.fc-button-active,
+.dark .custom-calendar-view .fc-timeGridWeek-button.fc-button-active,
+.dark .custom-calendar-view .fc-timeGridDay-button.fc-button-active {
+  color: #ffffff !important;
+}
+
+/* Show underline for active button */
+.custom-calendar-view .fc-dayGridMonth-button.fc-button-active::after,
+.custom-calendar-view .fc-timeGridWeek-button.fc-button-active::after,
+.custom-calendar-view .fc-timeGridDay-button.fc-button-active::after {
+  width: 80%;
+  left: 10%;
+}
+
+/* Container styling for the view buttons */
+.custom-calendar-view .fc-button-group {
+  border: none !important;
+  background: transparent !important;
+  gap: 0.5rem;
+}
+
+/* Today button styling */
+.custom-calendar-view .fc-today-button {
+  border-radius: 0.375rem !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+/* View button container spacing */
+.custom-calendar-view .fc-toolbar-chunk:last-child {
+  display: flex;
+  align-items: center;
+}
+
+/* Additional styling for fullcalendar container */
+.custom-calendar-view .fc {
+  font-family: inherit;
+}
+
+/* Improve responsive layout for mobile */
+@media (max-width: 640px) {
+  .custom-calendar-view .fc-toolbar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .custom-calendar-view .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+} 

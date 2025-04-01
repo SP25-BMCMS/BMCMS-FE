@@ -10,3 +10,23 @@ export const getAllStaff = async (): Promise<StaffResponse> => {
       throw error;
     }
   };
+
+export type AddStaffData = {
+  username: string;
+  email: string;
+  password: string;
+  phone: string;
+  role: 'Staff' | 'Leader' | 'Manager';
+  dateOfBirth: string;
+  gender: 'Male' | 'Female';
+}
+
+export const addStaff = async (staffData: AddStaffData): Promise<any> => {
+  try {
+    const response = await apiInstance.post(import.meta.env.VITE_SIGNUP_API, staffData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating staff account:', error);
+    throw error;
+  }
+};

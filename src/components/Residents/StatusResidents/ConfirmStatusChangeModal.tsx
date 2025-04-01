@@ -23,8 +23,8 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Xác nhận thay đổi trạng thái">
       <div className="p-6 space-y-4">
         <div className="text-center">
-          <p className="text-sm text-gray-700">
-            Bạn có chắc chắn muốn thay đổi trạng thái của <span className="font-medium">{resident.username}</span> từ <span className={`font-medium ${resident.accountStatus === 'Active' ? 'text-green-600' : 'text-red-600'}`}>{resident.accountStatus}</span> sang <span className={`font-medium ${newStatus === 'Active' ? 'text-green-600' : 'text-red-600'}`}>{newStatus}</span> không?
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            Bạn có chắc chắn muốn thay đổi trạng thái của <span className="font-medium">{resident.username}</span> từ <span className={`font-medium ${resident.accountStatus === 'Active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{resident.accountStatus}</span> sang <span className={`font-medium ${newStatus === 'Active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{newStatus}</span> không?
           </p>
         </div>
 
@@ -32,14 +32,14 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-red-600 underline hover:text-red-700"
+            className="px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-red-400"
           >
             Hủy bỏ
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400"
           >
             Xác nhận
           </button>

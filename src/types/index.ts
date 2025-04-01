@@ -9,6 +9,29 @@ export type GetCurrentUserAPIResponse ={
     username: string,
     email: string,
 }
+
+export type PaginationProps = {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  totalItems?: number;
+  itemsPerPage?: number;
+  onLimitChange?: (limit: number) => void;
+  limitOptions?: number[];
+  className?: string;
+}
+export type SeverityOption= {
+  value: string;
+  label: string;
+}
+
+export type SeverityFilterProps = {
+  options: SeverityOption[];
+  selectedValue: string;
+  onSelect: (value: string) => void;
+  label?: string;
+  className?: string;
+}
 //residents
 export type Residents = {
   userId: string;
@@ -87,20 +110,47 @@ export interface AddBuildingRequest {
   status: 'operational' | 'under_construction';
 }
 //crack
-export type Crack = {
-    id: string;
-    reportDescription: string;
-    createdDate: string;
-    status: 'pending' | 'in_progress' | 'resolved';
-    residentId: string;
-    residentName: string;
-    location: string;
-    description: string;
-    originalImage?: string;
-    originalImage2?: string;
-    aiDetectedImage?: string;
-    aiDetectedImage2?: string;
+export type CrackDetailsResponse = {
+  crackDetailsId: string;
+  crackReportId: string;
+  photoUrl: string;
+  severity: 'Low' | 'Medium' | 'High';
+  aiDetectionUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CrackReportResponse = {
+  crackReportId: string;
+  buildingDetailId: string;
+  description: string;
+  isPrivatesAsset: boolean;
+  position: string | null;
+  status: 'Pending' | 'InProgress' | 'Resolved';
+  reportedBy: string;
+  verifiedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  crackDetails: CrackDetailsResponse[];
+}
+
+export type CrackListPaginationResponse = {
+  data: CrackReportResponse[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   };
+}
+
+export type CrackListParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  severityFilter?: 'Low' | 'Medium' | 'High';
+  status?: 'Pending' | 'InProgress' | 'Resolved';
+}
 //task
 export interface Task {
   id: number;
@@ -122,3 +172,18 @@ export type Area = {
     name: string;
     description: string;
   }
+
+export type Crack = {
+  id: string;
+  reportDescription: string;
+  createdDate: string;
+  status: 'pending' | 'in_progress' | 'resolved';
+  residentId: string;
+  residentName?: string;
+  location?: string;
+  description: string;
+  originalImage?: string;
+  originalImage2?: string;
+  aiDetectedImage?: string;
+  aiDetectedImage2?: string;
+};
