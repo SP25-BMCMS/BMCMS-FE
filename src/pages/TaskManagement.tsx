@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Table, { Column } from '@/components/Table';
 import { mockTasks } from '@/mock/mockDataTask';
@@ -27,28 +26,28 @@ const TaskManagement: React.FC = () => {
     {
       key: 'index',
       title: 'No',
-      render: (_, index) => <span className="text-sm text-gray-500">{index + 1}</span>,
+      render: (_, index) => <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>,
       width: '60px'
     },
     {
       key: 'id',
       title: 'Task ID',
-      render: (item) => <span className="text-sm text-gray-500">{item.id}</span>
+      render: (item) => <div className="text-sm text-gray-500 dark:text-gray-400">{item.id}</div>
     },
     {
       key: 'title',
       title: 'Task Title',
-      render: (item) => <span className="text-sm font-medium text-gray-900">{item.title}</span>
+      render: (item) => <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</div>
     },
     {
       key: 'assignedTo',
       title: 'Assigned To',
-      render: (item) => <span className="text-sm text-gray-500">{item.assignedTo}</span>
+      render: (item) => <div className="text-sm text-gray-500 dark:text-gray-400">{item.assignedTo}</div>
     },
     {
       key: 'createdAt',
       title: 'Created Date',
-      render: (item) => <span className="text-sm text-gray-500">{item.createdAt}</span>
+      render: (item) => <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdAt}</div>
     },
     {
       key: 'status',

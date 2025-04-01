@@ -141,9 +141,9 @@ const Resident: React.FC = () => {
       key: "index",
       title: "No",
       render: (_, index) => (
-        <span className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
-        </span>
+        </div>
       ),
       width: "60px",
     },
@@ -151,23 +151,23 @@ const Resident: React.FC = () => {
       key: "name",
       title: "Resident Name",
       render: (item) => (
-        <span className="text-sm font-medium text-gray-900">
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
           {item.username}
-        </span>
+        </div>
       ),
     },
     {
       key: "email",
       title: "Email",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.email}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.email}</div>
       ),
     },
     {
       key: "phone",
       title: "Phone",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.phone}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.phone}</div>
       ),
     },
     {
@@ -192,7 +192,7 @@ const Resident: React.FC = () => {
         try {
           // Kiểm tra nếu dateOfBirth là undefined hoặc null
           if (!item.dateOfBirth) {
-            return <span className="text-sm text-gray-500">N/A</span>;
+            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>;
           }
 
           // Tạo đối tượng Date từ chuỗi ngày tháng
@@ -200,7 +200,7 @@ const Resident: React.FC = () => {
 
           // Kiểm tra xem date có hợp lệ không
           if (isNaN(date.getTime())) {
-            return <span className="text-sm text-gray-500">Invalid date</span>;
+            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>;
           }
 
           // Format ngày tháng theo định dạng dd/mm/yyyy
@@ -209,10 +209,10 @@ const Resident: React.FC = () => {
           const year = date.getFullYear();
 
           const formattedDate = `${day}/${month}/${year}`;
-          return <span className="text-sm text-gray-500">{formattedDate}</span>;
+          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>;
         } catch (error) {
           console.error("Error formatting date:", error);
-          return <span className="text-sm text-gray-500">Error</span>;
+          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>;
         }
       },
     },
@@ -221,7 +221,7 @@ const Resident: React.FC = () => {
       key: "createdDate",
       title: "Created Date",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.createdDate}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
       ),
     },
     {
@@ -260,7 +260,7 @@ const Resident: React.FC = () => {
 
   if (loading && residents.length === 0) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-64 text-gray-700 dark:text-gray-300">
         Đang tải dữ liệu...
       </div>
     );

@@ -290,6 +290,118 @@ const Calendar: React.FC = () => {
     setIsCreateMode(false);
   }, []);
 
+  // Thêm CSS tùy chỉnh cho dark mode
+  useEffect(() => {
+    // Thêm CSS tùy chỉnh cho dark mode
+    const style = document.createElement('style');
+    style.textContent = `
+      .dark .fc-theme-standard .fc-toolbar {
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-toolbar-title {
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-button {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-button:hover {
+        background-color: #4b5563;
+      }
+      .dark .fc-theme-standard .fc-button:disabled {
+        background-color: #374151;
+        opacity: 0.5;
+      }
+      .dark .fc-theme-standard .fc-button-active {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+      }
+      .dark .fc-theme-standard th {
+        background-color: #374151;
+        color: #f3f4f6;
+        border-color: #4b5563;
+      }
+      .dark .fc-theme-standard td {
+        border-color: #4b5563;
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-day {
+        background-color: #1f2937;
+      }
+      .dark .fc-theme-standard .fc-day-other {
+        background-color: #111827;
+      }
+      .dark .fc-theme-standard .fc-scrollgrid,
+      .dark .fc-theme-standard .fc-scrollgrid-section > td,
+      .dark .fc-theme-standard .fc-scrollgrid-section > th,
+      .dark .fc-theme-standard .fc-scrollgrid-section-liquid > td,
+      .dark .fc-theme-standard .fc-scrollgrid-section-liquid > th,
+      .dark .fc-theme-standard .fc-list {
+        border-color: #4b5563;
+      }
+      .dark .fc-theme-standard .fc-list-day-cushion {
+        background-color: #374151;
+      }
+      .dark .fc-theme-standard .fc-list-event:hover td {
+        background-color: #4b5563;
+      }
+      .dark .fc-theme-standard .fc-timegrid-slot-minor {
+        border-color: #4b5563;
+      }
+      .dark .fc-theme-standard .fc-timegrid-slot-label-cushion,
+      .dark .fc-theme-standard .fc-timegrid-axis-cushion {
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-timegrid-divider {
+        background: #4b5563;
+      }
+      .dark .fc-theme-standard .fc-col-header-cell-cushion {
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-daygrid-day-number {
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-daygrid-day-top {
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-h-event,
+      .dark .fc-theme-standard .fc-v-event {
+        background-color: #3b82f6;
+        border-color: #2563eb;
+      }
+      .dark .fc-theme-standard a.fc-event {
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-event-title-container {
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-more-link {
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-popover {
+        background-color: #1f2937;
+        border-color: #4b5563;
+      }
+      .dark .fc-theme-standard .fc-popover-header {
+        background-color: #374151;
+        color: #f3f4f6;
+      }
+      .dark .fc-theme-standard .fc-today-button {
+        background-color: #3b82f6;
+        border-color: #2563eb;
+      }
+      .dark .fc-theme-standard .fc-today-button:hover {
+        background-color: #2563eb;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   // Modal hiển thị chi tiết sự kiện
   const EventModal = React.memo(() => {
     if (!isModalOpen) return null;
@@ -297,34 +409,33 @@ const Calendar: React.FC = () => {
     return (
       <div className="fixed inset-0 flex items-center justify-center z-50" onClick={(e) => e.stopPropagation()}>
         <div className="absolute inset-0 bg-black opacity-50" onClick={handleCloseModal}></div>
-        <div ref={modalRef} className="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <div ref={modalRef} className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
           {isCreateMode ? (
             // Form tạo sự kiện mới
             <>
-              <h2 className="text-xl font-semibold mb-4">Tạo sự kiện mới</h2>
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Tạo sự kiện mới</h2>
               
               <form ref={formRef} onSubmit={handleSaveEvent} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="title">Tiêu đề</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="title">Tiêu đề</label>
                   <input
                     id="title"
                     type="text"
                     name="title"
                     defaultValue=""
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                     placeholder="Nhập tiêu đề sự kiện"
-                    autoFocus
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="status">Trạng thái</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="status">Trạng thái</label>
                     <select
                       id="status"
                       name="status"
                       defaultValue="pending"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
                     >
                       <option value="pending">Chờ xử lý</option>
                       <option value="in_progress">Đang thực hiện</option>
@@ -333,12 +444,12 @@ const Calendar: React.FC = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="priority">Mức độ ưu tiên</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="priority">Mức độ ưu tiên</label>
                     <select
                       id="priority"
                       name="priority"
                       defaultValue="medium"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
                     >
                       <option value="low">Thấp</option>
                       <option value="medium">Trung bình</option>
@@ -348,60 +459,60 @@ const Calendar: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="assignedTo">Người thực hiện</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="assignedTo">Người thực hiện</label>
                   <input
                     id="assignedTo"
                     type="text"
                     name="assignedTo"
                     defaultValue=""
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                     placeholder="Nhập tên người thực hiện"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="location">Địa điểm</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="location">Địa điểm</label>
                   <input
                     id="location"
                     type="text"
                     name="location"
                     defaultValue=""
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                     placeholder="Nhập địa điểm"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="description">Mô tả</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="description">Mô tả</label>
                   <textarea
                     id="description"
                     name="description"
                     defaultValue=""
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                     placeholder="Nhập mô tả công việc"
                     rows={3}
                   ></textarea>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Thời gian</label>
-                  <div className="text-sm text-gray-500">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thời gian</label>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
                     {new Date(initialFormData.start || '').toLocaleString()} 
                     {initialFormData.end ? ` - ${new Date(initialFormData.end).toLocaleString()}` : ''}
                     {initialFormData.allDay ? ' (Cả ngày)' : ''}
                   </div>
                 </div>
-                
+              
                 <div className="mt-6 flex justify-end space-x-3">
                   <button
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
+                    className="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded hover:bg-gray-400 dark:hover:bg-gray-600 transition"
                     onClick={handleCloseModal}
                     type="button"
                   >
                     Hủy
                   </button>
                   <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition"
                     type="submit"
                   >
                     Lưu
@@ -414,7 +525,7 @@ const Calendar: React.FC = () => {
             selectedEvent && (
               <>
                 <div className="flex justify-between items-start">
-                  <h2 className="text-xl font-semibold mb-4">{selectedEvent.title}</h2>
+                  <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">{selectedEvent.title}</h2>
                   <span 
                     className={`px-2 py-1 rounded text-white text-sm ${
                       selectedEvent.priority === 'high' ? 'bg-red-600' :
@@ -426,7 +537,7 @@ const Calendar: React.FC = () => {
                   </span>
                 </div>
                 
-                <div className="space-y-4">
+                <div className="space-y-4 text-gray-700 dark:text-gray-300">
                   <div>
                     <span className="font-medium">Thời gian:</span> {new Date(selectedEvent.start).toLocaleString()}
                     {selectedEvent.end && ` - ${new Date(selectedEvent.end).toLocaleString()}`}
@@ -464,7 +575,7 @@ const Calendar: React.FC = () => {
                 </div>
                 
                 <div className="mt-6">
-                  <div className="text-sm font-medium text-gray-700 mb-2">Cập nhật trạng thái:</div>
+                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cập nhật trạng thái:</div>
                   <div className="flex space-x-2">
                     <button
                       className={`px-3 py-1.5 rounded text-white text-sm ${
@@ -498,7 +609,7 @@ const Calendar: React.FC = () => {
                 
                 <div className="mt-6 flex justify-end">
                   <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition"
                     onClick={handleCloseModal}
                     type="button"
                   >
@@ -514,21 +625,21 @@ const Calendar: React.FC = () => {
   });
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
+    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Lịch công việc</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Lịch công việc</h1>
         <div className="flex items-center space-x-2">
           <div className="flex items-center">
             <span className="w-3 h-3 rounded-full bg-red-500 mr-1"></span>
-            <span className="text-sm text-gray-600">Chờ xử lý</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Chờ xử lý</span>
           </div>
           <div className="flex items-center ml-3">
             <span className="w-3 h-3 rounded-full bg-orange-500 mr-1"></span>
-            <span className="text-sm text-gray-600">Đang thực hiện</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Đang thực hiện</span>
           </div>
           <div className="flex items-center ml-3">
             <span className="w-3 h-3 rounded-full bg-green-500 mr-1"></span>
-            <span className="text-sm text-gray-600">Hoàn thành</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Hoàn thành</span>
           </div>
         </div>
       </div>

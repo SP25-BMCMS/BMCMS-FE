@@ -136,9 +136,9 @@ const CrackManagement: React.FC = () => {
       key: "index",
       title: "No",
       render: (_, index) => (
-        <span className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
-        </span>
+        </div>
       ),
       width: "60px",
     },
@@ -146,30 +146,30 @@ const CrackManagement: React.FC = () => {
       key: "id",
       title: "Crack ID",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.id}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.id}</div>
       ),
     },
     {
       key: "reportDescription",
       title: "Report Description",
       render: (item) => (
-        <span className="text-sm font-medium text-gray-900">
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
           {item.reportDescription}
-        </span>
+        </div>
       ),
     },
     {
       key: "residentName",
       title: "Reported By",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.residentName}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.residentName}</div>
       ),
     },
     {
       key: "createdDate",
       title: "Created Date",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.createdDate}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
       ),
     },
     {
@@ -239,7 +239,7 @@ const CrackManagement: React.FC = () => {
         </div>
 
         <div className="flex justify-end items-center">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-300">
             Total Cracks: {totalItems}
           </div>
         </div>

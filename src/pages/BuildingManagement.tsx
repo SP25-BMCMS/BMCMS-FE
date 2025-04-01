@@ -118,7 +118,7 @@ const Building: React.FC = () => {
       key: "index",
       title: "No",
       render: (_, index) => (
-        <span className="text-sm text-gray-500">{index + 1}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
       ),
       width: "60px",
     },
@@ -126,39 +126,39 @@ const Building: React.FC = () => {
       key: "name",
       title: "Building Name",
       render: (item) => (
-        <span className="text-sm font-medium text-gray-900">{item.name}</span>
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
       ),
     },
     {
       key: "areaId",
       title: "Area Name",
       render: (item) => (
-        <span className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {getAreaName(item.areaId)}
-        </span>
+        </div>
       ),
     },
     {
       key: "Floor",
       title: "Floor",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.numberFloor}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.numberFloor}</div>
       ),
     },
     {
       key: "createdAt",
       title: "Created Date",
       render: (item) => (
-        <span className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {new Date(item.createdAt).toLocaleDateString()}
-        </span>
+        </div>
       ),
     },
     {
       key: "completion Date",
       title: "Completion Date",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.completion_date}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.completion_date}</div>
       ),
     },
     {
@@ -225,7 +225,7 @@ const Building: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
+        <div className="flex justify-center items-center h-64 text-gray-700 dark:text-gray-300">
           <p>Loading data...</p>
         </div>
       ) : (
