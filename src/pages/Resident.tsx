@@ -125,10 +125,10 @@ const Resident: React.FC = () => {
   });
 
   // Xử lý thay đổi filter
-  const handleStatusFilter = (value: string) => {
-    setSelectedStatus(value);
-    setCurrentPage(1); // Reset về trang đầu tiên khi thay đổi filter
-  };
+  // const handleStatusFilter = (value: string) => {
+  //   setSelectedStatus(value);
+  //   setCurrentPage(1); // Reset về trang đầu tiên khi thay đổi filter
+  // };
   
   const filterOptions = [
     { value: "all", label: "Tất cả" },

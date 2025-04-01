@@ -1,6 +1,6 @@
 // services/buildings.ts
 import apiInstance from '@/lib/axios';
-import { BuildingResponse, BuildingsListResponse, AddBuildingRequest } from '@/types';
+import { BuildingResponse,  AddBuildingRequest } from '@/types';
 
 export interface BuildingListParams {
   page?: number;

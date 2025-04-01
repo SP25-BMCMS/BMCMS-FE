@@ -4,7 +4,6 @@ import { Staff } from "@/types";
 import { FiUserPlus } from "react-icons/fi";
 import DropdownMenu from "@/components/DropDownMenu";
 import SearchInput from "@/components/SearchInput";
-import FilterDropdown from "@/components/FilterDropdown";
 import AddButton from "@/components/AddButton";
 import { getAllStaff } from "@/services/staffs";
 import { StaffData } from "@/types";
@@ -16,7 +15,6 @@ const StaffManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedFilter, setSelectedFilter] = useState<string>("all");
 
   const { isModalOpen, isLoading, openModal, closeModal, addNewStaff } = useAddStaff({
     onAddSuccess: () => {
