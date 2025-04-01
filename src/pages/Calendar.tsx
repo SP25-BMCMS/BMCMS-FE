@@ -4,6 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { DateSelectArg, EventClickArg, EventContentArg, EventInput } from '@fullcalendar/core';
+import './Calendar.css'; // Import custom calendar CSS
 
 // Định nghĩa kiểu dữ liệu cho sự kiện
 interface TaskEvent {
@@ -394,6 +395,28 @@ const Calendar: React.FC = () => {
       .dark .fc-theme-standard .fc-today-button:hover {
         background-color: #2563eb;
       }
+
+      /* Remove background for prev/next buttons and add theming */
+      .fc-prev-button, .fc-next-button {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #374151 !important;
+      }
+      
+      .fc-prev-button:hover, .fc-next-button:hover {
+        background: rgba(0, 0, 0, 0.05) !important;
+        color: #1f2937 !important;
+      }
+      
+      .dark .fc-prev-button, .dark .fc-next-button {
+        color: #f3f4f6 !important;
+      }
+      
+      .dark .fc-prev-button:hover, .dark .fc-next-button:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+      }
     `;
     document.head.appendChild(style);
 
@@ -644,7 +667,7 @@ const Calendar: React.FC = () => {
         </div>
       </div>
       
-      <div className="calendar-container">
+      <div className="calendar-container custom-calendar-view">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
