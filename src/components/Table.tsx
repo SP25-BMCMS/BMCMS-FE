@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import './Table.css'; // Import CSS for loading animation
 
 export type Column<T> = {
   key: string;
@@ -127,7 +128,7 @@ const Table = <T extends {}>({
       <motion.div
         animate="animate"
         variants={loadingVariants}
-        className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full"
+        className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner"
       />
       <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">Loading data...</span>
     </div>

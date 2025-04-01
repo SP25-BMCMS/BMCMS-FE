@@ -10,6 +10,7 @@ import { StaffData } from "@/types";
 import AddStaff from "@/components/Staff/AddStaff/AddStaff";
 import { useAddStaff } from "@/components/Staff/AddStaff/use-add-staff";
 import { Toaster } from "react-hot-toast";
+import { motion } from "framer-motion";
 
 const StaffManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -156,6 +157,26 @@ const StaffManagement: React.FC = () => {
     staff.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Loading animation
+  const loadingVariants = {
+    rotate: 360,
+    transition: {
+      duration: 1,
+      repeat: Infinity,
+      ease: "linear"
+    }
+  };
+
+  const LoadingIndicator = () => (
+    <div className="flex flex-col justify-center items-center h-64">
+      <motion.div
+        animate={loadingVariants}
+        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
+      />
+      <p className="text-gray-700 dark:text-gray-300">Loading staff data...</p>
+    </div>
+  );
+
   return (
     <div className="w-full mt-[60px]">
       <Toaster position="top-right" />
@@ -176,7 +197,7 @@ const StaffManagement: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="text-center py-4 text-gray-700 dark:text-gray-300">Đang tải dữ liệu...</div>
+        <LoadingIndicator />
       ) : (
         <Table<Staff>
           data={filteredStaff}

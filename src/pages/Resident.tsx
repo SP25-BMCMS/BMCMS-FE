@@ -14,7 +14,7 @@ import { useRemoveResident } from "@/components/Residents/RemoveResidents/use-re
 import { FiUserPlus } from "react-icons/fi";
 import { getAllResidents, updateResidentStatus } from "@/services/residents";
 import { toast } from "react-hot-toast";
-
+import { motion } from "framer-motion";
 
 const Resident: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -258,12 +258,28 @@ const Resident: React.FC = () => {
     await addResident(residentData);
   };
 
+  // Loading animation
+  const loadingVariants = {
+    rotate: 360,
+    transition: {
+      duration: 1,
+      repeat: Infinity,
+      ease: "linear"
+    }
+  };
+
+  const LoadingIndicator = () => (
+    <div className="flex flex-col justify-center items-center h-64">
+      <motion.div
+        animate={loadingVariants}
+        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
+      />
+      <p className="text-gray-700 dark:text-gray-300">Loading residents data...</p>
+    </div>
+  );
+
   if (loading && residents.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64 text-gray-700 dark:text-gray-300">
-        Đang tải dữ liệu...
-      </div>
-    );
+    return <LoadingIndicator />;
   }
 
   if (error && residents.length === 0) {

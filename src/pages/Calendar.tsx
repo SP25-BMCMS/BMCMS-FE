@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { DateSelectArg, EventClickArg, EventContentArg, EventInput } from '@fullcalendar/core';
-import './Calendar.css'; // Import custom calendar CSS
+import '../../src/styles/Calendar.css'
 
 // Định nghĩa kiểu dữ liệu cho sự kiện
 interface TaskEvent {

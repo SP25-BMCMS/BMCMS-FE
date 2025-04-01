@@ -14,6 +14,7 @@ import AddButton from "@/components/AddButton";
 import AddAreaModal from "@/components/BuildingManager/areas/addAreas/AddAreaModal";
 import Pagination from "@/components/Pagination";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
 const Building: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -49,7 +50,8 @@ const Building: React.FC = () => {
           page: currentPage,
           limit: itemsPerPage,
           search: searchTerm,
-          status: selectedStatus === "all" ? undefined : selectedStatus,
+          status: selectedStatus === "all" ? undefined : 
+            (selectedStatus as "operational" | "under_construction"),
         };
         const response = await getBuildings(params);
         setBuildings(response.data);
@@ -194,6 +196,26 @@ const Building: React.FC = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
 
+  // Loading animation for standalone use
+  const loadingVariants = {
+    rotate: 360,
+    transition: {
+      duration: 1,
+      repeat: Infinity,
+      ease: "linear"
+    }
+  };
+
+  const LoadingIndicator = () => (
+    <div className="flex flex-col justify-center items-center h-64">
+      <motion.div
+        animate={loadingVariants}
+        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
+      />
+      <p className="text-gray-700 dark:text-gray-300">Loading buildings data...</p>
+    </div>
+  );
+
   return (
     <div className="w-full mt-[60px]">
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
@@ -225,9 +247,7 @@ const Building: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64 text-gray-700 dark:text-gray-300">
-          <p>Loading data...</p>
-        </div>
+        <LoadingIndicator />
       ) : (
         <>
           <Table<BuildingResponse>

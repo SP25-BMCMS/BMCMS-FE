@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Table, { Column } from '@/components/Table';
 import { mockTasks } from '@/mock/mockDataTask';
 import DropdownMenu from '@/components/DropDownMenu';
@@ -7,13 +7,45 @@ import FilterDropdown from '@/components/FilterDropdown';
 import AddButton from '@/components/AddButton';
 import { Task } from '@/types';
 import { MdOutlineAddTask } from "react-icons/md";
+import { motion } from "framer-motion";
 
 // Define the Task type (using your provided interface)
 
-
 const TaskManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch mock data with simulated loading
+  useEffect(() => {
+    // Simulate API loading time
+    const timer = setTimeout(() => {
+      setTasks(mockTasks);
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Loading animation
+  const loadingVariants = {
+    rotate: 360,
+    transition: {
+      duration: 1,
+      repeat: Infinity,
+      ease: "linear"
+    }
+  };
+
+  const LoadingIndicator = () => (
+    <div className="flex flex-col justify-center items-center h-64">
+      <motion.div
+        animate={loadingVariants}
+        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
+      />
+      <p className="text-gray-700 dark:text-gray-300">Loading tasks data...</p>
+    </div>
+  );
 
   const filterOptions = [
     { value: 'all', label: 'All' },
@@ -105,14 +137,18 @@ const TaskManagement: React.FC = () => {
         />
       </div>
       
-      <Table<Task>
-        data={tasks}
-        columns={columns}
-        keyExtractor={(item) => item.id.toString()}
-        onRowClick={(item) => console.log('Row clicked:', item)}
-        className="w-[95%] mx-auto"
-        tableClassName="w-full"
-      />
+      {isLoading ? (
+        <LoadingIndicator />
+      ) : (
+        <Table<Task>
+          data={tasks}
+          columns={columns}
+          keyExtractor={(item) => item.id.toString()}
+          onRowClick={(item) => console.log('Row clicked:', item)}
+          className="w-[95%] mx-auto"
+          tableClassName="w-full"
+        />
+      )}
     </div>
   );
 };

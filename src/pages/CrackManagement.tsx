@@ -7,6 +7,7 @@ import FilterDropdown from "@/components/FilterDropdown";
 import Pagination from "@/components/Pagination";
 import { CrackReportResponse, Crack } from "@/types";
 import crackApi from "@/services/cracks";
+import { motion } from "framer-motion";
 
 // Map API response to UI model
 const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
@@ -43,6 +44,16 @@ const CrackManagement: React.FC = () => {
     { value: "Medium", label: "Medium" },
     { value: "High", label: "High" },
   ];
+
+  // Loading animation
+  const loadingVariants = {
+    rotate: 360,
+    transition: {
+      duration: 1,
+      repeat: Infinity,
+      ease: "linear"
+    }
+  };
 
   // Fetch cracks based on current filters and pagination
   const fetchCracks = async () => {
