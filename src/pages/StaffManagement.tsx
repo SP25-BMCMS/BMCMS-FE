@@ -8,45 +8,51 @@ import FilterDropdown from "@/components/FilterDropdown";
 import AddButton from "@/components/AddButton";
 import { getAllStaff } from "@/services/staffs";
 import { StaffData } from "@/types";
+import AddStaff from "@/components/Staff/AddStaff/AddStaff";
+import { useAddStaff } from "@/components/Staff/AddStaff/use-add-staff";
+import { Toaster } from "react-hot-toast";
 
 const StaffManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedFilter, setSelectedFilter] = useState<string>("all");
+
+  const { isModalOpen, isLoading, openModal, closeModal, addNewStaff } = useAddStaff({
+    onAddSuccess: () => {
+      // Tải lại danh sách nhân viên sau khi thêm thành công
+      fetchStaffData();
+    },
+  });
+
+  const fetchStaffData = async () => {
+    try {
+      setLoading(true);
+      const response = await getAllStaff();
+      if (response.isSuccess) {
+        // Chuyển đổi dữ liệu API sang định dạng Staff
+        const formattedStaff: Staff[] = response.data.map((staff: StaffData) => ({
+          id: staff.userId,
+          name: staff.username,
+          email: staff.email,
+          phone: staff.phone,
+          role: staff.role as Staff['role'],
+          dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
+          gender: staff.gender,
+          createdDate: new Date().toLocaleDateString(), // Tạo ngày hiện tại cho createdDate
+        }));
+        setStaffList(formattedStaff);
+      }
+    } catch (error) {
+      console.error("Failed to fetch staff data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStaffData = async () => {
-      try {
-        const response = await getAllStaff();
-        if (response.isSuccess) {
-          // Chuyển đổi dữ liệu API sang định dạng Staff
-          const formattedStaff: Staff[] = response.data.map((staff: StaffData) => ({
-            id: staff.userId,
-            name: staff.username,
-            email: staff.email,
-            phone: staff.phone,
-            role: staff.role as Staff['role'],
-            dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
-            gender: staff.gender,
-            createdDate: new Date().toLocaleDateString(), // Tạo ngày hiện tại cho createdDate
-          }));
-          setStaffList(formattedStaff);
-        }
-      } catch (error) {
-        console.error("Failed to fetch staff data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStaffData();
   }, []);
-
-  const filterOptions = [
-    { value: "all", label: "All" },
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-  ];
 
   const columns: Column<Staff>[] = [
     {
@@ -146,25 +152,28 @@ const StaffManagement: React.FC = () => {
     },
   ];
 
+  // Lọc danh sách nhân viên dựa trên từ khóa tìm kiếm
+  const filteredStaff = staffList.filter((staff) =>
+    staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    staff.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="w-full mt-[60px]">
+      <Toaster position="top-right" />
+      
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
         <SearchInput
-          placeholder="Search by ID"
+          placeholder="Tìm kiếm theo tên hoặc ID"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-[20rem] max-w-xs"
         />
 
-        <FilterDropdown
-          options={filterOptions}
-          onSelect={(value) => console.log("Selected filter:", value)}
-        />
-
         <AddButton
           label="Add Staff"
           icon={<FiUserPlus />}
-          onClick={() => console.log("Add staff button clicked")}
+          onClick={openModal}
         />
       </div>
 
@@ -172,14 +181,23 @@ const StaffManagement: React.FC = () => {
         <div className="text-center py-4">Đang tải dữ liệu...</div>
       ) : (
         <Table<Staff>
-          data={staffList}
+          data={filteredStaff}
           columns={columns}
           keyExtractor={(item) => item.id}
           onRowClick={(item) => console.log("Row clicked:", item)}
           className="w-[95%] mx-auto"
           tableClassName="w-full"
+          emptyText="Không tìm thấy dữ liệu nhân viên"
         />
       )}
+
+      {/* Component thêm nhân viên */}
+      <AddStaff
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onAdd={addNewStaff}
+        isLoading={isLoading}
+      />
     </div>
   );
 };

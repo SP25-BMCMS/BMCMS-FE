@@ -5,22 +5,65 @@ const API_SECRET = import.meta.env.VITE_API_SECRET;
 const RESIDENTS_LIST_API = import.meta.env.VITE_VIEW_RESIDENTS_LIST;
 const STATUS_RESIDENT_API = import.meta.env.VITE_STATUS_RESIDENT;
 
-export const getAllResidents = async (): Promise<Residents[]> => {
+export const getAllResidents = async (params?: { 
+  search?: string; 
+  page?: number; 
+  limit?: number;
+  status?: string;
+}): Promise<{
+  data: Residents[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }
+}> => {
   try {
-    const response = await axios.get<{message: string, data: any[]}>(`${API_SECRET}${RESIDENTS_LIST_API}`);
+    // Tạo url với các query params
+    let url = `${API_SECRET}${RESIDENTS_LIST_API}`;
     
+    // Thêm query params nếu có
+    if (params) {
+      const queryParams = new URLSearchParams();
+      
+      if (params.search) queryParams.append('search', params.search);
+      if (params.page) queryParams.append('page', params.page.toString());
+      if (params.limit) queryParams.append('limit', params.limit.toString());
+      if (params.status && params.status !== 'all') queryParams.append('status', params.status);
+      
+      if (queryParams.toString()) {
+        url += `?${queryParams.toString()}`;
+      }
+    }
+
+    const token = localStorage.getItem('bmcms_token');
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    // Xử lý response
     if (response.data && response.data.data) {
       // Chuyển đổi dữ liệu từ API sang định dạng hiển thị
       const formattedResidents = response.data.data.map(resident => ({
         ...resident,
         id: resident.userId,
         name: resident.username,
-        createdDate: new Date().toLocaleDateString(),
-        // Đảm bảo accountStatus được lấy từ API
+        createdDate: new Date(resident.createdAt || Date.now()).toLocaleDateString(),
         accountStatus: resident.accountStatus || 'Inactive'
       }));
       
-      return formattedResidents;
+      return {
+        data: formattedResidents,
+        pagination: response.data.pagination || {
+          total: formattedResidents.length,
+          page: params?.page || 1,
+          limit: params?.limit || 10,
+          totalPages: Math.ceil(formattedResidents.length / (params?.limit || 10))
+        }
+      };
     }
     
     throw new Error('Failed to fetch residents data');

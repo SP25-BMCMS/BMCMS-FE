@@ -3,17 +3,18 @@ import Table, { Column } from "@/components/Table";
 import { Residents } from "@/types";
 import DropdownMenu from "@/components/DropDownMenu";
 import SearchInput from "@/components/SearchInput";
-import FilterDropdown from "@/components/FilterDropdown";
 import AddButton from "@/components/AddButton";
 import AddResident from "@/components/Residents/AddResidents/AddResidents";
 import RemoveResident from "@/components/Residents/RemoveResidents/RemoveResidents";
+import ConfirmStatusChangeModal from "@/components/Residents/StatusResidents/ConfirmStatusChangeModal";
+import Pagination from "@/components/Pagination";
 import { Toaster } from "react-hot-toast";
 import { useAddNewResident } from "@/components/Residents/AddResidents/use-add-new-residents";
 import { useRemoveResident } from "@/components/Residents/RemoveResidents/use-remove-residents";
 import { FiUserPlus } from "react-icons/fi";
 import { getAllResidents, updateResidentStatus } from "@/services/residents";
 import { toast } from "react-hot-toast";
-import ConfirmStatusChangeModal from "@/components/Residents/StatusResidents/ConfirmStatusChangeModal";
+
 
 const Resident: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -22,73 +23,90 @@ const Resident: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState<boolean>(false);
   const [residentToChangeStatus, setResidentToChangeStatus] = useState<Residents | null>(null);
+  
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
   // Fetch residents data
+  const fetchResidents = async () => {
+    try {
+      setLoading(true);
+      const result = await getAllResidents({
+        search: searchTerm,
+        page: currentPage,
+        limit: itemsPerPage,
+        status: selectedStatus
+      });
+
+      setResidents(result.data);
+      setTotalItems(result.pagination.total);
+      setTotalPages(result.pagination.totalPages);
+    } catch (err) {
+      setError("Failed to fetch residents");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Gọi API mỗi khi thay đổi các tham số
   useEffect(() => {
-    const fetchResidents = async () => {
-      try {
-        setLoading(true);
-        const data = await getAllResidents();
-
-        // Chuyển đổi dữ liệu từ API sang định dạng hiển thị
-        const formattedResidents = data.map((resident) => ({
-          ...resident,
-          id: resident.userId, // Sử dụng userId làm id
-          name: resident.username, // Sử dụng username làm name
-          createdDate: new Date().toLocaleDateString(), // Nếu API không có createdDate
-          // Đảm bảo accountStatus được giữ nguyên từ API
-          accountStatus: resident.accountStatus || "Inactive",
-        }));
-
-        setResidents(formattedResidents);
-      } catch (err) {
-        setError("Failed to fetch residents");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchResidents();
-  }, []);
+  }, [currentPage, itemsPerPage, selectedStatus]);
 
+  // Xử lý tìm kiếm với debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentPage === 1) {
+        fetchResidents();
+      } else {
+        setCurrentPage(1);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const openStatusChangeModal = (resident: Residents) => {
     setResidentToChangeStatus(resident);
     setIsStatusChangeModalOpen(true);
   };
 
-  // Các hook và state khác giữ nguyên
+  // Xử lý thay đổi trạng thái resident
   const handleChangeStatus = async () => {
-  if (!residentToChangeStatus) return;
-  
-  try {
-    // Xác định trạng thái mới
-    const newStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active';
+    if (!residentToChangeStatus) return;
     
-    // Gọi API để cập nhật trạng thái
-    await updateResidentStatus(residentToChangeStatus.userId, newStatus);
-    
-    // Cập nhật state để hiển thị thay đổi ngay lập tức
-    setResidents(residents.map(r => 
-      r.userId === residentToChangeStatus.userId ? { ...r, accountStatus: newStatus } : r
-    ));
-    
-    // Hiển thị thông báo thành công
-    toast.success(`Trạng thái của ${residentToChangeStatus.username} đã được thay đổi thành ${newStatus}`);
-    
-    // Đóng modal
-    setIsStatusChangeModalOpen(false);
-    setResidentToChangeStatus(null);
-  } catch (error) {
-    console.error('Không thể thay đổi trạng thái của resident:', error);
-    toast.error('Không thể thay đổi trạng thái của resident');
-  }
-};
+    try {
+      // Xác định trạng thái mới
+      const newStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active';
+      
+      // Gọi API để cập nhật trạng thái
+      await updateResidentStatus(residentToChangeStatus.userId, newStatus);
+      
+      // Tải lại dữ liệu sau khi cập nhật
+      fetchResidents();
+      
+      // Hiển thị thông báo thành công
+      toast.success(`Trạng thái của ${residentToChangeStatus.username} đã được thay đổi thành ${newStatus}`);
+      
+      // Đóng modal
+      setIsStatusChangeModalOpen(false);
+      setResidentToChangeStatus(null);
+    } catch (error) {
+      console.error('Không thể thay đổi trạng thái của resident:', error);
+      toast.error('Không thể thay đổi trạng thái của resident');
+    }
+  };
+
   const { isLoading, isModalOpen, openModal, closeModal, addResident } =
     useAddNewResident({
       onAddSuccess: (newResident) => {
-        setResidents([...residents, newResident]);
+        // Tải lại dữ liệu sau khi thêm thành công
+        fetchResidents();
       },
     });
 
@@ -100,15 +118,22 @@ const Resident: React.FC = () => {
     closeModal: closeRemoveModal,
     removeResident,
   } = useRemoveResident({
-    onRemoveSuccess: (removedResidentId) => {
-      setResidents(residents.filter((r) => r.userId !== removedResidentId));
+    onRemoveSuccess: () => {
+      // Tải lại dữ liệu sau khi xóa thành công
+      fetchResidents();
     },
   });
 
+  // Xử lý thay đổi filter
+  const handleStatusFilter = (value: string) => {
+    setSelectedStatus(value);
+    setCurrentPage(1); // Reset về trang đầu tiên khi thay đổi filter
+  };
+  
   const filterOptions = [
-    { value: "all", label: "All" },
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
+    { value: "all", label: "Tất cả" },
+    { value: "Active", label: "Hoạt động" },
+    { value: "Inactive", label: "Không hoạt động" },
   ];
 
   const columns: Column<Residents>[] = [
@@ -116,7 +141,9 @@ const Resident: React.FC = () => {
       key: "index",
       title: "No",
       render: (_, index) => (
-        <span className="text-sm text-gray-500">{index + 1}</span>
+        <span className="text-sm text-gray-500">
+          {(currentPage - 1) * itemsPerPage + index + 1}
+        </span>
       ),
       width: "60px",
     },
@@ -231,7 +258,7 @@ const Resident: React.FC = () => {
     await addResident(residentData);
   };
 
-  if (loading) {
+  if (loading && residents.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
         Đang tải dữ liệu...
@@ -239,7 +266,7 @@ const Resident: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error && residents.length === 0) {
     return (
       <div className="flex justify-center items-center h-64 text-red-500">
         {error}
@@ -251,20 +278,20 @@ const Resident: React.FC = () => {
     <div className="w-full mt-[60px]">
       <Toaster position="top-right" />
 
-      <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
-        <SearchInput
-          placeholder="Search by ID"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-[20rem] max-w-xs"
-        />
+      <div className="flex flex-col gap-4 mb-4 ml-[90px] mr-[132px]">
+        <div className="flex justify-between items-center">
+          <SearchInput
+            placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-[30rem] max-w-xs"
+          />
 
-        <FilterDropdown
-          options={filterOptions}
-          onSelect={(value) => console.log("Selected filter:", value)}
-        />
+          <div className="flex gap-4">
 
-        <AddButton label="Add User" icon={<FiUserPlus />} onClick={openModal} />
+            <AddButton label="Add User" icon={<FiUserPlus />} onClick={openModal} />
+          </div>
+        </div>
       </div>
 
       <Table<Residents>
@@ -274,7 +301,21 @@ const Resident: React.FC = () => {
         onRowClick={(item) => console.log("Row clicked:", item)}
         className="w-[95%] mx-auto"
         tableClassName="w-full"
+        isLoading={loading}
+        emptyText="Không tìm thấy dữ liệu"
       />
+
+      {/* Thêm component phân trang */}
+      <div className="w-[95%] mx-auto">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+          onLimitChange={setItemsPerPage}
+        />
+      </div>
 
       <AddResident
         isOpen={isModalOpen}
@@ -282,12 +323,12 @@ const Resident: React.FC = () => {
         onAdd={handleAddResident}
         isLoading={isLoading}
       />
-       <ConfirmStatusChangeModal 
-      isOpen={isStatusChangeModalOpen}
-      onClose={() => setIsStatusChangeModalOpen(false)}
-      onConfirm={handleChangeStatus}
-      resident={residentToChangeStatus}
-    />
+      <ConfirmStatusChangeModal 
+        isOpen={isStatusChangeModalOpen}
+        onClose={() => setIsStatusChangeModalOpen(false)}
+        onConfirm={handleChangeStatus}
+        resident={residentToChangeStatus}
+      />
       <RemoveResident
         isOpen={isRemoveModalOpen}
         onClose={closeRemoveModal}

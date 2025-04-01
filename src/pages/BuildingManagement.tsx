@@ -12,6 +12,7 @@ import SearchInput from "@/components/SearchInput";
 import FilterDropdown from "@/components/FilterDropdown";
 import AddButton from "@/components/AddButton";
 import AddAreaModal from "@/components/BuildingManager/areas/addAreas/AddAreaModal";
+import Pagination from "@/components/Pagination";
 import toast from "react-hot-toast";
 
 const Building: React.FC = () => {
@@ -25,23 +26,45 @@ const Building: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch buildings when component mounts
+  // Handle search without delay
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  // Fetch buildings with pagination and search
   useEffect(() => {
     const fetchBuildings = async () => {
       setIsLoading(true);
       try {
-        const buildingsData = await getBuildings();
-        setBuildings(buildingsData);
+        const params = {
+          page: currentPage,
+          limit: itemsPerPage,
+          search: searchTerm,
+          status: selectedStatus === "all" ? undefined : selectedStatus,
+        };
+        const response = await getBuildings(params);
+        setBuildings(response.data);
+        setTotalItems(response.pagination.total);
+        setTotalPages(response.pagination.totalPages);
       } catch (error) {
         console.error("Failed to fetch buildings:", error);
+        toast.error("Failed to fetch buildings");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchBuildings();
-  }, [refreshTrigger]);
+  }, [currentPage, itemsPerPage, searchTerm, selectedStatus, refreshTrigger]);
 
   // Fetch areas when component mounts or refreshTrigger changes
   useEffect(() => {
@@ -51,6 +74,7 @@ const Building: React.FC = () => {
         setAreas(areasData);
       } catch (error) {
         console.error("Failed to fetch areas:", error);
+        toast.error("Failed to fetch areas");
       }
     };
     fetchAreas();
@@ -72,7 +96,7 @@ const Building: React.FC = () => {
     setIsDeleting(true);
     try {
       await deleteBuilding(selectedBuilding.buildingId);
-      toast.success("Delete building successfully!");
+      toast.success("Building deleted successfully!");
       setRefreshTrigger((prev) => prev + 1);
       setIsRemoveBuildingModalOpen(false);
     } catch (error) {
@@ -132,7 +156,7 @@ const Building: React.FC = () => {
     },
     {
       key: "completion Date",
-      title: "completion Date",
+      title: "Completion Date",
       render: (item) => (
         <span className="text-sm text-gray-500">{item.completion_date}</span>
       ),
@@ -167,7 +191,6 @@ const Building: React.FC = () => {
   ];
 
   const handleAddSuccess = () => {
-    // Trigger a refresh of the data
     setRefreshTrigger((prev) => prev + 1);
   };
 
@@ -175,15 +198,16 @@ const Building: React.FC = () => {
     <div className="w-full mt-[60px]">
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
         <SearchInput
-          placeholder="Search by ID"
+          placeholder="Search by building name or description"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           className="w-[20rem] max-w-xs"
         />
 
         <FilterDropdown
           options={filterOptions}
-          onSelect={(value) => console.log("Selected filter:", value)}
+          selectedValue={selectedStatus}
+          onSelect={setSelectedStatus}
         />
 
         <AddButton
@@ -202,17 +226,29 @@ const Building: React.FC = () => {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <p>Đang tải dữ liệu...</p>
+          <p>Loading data...</p>
         </div>
       ) : (
-        <Table<BuildingResponse>
-          data={buildings}
-          columns={columns}
-          keyExtractor={(item) => item.buildingId}
-          onRowClick={(item) => console.log("Row clicked:", item)}
-          className="w-[95%] mx-auto"
-          tableClassName="w-full"
-        />
+        <>
+          <Table<BuildingResponse>
+            data={buildings}
+            columns={columns}
+            keyExtractor={(item) => item.buildingId}
+            onRowClick={(item) => console.log("Row clicked:", item)}
+            className="w-[95%] mx-auto"
+            tableClassName="w-full"
+          />
+          
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onLimitChange={setItemsPerPage}
+            className="w-[95%] mx-auto mt-4"
+          />
+        </>
       )}
 
       {/* Add Area Modal */}

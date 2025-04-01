@@ -2,18 +2,37 @@
 import apiInstance from '@/lib/axios';
 import { BuildingResponse, BuildingsListResponse, AddBuildingRequest } from '@/types';
 
-// Hàm lấy danh sách tòa nhà
-export const getBuildings = async (): Promise<BuildingResponse[]> => {
+export interface BuildingListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: 'operational' | 'under_construction';
+}
+
+export interface BuildingListResponse {
+  data: BuildingResponse[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+// Hàm lấy danh sách tòa nhà với pagination và search
+export const getBuildings = async (params: BuildingListParams = {}): Promise<BuildingListResponse> => {
   try {
-    const response = await apiInstance.get<BuildingsListResponse>(
-      import.meta.env.VITE_VIEW_BUILDING_LIST
+    const response = await apiInstance.get<BuildingListResponse>(
+      import.meta.env.VITE_VIEW_BUILDING_LIST,
+      { params }
     );
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error('Error fetching buildings list:', error);
     throw error;
   }
 };
+
 export const addBuilding = async (buildingData: AddBuildingRequest): Promise<BuildingResponse> => {
   try {
     const response = await apiInstance.post<{statusCode: number, message: string, data: BuildingResponse}>(
@@ -26,6 +45,7 @@ export const addBuilding = async (buildingData: AddBuildingRequest): Promise<Bui
     throw error;
   }
 };
+
 export const deleteBuilding = async (buildingId: string): Promise<void> => {
   try {
     const url = import.meta.env.VITE_DELETE_BUIDLING.replace('{id}', buildingId);
