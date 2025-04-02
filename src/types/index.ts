@@ -69,6 +69,39 @@ export interface StaffData {
   dateOfBirth: string;
   gender: string;
 }
+
+export interface StaffDetailResponse {
+  isSuccess: boolean;
+  message: string;
+  data: StaffDetailData;
+}
+
+export interface StaffDetailData {
+  userId: string;
+  username: string;
+  email: string;
+  phone: string;
+  role: string;
+  dateOfBirth: string;
+  gender: string;
+  accountStatus: string;
+  userDetails?: {
+    positionId: string;
+    departmentId: string;
+    position: {
+      positionId: string;
+      positionName: string;
+      description: string;
+    };
+    department: {
+      departmentId: string;
+      departmentName: string;
+      description: string;
+      area: string;
+    };
+  };
+}
+
 export type Staff = {
   id: string;
   name: string;
