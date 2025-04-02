@@ -25,11 +25,11 @@ const getCrackDetail = async (id: string) => {
   }
 };
 
-const updateCrackStatus = async (id: string, status: 'Pending' | 'InProgress' | 'Resolved') => {
+const updateCrackStatus = async (id: string, status: 'Pending' | 'InProgress' | 'Resolved', staffId: string) => {
   try {
     const { data } = await apiInstance.patch(
-      import.meta.env.VITE_VIE_DETAIL_CRACK.replace('{id}', id),
-      { status }
+      import.meta.env.VITE_CHANGE_STATUS_CRACK.replace('{id}', id),
+      { staffId: staffId }
     );
     return data;
   } catch (error: any) {

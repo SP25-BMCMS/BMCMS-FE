@@ -62,13 +62,24 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Temporarily use sample data for departments
-        const mockDepartments: Department[] = [
-          { departmentId: "2a2ae0a4-067a-4faf-be79-a2c9d4518fea", departmentName: "Technical Department" },
-          { departmentId: "3b3bf1b5-178b-5gbg-cf80-b3d0d5629gfb", departmentName: "Administrative Department" },
-          { departmentId: "4c4cg2c6-289c-6hch-dg91-c4e1e6730hgc", departmentName: "Business Department" },
-        ];
-        setDepartments(mockDepartments);
+        // Fetch departments from API using VITE_VIEW_DEPARTMENT_LIST
+        const departmentsResponse = await apiInstance.get(import.meta.env.VITE_VIEW_DEPARTMENT_LIST);
+        console.log("Departments API Response:", departmentsResponse.data);
+        
+        if (departmentsResponse.data && departmentsResponse.data.data && Array.isArray(departmentsResponse.data.data)) {
+          setDepartments(departmentsResponse.data.data);
+        } else {
+          console.error("Unexpected department API response format:", departmentsResponse.data);
+          toast.error('Department data is not in the correct format');
+          
+          // Fallback to mock data if API fails
+          const mockDepartments: Department[] = [
+            { departmentId: "2a2ae0a4-067a-4faf-be79-a2c9d4518fea", departmentName: "Technical Department" },
+            { departmentId: "3b3bf1b5-178b-5gbg-cf80-b3d0d5629gfb", departmentName: "Administrative Department" },
+            { departmentId: "4c4cg2c6-289c-6hch-dg91-c4e1e6730hgc", departmentName: "Business Department" },
+          ];
+          setDepartments(mockDepartments);
+        }
 
         // Call API to get position list from VITE_VIEW_POSITION_LIST
         const positionsResponse = await apiInstance.get(import.meta.env.VITE_VIEW_POSITION_LIST);
@@ -84,6 +95,14 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
       } catch (error) {
         console.error('Failed to fetch departments and positions:', error);
         toast.error('Could not load departments and positions list');
+        
+        // Fallback to mock department data if API fails
+        const mockDepartments: Department[] = [
+          { departmentId: "2a2ae0a4-067a-4faf-be79-a2c9d4518fea", departmentName: "Technical Department" },
+          { departmentId: "3b3bf1b5-178b-5gbg-cf80-b3d0d5629gfb", departmentName: "Administrative Department" },
+          { departmentId: "4c4cg2c6-289c-6hch-dg91-c4e1e6730hgc", departmentName: "Business Department" },
+        ];
+        setDepartments(mockDepartments);
       } finally {
         setIsLoading(false);
       }
@@ -192,20 +211,7 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Position Data (converted):</h3>
-            <div className="grid grid-cols-1 gap-2">
-              {positions.map(pos => (
-                <div key={pos.positionId} className="p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-600 text-sm">
-                  <p><span className="font-semibold">ID:</span> {pos.positionId}</p>
-                  <p><span className="font-semibold">Position:</span> {getPositionName(pos.positionName)} <span className="text-gray-500">({pos.positionName})</span></p>
-                  {pos.description && <p><span className="font-semibold">Description:</span> {pos.description}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
+          </div>   
 
           <div className="flex justify-end space-x-3 mt-6">
             {onCancel && (
