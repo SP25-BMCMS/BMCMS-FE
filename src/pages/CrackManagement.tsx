@@ -46,13 +46,6 @@ const CrackManagement: React.FC = () => {
     { value: "Medium", label: "Medium" },
     { value: "High", label: "High" },
   ];
-  
-  const statusOptions = [
-    { value: "all", label: "All Statuses" },
-    { value: "Pending", label: "Pending" },
-    { value: "InProgress", label: "In Progress" },
-    { value: "Resolved", label: "Resolved" },
-  ];
 
   // Loading animation
   const loadingVariants = {
@@ -281,13 +274,6 @@ const CrackManagement: React.FC = () => {
           />
 
           <div className="flex space-x-4">
-            <FilterDropdown
-              options={statusOptions}
-              onSelect={handleStatusChange}
-              buttonClassName="w-[160px]"
-              selectedValue={selectedStatus}
-              label="Status"
-            />
             <FilterDropdown
               options={severityOptions}
               onSelect={handleSeverityChange}
