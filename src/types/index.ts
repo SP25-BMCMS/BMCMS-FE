@@ -53,6 +53,39 @@ export type ResidentsApiResponse = {
   data: Residents[];
 };
 
+// Resident apartment types
+export interface ResidentApartmentResponse {
+  isSuccess: boolean;
+  message: string;
+  data: ResidentApartment[];
+}
+
+export interface ResidentApartment {
+  apartmentId: string;
+  apartmentName: string;
+  buildingDetails: {
+    buildingDetailId: string;
+    name: string;
+    building: {
+      buildingId: string;
+      name: string;
+      description: string;
+      numberFloor: number;
+      imageCover: string;
+      areaId: string;
+      Status: string;
+      area: {
+        areaId: string;
+        name: string;
+        description: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    };
+  };
+}
+
+
 //Staff
 export interface StaffResponse {
   isSuccess: boolean;
@@ -69,6 +102,39 @@ export interface StaffData {
   dateOfBirth: string;
   gender: string;
 }
+
+export interface StaffDetailResponse {
+  isSuccess: boolean;
+  message: string;
+  data: StaffDetailData;
+}
+
+export interface StaffDetailData {
+  userId: string;
+  username: string;
+  email: string;
+  phone: string;
+  role: string;
+  dateOfBirth: string;
+  gender: string;
+  accountStatus: string;
+  userDetails?: {
+    positionId: string;
+    departmentId: string;
+    position: {
+      positionId: string;
+      positionName: string;
+      description: string;
+    };
+    department: {
+      departmentId: string;
+      departmentName: string;
+      description: string;
+      area: string;
+    };
+  };
+}
+
 export type Staff = {
   id: string;
   name: string;

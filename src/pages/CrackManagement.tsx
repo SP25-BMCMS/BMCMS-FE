@@ -7,6 +7,7 @@ import FilterDropdown from "@/components/FilterDropdown";
 import Pagination from "@/components/Pagination";
 import { CrackReportResponse, Crack } from "@/types";
 import crackApi from "@/services/cracks";
+import StatusCrack from "@/components/crackManager/StatusCrack";
 
 
 // Map API response to UI model
@@ -39,6 +40,8 @@ const CrackManagement: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedSeverity, setSelectedSeverity] = useState<string>("all");
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedCrack, setSelectedCrack] = useState<Crack | null>(null);
 
   const severityOptions = [
     { value: "all", label: "All Severities" },
@@ -147,27 +150,14 @@ const CrackManagement: React.FC = () => {
     }
   };
 
+  // Handle status update with staff assignment
   const handleStatusUpdate = async (
     crack: Crack,
     newStatus?: "pending" | "InProgress" | "resolved"
   ) => {
-    try {
-      // If no newStatus provided, cycle to next status
-      const statusToSet = newStatus || getNextStatus(crack.status);
-      
-      // Convert status from UI format to API format
-      const apiStatus =
-        statusToSet === "InProgress"
-          ? "InProgress"
-          : statusToSet === "resolved"
-          ? "Resolved"
-          : "Pending";
-
-      await crackApi.updateCrackStatus(crack.id, apiStatus as any);
-      fetchCracks(); // Refresh data after update
-    } catch (error) {
-      console.error("Failed to update status:", error);
-    }
+    // Open the status modal instead of directly updating
+    setSelectedCrack(crack);
+    setIsStatusModalOpen(true);
   };
 
   const columns: Column<Crack>[] = [
@@ -332,6 +322,17 @@ const CrackManagement: React.FC = () => {
             onLimitChange={setItemsPerPage}
           />
         </div>
+      )}
+
+      {/* Status Change Modal */}
+      {selectedCrack && (
+        <StatusCrack 
+          isOpen={isStatusModalOpen}
+          onClose={() => setIsStatusModalOpen(false)}
+          crackId={selectedCrack.id}
+          crackStatus={selectedCrack.status}
+          onUpdateSuccess={fetchCracks}
+        />
       )}
     </div>
   );

@@ -12,6 +12,7 @@ import { useAddStaff } from "@/components/Staff/AddStaff/use-add-staff";
 import { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import DepartmentPositionModal from "@/components/Staff/DepartmentPositionModal";
+import ViewDetailStaff from '@/components/Staff/ViewDetailStaff';
 
 const StaffManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -19,6 +20,7 @@ const StaffManagement: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false);
+  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
 
   const { isModalOpen, isLoading, openModal, closeModal, addNewStaff } = useAddStaff({
     onAddSuccess: () => {
@@ -55,6 +57,11 @@ const StaffManagement: React.FC = () => {
   useEffect(() => {
     fetchStaffData();
   }, []);
+
+  const handleViewDetail = (staff: Staff) => {
+    setSelectedStaff(staff);
+    setIsViewDetailOpen(true);
+  };
 
   const handleOpenDeptPosModal = (staff: Staff) => {
     setSelectedStaff(staff);
@@ -150,7 +157,7 @@ const StaffManagement: React.FC = () => {
       title: "Action",
       render: (item) => (
         <DropdownMenu
-          onViewDetail={() => console.log("View detail clicked")}
+          onViewDetail={() => handleViewDetail(item)}
           onChangeStatus={() => handleOpenDeptPosModal(item)}
           onRemove={() => console.log("Remove clicked", item)}
           changeStatusTitle="Change Department"
@@ -233,6 +240,13 @@ const StaffManagement: React.FC = () => {
           staffId={selectedStaff.id}
           staffName={selectedStaff.name}
           onSaveSuccess={fetchStaffData}
+        />
+      )}
+      {isViewDetailOpen && selectedStaff && (
+        <ViewDetailStaff
+          isOpen={isViewDetailOpen}
+          onClose={() => setIsViewDetailOpen(false)}
+          staffId={selectedStaff.id}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 import apiInstance from '@/lib/axios';
-import { StaffResponse } from '@/types';
+import { StaffResponse, StaffDetailResponse } from '@/types';
 
 export const getAllStaff = async (): Promise<StaffResponse> => {
     try {
@@ -27,6 +27,16 @@ export const addStaff = async (staffData: AddStaffData): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error('Error creating staff account:', error);
+    throw error;
+  }
+};
+
+export const getStaffDetail = async (staffId: string): Promise<StaffDetailResponse> => {
+  try {
+    const response = await apiInstance.get(import.meta.env.VITE_VIEW_STAFF_DETAIL.replace('{staffId}', staffId));
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching staff detail:', error);
     throw error;
   }
 };
