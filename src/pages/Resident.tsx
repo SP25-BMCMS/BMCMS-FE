@@ -178,7 +178,7 @@ const Resident: React.FC = () => {
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
             item.gender === "Male"
               ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
-              : "bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]"
+              : "bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]"
           }`}
         >
           {item.gender}

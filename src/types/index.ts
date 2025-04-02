@@ -127,8 +127,14 @@ export type CrackReportResponse = {
   isPrivatesAsset: boolean;
   position: string | null;
   status: 'Pending' | 'InProgress' | 'Resolved';
-  reportedBy: string;
-  verifiedBy: string | null;
+  reportedBy: {
+    userId: string;
+    username: string;
+  };
+  verifiedBy: {
+    userId: string;
+    username: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
   crackDetails: CrackDetailsResponse[];

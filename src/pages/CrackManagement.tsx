@@ -19,7 +19,8 @@ const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
       | "pending"
       | "in_progress"
       | "resolved",
-    residentId: response.reportedBy,
+    residentId: response.reportedBy.userId,
+    residentName: response.reportedBy.username,
     description: response.description,
     originalImage: response.crackDetails[0]?.photoUrl,
     aiDetectedImage: response.crackDetails[0]?.aiDetectionUrl,

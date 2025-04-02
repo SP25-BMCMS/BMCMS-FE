@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import './Table.css'; // Import CSS for loading animation
+import '../../src/styles/Table.css';
 
 export type Column<T> = {
   key: string;
