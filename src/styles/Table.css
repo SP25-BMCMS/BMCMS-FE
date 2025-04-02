@@ -1,0 +1,53 @@
+/* Custom styles for the Table component */
+
+/* Loading spinner animation */
+.loading-spinner {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite, spin 1s linear infinite;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); /* Blue glow effect */
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1) rotate(180deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Standalone loading spinner - larger with stronger effect */
+.h-64 .loading-spinner {
+  border-width: 5px;
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.7);
+}
+
+.dark .h-64 .loading-spinner {
+  box-shadow: 0 0 25px rgba(96, 165, 250, 0.8);
+}
+
+/* Enhanced table styles for better readability */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hover effect for clickable rows */
+tr.clickable:hover td {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Dark mode adjustments */
+.dark .loading-spinner {
+  box-shadow: 0 0 15px rgba(96, 165, 250, 0.6); /* Lighter blue glow for dark mode */
+} 

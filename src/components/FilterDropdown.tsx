@@ -97,10 +97,10 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className={`flex items-center justify-between px-4 py-2 bg-white text-gray-700 rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition-colors duration-200 ${buttonClassName}`}
+        className={`flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 ${buttonClassName}`}
       >
         <div className="flex items-center">
-          <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
           </svg>
           <span className="truncate">{displayText}</span>
@@ -118,7 +118,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
       
       {showDropdown && (
         <div 
-          className={`absolute right-0 mt-2 w-full min-w-[160px] bg-white rounded-lg shadow-lg z-10 border border-gray-200 overflow-hidden ${dropdownClassName}`}
+          className={`absolute right-0 mt-2 w-full min-w-[160px] bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-gray-900/30 z-10 border border-gray-200 dark:border-gray-700 overflow-hidden ${dropdownClassName}`}
           style={dropdownAnimation}
         >
           <div className="py-1 max-h-60 overflow-y-auto">
@@ -126,8 +126,10 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
               <button
                 key={option.value}
                 onClick={() => handleSelect(option.value)}
-                className={`flex items-center w-full px-4 py-2 text-sm text-left hover:bg-blue-50 transition-colors duration-150 ${
-                  selectedValue === option.value ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
+                className={`flex items-center w-full px-4 py-2 text-sm text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors duration-150 ${
+                  selectedValue === option.value 
+                    ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium' 
+                    : 'text-gray-700 dark:text-gray-300'
                 }`}
                 style={{
                   animationName: 'optionFadeIn',
@@ -139,7 +141,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 } as React.CSSProperties}
               >
                 {selectedValue === option.value && (
-                  <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                 )}

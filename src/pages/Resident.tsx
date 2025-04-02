@@ -14,7 +14,7 @@ import { useRemoveResident } from "@/components/Residents/RemoveResidents/use-re
 import { FiUserPlus } from "react-icons/fi";
 import { getAllResidents, updateResidentStatus } from "@/services/residents";
 import { toast } from "react-hot-toast";
-
+import { motion } from "framer-motion";
 
 const Resident: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -141,9 +141,9 @@ const Resident: React.FC = () => {
       key: "index",
       title: "No",
       render: (_, index) => (
-        <span className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
-        </span>
+        </div>
       ),
       width: "60px",
     },
@@ -151,23 +151,23 @@ const Resident: React.FC = () => {
       key: "name",
       title: "Resident Name",
       render: (item) => (
-        <span className="text-sm font-medium text-gray-900">
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
           {item.username}
-        </span>
+        </div>
       ),
     },
     {
       key: "email",
       title: "Email",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.email}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.email}</div>
       ),
     },
     {
       key: "phone",
       title: "Phone",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.phone}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.phone}</div>
       ),
     },
     {
@@ -178,7 +178,7 @@ const Resident: React.FC = () => {
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
             item.gender === "Male"
               ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
-              : "bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]"
+              : "bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]"
           }`}
         >
           {item.gender}
@@ -192,7 +192,7 @@ const Resident: React.FC = () => {
         try {
           // Kiểm tra nếu dateOfBirth là undefined hoặc null
           if (!item.dateOfBirth) {
-            return <span className="text-sm text-gray-500">N/A</span>;
+            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>;
           }
 
           // Tạo đối tượng Date từ chuỗi ngày tháng
@@ -200,7 +200,7 @@ const Resident: React.FC = () => {
 
           // Kiểm tra xem date có hợp lệ không
           if (isNaN(date.getTime())) {
-            return <span className="text-sm text-gray-500">Invalid date</span>;
+            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>;
           }
 
           // Format ngày tháng theo định dạng dd/mm/yyyy
@@ -209,10 +209,10 @@ const Resident: React.FC = () => {
           const year = date.getFullYear();
 
           const formattedDate = `${day}/${month}/${year}`;
-          return <span className="text-sm text-gray-500">{formattedDate}</span>;
+          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>;
         } catch (error) {
           console.error("Error formatting date:", error);
-          return <span className="text-sm text-gray-500">Error</span>;
+          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>;
         }
       },
     },
@@ -221,7 +221,7 @@ const Resident: React.FC = () => {
       key: "createdDate",
       title: "Created Date",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.createdDate}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
       ),
     },
     {
@@ -258,12 +258,28 @@ const Resident: React.FC = () => {
     await addResident(residentData);
   };
 
+  // Loading animation
+  const loadingVariants = {
+    rotate: 360,
+    transition: {
+      duration: 1,
+      repeat: Infinity,
+      ease: "linear"
+    }
+  };
+
+  const LoadingIndicator = () => (
+    <div className="flex flex-col justify-center items-center h-64">
+      <motion.div
+        animate={loadingVariants}
+        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
+      />
+      <p className="text-gray-700 dark:text-gray-300">Loading residents data...</p>
+    </div>
+  );
+
   if (loading && residents.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        Đang tải dữ liệu...
-      </div>
-    );
+    return <LoadingIndicator />;
   }
 
   if (error && residents.length === 0) {

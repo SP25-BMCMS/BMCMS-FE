@@ -17,7 +17,7 @@ const getCrackList = async (params: CrackListParams = {}): Promise<CrackListPagi
 const getCrackDetail = async (id: string) => {
   try {
     const { data } = await apiInstance.get(
-      import.meta.env.VITE_VIE_DETAIL_CRACK.replace('{id}', id)
+      import.meta.env.VITE_VIEW_DETAIL_CRACK.replace('{id}', id)
     );
     return data;
   } catch (error: any) {

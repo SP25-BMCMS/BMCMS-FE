@@ -174,15 +174,15 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-8 w-full max-w-[800px] shadow-2xl">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-full max-w-[800px] shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Add New Building</h2>
-            <p className="text-sm text-gray-500 mt-1">Fill in the information below to add a new building</p>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Add New Building</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill in the information below to add a new building</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
           >
             <svg
               className="w-6 h-6"
@@ -204,7 +204,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
           <div className="grid grid-cols-2 gap-6">
             {/* Building Name */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Building Name
               </label>
               <input
@@ -213,18 +213,18 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter building name"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.name ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  errors.name ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               />
               {errors.name && (
-                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.name}</p>
               )}
             </div>
 
             {/* Number of Floors */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Number of Floors
               </label>
               <input
@@ -233,18 +233,18 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 value={formData.numberFloor}
                 onChange={handleChange}
                 min="1"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.numberFloor ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                  errors.numberFloor ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               />
               {errors.numberFloor && (
-                <p className="text-red-500 text-xs mt-1">{errors.numberFloor}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.numberFloor}</p>
               )}
             </div>
 
             {/* Image URL */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Image (URL)
               </label>
               <input
@@ -253,26 +253,26 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 value={formData.imageCover}
                 onChange={handleChange}
                 placeholder="Enter image URL"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.imageCover ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  errors.imageCover ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               />
               {errors.imageCover && (
-                <p className="text-red-500 text-xs mt-1">{errors.imageCover}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.imageCover}</p>
               )}
             </div>
 
             {/* Area Selection */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Area
               </label>
               <select
                 name="areaId"
                 value={formData.areaId}
                 onChange={handleChange}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.areaId ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                  errors.areaId ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               >
                 <option value="">Select area</option>
@@ -283,13 +283,13 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 ))}
               </select>
               {errors.areaId && (
-                <p className="text-red-500 text-xs mt-1">{errors.areaId}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.areaId}</p>
               )}
             </div>
 
             {/* Construction Date */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Construction Date
               </label>
               <input
@@ -297,18 +297,18 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 name="construction_date"
                 value={formData.construction_date}
                 onChange={handleChange}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.construction_date ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                  errors.construction_date ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               />
               {errors.construction_date && (
-                <p className="text-red-500 text-xs mt-1">{errors.construction_date}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.construction_date}</p>
               )}
             </div>
 
             {/* Status */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Status
               </label>
               <div className="flex space-x-4">
@@ -319,9 +319,9 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                     value="operational"
                     checked={formData.status === "operational"}
                     onChange={handleChange}
-                    className="form-radio h-4 w-4 text-blue-600"
+                    className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                   />
-                  <span className="ml-2 text-gray-700">Operational</span>
+                  <span className="ml-2 text-gray-700 dark:text-gray-300">Operational</span>
                 </label>
                 <label className="inline-flex items-center">
                   <input
@@ -330,16 +330,16 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                     value="under_construction"
                     checked={formData.status === "under_construction"}
                     onChange={handleChange}
-                    className="form-radio h-4 w-4 text-blue-600"
+                    className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                   />
-                  <span className="ml-2 text-gray-700">Under construction</span>
+                  <span className="ml-2 text-gray-700 dark:text-gray-300">Under construction</span>
                 </label>
               </div>
             </div>
 
             {/* Completion Date */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Completion Date
               </label>
               {formData.status === "under_construction" ? (
@@ -347,8 +347,8 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                   type="text"
                   name="completion_date"
                   value={formData.completion_date}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm 
-                           bg-gray-50 cursor-not-allowed text-gray-500"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm 
+                           bg-gray-50 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
                   disabled
                 />
               ) : (
@@ -357,19 +357,19 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                   name="completion_date"
                   value={formData.completion_date}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                    errors.completion_date ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                    errors.completion_date ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                   }`}
                 />
               )}
               {errors.completion_date && (
-                <p className="text-red-500 text-xs mt-1">{errors.completion_date}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.completion_date}</p>
               )}
             </div>
 
             {/* Description - Full Width */}
             <div className="col-span-2 space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Description
               </label>
               <textarea
@@ -377,13 +377,13 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Enter building description"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.description ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  errors.description ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
                 rows={4}
               />
               {errors.description && (
-                <p className="text-red-500 text-xs mt-1">{errors.description}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.description}</p>
               )}
             </div>
           </div>
@@ -393,14 +393,14 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+              className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-gray-600 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? (
                 <span className="flex items-center">

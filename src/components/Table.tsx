@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import '../../src/styles/Table.css';
 
 export type Column<T> = {
   key: string;
@@ -49,13 +50,18 @@ const Table = <T extends {}>({
   onRowClick,
   className = '',
   tableClassName = '',
-  headerClassName = 'bg-gray-50',
-  bodyClassName = 'bg-white',
+  headerClassName = 'bg-gray-50 dark:bg-gray-800',
+  bodyClassName = 'bg-white dark:bg-gray-900',
   emptyText = 'No data available',
   isLoading = false,
   loadingComponent,
   animated = true,
 }: TableProps<T>) => {
+  // Wrapper for content to ensure dark mode compatibility
+  const ContentWrapper = ({ children }: { children: ReactNode }) => (
+    <div className="text-gray-700 dark:text-gray-300">{children}</div>
+  );
+
   // Animated row component
   const AnimatedRow = ({ item, index }: { item: T, index: number }) => (
     <motion.tr
@@ -65,15 +71,19 @@ const Table = <T extends {}>({
       animate="visible"
       exit="exit"
       custom={index}
-      className={`${onRowClick ? 'cursor-pointer hover:bg-gray-50 transition-colors duration-150' : ''} border-b border-gray-200`}
+      className={`${onRowClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150' : ''} border-b border-gray-200 dark:border-gray-700`}
       onClick={() => onRowClick && onRowClick(item)}
     >
       {columns.map((column) => (
         <td 
           key={`${keyExtractor(item)}-${column.key}`} 
-          className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
+          className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"
         >
-          {column.render ? column.render(item, index) : (item as any)[column.key]}
+          {column.render ? (
+            <ContentWrapper>{column.render(item, index)}</ContentWrapper>
+          ) : (
+            <ContentWrapper>{(item as any)[column.key]}</ContentWrapper>
+          )}
         </td>
       ))}
     </motion.tr>
@@ -83,15 +93,19 @@ const Table = <T extends {}>({
   const RegularRow = ({ item, index }: { item: T, index: number }) => (
     <tr
       key={keyExtractor(item)}
-      className={`${onRowClick ? 'cursor-pointer hover:bg-gray-50 transition-colors duration-150' : ''} border-b border-gray-200`}
+      className={`${onRowClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150' : ''} border-b border-gray-200 dark:border-gray-700`}
       onClick={() => onRowClick && onRowClick(item)}
     >
       {columns.map((column) => (
         <td 
           key={`${keyExtractor(item)}-${column.key}`} 
-          className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
+          className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"
         >
-          {column.render ? column.render(item, index) : (item as any)[column.key]}
+          {column.render ? (
+            <ContentWrapper>{column.render(item, index)}</ContentWrapper>
+          ) : (
+            <ContentWrapper>{(item as any)[column.key]}</ContentWrapper>
+          )}
         </td>
       ))}
     </tr>
@@ -114,21 +128,21 @@ const Table = <T extends {}>({
       <motion.div
         animate="animate"
         variants={loadingVariants}
-        className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full"
+        className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner"
       />
-      <span className="ml-3 text-sm text-gray-500">Loading data...</span>
+      <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">Loading data...</span>
     </div>
   );
 
   return (
-    <div className={`overflow-x-auto rounded-lg border border-gray-200 shadow-sm ${className}`}>
-      <table className={`min-w-full divide-y divide-gray-200 ${tableClassName}`}>
+    <div className={`overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}>
+      <table className={`min-w-full divide-y divide-gray-200 dark:divide-gray-700 ${tableClassName}`}>
         <thead className={headerClassName}>
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider ${column.className || ''}`}
+                className={`px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ${column.className || ''}`}
                 style={{ width: column.width }}
               >
                 {column.title}
@@ -136,7 +150,7 @@ const Table = <T extends {}>({
             ))}
           </tr>
         </thead>
-        <tbody className={`divide-y divide-gray-200 ${bodyClassName}`}>
+        <tbody className={`divide-y divide-gray-200 dark:divide-gray-700 ${bodyClassName}`}>
           {isLoading ? (
             <tr>
               <td colSpan={columns.length} className="px-6 py-4 text-center">
@@ -146,7 +160,7 @@ const Table = <T extends {}>({
           ) : data.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="px-6 py-8 text-center">
-                <div className="flex flex-col items-center justify-center text-gray-500">
+                <div className="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
                   <svg
                     className="w-12 h-12 mb-2"
                     fill="none"

@@ -127,8 +127,14 @@ export type CrackReportResponse = {
   isPrivatesAsset: boolean;
   position: string | null;
   status: 'Pending' | 'InProgress' | 'Resolved';
-  reportedBy: string;
-  verifiedBy: string | null;
+  reportedBy: {
+    userId: string;
+    username: string;
+  };
+  verifiedBy: {
+    userId: string;
+    username: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
   crackDetails: CrackDetailsResponse[];
@@ -152,13 +158,33 @@ export type CrackListParams = {
   status?: 'Pending' | 'InProgress' | 'Resolved';
 }
 //task
-export interface Task {
-  id: number;
-  title: string;
+export interface TaskResponse {
+  task_id: string;
   description: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  assignedTo: string;
-  createdAt: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  crack_id: string;
+  schedule_job_id: string;
+}
+
+export interface TaskListPaginationResponse {
+  statusCode: number;
+  message: string;
+  data: TaskResponse[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface TaskListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
 }
 //area
 export type Area = {
@@ -177,7 +203,7 @@ export type Crack = {
   id: string;
   reportDescription: string;
   createdDate: string;
-  status: 'pending' | 'in_progress' | 'resolved';
+  status: 'pending' | 'InProgress' | 'resolved';
   residentId: string;
   residentName?: string;
   location?: string;

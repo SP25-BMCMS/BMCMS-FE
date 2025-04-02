@@ -5,12 +5,14 @@ interface DropdownMenuProps {
   onViewDetail: () => void;
   onChangeStatus: () => void;
   onRemove: () => void;
+  changeStatusTitle?: string;
 }
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({
   onViewDetail,
   onChangeStatus,
   onRemove,
+  changeStatusTitle = "Change Status",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -52,7 +54,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
             onClick={onChangeStatus}
             className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
           >
-            <RiFilterLine className="mr-2" /> Change Status
+            <RiFilterLine className="mr-2" /> {changeStatusTitle}
           </button>
           <button
             onClick={onRemove}

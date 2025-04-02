@@ -85,19 +85,19 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
   }
 
   return (
-    <div className={`bg-white h-screen shadow-xl border-r border-gray-200 
+    <div className={`bg-white dark:bg-gray-800 h-screen shadow-xl border-r border-gray-200 dark:border-gray-700 
       transition-all duration-300 ${isCollapsed ? "w-20" : "w-64"} fixed top-0 left-0 z-30`}>
 
       {/* Collapse Button */}
-      <div className="flex p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+      <div className="flex p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
         <button
           onClick={toggleSidebar}
-          className="text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
+          className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors"
         >
           {isCollapsed ? (
-            <RiMenuUnfoldLine size={24} className="text-blue-600" />
+            <RiMenuUnfoldLine size={24} className="text-blue-600 dark:text-blue-400" />
           ) : (
-            <RiMenuFoldLine size={24} className="text-blue-600" />
+            <RiMenuFoldLine size={24} className="text-blue-600 dark:text-blue-400" />
           )}
         </button>
       </div>
@@ -112,12 +112,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                 className={`flex items-center p-3 rounded-lg cursor-pointer
                   transition-all duration-200 group
                   ${isActive(item.path, item.children)
-                    ? "bg-blue-100 text-blue-600 font-semibold"
-                    : "hover:bg-gray-100"}
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 font-semibold"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"}
                   ${!isCollapsed ? "justify-between" : "justify-center"}`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl text-gray-600 group-hover:text-blue-600">
+                  <span className="text-xl text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                     {item.icon}
                   </span>
                   {!isCollapsed && (
@@ -127,13 +127,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
 
                 {!isCollapsed && item.children && (
                   <IoIosArrowDown className={`transition-transform duration-300 ${openDropdown === item.title ? 'rotate-180' : ''
-                    } text-gray-400`} />
+                    } text-gray-400 dark:text-gray-500`} />
                 )}
               </div>
 
               {/* Dropdown Menu */}
               {item.children && openDropdown === item.title && !isCollapsed && (
-                <div className="ml-4 pl-3 border-l-2 border-gray-100 animate-slideDown">
+                <div className="ml-4 pl-3 border-l-2 border-gray-100 dark:border-gray-700 animate-slideDown">
                   {item.children.map((child) => (
                     <div
                       key={child.path}
@@ -141,8 +141,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                       className={`py-2 px-3 rounded-lg cursor-pointer text-sm
                         transition-colors duration-200
                         ${location.pathname === child.path
-                          ? "bg-blue-50 text-blue-600"
-                          : "hover:bg-gray-100"}`}
+                          ? "bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"}`}
                     >
                       {child.title}
                     </div>
@@ -156,8 +156,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
           <div
             onClick={handleLogout}
             className="mt-auto p-3 rounded-lg cursor-pointer
-              text-red-600 hover:bg-red-50 transition-colors
-              border-t border-gray-100 mx-2"
+              text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors
+              border-t border-gray-100 dark:border-gray-700 mx-2"
           >
             <div className="flex items-center gap-3">
               <RiLogoutBoxRLine size={20} />

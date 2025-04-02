@@ -138,15 +138,15 @@ const AddStaff: React.FC<AddStaffProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-8 w-full max-w-[600px] shadow-2xl">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-full max-w-[600px] shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Add New Staff</h2>
-            <p className="text-sm text-gray-500 mt-1">Fill in the information below to add a new staff member</p>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Add New Staff</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill in the information below to add a new staff member</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
           >
             <svg
               className="w-6 h-6"
@@ -167,7 +167,7 @@ const AddStaff: React.FC<AddStaffProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Username
               </label>
               <input
@@ -177,17 +177,17 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 value={formData.username}
                 onChange={handleChange}
                 placeholder="Enter username"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.username ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  errors.username ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               />
               {errors.username && (
-                <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.username}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email
               </label>
               <input
@@ -197,17 +197,17 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter email"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.email ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  errors.email ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               />
               {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.email}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Password
               </label>
               <input
@@ -217,17 +217,17 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Enter password"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.password ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  errors.password ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               />
               {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.password}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Phone Number
               </label>
               <input
@@ -237,17 +237,17 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="Enter phone number"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.phone ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  errors.phone ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               />
               {errors.phone && (
-                <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.phone}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Role
               </label>
               <select
@@ -255,8 +255,8 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 name="role"
                 value={formData.role}
                 onChange={(e) => handleSelectChange("role", e.target.value)}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.role ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                  errors.role ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               >
                 <option value="Staff">Staff</option>
@@ -264,12 +264,12 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 <option value="Manager">Manager</option>
               </select>
               {errors.role && (
-                <p className="text-red-500 text-xs mt-1">{errors.role}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.role}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Gender
               </label>
               <select
@@ -277,20 +277,20 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 name="gender"
                 value={formData.gender}
                 onChange={(e) => handleSelectChange("gender", e.target.value)}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.gender ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                  errors.gender ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
               {errors.gender && (
-                <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.gender}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Date of Birth
               </label>
               <input
@@ -298,12 +298,12 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 name="dateOfBirth"
                 type="date"
                 onChange={handleDateChange}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.dateOfBirth ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                  errors.dateOfBirth ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
                 }`}
               />
               {errors.dateOfBirth && (
-                <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.dateOfBirth}</p>
               )}
             </div>
           </div>
@@ -312,14 +312,14 @@ const AddStaff: React.FC<AddStaffProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+              className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-gray-600 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? (
                 <span className="flex items-center">

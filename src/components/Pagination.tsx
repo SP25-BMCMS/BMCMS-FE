@@ -63,25 +63,25 @@ const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <div className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6 ${className}`}>
-      <div className="flex items-center space-x-3 text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg shadow-sm border border-gray-200">
+      <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         {totalItems !== undefined && itemsPerPage !== undefined && (
           <div className="flex items-center">
-            <span className="font-medium text-gray-800">
+            <span className="font-medium text-gray-800 dark:text-gray-200">
               {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}
-              <span className="mx-1 text-gray-500">-</span>
+              <span className="mx-1 text-gray-500 dark:text-gray-400">-</span>
               {Math.min(currentPage * itemsPerPage, totalItems)}
             </span>
             <span className="ml-1">
-              <span className="text-gray-500">của</span> {totalItems} <span className="hidden sm:inline">mục</span>
+              <span className="text-gray-500 dark:text-gray-400">của</span> {totalItems} <span className="hidden sm:inline">mục</span>
             </span>
           </div>
         )}
         
         {onLimitChange && (
-          <div className="flex items-center ml-4 border-l border-gray-300 pl-4">
-            <label className="mr-2 text-gray-500 whitespace-nowrap">Hiển thị:</label>
+          <div className="flex items-center ml-4 border-l border-gray-300 dark:border-gray-600 pl-4">
+            <label className="mr-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">Hiển thị:</label>
             <select 
-              className="bg-white border border-gray-300 rounded-md px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-gray-700 dark:text-gray-200"
               value={itemsPerPage}
               onChange={(e) => onLimitChange(Number(e.target.value))}
             >
@@ -99,8 +99,8 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === 1}
           className={`flex items-center justify-center p-2 rounded-md transition-colors duration-200 ${
             currentPage === 1 
-              ? 'text-gray-300 bg-gray-50 border border-gray-200 cursor-not-allowed' 
-              : 'text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 hover:text-blue-600'
+              ? 'text-gray-300 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-not-allowed' 
+              : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400'
           }`}
           aria-label="Trang trước"
         >
@@ -110,15 +110,15 @@ const Pagination: React.FC<PaginationProps> = ({
         <div className="flex items-center space-x-1 overflow-x-auto">
           {getPageNumbers().map((page, index) => (
             page === 'ellipsis-start' || page === 'ellipsis-end' ? (
-              <span key={`ellipsis-${index}`} className="w-10 text-center px-1 py-2 text-gray-500">...</span>
+              <span key={`ellipsis-${index}`} className="w-10 text-center px-1 py-2 text-gray-500 dark:text-gray-400">...</span>
             ) : (
               <button
                 key={index}
                 onClick={() => onPageChange(page as number)}
                 className={`min-w-[40px] h-10 flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200 ${
                   currentPage === page
-                    ? 'bg-blue-500 text-white shadow-sm border border-blue-600'
-                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-blue-600'
+                    ? 'bg-blue-500 dark:bg-blue-600 text-white shadow-sm border border-blue-600 dark:border-blue-700'
+                    : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
                 aria-label={`Trang ${page}`}
                 aria-current={currentPage === page ? 'page' : undefined}
@@ -134,8 +134,8 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === totalPages || totalPages === 0}
           className={`flex items-center justify-center p-2 rounded-md transition-colors duration-200 ${
             currentPage === totalPages || totalPages === 0
-              ? 'text-gray-300 bg-gray-50 border border-gray-200 cursor-not-allowed' 
-              : 'text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 hover:text-blue-600'
+              ? 'text-gray-300 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-not-allowed' 
+              : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400'
           }`}
           aria-label="Trang sau"
         >

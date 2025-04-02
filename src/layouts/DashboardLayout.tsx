@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
 import { sidebarItems } from "@/components/layout/Sidebar"; // Import sidebarItems để lấy tiêu đề động
+import ThemeToggle from "@/components/ThemeToggle";
 
 const DashboardLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -35,7 +36,7 @@ const DashboardLayout = () => {
   const currentTitle = getCurrentTitle();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
       {/* Placeholder để giữ không gian cho sidebar */}
       <div className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} flex-shrink-0 transition-all duration-300`}></div>
       
@@ -44,10 +45,13 @@ const DashboardLayout = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-6 transition-all duration-300">
-        {/* Tiêu đề động */}
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6 text-[50px]">
-          {currentTitle}
-        </h1>
+        {/* Tiêu đề và Theme Toggle */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white text-[50px]">
+            {currentTitle}
+          </h1>
+          <ThemeToggle />
+        </div>
 
         {/* Outlet để render các trang con */}
         <Outlet />

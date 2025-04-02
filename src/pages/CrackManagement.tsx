@@ -8,17 +8,20 @@ import Pagination from "@/components/Pagination";
 import { CrackReportResponse, Crack } from "@/types";
 import crackApi from "@/services/cracks";
 
+
 // Map API response to UI model
 const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
   return {
     id: response.crackReportId,
     reportDescription: response.description,
     createdDate: new Date(response.createdAt).toLocaleDateString(),
-    status: response.status.toLowerCase() as
-      | "pending"
-      | "in_progress"
-      | "resolved",
-    residentId: response.reportedBy,
+    status: response.status === "Pending" 
+      ? "pending"
+      : response.status === "InProgress"
+      ? "InProgress" 
+      : "resolved",
+    residentId: typeof response.reportedBy === 'object' ? response.reportedBy.userId : response.reportedBy,
+    residentName: typeof response.reportedBy === 'object' ? response.reportedBy.username : "Unknown",
     description: response.description,
     originalImage: response.crackDetails[0]?.photoUrl,
     aiDetectedImage: response.crackDetails[0]?.aiDetectionUrl,
@@ -43,6 +46,28 @@ const CrackManagement: React.FC = () => {
     { value: "Medium", label: "Medium" },
     { value: "High", label: "High" },
   ];
+
+  // Loading animation
+  const loadingVariants = {
+    rotate: 360,
+    transition: {
+      duration: 1,
+      repeat: Infinity,
+      ease: "linear"
+    }
+  };
+
+  // Get status animation class
+  const getStatusAnimationClass = (status: string) => {
+    switch (status) {
+      case "resolved":
+        return "";
+      case "InProgress":
+        return "animate-pulse";
+      default:
+        return "animate-pulse-fast";
+    }
+  };
 
   // Fetch cracks based on current filters and pagination
   const fetchCracks = async () => {
@@ -111,16 +136,30 @@ const CrackManagement: React.FC = () => {
     setCurrentPage(1); // Reset to first page when filter changes
   };
 
+  const getNextStatus = (currentStatus: string): "pending" | "InProgress" | "resolved" => {
+    switch (currentStatus) {
+      case "pending":
+        return "InProgress";
+      case "InProgress":
+        return "resolved";
+      default:
+        return "pending";
+    }
+  };
+
   const handleStatusUpdate = async (
     crack: Crack,
-    newStatus: "pending" | "in_progress" | "resolved"
+    newStatus?: "pending" | "InProgress" | "resolved"
   ) => {
     try {
+      // If no newStatus provided, cycle to next status
+      const statusToSet = newStatus || getNextStatus(crack.status);
+      
       // Convert status from UI format to API format
       const apiStatus =
-        newStatus === "in_progress"
+        statusToSet === "InProgress"
           ? "InProgress"
-          : newStatus === "resolved"
+          : statusToSet === "resolved"
           ? "Resolved"
           : "Pending";
 
@@ -136,9 +175,9 @@ const CrackManagement: React.FC = () => {
       key: "index",
       title: "No",
       render: (_, index) => (
-        <span className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
-        </span>
+        </div>
       ),
       width: "60px",
     },
@@ -146,30 +185,30 @@ const CrackManagement: React.FC = () => {
       key: "id",
       title: "Crack ID",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.id}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.id.substring(0, 8)}...</div>
       ),
     },
     {
       key: "reportDescription",
       title: "Report Description",
       render: (item) => (
-        <span className="text-sm font-medium text-gray-900">
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
           {item.reportDescription}
-        </span>
+        </div>
       ),
     },
     {
       key: "residentName",
       title: "Reported By",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.residentName}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.residentName}</div>
       ),
     },
     {
       key: "createdDate",
       title: "Created Date",
       render: (item) => (
-        <span className="text-sm text-gray-500">{item.createdDate}</span>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
       ),
     },
     {
@@ -177,17 +216,33 @@ const CrackManagement: React.FC = () => {
       title: "Status",
       render: (item) => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+          className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${
             item.status === "resolved"
               ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
-              : item.status === "in_progress"
+              : item.status === "InProgress"
               ? "bg-[rgba(255,165,0,0.3)] text-[#ff9900] border border-[#ffa500]"
               : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
           }`}
         >
+          <span className="relative mr-1.5">
+            <span className={`inline-block w-2 h-2 rounded-full ${
+              item.status === "resolved"
+                ? "bg-[#00ff90]"
+                : item.status === "InProgress"
+                ? "bg-[#ff9900]"
+                : "bg-[#ff0000]"
+            } ${getStatusAnimationClass(item.status)}`}></span>
+            {item.status !== "resolved" && (
+              <span className={`absolute -inset-1 rounded-full ${
+                item.status === "InProgress"
+                  ? "bg-[#ff9900]"
+                  : "bg-[#ff0000]"
+              } opacity-30 animate-ping`}></span>
+            )}
+          </span>
           {item.status === "resolved"
             ? "Resolved"
-            : item.status === "in_progress"
+            : item.status === "InProgress"
             ? "In Progress"
             : "Pending"}
         </span>
@@ -199,16 +254,7 @@ const CrackManagement: React.FC = () => {
       render: (item) => (
         <DropdownMenu
           onViewDetail={() => navigate(`/crack/detail/${item.id}`)}
-          onChangeStatus={() => {
-            // Logic to show status change options
-            const newStatus =
-              item.status === "pending"
-                ? "in_progress"
-                : item.status === "in_progress"
-                ? "resolved"
-                : "pending";
-            handleStatusUpdate(item, newStatus);
-          }}
+          onChangeStatus={() => handleStatusUpdate(item)}
           onRemove={() => console.log("Remove", item)}
         />
       ),
@@ -233,13 +279,33 @@ const CrackManagement: React.FC = () => {
               onSelect={handleSeverityChange}
               buttonClassName="w-[160px]"
               selectedValue={selectedSeverity}
-              label="Mức độ"
+              label="Severity"
             />
           </div>
         </div>
 
-        <div className="flex justify-end items-center">
-          <div className="text-sm text-gray-600">
+        <div className="flex justify-between items-center">
+          <div className="flex space-x-4">
+            <div className="flex items-center">
+              <span className="relative mr-1.5">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#ff0000] animate-pulse-fast"></span>
+                <span className="absolute -inset-1 rounded-full bg-[#ff0000] opacity-30 animate-ping"></span>
+              </span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">Pending</span>
+            </div>
+            <div className="flex items-center">
+              <span className="relative mr-1.5">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#ff9900] animate-pulse"></span>
+                <span className="absolute -inset-1 rounded-full bg-[#ff9900] opacity-30 animate-ping"></span>
+              </span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">In Progress</span>
+            </div>
+            <div className="flex items-center">
+              <span className="inline-block w-2 h-2 rounded-full bg-[#00ff90] mr-1.5"></span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">Resolved</span>
+            </div>
+          </div>
+          <div className="text-sm text-gray-600 dark:text-gray-300">
             Total Cracks: {totalItems}
           </div>
         </div>
