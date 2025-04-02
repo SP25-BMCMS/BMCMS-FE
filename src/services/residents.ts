@@ -4,6 +4,9 @@ import { Residents, ResidentsApiResponse } from '@/types';
 const API_SECRET = import.meta.env.VITE_API_SECRET;
 const RESIDENTS_LIST_API = import.meta.env.VITE_VIEW_RESIDENTS_LIST;
 const STATUS_RESIDENT_API = import.meta.env.VITE_STATUS_RESIDENT;
+const RESIDENT_APARTMENT_API = import.meta.env.VITE_VIEW_RESIDENT_APRTMENT;
+const ADD_APARTMENT_API = import.meta.env.VITE_ADD_APARTMENT;
+const BUILDING_DETAILS_API = import.meta.env.VITE_VIEW_ALL_BUIDLINGS_DETAIL;
 
 export const getAllResidents = async (params?: { 
   search?: string; 
@@ -76,8 +79,12 @@ export const getAllResidents = async (params?: {
 
 export const getResidentApartments = async (residentId: string) => {
   try {
-    const RESIDENT_APARTMENT_API = import.meta.env.VITE_VIEW_RESIDENT_APRTMENT.replace('{id}', residentId);
-    const response = await axios.get(`${API_SECRET}${RESIDENT_APARTMENT_API}`);
+    const url = `${API_SECRET}${RESIDENT_APARTMENT_API.replace('{id}', residentId)}`;
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('bmcms_token')}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching resident apartments:', error);
@@ -100,6 +107,36 @@ export const updateResidentStatus = async (residentId: string, newStatus: 'Activ
     return response.data;
   } catch (error) {
     console.error('Error updating resident status:', error);
+    throw error;
+  }
+};
+export const getAllBuildingDetails = async () => {
+  try {
+    const url = `${API_SECRET}${BUILDING_DETAILS_API}`;
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('bmcms_token')}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching building details:', error);
+    throw error;
+  }
+};
+export const addApartmentForResident = async (residentId: string, apartmentData: { apartments: Array<{ apartmentName: string; buildingDetailId: string }> }) => {
+  try {
+    const url = `${API_SECRET}${ADD_APARTMENT_API.replace('{residentId}', residentId)}`;
+    const token = localStorage.getItem('bmcms_token');
+    const response = await axios.patch(url, apartmentData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding apartment for resident:', error);
     throw error;
   }
 };

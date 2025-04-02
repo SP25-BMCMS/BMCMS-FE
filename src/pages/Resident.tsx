@@ -15,6 +15,7 @@ import { FiUserPlus } from "react-icons/fi";
 import { getAllResidents, updateResidentStatus } from "@/services/residents";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
+import ViewDetailResident from "@/components/Residents/ViewDetailResident";
 
 const Resident: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -23,6 +24,8 @@ const Resident: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState<boolean>(false);
   const [residentToChangeStatus, setResidentToChangeStatus] = useState<Residents | null>(null);
+  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
+  const [selectedResident, setSelectedResident] = useState<Residents | null>(null);
   
   // Phân trang
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -30,6 +33,11 @@ const Resident: React.FC = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+
+  const handleViewDetail = (resident: Residents) => {
+    setSelectedResident(resident);
+    setIsViewDetailOpen(true);
+  };
 
   // Fetch residents data
   const fetchResidents = async () => {
@@ -244,7 +252,7 @@ const Resident: React.FC = () => {
       title: "Action",
       render: (item) => (
         <DropdownMenu
-          onViewDetail={() => console.log("View detail clicked")}
+          onViewDetail={() => handleViewDetail(item)}
           onChangeStatus={() => openStatusChangeModal(item)}
           onRemove={() => openRemoveModal(item)}
         />
@@ -351,6 +359,11 @@ const Resident: React.FC = () => {
         onConfirm={removeResident}
         isLoading={isRemoving}
         resident={residentToRemove}
+      />
+      <ViewDetailResident
+        isOpen={isViewDetailOpen}
+        onClose={() => setIsViewDetailOpen(false)}
+        resident={selectedResident}
       />
     </div>
   );
