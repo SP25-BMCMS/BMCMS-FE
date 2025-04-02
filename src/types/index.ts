@@ -183,7 +183,7 @@ export type Crack = {
   id: string;
   reportDescription: string;
   createdDate: string;
-  status: 'pending' | 'in_progress' | 'resolved';
+  status: 'pending' | 'InProgress' | 'resolved';
   residentId: string;
   residentName?: string;
   location?: string;

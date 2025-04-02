@@ -19,7 +19,7 @@ export const mockCracks: Crack[] = [
       id: "CRK002",
       reportDescription: "Ceiling crack with water leakage in bathroom",
       createdDate: "22/01/2025",
-      status: "in_progress",
+      status: "InProgress",
       residentId: "123111",
       residentName: "Duong Quang Huy",
       location: "VinHomes s104.8xxx",
