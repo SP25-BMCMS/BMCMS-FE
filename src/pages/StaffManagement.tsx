@@ -11,11 +11,14 @@ import AddStaff from "@/components/Staff/AddStaff/AddStaff";
 import { useAddStaff } from "@/components/Staff/AddStaff/use-add-staff";
 import { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
+import DepartmentPositionModal from "@/components/Staff/DepartmentPositionModal";
 
 const StaffManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false);
 
   const { isModalOpen, isLoading, openModal, closeModal, addNewStaff } = useAddStaff({
     onAddSuccess: () => {
@@ -52,6 +55,11 @@ const StaffManagement: React.FC = () => {
   useEffect(() => {
     fetchStaffData();
   }, []);
+
+  const handleOpenDeptPosModal = (staff: Staff) => {
+    setSelectedStaff(staff);
+    setIsDeptPosModalOpen(true);
+  };
 
   const columns: Column<Staff>[] = [
     {
@@ -143,8 +151,9 @@ const StaffManagement: React.FC = () => {
       render: (item) => (
         <DropdownMenu
           onViewDetail={() => console.log("View detail clicked")}
-          onChangeStatus={() => console.log("Change Status", item)}
+          onChangeStatus={() => handleOpenDeptPosModal(item)}
           onRemove={() => console.log("Remove clicked", item)}
+          changeStatusTitle="Change Department"
         />
       ),
       width: "80px",
@@ -217,6 +226,15 @@ const StaffManagement: React.FC = () => {
         onAdd={addNewStaff}
         isLoading={isLoading}
       />
+      {isDeptPosModalOpen && selectedStaff && (
+        <DepartmentPositionModal
+          isOpen={isDeptPosModalOpen}
+          onClose={() => setIsDeptPosModalOpen(false)}
+          staffId={selectedStaff.id}
+          staffName={selectedStaff.name}
+          onSaveSuccess={fetchStaffData}
+        />
+      )}
     </div>
   );
 };
