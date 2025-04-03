@@ -50,7 +50,7 @@ export const getAllResidents = async (params?: {
     // Xử lý response
     if (response.data && response.data.data) {
       // Chuyển đổi dữ liệu từ API sang định dạng hiển thị
-      const formattedResidents = response.data.data.map(resident => ({
+      const formattedResidents = response.data.data.map((resident: any) => ({
         ...resident,
         id: resident.userId,
         name: resident.username,
@@ -127,8 +127,10 @@ export const getAllBuildingDetails = async () => {
 export const addApartmentForResident = async (residentId: string, apartmentData: { apartments: Array<{ apartmentName: string; buildingDetailId: string }> }) => {
   try {
     const url = `${API_SECRET}${ADD_APARTMENT_API.replace('{residentId}', residentId)}`;
+    console.log('API URL for adding apartment:', url);
+    console.log('Request body:', JSON.stringify(apartmentData));
     const token = localStorage.getItem('bmcms_token');
-    const response = await axios.patch(url, apartmentData, {
+    const response = await axios.post(url, apartmentData, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`

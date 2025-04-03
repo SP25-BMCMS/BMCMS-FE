@@ -13,6 +13,8 @@ import { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import DepartmentPositionModal from "@/components/Staff/DepartmentPositionModal";
 import ViewDetailStaff from '@/components/Staff/ViewDetailStaff';
+import FilterDropdown from "@/components/FilterDropdown";
+import Pagination from "@/components/Pagination";
 
 const StaffManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -21,6 +23,11 @@ const StaffManagement: React.FC = () => {
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false);
   const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
+  const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   const { isModalOpen, isLoading, openModal, closeModal, addNewStaff } = useAddStaff({
     onAddSuccess: () => {
@@ -32,7 +39,11 @@ const StaffManagement: React.FC = () => {
   const fetchStaffData = async () => {
     try {
       setLoading(true);
-      const response = await getAllStaff();
+      const response = await getAllStaff({
+        search: searchTerm,
+        role: selectedRole !== "all" ? selectedRole : undefined
+      });
+      
       if (response.isSuccess) {
         // Chuyển đổi dữ liệu API sang định dạng Staff
         const formattedStaff: Staff[] = response.data.map((staff: StaffData) => ({
@@ -45,7 +56,10 @@ const StaffManagement: React.FC = () => {
           gender: staff.gender,
           createdDate: new Date().toLocaleDateString(), // Tạo ngày hiện tại cho createdDate
         }));
+        
         setStaffList(formattedStaff);
+        setTotalItems(response.pagination?.total || formattedStaff.length);
+        setTotalPages(response.pagination?.totalPages || 1);
       }
     } catch (error) {
       console.error("Failed to fetch staff data:", error);
@@ -54,9 +68,23 @@ const StaffManagement: React.FC = () => {
     }
   };
 
+  // Initial data load
   useEffect(() => {
     fetchStaffData();
-  }, []);
+  }, [selectedRole, currentPage, itemsPerPage]);
+
+  // Handle search with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentPage === 1) {
+        fetchStaffData();
+      } else {
+        setCurrentPage(1);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const handleViewDetail = (staff: Staff) => {
     setSelectedStaff(staff);
@@ -68,12 +96,22 @@ const StaffManagement: React.FC = () => {
     setIsDeptPosModalOpen(true);
   };
 
+  // Role filter options
+  const roleFilterOptions = [
+    { value: "all", label: "All Roles" },
+    { value: "Admin", label: "Admin" },
+    { value: "Manager", label: "Manager" },
+    { value: "Staff", label: "Staff" },
+  ];
+
   const columns: Column<Staff>[] = [
     {
       key: "index",
       title: "No",
       render: (_, index) => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {(currentPage - 1) * itemsPerPage + index + 1}
+        </div>
       ),
       width: "60px",
     },
@@ -167,12 +205,6 @@ const StaffManagement: React.FC = () => {
     },
   ];
 
-  // Lọc danh sách nhân viên dựa trên từ khóa tìm kiếm
-  const filteredStaff = staffList.filter((staff) =>
-    staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    staff.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   // Loading animation
   const loadingVariants = {
     rotate: 360,
@@ -197,34 +229,58 @@ const StaffManagement: React.FC = () => {
     <div className="w-full mt-[60px]">
       <Toaster position="top-right" />
       
-      <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
-        <SearchInput
-          placeholder="Tìm kiếm theo tên hoặc ID"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-[20rem] max-w-xs"
-        />
+      <div className="flex flex-col gap-4 mb-4 ml-[90px] mr-[132px]">
+        <div className="flex justify-between items-center">
+          <SearchInput
+            placeholder="Search by username, email or phone"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-[30rem] max-w-xs"
+          />
 
-        <AddButton
-          label="Add Staff"
-          icon={<FiUserPlus />}
-          onClick={openModal}
-        />
+          <div className="flex gap-4">
+            <FilterDropdown
+              options={roleFilterOptions}
+              selectedValue={selectedRole}
+              onSelect={setSelectedRole}
+              label="Filter by Role"
+            />
+            
+            <AddButton
+              label="Add Staff"
+              icon={<FiUserPlus />}
+              onClick={openModal}
+            />
+          </div>
+        </div>
       </div>
 
-      {loading ? (
+      {loading && staffList.length === 0 ? (
         <LoadingIndicator />
       ) : (
         <Table<Staff>
-          data={filteredStaff}
+          data={staffList}
           columns={columns}
           keyExtractor={(item) => item.id}
           onRowClick={(item) => console.log("Row clicked:", item)}
           className="w-[95%] mx-auto"
           tableClassName="w-full"
-          emptyText="Không tìm thấy dữ liệu nhân viên"
+          emptyText="No staff data found"
+          isLoading={loading}
         />
       )}
+
+      {/* Pagination */}
+      <div className="w-[95%] mx-auto">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+          onLimitChange={setItemsPerPage}
+        />
+      </div>
 
       {/* Component thêm nhân viên */}
       <AddStaff
