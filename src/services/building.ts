@@ -19,6 +19,49 @@ export interface BuildingListResponse {
   };
 }
 
+export interface BuildingDetailResponse {
+  statusCode: number;
+  message: string;
+  data: {
+    buildingDetailId: string;
+    buildingId: string;
+    name: string;
+    total_apartments: number;
+    createdAt: string;
+    updatedAt: string;
+    building: BuildingResponse & {
+      area: {
+        areaId: string;
+        name: string;
+        description: string;
+        createdAt: string;
+        updatedAt: string;
+      }
+    }
+  }
+}
+
+export interface AllBuildingDetailsResponse {
+  statusCode: number;
+  message: string;
+  data: Array<{
+    buildingDetailId: string;
+    buildingId: string;
+    name: string;
+    total_apartments: number;
+    createdAt: string;
+    updatedAt: string;
+    building: BuildingResponse;
+    locationDetails?: Array<any>;
+  }>;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 // Hàm lấy danh sách tòa nhà với pagination và search
 export const getBuildings = async (params: BuildingListParams = {}): Promise<BuildingListResponse> => {
   try {
@@ -52,6 +95,30 @@ export const deleteBuilding = async (buildingId: string): Promise<void> => {
     await apiInstance.delete(url);
   } catch (error) {
     console.error('Error deleting building:', error);
+    throw error;
+  }
+};
+
+export const getBuildingDetail = async (buildingDetailId: string): Promise<BuildingDetailResponse> => {
+  try {
+    const url = import.meta.env.VITE_VIEW_BUILDING_DETAIL.replace('{id}', buildingDetailId);
+    console.log(`Fetching building detail with URL: ${url}, buildingDetailId: ${buildingDetailId}`);
+    const response = await apiInstance.get<BuildingDetailResponse>(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching building detail:', error);
+    throw error;
+  }
+};
+
+export const getAllBuildingDetails = async (): Promise<AllBuildingDetailsResponse> => {
+  try {
+    const response = await apiInstance.get<AllBuildingDetailsResponse>(
+      import.meta.env.VITE_VIEW_ALL_BUIDLINGS_DETAIL
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all building details:', error);
     throw error;
   }
 };

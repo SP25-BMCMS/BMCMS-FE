@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Table, { Column } from "@/components/Table";
 import { BuildingResponse, Area } from "@/types";
-import { getBuildings, deleteBuilding } from "@/services/building";
+import { getBuildings, deleteBuilding, getAllBuildingDetails } from "@/services/building";
 import { getAreaList } from "@/services/areas";
 import { PiMapPinAreaBold } from "react-icons/pi";
 import { FaRegBuilding } from "react-icons/fa";
 import AddBuildingModal from "@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal";
 import RemoveBuilding from "@/components/BuildingManager/buildings/DeleteBuilding/RemoveBuilding";
+import ViewBuildingDetail from "@/components/BuildingManager/buildings/ViewBuildingDetail";
 import DropdownMenu from "@/components/DropDownMenu";
 import SearchInput from "@/components/SearchInput";
 import FilterDropdown from "@/components/FilterDropdown";
@@ -28,6 +29,9 @@ const Building: React.FC = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [isViewDetailOpen, setIsViewDetailOpen] = useState(false);
+  const [selectedBuildingDetail, setSelectedBuildingDetail] = useState<string | null>(null);
+  const [buildingDetailOptions, setBuildingDetailOptions] = useState<any[]>([]);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -115,6 +119,102 @@ const Building: React.FC = () => {
     { value: "under_construction", label: "Under Construction" },
   ];
 
+  const handleViewDetail = (building: BuildingResponse) => {
+    // Don't allow viewing details for buildings under construction
+    if (building.Status === "under_construction") {
+      toast.error("Không thể xem chi tiết của tòa nhà đang trong quá trình xây dựng");
+      return;
+    }
+    
+    // Đóng modal trước khi fetch dữ liệu mới để tránh hiển thị dữ liệu cũ
+    if (isViewDetailOpen) {
+      setIsViewDetailOpen(false);
+      // Set timeout để đảm bảo modal đã đóng trước khi mở lại
+      setTimeout(() => {
+        fetchBuildingDetailId(building.buildingId).then(() => {
+          setIsViewDetailOpen(true);
+        });
+      }, 300); // 300ms là đủ để modal đóng hoàn toàn
+    } else {
+      fetchBuildingDetailId(building.buildingId).then(() => {
+        setIsViewDetailOpen(true);
+      });
+    }
+  };
+  
+  // Hiển thị thông tin các building details có cùng buildingId
+  const logBuildingDetailOptions = (details: any[]) => {
+    if (details.length <= 1) return;
+    
+    console.group(`Danh sách các chi tiết tòa nhà (tổng ${details.length} chi tiết):`);
+    details.forEach((detail, index) => {
+      console.log(`${index + 1}. ID: ${detail.buildingDetailId}, Tên: ${detail.name}, Số căn hộ: ${detail.total_apartments}`);
+    });
+    console.groupEnd();
+  };
+
+  // Fetch building detail ID for the selected building
+  const fetchBuildingDetailId = async (buildingId: string) => {
+    setIsLoading(true);
+    // Reset selectedBuildingDetail để tránh hiển thị dữ liệu cũ
+    setSelectedBuildingDetail(null);
+    // Reset buildingDetailOptions
+    setBuildingDetailOptions([]);
+    
+    try {
+      // Sử dụng service để lấy tất cả building details
+      const result = await getAllBuildingDetails();
+      
+      if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+        // Lọc building details theo buildingId
+        const matchingDetails = result.data.filter(detail => detail.buildingId === buildingId);
+        
+        if (matchingDetails.length > 0) {
+          // Lưu tất cả các tùy chọn để có thể chọn sau này nếu cần
+          setBuildingDetailOptions(matchingDetails);
+          
+          // Chỉ lấy detail đầu tiên tìm thấy để tránh trùng lặp
+          const firstDetail = matchingDetails[0];
+          setSelectedBuildingDetail(firstDetail.buildingDetailId);
+          console.log(`Tìm thấy buildingDetailId: ${firstDetail.buildingDetailId} cho tòa nhà có ID: ${buildingId}`);
+          
+          // Log danh sách các chi tiết nếu có nhiều hơn 1
+          if (matchingDetails.length > 1) {
+            console.log(`Lưu ý: Có ${matchingDetails.length} chi tiết cho tòa nhà này, đang sử dụng chi tiết đầu tiên.`);
+            logBuildingDetailOptions(matchingDetails);
+          }
+        } else {
+          toast.error('Không tìm thấy chi tiết cho tòa nhà này');
+          console.error(`Không tìm thấy chi tiết nào cho tòa nhà có ID: ${buildingId}`);
+        }
+      } else {
+        toast.error('Không thể tải danh sách chi tiết tòa nhà');
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải thông tin chi tiết tòa nhà:", error);
+      toast.error("Lỗi khi tải thông tin chi tiết tòa nhà");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle closing the view detail modal
+  const handleCloseViewDetail = () => {
+    setIsViewDetailOpen(false);
+    // Đặt selectedBuildingDetail về null sau khi đóng modal
+    // để tránh hiển thị dữ liệu cũ khi mở modal cho tòa nhà khác
+    setTimeout(() => {
+      setSelectedBuildingDetail(null);
+    }, 300);
+  };
+
+  // Handle changing building detail
+  const handleChangeDetail = (buildingDetailId: string) => {
+    if (buildingDetailId !== selectedBuildingDetail) {
+      setSelectedBuildingDetail(buildingDetailId);
+    }
+  };
+
   const columns: Column<BuildingResponse>[] = [
     {
       key: "index",
@@ -183,9 +283,10 @@ const Building: React.FC = () => {
       title: "Action",
       render: (item) => (
         <DropdownMenu
-          onViewDetail={() => console.log("View detail clicked")}
+          onViewDetail={() => handleViewDetail(item)}
           onChangeStatus={() => console.log("Change Status", item)}
           onRemove={() => handleRemoveBuilding(item)}
+          viewDetailDisabled={item.Status === "under_construction"}
         />
       ),
       width: "80px",
@@ -292,6 +393,15 @@ const Building: React.FC = () => {
         onConfirm={confirmRemoveBuilding}
         isLoading={isDeleting}
         building={selectedBuilding}
+      />
+
+      {/* View Detail Modal */}
+      <ViewBuildingDetail
+        isOpen={isViewDetailOpen}
+        onClose={handleCloseViewDetail}
+        buildingDetailId={selectedBuildingDetail}
+        buildingDetailOptions={buildingDetailOptions}
+        onChangeDetail={handleChangeDetail}
       />
     </div>
   );

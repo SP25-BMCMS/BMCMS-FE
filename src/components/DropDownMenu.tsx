@@ -6,6 +6,7 @@ interface DropdownMenuProps {
   onChangeStatus: () => void;
   onRemove: () => void;
   changeStatusTitle?: string;
+  viewDetailDisabled?: boolean;
 }
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({
@@ -13,6 +14,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
   onChangeStatus,
   onRemove,
   changeStatusTitle = "Change Status",
+  viewDetailDisabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -28,6 +30,13 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleViewDetail = () => {
+    if (!viewDetailDisabled) {
+      onViewDetail();
+      setIsOpen(false);
+    }
+  };
 
   return (
     <div className="relative" ref={menuRef}>
@@ -45,19 +54,33 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
       {isOpen && (
         <div className="fixed right-0 mt-2 w-44 bg-white border border-gray-300 shadow-lg rounded-md z-50 mr-[3.5rem]">
           <button
-            onClick={onViewDetail}
-            className="flex items-center w-full px-4 py-2 text-blue-700 hover:bg-gray-100"
+            onClick={handleViewDetail}
+            className={`flex items-center w-full px-4 py-2 ${
+              viewDetailDisabled 
+                ? 'text-gray-400 cursor-not-allowed' 
+                : 'text-blue-700 hover:bg-gray-100'
+            }`}
+            disabled={viewDetailDisabled}
+            title={viewDetailDisabled ? "Không khả dụng với tòa nhà đang xây dựng" : "Xem chi tiết"}
           >
-            <RiEyeLine className="mr-2" /> View Detail
+            <RiEyeLine className="mr-2" /> 
+            View Detail
+            {viewDetailDisabled && <span className="ml-1 text-xs">(Không khả dụng)</span>}
           </button>
           <button
-            onClick={onChangeStatus}
+            onClick={() => {
+              onChangeStatus();
+              setIsOpen(false);
+            }}
             className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
           >
             <RiFilterLine className="mr-2" /> {changeStatusTitle}
           </button>
           <button
-            onClick={onRemove}
+            onClick={() => {
+              onRemove();
+              setIsOpen(false);
+            }}
             className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100"
           >
             <RiDeleteBinLine className="mr-2" /> Remove
