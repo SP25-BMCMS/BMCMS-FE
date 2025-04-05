@@ -71,14 +71,6 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
         } else {
           console.error("Unexpected department API response format:", departmentsResponse.data);
           toast.error('Department data is not in the correct format');
-          
-          // Fallback to mock data if API fails
-          const mockDepartments: Department[] = [
-            { departmentId: "2a2ae0a4-067a-4faf-be79-a2c9d4518fea", departmentName: "Technical Department" },
-            { departmentId: "3b3bf1b5-178b-5gbg-cf80-b3d0d5629gfb", departmentName: "Administrative Department" },
-            { departmentId: "4c4cg2c6-289c-6hch-dg91-c4e1e6730hgc", departmentName: "Business Department" },
-          ];
-          setDepartments(mockDepartments);
         }
 
         // Call API to get position list from VITE_VIEW_POSITION_LIST

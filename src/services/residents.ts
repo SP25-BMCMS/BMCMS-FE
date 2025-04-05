@@ -130,7 +130,7 @@ export const addApartmentForResident = async (residentId: string, apartmentData:
     console.log('API URL for adding apartment:', url);
     console.log('Request body:', JSON.stringify(apartmentData));
     const token = localStorage.getItem('bmcms_token');
-    const response = await axios.post(url, apartmentData, {
+    const response = await axios.patch(url, apartmentData, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
