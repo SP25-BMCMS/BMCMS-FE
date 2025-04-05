@@ -1,50 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import Table, { Column } from '@/components/Table';
-import DropdownMenu from '@/components/DropDownMenu';
-import SearchInput from '@/components/SearchInput';
-import FilterDropdown from '@/components/FilterDropdown';
-import AddButton from '@/components/AddButton';
-import { MdOutlineAddTask } from "react-icons/md";
-import { motion } from "framer-motion";
-import tasksApi from '@/services/tasks';
-import { TaskResponse } from '@/types';
-import Pagination from '@/components/Pagination';
+import React, { useState, useEffect, useCallback } from 'react'
+import Table, { Column } from '@/components/Table'
+import DropdownMenu from '@/components/DropDownMenu'
+import SearchInput from '@/components/SearchInput'
+import FilterDropdown from '@/components/FilterDropdown'
+import AddButton from '@/components/AddButton'
+import { MdOutlineAddTask } from "react-icons/md"
+import { motion } from "framer-motion"
+import tasksApi from '@/services/tasks'
+import { TaskResponse } from '@/types'
+import Pagination from '@/components/Pagination'
 
 // Define the Task type (using your provided interface)
 
 const TaskManagement: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [tasks, setTasks] = useState<TaskResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  
-  // Fetch tasks data
-  useEffect(() => {
-    const fetchTasks = async () => {
-      setIsLoading(true);
-      try {
-        const response = await tasksApi.getTasks({
-          page: currentPage,
-          limit: itemsPerPage,
-          search: searchTerm || undefined,
-        });
-        
-        setTasks(response.data);
-        setTotalPages(response.pagination.totalPages);
-        setTotalItems(response.pagination.total);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-        setIsLoading(false);
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [tasks, setTasks] = useState<TaskResponse[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+
+  // Sử dụng useCallback để tránh tạo lại hàm mỗi khi component render
+  const fetchTasks = useCallback(async (shouldSetLoading = true) => {
+    if (shouldSetLoading) {
+      setIsLoading(true)
+    }
+
+    try {
+      const params: Record<string, string | number | undefined> = {
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchTerm || undefined,
+        ...(selectedStatus !== 'all' && { status: selectedStatus }),
       }
-    };
-    
-    fetchTasks();
-  }, [currentPage, itemsPerPage, searchTerm]);
-  
+
+      const response = await tasksApi.getTasks(params)
+
+      setTasks(response.data)
+      setTotalPages(response.pagination.totalPages)
+      setTotalItems(response.pagination.total)
+    } catch (error) {
+      console.error('Error fetching tasks:', error)
+    } finally {
+      if (shouldSetLoading) {
+        setIsLoading(false)
+      }
+    }
+  }, [currentPage, itemsPerPage, searchTerm, selectedStatus])
+
+  // Chỉ fetch dữ liệu một lần khi component mount và khi các dependencies thay đổi
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchTasks(true)
+    }, searchTerm ? 500 : 0)
+
+    return () => clearTimeout(timer)
+  }, [fetchTasks, currentPage, itemsPerPage, selectedStatus, searchTerm])
+
   // Loading animation
   const loadingVariants = {
     rotate: 360,
@@ -53,7 +67,7 @@ const TaskManagement: React.FC = () => {
       repeat: Infinity,
       ease: "linear"
     }
-  };
+  }
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -63,29 +77,43 @@ const TaskManagement: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading tasks data...</p>
     </div>
-  );
+  )
 
   const filterOptions = [
     { value: 'all', label: 'All' },
     { value: 'Assigned', label: 'Assigned' },
     { value: 'In Progress', label: 'In Progress' },
     { value: 'Completed', label: 'Completed' },
-  ];
-  
+  ]
+
   const handleFilterChange = (value: string) => {
     // Reset to first page when changing filters
-    setCurrentPage(1);
-    // TODO: Implement filter by status if needed
-  };
+    setSelectedStatus(value)
+    setCurrentPage(1)
+  }
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+    setCurrentPage(page)
+  }
 
   const handleLimitChange = (limit: number) => {
-    setItemsPerPage(limit);
-    setCurrentPage(1); // Reset to first page when changing limit
-  };
+    setItemsPerPage(limit)
+    setCurrentPage(1) // Reset to first page when changing limit
+  }
+
+  // Optimistic update for task changes
+  const handleTaskUpdateSuccess = (taskId: string, updatedData: Partial<TaskResponse>) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.task_id === taskId
+          ? { ...task, ...updatedData }
+          : task
+      )
+    )
+
+    // Fetch fresh data in the background without showing loading state
+    fetchTasks(false)
+  }
 
   const columns: Column<TaskResponse>[] = [
     {
@@ -118,13 +146,12 @@ const TaskManagement: React.FC = () => {
       key: 'status',
       title: 'Status',
       render: (item) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-          item.status === 'Completed' 
-            ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]' 
-            : item.status === 'In Progress'
-              ? 'bg-[rgba(255,193,7,0.3)] text-[#ffc107] border border-[#ffc107]'
-              : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
-        }`}>
+        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.status === 'Completed'
+          ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
+          : item.status === 'In Progress'
+            ? 'bg-[rgba(255,193,7,0.3)] text-[#ffc107] border border-[#ffc107]'
+            : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+          }`}>
           {item.status}
         </span>
       )
@@ -133,42 +160,48 @@ const TaskManagement: React.FC = () => {
       key: 'action',
       title: 'Action',
       render: (item) => (
-        <DropdownMenu 
+        <DropdownMenu
           onViewDetail={() => console.log('View detail clicked', item)}
-          onChangeStatus={() => console.log("Change Status", item)}
+          onChangeStatus={() => {
+            // Optimistic update example
+            const newStatus = item.status === 'Assigned' ? 'In Progress' :
+              item.status === 'In Progress' ? 'Completed' : 'Assigned'
+            handleTaskUpdateSuccess(item.task_id, { status: newStatus })
+          }}
           onRemove={() => console.log("Remove", item)}
         />
       ),
       width: '80px',
     }
-  ];
+  ]
 
   return (
     <div className="w-full mt-[60px]">
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
-        <SearchInput 
+        <SearchInput
           placeholder="Search by ID"
           value={searchTerm}
           onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset to first page when searching
+            setSearchTerm(e.target.value)
+            setCurrentPage(1) // Reset to first page when searching
           }}
           className="w-[20rem] max-w-xs"
         />
-        
-        <FilterDropdown 
+
+        <FilterDropdown
           options={filterOptions}
           onSelect={handleFilterChange}
+          selectedValue={selectedStatus}
         />
-        
-        <AddButton 
+
+        <AddButton
           label="Add Task"
           icon={<MdOutlineAddTask />}
           className='w-[154px]'
           onClick={() => console.log('Add Task clicked')}
         />
       </div>
-      
+
       {isLoading ? (
         <LoadingIndicator />
       ) : (
@@ -181,8 +214,8 @@ const TaskManagement: React.FC = () => {
             className="w-[95%] mx-auto"
             tableClassName="w-full"
           />
-          
-          <Pagination 
+
+          <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
@@ -194,7 +227,7 @@ const TaskManagement: React.FC = () => {
         </>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default TaskManagement;
+export default TaskManagement

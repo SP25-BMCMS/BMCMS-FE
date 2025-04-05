@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Table, { Column } from "@/components/Table";
-import DropdownMenu from "@/components/DropDownMenu";
-import SearchInput from "@/components/SearchInput";
-import FilterDropdown from "@/components/FilterDropdown";
-import Pagination from "@/components/Pagination";
-import { CrackReportResponse, Crack } from "@/types";
-import crackApi from "@/services/cracks";
-import StatusCrack from "@/components/crackManager/StatusCrack";
+import React, { useState, useEffect, useCallback } from "react"
+import { useNavigate } from "react-router-dom"
+import Table, { Column } from "@/components/Table"
+import DropdownMenu from "@/components/DropDownMenu"
+import SearchInput from "@/components/SearchInput"
+import FilterDropdown from "@/components/FilterDropdown"
+import Pagination from "@/components/Pagination"
+import { CrackReportResponse, Crack } from "@/types"
+import crackApi from "@/services/cracks"
+import StatusCrack from "@/components/crackManager/StatusCrack"
 
 
 // Map API response to UI model
@@ -16,149 +16,132 @@ const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
     id: response.crackReportId,
     reportDescription: response.description,
     createdDate: new Date(response.createdAt).toLocaleDateString(),
-    status: response.status === "Pending" 
+    status: response.status === "Pending"
       ? "pending"
       : response.status === "InProgress"
-      ? "InProgress" 
-      : "resolved",
+        ? "InProgress"
+        : "resolved",
     residentId: typeof response.reportedBy === 'object' ? response.reportedBy.userId : response.reportedBy,
     residentName: typeof response.reportedBy === 'object' ? response.reportedBy.username : "Unknown",
     description: response.description,
     originalImage: response.crackDetails[0]?.photoUrl,
     aiDetectedImage: response.crackDetails[0]?.aiDetectionUrl,
-  };
-};
+  }
+}
 
 const CrackManagement: React.FC = () => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [cracks, setCracks] = useState<Crack[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [selectedSeverity, setSelectedSeverity] = useState<string>("all");
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [selectedCrack, setSelectedCrack] = useState<Crack | null>(null);
+  const navigate = useNavigate()
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [cracks, setCracks] = useState<Crack[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [totalItems, setTotalItems] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const [selectedStatus, setSelectedStatus] = useState<string>("all")
+  const [selectedSeverity, setSelectedSeverity] = useState<string>("all")
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+  const [selectedCrack, setSelectedCrack] = useState<Crack | null>(null)
 
   const severityOptions = [
     { value: "all", label: "All Severities" },
     { value: "Low", label: "Low" },
     { value: "Medium", label: "Medium" },
     { value: "High", label: "High" },
-  ];
-
-  // Loading animation
-  const loadingVariants = {
-    rotate: 360,
-    transition: {
-      duration: 1,
-      repeat: Infinity,
-      ease: "linear"
-    }
-  };
+  ]
 
   // Get status animation class
   const getStatusAnimationClass = (status: string) => {
     switch (status) {
       case "resolved":
-        return "";
+        return ""
       case "InProgress":
-        return "animate-pulse";
+        return "animate-pulse"
       default:
-        return "animate-pulse-fast";
+        return "animate-pulse-fast"
     }
-  };
+  }
 
   // Fetch cracks based on current filters and pagination
-  const fetchCracks = async () => {
-    setIsLoading(true);
+  const fetchCracks = useCallback(async (shouldSetLoading = true) => {
+    if (shouldSetLoading) {
+      setIsLoading(true)
+    }
+
     try {
-      const params: any = {
+      const params: Record<string, string | number> = {
         page: currentPage,
         limit: itemsPerPage,
-      };
-
-      // Add search param if provided
-      if (searchTerm) {
-        params.search = searchTerm;
+        search: searchTerm,
+        ...(selectedStatus !== "all" && { status: selectedStatus }),
+        ...(selectedSeverity !== "all" && { severityFilter: selectedSeverity })
       }
 
-      // Add status filter if not 'all'
-      if (selectedStatus !== "all") {
-        params.status = selectedStatus;
-      }
+      const response = await crackApi.getCrackList(params)
 
-      // Add severity filter if not 'all'
-      if (selectedSeverity !== "all") {
-        params.severityFilter = selectedSeverity;
-      }
+      const mappedCracks = response.data.map(mapCrackResponseToCrack)
 
-      const response = await crackApi.getCrackList(params);
-
-      // Map API response to our UI model
-      const mappedCracks = response.data.map(mapCrackResponseToCrack);
-
-      setCracks(mappedCracks);
-      setTotalItems(response.pagination.total);
-      setTotalPages(response.pagination.totalPages);
+      setCracks(mappedCracks)
+      setTotalItems(response.pagination.total)
+      setTotalPages(response.pagination.totalPages)
     } catch (error) {
-      console.error("Failed to fetch cracks:", error);
+      console.error("Failed to fetch cracks:", error)
     } finally {
-      setIsLoading(false);
+      if (shouldSetLoading) {
+        setIsLoading(false)
+      }
     }
-  };
+  }, [currentPage, itemsPerPage, searchTerm, selectedStatus, selectedSeverity])
 
-  // Fetch data when filters or pagination changes
-  useEffect(() => {
-    fetchCracks();
-  }, [currentPage, itemsPerPage, selectedStatus, selectedSeverity]);
-
-  // Handle search with debounce
+  // Combined effect for all data fetching scenarios
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (currentPage === 1) {
-        fetchCracks();
-      } else {
-        setCurrentPage(1); // This will trigger a fetch via the dependency array
-      }
-    }, 500);
+      fetchCracks(true)
+    }, searchTerm ? 500 : 0)
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    return () => clearTimeout(timer)
+  }, [fetchCracks, currentPage, itemsPerPage, selectedStatus, selectedSeverity, searchTerm])
 
   const handleStatusChange = (value: string) => {
-    setSelectedStatus(value);
-    setCurrentPage(1); // Reset to first page when filter changes
-  };
+    setSelectedStatus(value)
+    setCurrentPage(1) // Reset to first page when filter changes
+  }
 
   const handleSeverityChange = (value: string) => {
-    setSelectedSeverity(value);
-    setCurrentPage(1); // Reset to first page when filter changes
-  };
+    setSelectedSeverity(value)
+    setCurrentPage(1) // Reset to first page when filter changes
+  }
 
   const getNextStatus = (currentStatus: string): "pending" | "InProgress" | "resolved" => {
     switch (currentStatus) {
       case "pending":
-        return "InProgress";
+        return "InProgress"
       case "InProgress":
-        return "resolved";
+        return "resolved"
       default:
-        return "pending";
+        return "pending"
     }
-  };
+  }
 
   // Handle status update with staff assignment
-  const handleStatusUpdate = async (
-    crack: Crack,
-    newStatus?: "pending" | "InProgress" | "resolved"
-  ) => {
-    // Open the status modal instead of directly updating
-    setSelectedCrack(crack);
-    setIsStatusModalOpen(true);
-  };
+  const handleStatusUpdate = (crack: Crack) => {
+    setSelectedCrack(crack)
+    setIsStatusModalOpen(true)
+  }
+
+  // Optimistic update for status change
+  const handleStatusUpdateSuccess = (crackId: string, newStatus: string) => {
+    setCracks(prevCracks =>
+      prevCracks.map(crack =>
+        crack.id === crackId
+          ? { ...crack, status: newStatus as "pending" | "InProgress" | "resolved" }
+          : crack
+      )
+    )
+
+    // Fetch fresh data in the background without showing loading state
+    fetchCracks(false)
+  }
 
   const columns: Column<Crack>[] = [
     {
@@ -206,35 +189,32 @@ const CrackManagement: React.FC = () => {
       title: "Status",
       render: (item) => (
         <span
-          className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${
-            item.status === "resolved"
-              ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
-              : item.status === "InProgress"
+          className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${item.status === "resolved"
+            ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
+            : item.status === "InProgress"
               ? "bg-[rgba(255,165,0,0.3)] text-[#ff9900] border border-[#ffa500]"
               : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
-          }`}
+            }`}
         >
           <span className="relative mr-1.5">
-            <span className={`inline-block w-2 h-2 rounded-full ${
-              item.status === "resolved"
-                ? "bg-[#00ff90]"
-                : item.status === "InProgress"
+            <span className={`inline-block w-2 h-2 rounded-full ${item.status === "resolved"
+              ? "bg-[#00ff90]"
+              : item.status === "InProgress"
                 ? "bg-[#ff9900]"
                 : "bg-[#ff0000]"
-            } ${getStatusAnimationClass(item.status)}`}></span>
+              } ${getStatusAnimationClass(item.status)}`}></span>
             {item.status !== "resolved" && (
-              <span className={`absolute -inset-1 rounded-full ${
-                item.status === "InProgress"
-                  ? "bg-[#ff9900]"
-                  : "bg-[#ff0000]"
-              } opacity-30 animate-ping`}></span>
+              <span className={`absolute -inset-1 rounded-full ${item.status === "InProgress"
+                ? "bg-[#ff9900]"
+                : "bg-[#ff0000]"
+                } opacity-30 animate-ping`}></span>
             )}
           </span>
           {item.status === "resolved"
             ? "Resolved"
             : item.status === "InProgress"
-            ? "In Progress"
-            : "Pending"}
+              ? "In Progress"
+              : "Pending"}
         </span>
       ),
     },
@@ -250,7 +230,7 @@ const CrackManagement: React.FC = () => {
       ),
       width: "80px",
     },
-  ];
+  ]
 
   return (
     <div className="w-full mt-[60px]">
@@ -326,16 +306,21 @@ const CrackManagement: React.FC = () => {
 
       {/* Status Change Modal */}
       {selectedCrack && (
-        <StatusCrack 
+        <StatusCrack
           isOpen={isStatusModalOpen}
           onClose={() => setIsStatusModalOpen(false)}
           crackId={selectedCrack.id}
           crackStatus={selectedCrack.status}
-          onUpdateSuccess={fetchCracks}
+          onUpdateSuccess={() => {
+            if (selectedCrack) {
+              const newStatus = getNextStatus(selectedCrack.status)
+              handleStatusUpdateSuccess(selectedCrack.id, newStatus)
+            }
+          }}
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default CrackManagement;
+export default CrackManagement
