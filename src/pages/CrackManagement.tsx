@@ -8,6 +8,7 @@ import Pagination from "@/components/Pagination"
 import { CrackReportResponse, Crack } from "@/types"
 import crackApi from "@/services/cracks"
 import StatusCrack from "@/components/crackManager/StatusCrack"
+import { STATUS_COLORS } from "@/constants/colors"
 
 
 // Map API response to UI model
@@ -190,23 +191,23 @@ const CrackManagement: React.FC = () => {
       render: (item) => (
         <span
           className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${item.status === "resolved"
-            ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
+            ? `bg-[${STATUS_COLORS.RESOLVED.BG}] text-[${STATUS_COLORS.RESOLVED.TEXT}] border border-[${STATUS_COLORS.RESOLVED.BORDER}]`
             : item.status === "InProgress"
-              ? "bg-[rgba(255,165,0,0.3)] text-[#ff9900] border border-[#ffa500]"
-              : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
+              ? `bg-[${STATUS_COLORS.IN_PROGRESS.BG}] text-[${STATUS_COLORS.IN_PROGRESS.TEXT}] border border-[${STATUS_COLORS.IN_PROGRESS.BORDER}]`
+              : `bg-[${STATUS_COLORS.PENDING.BG}] text-[${STATUS_COLORS.PENDING.TEXT}] border border-[${STATUS_COLORS.PENDING.BORDER}]`
             }`}
         >
-          <span className="relative mr-1.5">
+          <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
             <span className={`inline-block w-2 h-2 rounded-full ${item.status === "resolved"
-              ? "bg-[#00ff90]"
+              ? `bg-[${STATUS_COLORS.RESOLVED.TEXT}]`
               : item.status === "InProgress"
-                ? "bg-[#ff9900]"
-                : "bg-[#ff0000]"
+                ? `bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`
+                : `bg-[${STATUS_COLORS.PENDING.TEXT}]`
               } ${getStatusAnimationClass(item.status)}`}></span>
             {item.status !== "resolved" && (
-              <span className={`absolute -inset-1 rounded-full ${item.status === "InProgress"
-                ? "bg-[#ff9900]"
-                : "bg-[#ff0000]"
+              <span className={`absolute -inset-0.5 rounded-full ${item.status === "InProgress"
+                ? `bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`
+                : `bg-[${STATUS_COLORS.PENDING.TEXT}]`
                 } opacity-30 animate-ping`}></span>
             )}
           </span>
@@ -257,21 +258,21 @@ const CrackManagement: React.FC = () => {
         <div className="flex justify-between items-center">
           <div className="flex space-x-4">
             <div className="flex items-center">
-              <span className="relative mr-1.5">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#ff0000] animate-pulse-fast"></span>
-                <span className="absolute -inset-1 rounded-full bg-[#ff0000] opacity-30 animate-ping"></span>
+              <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
+                <span className={`inline-block w-2 h-2 rounded-full bg-[${STATUS_COLORS.PENDING.TEXT}] animate-pulse-fast`}></span>
+                <span className={`absolute -inset-0.5 rounded-full bg-[${STATUS_COLORS.PENDING.TEXT}] opacity-30 animate-ping`}></span>
               </span>
               <span className="text-sm text-gray-600 dark:text-gray-300">Pending</span>
             </div>
             <div className="flex items-center">
-              <span className="relative mr-1.5">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#ff9900] animate-pulse"></span>
-                <span className="absolute -inset-1 rounded-full bg-[#ff9900] opacity-30 animate-ping"></span>
+              <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
+                <span className={`inline-block w-2 h-2 rounded-full bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}] animate-pulse`}></span>
+                <span className={`absolute -inset-0.5 rounded-full bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}] opacity-30 animate-ping`}></span>
               </span>
               <span className="text-sm text-gray-600 dark:text-gray-300">In Progress</span>
             </div>
             <div className="flex items-center">
-              <span className="inline-block w-2 h-2 rounded-full bg-[#00ff90] mr-1.5"></span>
+              <span className={`inline-block w-2 h-2 rounded-full bg-[${STATUS_COLORS.RESOLVED.TEXT}] mr-1.5`}></span>
               <span className="text-sm text-gray-600 dark:text-gray-300">Resolved</span>
             </div>
           </div>
