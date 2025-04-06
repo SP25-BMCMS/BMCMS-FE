@@ -1,122 +1,127 @@
-import React, { useState, useEffect } from "react";
-import Table, { Column } from "@/components/Table";
-import { Residents } from "@/types";
-import DropdownMenu from "@/components/DropDownMenu";
-import SearchInput from "@/components/SearchInput";
-import AddButton from "@/components/AddButton";
-import AddResident from "@/components/Residents/AddResidents/AddResidents";
-import RemoveResident from "@/components/Residents/RemoveResidents/RemoveResidents";
-import ConfirmStatusChangeModal from "@/components/Residents/StatusResidents/ConfirmStatusChangeModal";
-import Pagination from "@/components/Pagination";
-import { Toaster } from "react-hot-toast";
-import { useAddNewResident } from "@/components/Residents/AddResidents/use-add-new-residents";
-import { useRemoveResident } from "@/components/Residents/RemoveResidents/use-remove-residents";
-import { FiUserPlus } from "react-icons/fi";
-import { getAllResidents, updateResidentStatus } from "@/services/residents";
-import { toast } from "react-hot-toast";
-import { motion } from "framer-motion";
-import ViewDetailResident from "@/components/Residents/ViewDetailResident";
+import React, { useState, useEffect } from "react"
+import Table, { Column } from "@/components/Table"
+import { Residents } from "@/types"
+import DropdownMenu from "@/components/DropDownMenu"
+import SearchInput from "@/components/SearchInput"
+import AddButton from "@/components/AddButton"
+import AddResident from "@/components/Residents/AddResidents/AddResidents"
+import RemoveResident from "@/components/Residents/RemoveResidents/RemoveResidents"
+import ConfirmStatusChangeModal from "@/components/Residents/StatusResidents/ConfirmStatusChangeModal"
+import Pagination from "@/components/Pagination"
+import { Toaster } from "react-hot-toast"
+import { useAddNewResident } from "@/components/Residents/AddResidents/use-add-new-residents"
+import { useRemoveResident } from "@/components/Residents/RemoveResidents/use-remove-residents"
+import { FiUserPlus } from "react-icons/fi"
+import { getAllResidents, updateResidentStatus } from "@/services/residents"
+import { toast } from "react-hot-toast"
+import { motion } from "framer-motion"
+import ViewDetailResident from "@/components/Residents/ViewDetailResident"
 
 const Resident: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [residents, setResidents] = useState<Residents[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState<boolean>(false);
-  const [residentToChangeStatus, setResidentToChangeStatus] = useState<Residents | null>(null);
-  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
-  const [selectedResident, setSelectedResident] = useState<Residents | null>(null);
-  
-  // Phân trang
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  const [totalItems, setTotalItems] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [residents, setResidents] = useState<Residents[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState<boolean>(false)
+  const [residentToChangeStatus, setResidentToChangeStatus] = useState<Residents | null>(null)
+  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false)
+  const [selectedResident, setSelectedResident] = useState<Residents | null>(null)
 
-  const handleViewDetail = (resident: Residents) => {
-    setSelectedResident(resident);
-    setIsViewDetailOpen(true);
-  };
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10)
+  const [totalItems, setTotalItems] = useState<number>(0)
+  const [totalPages, setTotalPages] = useState<number>(1)
+  const [selectedStatus, setSelectedStatus] = useState<string>("all")
 
   // Fetch residents data
   const fetchResidents = async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       const result = await getAllResidents({
         search: searchTerm,
         page: currentPage,
         limit: itemsPerPage,
         status: selectedStatus
-      });
+      })
 
-      setResidents(result.data);
-      setTotalItems(result.pagination.total);
-      setTotalPages(result.pagination.totalPages);
+      setResidents(result.data)
+      setTotalItems(result.pagination.total)
+      setTotalPages(result.pagination.totalPages)
     } catch (err) {
-      setError("Failed to fetch residents");
-      console.error(err);
+      setError("Failed to fetch residents")
+      console.error(err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Gọi API mỗi khi thay đổi các tham số
   useEffect(() => {
-    fetchResidents();
-  }, [currentPage, itemsPerPage, selectedStatus]);
+    fetchResidents()
+  }, [currentPage, itemsPerPage, selectedStatus])
 
   // Xử lý tìm kiếm với debounce
   useEffect(() => {
     const timer = setTimeout(() => {
       if (currentPage === 1) {
-        fetchResidents();
+        fetchResidents()
       } else {
-        setCurrentPage(1);
+        setCurrentPage(1)
       }
-    }, 500);
+    }, 500)
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    return () => clearTimeout(timer)
+  }, [searchTerm])
 
   const openStatusChangeModal = (resident: Residents) => {
-    setResidentToChangeStatus(resident);
-    setIsStatusChangeModalOpen(true);
-  };
+    setResidentToChangeStatus(resident)
+    setIsStatusChangeModalOpen(true)
+  }
 
   // Xử lý thay đổi trạng thái resident
   const handleChangeStatus = async () => {
-    if (!residentToChangeStatus) return;
-    
+    if (!residentToChangeStatus) return
+
     try {
       // Xác định trạng thái mới
-      const newStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active';
-      
+      const newStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active'
+
+      // Cập nhật UI ngay lập tức
+      setResidents(prevResidents =>
+        prevResidents.map(resident =>
+          resident.userId === residentToChangeStatus.userId
+            ? { ...resident, accountStatus: newStatus }
+            : resident
+        )
+      )
+
       // Gọi API để cập nhật trạng thái
-      await updateResidentStatus(residentToChangeStatus.userId, newStatus);
-      
-      // Tải lại dữ liệu sau khi cập nhật
-      fetchResidents();
-      
+      await updateResidentStatus(residentToChangeStatus.userId, newStatus)
+
       // Hiển thị thông báo thành công
-      toast.success(`Trạng thái của ${residentToChangeStatus.username} đã được thay đổi thành ${newStatus}`);
-      
+      toast.success(`Trạng thái của ${residentToChangeStatus.username} đã được thay đổi thành ${newStatus}`)
+
       // Đóng modal
-      setIsStatusChangeModalOpen(false);
-      setResidentToChangeStatus(null);
+      setIsStatusChangeModalOpen(false)
+      setResidentToChangeStatus(null)
     } catch (error) {
-      console.error('Không thể thay đổi trạng thái của resident:', error);
-      toast.error('Không thể thay đổi trạng thái của resident');
+      console.error('Không thể thay đổi trạng thái của resident:', error)
+      toast.error('Không thể thay đổi trạng thái của resident')
+      // Nếu có lỗi, fetch lại dữ liệu để đảm bảo UI hiển thị đúng
+      fetchResidents()
     }
-  };
+  }
 
   const { isLoading, isModalOpen, openModal, closeModal, addResident } =
     useAddNewResident({
       onAddSuccess: (newResident) => {
-        // Tải lại dữ liệu sau khi thêm thành công
-        fetchResidents();
+        // Cập nhật UI ngay lập tức
+        setResidents(prevResidents => [...prevResidents, newResident])
+        // Cập nhật lại dữ liệu từ server
+        fetchResidents()
       },
-    });
+    })
 
   const {
     isModalOpen: isRemoveModalOpen,
@@ -127,22 +132,28 @@ const Resident: React.FC = () => {
     removeResident,
   } = useRemoveResident({
     onRemoveSuccess: () => {
-      // Tải lại dữ liệu sau khi xóa thành công
-      fetchResidents();
+      // Cập nhật UI ngay lập tức
+      if (residentToRemove) {
+        setResidents(prevResidents =>
+          prevResidents.filter(resident => resident.userId !== residentToRemove.userId)
+        )
+      }
+      // Cập nhật lại dữ liệu từ server
+      fetchResidents()
     },
-  });
+  })
 
   // Xử lý thay đổi filter
   // const handleStatusFilter = (value: string) => {
   //   setSelectedStatus(value);
   //   setCurrentPage(1); // Reset về trang đầu tiên khi thay đổi filter
   // };
-  
+
   const filterOptions = [
     { value: "all", label: "Tất cả" },
     { value: "Active", label: "Hoạt động" },
     { value: "Inactive", label: "Không hoạt động" },
-  ];
+  ]
 
   const columns: Column<Residents>[] = [
     {
@@ -183,11 +194,10 @@ const Resident: React.FC = () => {
       title: "Gender",
       render: (item) => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.gender === "Male"
-              ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
-              : "bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]"
-          }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === "Male"
+            ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
+            : "bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]"
+            }`}
         >
           {item.gender}
         </span>
@@ -200,27 +210,27 @@ const Resident: React.FC = () => {
         try {
           // Kiểm tra nếu dateOfBirth là undefined hoặc null
           if (!item.dateOfBirth) {
-            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>;
+            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>
           }
 
           // Tạo đối tượng Date từ chuỗi ngày tháng
-          const date = new Date(item.dateOfBirth);
+          const date = new Date(item.dateOfBirth)
 
           // Kiểm tra xem date có hợp lệ không
           if (isNaN(date.getTime())) {
-            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>;
+            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>
           }
 
           // Format ngày tháng theo định dạng dd/mm/yyyy
-          const day = date.getDate().toString().padStart(2, "0");
-          const month = (date.getMonth() + 1).toString().padStart(2, "0");
-          const year = date.getFullYear();
+          const day = date.getDate().toString().padStart(2, "0")
+          const month = (date.getMonth() + 1).toString().padStart(2, "0")
+          const year = date.getFullYear()
 
-          const formattedDate = `${day}/${month}/${year}`;
-          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>;
+          const formattedDate = `${day}/${month}/${year}`
+          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>
         } catch (error) {
-          console.error("Error formatting date:", error);
-          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>;
+          console.error("Error formatting date:", error)
+          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>
         }
       },
     },
@@ -237,11 +247,10 @@ const Resident: React.FC = () => {
       title: "Status",
       render: (item) => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.accountStatus === "Active"
-              ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
-              : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
-          }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.accountStatus === "Active"
+            ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
+            : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
+            }`}
         >
           {item.accountStatus}
         </span>
@@ -259,12 +268,12 @@ const Resident: React.FC = () => {
       ),
       width: "80px",
     },
-  ];
+  ]
 
   // Handle submission from the AddResident component
   const handleAddResident = async (residentData: any) => {
-    await addResident(residentData);
-  };
+    await addResident(residentData)
+  }
 
   // Loading animation
   const loadingVariants = {
@@ -274,7 +283,7 @@ const Resident: React.FC = () => {
       repeat: Infinity,
       ease: "linear"
     }
-  };
+  }
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -284,10 +293,15 @@ const Resident: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading residents data...</p>
     </div>
-  );
+  )
+
+  const handleViewDetail = (resident: Residents) => {
+    setSelectedResident(resident)
+    setIsViewDetailOpen(true)
+  }
 
   if (loading && residents.length === 0) {
-    return <LoadingIndicator />;
+    return <LoadingIndicator />
   }
 
   if (error && residents.length === 0) {
@@ -295,7 +309,7 @@ const Resident: React.FC = () => {
       <div className="flex justify-center items-center h-64 text-red-500">
         {error}
       </div>
-    );
+    )
   }
 
   return (
@@ -312,7 +326,6 @@ const Resident: React.FC = () => {
           />
 
           <div className="flex gap-4">
-
             <AddButton label="Add User" icon={<FiUserPlus />} onClick={openModal} />
           </div>
         </div>
@@ -347,7 +360,7 @@ const Resident: React.FC = () => {
         onAdd={handleAddResident}
         isLoading={isLoading}
       />
-      <ConfirmStatusChangeModal 
+      <ConfirmStatusChangeModal
         isOpen={isStatusChangeModalOpen}
         onClose={() => setIsStatusChangeModalOpen(false)}
         onConfirm={handleChangeStatus}
@@ -366,7 +379,7 @@ const Resident: React.FC = () => {
         resident={selectedResident}
       />
     </div>
-  );
-};
+  )
+}
 
-export default Resident;
+export default Resident

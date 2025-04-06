@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import Modal from './Modal';
-import crackApi from '@/services/cracks';
-import { getAllStaff } from '@/services/staffs';
-import { StaffData, Crack } from '@/types';
-import { toast } from 'react-hot-toast';
+import React, { useState, useEffect } from 'react'
+import Modal from './Modal'
+import crackApi from '@/services/cracks'
+import { getAllStaff } from '@/services/staffs'
+import { StaffData } from '@/types'
+import { toast } from 'react-hot-toast'
+import { STATUS_COLORS } from '@/constants/colors'
 
 interface StatusCrackProps {
-  isOpen: boolean;
-  onClose: () => void;
-  crackId: string;
-  crackStatus: string;
-  onUpdateSuccess: () => void;
+  isOpen: boolean
+  onClose: () => void
+  crackId: string
+  crackStatus: string
+  onUpdateSuccess: () => void
 }
 
 const StatusCrack: React.FC<StatusCrackProps> = ({
@@ -20,134 +21,134 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
   crackStatus,
   onUpdateSuccess
 }) => {
-  const [staffList, setStaffList] = useState<StaffData[]>([]);
-  const [selectedStaffId, setSelectedStaffId] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [staffList, setStaffList] = useState<StaffData[]>([])
+  const [selectedStaffId, setSelectedStaffId] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState<boolean>(false)
 
   // Status title mapping
   const statusMapping = {
     pending: { title: "Assign Staff to Pending Crack", label: "Pending" },
     InProgress: { title: "Update In-Progress Crack", label: "In Progress" },
     resolved: { title: "Resolve Crack", label: "Resolved" }
-  };
+  }
 
   // Get the status title
   const getStatusTitle = () => {
-    return statusMapping[crackStatus as keyof typeof statusMapping]?.title || "Update Crack Status";
-  };
+    return statusMapping[crackStatus as keyof typeof statusMapping]?.title || "Update Crack Status"
+  }
 
   // Get the status label
   const getStatusLabel = () => {
-    return statusMapping[crackStatus as keyof typeof statusMapping]?.label || crackStatus;
-  };
+    return statusMapping[crackStatus as keyof typeof statusMapping]?.label || crackStatus
+  }
 
   // Fetch staff list when modal is opened
   useEffect(() => {
     if (isOpen) {
-      fetchStaffList();
+      fetchStaffList()
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Fetch staff list from API
   const fetchStaffList = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const response = await getAllStaff();
+      const response = await getAllStaff()
       if (response.isSuccess && response.data) {
         // Filter to only include staff with the "Staff" role
-        const staffMembers = response.data.filter(staff => staff.role === "Staff");
-        setStaffList(staffMembers);
+        const staffMembers = response.data.filter(staff => staff.role === "Staff")
+        setStaffList(staffMembers)
       } else {
-        toast.error('Failed to load staff list');
+        toast.error('Failed to load staff list')
       }
     } catch (error) {
-      console.error('Error fetching staff list:', error);
-      toast.error('Could not load staff list');
+      console.error('Error fetching staff list:', error)
+      toast.error('Could not load staff list')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Handle selection change
   const handleStaffChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedStaffId(e.target.value);
-  };
+    setSelectedStaffId(e.target.value)
+  }
 
   // Get status animation class for the badge
   const getStatusAnimationClass = (status: string) => {
     switch (status) {
       case "resolved":
-        return "";
+        return ""
       case "InProgress":
-        return "animate-pulse";
+        return "animate-pulse"
       default:
-        return "animate-pulse-fast";
+        return "animate-pulse-fast"
     }
-  };
+  }
 
   // Get status colors for the badge
   const getStatusColors = () => {
     switch (crackStatus) {
       case "resolved":
-        return "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]";
+        return `bg-[${STATUS_COLORS.RESOLVED.BG}] text-[${STATUS_COLORS.RESOLVED.TEXT}] border border-[${STATUS_COLORS.RESOLVED.BORDER}]`
       case "InProgress":
-        return "bg-[rgba(255,165,0,0.3)] text-[#ff9900] border border-[#ffa500]";
+        return `bg-[${STATUS_COLORS.IN_PROGRESS.BG}] text-[${STATUS_COLORS.IN_PROGRESS.TEXT}] border border-[${STATUS_COLORS.IN_PROGRESS.BORDER}]`
       default:
-        return "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]";
+        return `bg-[${STATUS_COLORS.PENDING.BG}] text-[${STATUS_COLORS.PENDING.TEXT}] border border-[${STATUS_COLORS.PENDING.BORDER}]`
     }
-  };
+  }
 
   // Get dot colors for the status badge
   const getDotColors = () => {
     switch (crackStatus) {
       case "resolved":
-        return "bg-[#00ff90]";
+        return `bg-[${STATUS_COLORS.RESOLVED.TEXT}]`
       case "InProgress":
-        return "bg-[#ff9900]";
+        return `bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`
       default:
-        return "bg-[#ff0000]";
+        return `bg-[${STATUS_COLORS.PENDING.TEXT}]`
     }
-  };
+  }
 
   // Save the staff assignment
   const handleSave = async () => {
     if (!selectedStaffId) {
-      toast.error('Please select a staff member');
-      return;
+      toast.error('Please select a staff member')
+      return
     }
 
-    setIsSaving(true);
+    setIsSaving(true)
     try {
       // Convert UI status to API status format
       const apiStatus =
         crackStatus === "InProgress"
           ? "InProgress"
           : crackStatus === "resolved"
-          ? "Resolved"
-          : "Pending";
+            ? "Resolved"
+            : "Pending"
 
       // Call API to update crack status with staff assignment
       const response = await crackApi.updateCrackStatus(
-        crackId, 
-        apiStatus as any, 
+        crackId,
+        apiStatus,
         selectedStaffId // This is the staff's userId that will be sent as staffId in the request body
-      );
-      
+      )
+
       if (response.isSuccess) {
-        toast.success(`Staff assigned and status updated to ${getStatusLabel()}`);
-        onUpdateSuccess();
-        onClose();
+        toast.success(`Staff assigned and status updated to ${getStatusLabel()}`)
+        onUpdateSuccess()
+        onClose()
       } else {
-        toast.error(response.message || 'Failed to update status');
+        toast.error(response.message || 'Failed to update status')
       }
-    } catch (error: any) {
-      console.error('Failed to update crack status:', error);
-      toast.error(error.message || 'An error occurred');
+    } catch (error) {
+      console.error('Failed to update crack status:', error)
+      toast.error(error instanceof Error ? error.message : 'An error occurred')
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
   return (
     <Modal
@@ -165,11 +166,10 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
             <span className="relative mr-2">
               <span className={`inline-block w-3 h-3 rounded-full ${getDotColors()} ${getStatusAnimationClass(crackStatus)}`}></span>
               {crackStatus !== "resolved" && (
-                <span className={`absolute -inset-1 rounded-full ${
-                  crackStatus === "InProgress"
-                    ? "bg-[#ff9900]"
-                    : "bg-[#ff0000]"
-                } opacity-30 animate-ping`}></span>
+                <span className={`absolute -inset-1 rounded-full ${crackStatus === "InProgress"
+                  ? `bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`
+                  : `bg-[${STATUS_COLORS.PENDING.TEXT}]`
+                  } opacity-30 animate-ping`}></span>
               )}
             </span>
             Current Status: {getStatusLabel()}
@@ -242,7 +242,7 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
         </div>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default StatusCrack; 
+export default StatusCrack 

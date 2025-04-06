@@ -1,49 +1,42 @@
-import React, { useState, useEffect } from "react";
-import Table, { Column } from "@/components/Table";
-import { Staff } from "@/types";
-import { FiUserPlus } from "react-icons/fi";
-import DropdownMenu from "@/components/DropDownMenu";
-import SearchInput from "@/components/SearchInput";
-import AddButton from "@/components/AddButton";
-import { getAllStaff } from "@/services/staffs";
-import { StaffData } from "@/types";
-import AddStaff from "@/components/Staff/AddStaff/AddStaff";
-import { useAddStaff } from "@/components/Staff/AddStaff/use-add-staff";
-import { Toaster } from "react-hot-toast";
-import { motion } from "framer-motion";
-import DepartmentPositionModal from "@/components/Staff/DepartmentPositionModal";
-import ViewDetailStaff from '@/components/Staff/ViewDetailStaff';
-import FilterDropdown from "@/components/FilterDropdown";
-import Pagination from "@/components/Pagination";
+import React, { useState, useEffect, useCallback } from "react"
+import Table, { Column } from "@/components/Table"
+import { Staff } from "@/types"
+import { FiUserPlus } from "react-icons/fi"
+import DropdownMenu from "@/components/DropDownMenu"
+import SearchInput from "@/components/SearchInput"
+import AddButton from "@/components/AddButton"
+import { getAllStaff } from "@/services/staffs"
+import { StaffData } from "@/types"
+import AddStaff from "@/components/Staff/AddStaff/AddStaff"
+import { useAddStaff } from "@/components/Staff/AddStaff/use-add-staff"
+import { Toaster } from "react-hot-toast"
+import { motion } from "framer-motion"
+import DepartmentPositionModal from "@/components/Staff/DepartmentPositionModal"
+import ViewDetailStaff from '@/components/Staff/ViewDetailStaff'
 
 const StaffManagement: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [staffList, setStaffList] = useState<Staff[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false);
-  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
-  const [selectedRole, setSelectedRole] = useState<string>("all");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  const [totalItems, setTotalItems] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [staffList, setStaffList] = useState<Staff[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
+  const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false)
+  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false)
 
   const { isModalOpen, isLoading, openModal, closeModal, addNewStaff } = useAddStaff({
     onAddSuccess: () => {
       // Tải lại danh sách nhân viên sau khi thêm thành công
-      fetchStaffData();
+      fetchStaffData(false)
     },
-  });
+  })
 
-  const fetchStaffData = async () => {
+  // Sử dụng useCallback để tránh tạo lại hàm mỗi khi component render
+  const fetchStaffData = useCallback(async (shouldSetLoading = true) => {
+    if (shouldSetLoading) {
+      setLoading(true)
+    }
+
     try {
-      setLoading(true);
-      const response = await getAllStaff({
-        search: searchTerm,
-        role: selectedRole !== "all" ? selectedRole : undefined
-      });
-      
+      const response = await getAllStaff()
       if (response.isSuccess) {
         // Chuyển đổi dữ liệu API sang định dạng Staff
         const formattedStaff: Staff[] = response.data.map((staff: StaffData) => ({
@@ -55,46 +48,51 @@ const StaffManagement: React.FC = () => {
           dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
           gender: staff.gender,
           createdDate: new Date().toLocaleDateString(), // Tạo ngày hiện tại cho createdDate
-        }));
-        
-        setStaffList(formattedStaff);
-        setTotalItems(response.pagination?.total || formattedStaff.length);
-        setTotalPages(response.pagination?.totalPages || 1);
+        }))
+        setStaffList(formattedStaff)
       }
     } catch (error) {
-      console.error("Failed to fetch staff data:", error);
+      console.error("Failed to fetch staff data:", error)
     } finally {
-      setLoading(false);
+      if (shouldSetLoading) {
+        setLoading(false)
+      }
     }
-  };
+  }, [])
 
-  // Initial data load
-  useEffect(() => {
-    fetchStaffData();
-  }, [selectedRole, currentPage, itemsPerPage]);
 
-  // Handle search with debounce
+  // Chỉ fetch dữ liệu một lần khi component mount và khi searchTerm thay đổi
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (currentPage === 1) {
-        fetchStaffData();
-      } else {
-        setCurrentPage(1);
-      }
-    }, 500);
+      fetchStaffData(true)
+    }, searchTerm ? 500 : 0)
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    return () => clearTimeout(timer)
+  }, [fetchStaffData, searchTerm])
 
   const handleViewDetail = (staff: Staff) => {
-    setSelectedStaff(staff);
-    setIsViewDetailOpen(true);
-  };
+    setSelectedStaff(staff)
+    setIsViewDetailOpen(true)
+  }
 
   const handleOpenDeptPosModal = (staff: Staff) => {
-    setSelectedStaff(staff);
-    setIsDeptPosModalOpen(true);
-  };
+    setSelectedStaff(staff)
+    setIsDeptPosModalOpen(true)
+  }
+
+  // Optimistic update for staff changes
+  const handleStaffUpdateSuccess = (staffId: string, updatedData: Partial<Staff>) => {
+    setStaffList(prevStaffList =>
+      prevStaffList.map(staff =>
+        staff.id === staffId
+          ? { ...staff, ...updatedData }
+          : staff
+      )
+    )
+
+    // Fetch fresh data in the background without showing loading state
+    fetchStaffData(false)
+  }
 
   // Role filter options
   const roleFilterOptions = [
@@ -149,16 +147,15 @@ const StaffManagement: React.FC = () => {
             "bg-[#360AFE] bg-opacity-30 border border-[#360AFE] text-[#360AFE]",
           Admin:
             "bg-[#50f186] bg-opacity-30 border border-[#50f186] text-[#00ff90]",
-        };
+        }
         return (
           <span
-            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${
-              roleColors[item.role] || "text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600"
-            }`}
+            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${roleColors[item.role] || "text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600"
+              }`}
           >
             {item.role}
           </span>
-        );
+        )
       },
     },
     {
@@ -166,11 +163,10 @@ const StaffManagement: React.FC = () => {
       title: "Gender",
       render: (item) => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.gender === "Male"
-              ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
-              : "bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]"
-          }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === "Male"
+            ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
+            : "bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]"
+            }`}
         >
           {item.gender}
         </span>
@@ -203,7 +199,14 @@ const StaffManagement: React.FC = () => {
       ),
       width: "80px",
     },
-  ];
+  ]
+
+
+  // Lọc danh sách nhân viên dựa trên từ khóa tìm kiếm
+  const filteredStaff = staffList.filter((staff) =>
+    staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    staff.id.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   // Loading animation
   const loadingVariants = {
@@ -213,7 +216,7 @@ const StaffManagement: React.FC = () => {
       repeat: Infinity,
       ease: "linear"
     }
-  };
+  }
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -223,21 +226,20 @@ const StaffManagement: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading staff data...</p>
     </div>
-  );
+  )
 
   return (
     <div className="w-full mt-[60px]">
       <Toaster position="top-right" />
-      
-      <div className="flex flex-col gap-4 mb-4 ml-[90px] mr-[132px]">
-        <div className="flex justify-between items-center">
-          <SearchInput
-            placeholder="Search by username, email or phone"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-[30rem] max-w-xs"
-          />
 
+
+      <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
+        <SearchInput
+          placeholder="Tìm kiếm theo tên hoặc ID"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-[20rem] max-w-xs"
+        />
           <div className="flex gap-4">
             <FilterDropdown
               options={roleFilterOptions}
@@ -295,7 +297,12 @@ const StaffManagement: React.FC = () => {
           onClose={() => setIsDeptPosModalOpen(false)}
           staffId={selectedStaff.id}
           staffName={selectedStaff.name}
-          onSaveSuccess={fetchStaffData}
+          onSaveSuccess={() => {
+            // Optimistic update
+            if (selectedStaff) {
+              handleStaffUpdateSuccess(selectedStaff.id, {})
+            }
+          }}
         />
       )}
       {isViewDetailOpen && selectedStaff && (
@@ -306,7 +313,7 @@ const StaffManagement: React.FC = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default StaffManagement;
+export default StaffManagement
