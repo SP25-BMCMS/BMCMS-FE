@@ -17,27 +17,6 @@ import { toast } from "react-hot-toast"
 import { motion } from "framer-motion"
 import ViewDetailResident from "@/components/Residents/ViewDetailResident"
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
-import FilterDropdown from "@/components/FilterDropdown"
-
-interface ResidentsCacheData {
-  data: Residents[]
-  pagination: {
-    total: number
-    totalPages: number
-  }
-}
-
-type ResidentStatus = "Active" | "Inactive"
-
-interface AddResidentData {
-  fullName: string
-  dateOfBirth: Date | null | string
-  createdDate: string
-  role: string
-  area: string
-  status: "active" | "inactive"
-  gender: string
-}
 
 interface ResidentsResponse {
   data: Residents[]
@@ -55,29 +34,21 @@ const Resident: React.FC = () => {
   const [selectedResident, setSelectedResident] = useState<Residents | null>(null)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [itemsPerPage, setItemsPerPage] = useState<number>(10)
-  const [selectedStatus, setSelectedStatus] = useState<ResidentStatus | "all">("all")
+  const [selectedStatus, setSelectedStatus] = useState<string>("all")
 
   const queryClient = useQueryClient()
 
   // Fetch residents with React Query
-  const { data: residentsData, isLoading: isLoadingResidents } = useQuery<ResidentsResponse>({
-    queryKey: ['residents', currentPage, itemsPerPage, searchTerm, selectedStatus],
+  const { data: residentsResponse, isLoading: isLoadingResidents } = useQuery<ResidentsResponse>({
+    queryKey: ['residents', currentPage, itemsPerPage, selectedStatus, searchTerm],
     queryFn: async () => {
-      const params = {
+      const result = await getAllResidents({
         search: searchTerm,
         page: currentPage,
         limit: itemsPerPage,
-        status: selectedStatus !== "all" ? selectedStatus : undefined
-      }
-      const response = await getAllResidents(params)
-      return response
-    },
-    initialData: {
-      data: [],
-      pagination: {
-        total: 0,
-        totalPages: 1
-      }
+        status: selectedStatus
+      })
+      return result
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -87,21 +58,16 @@ const Resident: React.FC = () => {
     retry: false
   })
 
-  // Update resident status mutation
+  // Update status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ userId, newStatus }: { userId: string, newStatus: ResidentStatus }) => {
+    mutationFn: async ({ userId, newStatus }: { userId: string, newStatus: "Active" | "Inactive" }) => {
       await updateResidentStatus(userId, newStatus)
       return { userId, newStatus }
     },
     onMutate: async ({ userId, newStatus }) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['residents'] })
-
-      // Snapshot the previous value
       const previousResidents = queryClient.getQueryData(['residents'])
-
-      // Optimistically update to the new value
-      queryClient.setQueryData(['residents'], (old: ResidentsCacheData) => ({
+      queryClient.setQueryData(['residents'], (old: ResidentsResponse) => ({
         ...old,
         data: old.data.map((resident: Residents) =>
           resident.userId === userId
@@ -109,18 +75,15 @@ const Resident: React.FC = () => {
             : resident
         )
       }))
-
       return { previousResidents }
     },
     onError: (err, variables, context) => {
-      // Revert back to the previous value
       if (context?.previousResidents) {
         queryClient.setQueryData(['residents'], context.previousResidents)
       }
       toast.error('Failed to update resident status!')
     },
     onSettled: () => {
-      // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ['residents'] })
     },
   })
@@ -133,10 +96,10 @@ const Resident: React.FC = () => {
   const handleChangeStatus = async () => {
     if (!residentToChangeStatus) return
 
-    const newStatus: ResidentStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active'
+    const newStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active'
     updateStatusMutation.mutate({
       userId: residentToChangeStatus.userId,
-      newStatus
+      newStatus: newStatus as "Active" | "Inactive"
     })
     setIsStatusChangeModalOpen(false)
     setResidentToChangeStatus(null)
@@ -162,7 +125,7 @@ const Resident: React.FC = () => {
     },
   })
 
-  const filterOptions: { value: ResidentStatus | "all"; label: string }[] = [
+  const filterOptions = [
     { value: "all", label: "Tất cả" },
     { value: "Active", label: "Hoạt động" },
     { value: "Inactive", label: "Không hoạt động" },
@@ -221,20 +184,16 @@ const Resident: React.FC = () => {
       title: "Date Of Birth",
       render: (item) => {
         try {
-          // Kiểm tra nếu dateOfBirth là undefined hoặc null
           if (!item.dateOfBirth) {
             return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>
           }
 
-          // Tạo đối tượng Date từ chuỗi ngày tháng
           const date = new Date(item.dateOfBirth)
 
-          // Kiểm tra xem date có hợp lệ không
           if (isNaN(date.getTime())) {
             return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>
           }
 
-          // Format ngày tháng theo định dạng dd/mm/yyyy
           const day = date.getDate().toString().padStart(2, "0")
           const month = (date.getMonth() + 1).toString().padStart(2, "0")
           const year = date.getFullYear()
@@ -247,13 +206,32 @@ const Resident: React.FC = () => {
         }
       },
     },
-
     {
       key: "createdDate",
       title: "Created Date",
-      render: (item) => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
-      ),
+      render: (item) => {
+        try {
+          if (!item.createdDate) {
+            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>
+          }
+
+          const date = new Date(item.createdDate)
+
+          if (isNaN(date.getTime())) {
+            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>
+          }
+
+          const day = date.getDate().toString().padStart(2, "0")
+          const month = (date.getMonth() + 1).toString().padStart(2, "0")
+          const year = date.getFullYear()
+
+          const formattedDate = `${day}/${month}/${year}`
+          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>
+        } catch (error) {
+          console.error("Error formatting date:", error)
+          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>
+        }
+      },
     },
     {
       key: "status",
@@ -283,7 +261,7 @@ const Resident: React.FC = () => {
     },
   ]
 
-  const handleAddResident = async (residentData: AddResidentData) => {
+  const handleAddResident = async (residentData: Omit<Residents, 'userId'>) => {
     await addResident(residentData)
   }
 
@@ -311,12 +289,7 @@ const Resident: React.FC = () => {
     setIsViewDetailOpen(true)
   }
 
-  const handleStatusFilter = (value: string) => {
-    setSelectedStatus(value as ResidentStatus | "all")
-    setCurrentPage(1)
-  }
-
-  if (isLoadingResidents && (!residentsData?.data || residentsData.data.length === 0)) {
+  if (isLoadingResidents && (!residentsResponse?.data || residentsResponse.data.length === 0)) {
     return <LoadingIndicator />
   }
 
@@ -326,19 +299,12 @@ const Resident: React.FC = () => {
 
       <div className="flex flex-col gap-4 mb-4 ml-[90px] mr-[132px]">
         <div className="flex justify-between items-center">
-          <div className="flex gap-4">
-            <SearchInput
-              placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-[30rem] max-w-xs"
-            />
-            <FilterDropdown
-              options={filterOptions}
-              onSelect={handleStatusFilter}
-              selectedValue={selectedStatus}
-            />
-          </div>
+          <SearchInput
+            placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-[30rem] max-w-xs"
+          />
 
           <div className="flex gap-4">
             <AddButton label="Add User" icon={<FiUserPlus />} onClick={openModal} />
@@ -347,7 +313,7 @@ const Resident: React.FC = () => {
       </div>
 
       <Table<Residents>
-        data={(residentsData as ResidentsResponse)?.data || []}
+        data={residentsResponse?.data || []}
         columns={columns}
         keyExtractor={(item) => item.userId}
         onRowClick={(item) => console.log("Row clicked:", item)}
@@ -360,9 +326,9 @@ const Resident: React.FC = () => {
       <div className="w-[95%] mx-auto">
         <Pagination
           currentPage={currentPage}
-          totalPages={(residentsData as ResidentsResponse)?.pagination.totalPages || 1}
+          totalPages={residentsResponse?.pagination.totalPages || 1}
           onPageChange={setCurrentPage}
-          totalItems={(residentsData as ResidentsResponse)?.pagination.total || 0}
+          totalItems={residentsResponse?.pagination.total || 0}
           itemsPerPage={itemsPerPage}
           onLimitChange={setItemsPerPage}
         />

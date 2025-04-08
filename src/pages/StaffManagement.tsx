@@ -1,117 +1,121 @@
-import React, { useState, useEffect } from "react";
-import Table, { Column } from "@/components/Table";
-import { Staff } from "@/types";
-import { FiUserPlus } from "react-icons/fi";
-import DropdownMenu from "@/components/DropDownMenu";
-import SearchInput from "@/components/SearchInput";
-import AddButton from "@/components/AddButton";
-import { getAllStaff } from "@/services/staffs";
-import { StaffData } from "@/types";
-import AddStaff from "@/components/Staff/AddStaff/AddStaff";
-import { useAddStaff } from "@/components/Staff/AddStaff/use-add-staff";
-import { Toaster } from "react-hot-toast";
-import { motion } from "framer-motion";
-import DepartmentPositionModal from "@/components/Staff/DepartmentPositionModal";
-import ViewDetailStaff from '@/components/Staff/ViewDetailStaff';
-import FilterDropdown from "@/components/FilterDropdown";
-import Pagination from "@/components/Pagination";
+import React, { useState } from "react"
+import Table, { Column } from "@/components/Table"
+import { Staff, StaffData } from "@/types"
+import { FiUserPlus } from "react-icons/fi"
+import DropdownMenu from "@/components/DropDownMenu"
+import SearchInput from "@/components/SearchInput"
+import AddButton from "@/components/AddButton"
+import { getAllStaff } from "@/services/staffs"
+import AddStaff from "@/components/Staff/AddStaff/AddStaff"
+import { useAddStaff } from "@/components/Staff/AddStaff/use-add-staff"
+import { Toaster } from "react-hot-toast"
+import { motion } from "framer-motion"
+import DepartmentPositionModal from "@/components/Staff/DepartmentPositionModal"
+import ViewDetailStaff from '@/components/Staff/ViewDetailStaff'
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
+import { toast } from "react-hot-toast"
+
+interface StaffResponse {
+  isSuccess: boolean
+  data: StaffData[]
+}
 
 const StaffManagement: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [staffList, setStaffList] = useState<Staff[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false);
-  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
-  const [selectedRole, setSelectedRole] = useState<string>("all");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  const [totalItems, setTotalItems] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
+  const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false)
+  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false)
 
-  const { isModalOpen, isLoading, openModal, closeModal, addNewStaff } = useAddStaff({
-    onAddSuccess: () => {
-      // Tải lại danh sách nhân viên sau khi thêm thành công
-      fetchStaffData();
+  const queryClient = useQueryClient()
+
+  // Fetch staff with React Query
+  const { data: staffResponse, isLoading: isLoadingStaff } = useQuery<StaffResponse>({
+    queryKey: ['staff', searchTerm],
+    queryFn: async () => {
+      const response = await getAllStaff()
+      return response
     },
-  });
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: false
+  })
 
-  const fetchStaffData = async () => {
-    try {
-      setLoading(true);
-      const response = await getAllStaff({
-        search: searchTerm,
-        role: selectedRole !== "all" ? selectedRole : undefined
-      });
-      
-      if (response.isSuccess) {
-        // Chuyển đổi dữ liệu API sang định dạng Staff
-        const formattedStaff: Staff[] = response.data.map((staff: StaffData) => ({
-          id: staff.userId,
-          name: staff.username,
-          email: staff.email,
-          phone: staff.phone,
-          role: staff.role as Staff['role'],
-          dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
-          gender: staff.gender,
-          createdDate: new Date().toLocaleDateString(), // Tạo ngày hiện tại cho createdDate
-        }));
-        
-        setStaffList(formattedStaff);
-        setTotalItems(response.pagination?.total || formattedStaff.length);
-        setTotalPages(response.pagination?.totalPages || 1);
-      }
-    } catch (error) {
-      console.error("Failed to fetch staff data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Format staff data
+  const staffList = staffResponse?.data.map((staff: StaffData) => ({
+    id: staff.userId,
+    name: staff.username,
+    email: staff.email,
+    phone: staff.phone,
+    role: staff.role as Staff['role'],
+    dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
+    gender: staff.gender,
+    createdDate: new Date().toLocaleDateString(),
+  })) || []
 
-  // Initial data load
-  useEffect(() => {
-    fetchStaffData();
-  }, [selectedRole, currentPage, itemsPerPage]);
-
-  // Handle search with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentPage === 1) {
-        fetchStaffData();
-      } else {
-        setCurrentPage(1);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  const { isModalOpen, isLoading: isAdding, openModal, closeModal, addNewStaff } = useAddStaff({
+    onAddSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] })
+    },
+  })
 
   const handleViewDetail = (staff: Staff) => {
-    setSelectedStaff(staff);
-    setIsViewDetailOpen(true);
-  };
+    setSelectedStaff(staff)
+    setIsViewDetailOpen(true)
+  }
 
   const handleOpenDeptPosModal = (staff: Staff) => {
-    setSelectedStaff(staff);
-    setIsDeptPosModalOpen(true);
-  };
+    setSelectedStaff(staff)
+    setIsDeptPosModalOpen(true)
+  }
 
-  // Role filter options
-  const roleFilterOptions = [
-    { value: "all", label: "All Roles" },
-    { value: "Admin", label: "Admin" },
-    { value: "Manager", label: "Manager" },
-    { value: "Staff", label: "Staff" },
-  ];
+  // Update staff mutation
+  const updateStaffMutation = useMutation({
+    mutationFn: async ({ staffId, updatedData }: { staffId: string, updatedData: Partial<Staff> }) => {
+      // Here you would call your API to update the staff
+      // For now, we'll just simulate a successful update
+      return { staffId, updatedData }
+    },
+    onMutate: async ({ staffId, updatedData }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['staff'] })
+
+      // Snapshot the previous value
+      const previousStaff = queryClient.getQueryData(['staff'])
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['staff'], (old: StaffResponse) => ({
+        ...old,
+        data: old.data.map((staff: StaffData) =>
+          staff.userId === staffId
+            ? { ...staff, ...updatedData }
+            : staff
+        )
+      }))
+
+      return { previousStaff }
+    },
+    onError: (err, variables, context) => {
+      // Revert back to the previous value
+      if (context?.previousStaff) {
+        queryClient.setQueryData(['staff'], context.previousStaff)
+      }
+      toast.error('Failed to update staff!')
+    },
+    onSettled: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['staff'] })
+    },
+  })
 
   const columns: Column<Staff>[] = [
     {
       key: "index",
       title: "No",
       render: (_, index) => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {(currentPage - 1) * itemsPerPage + index + 1}
-        </div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
       ),
       width: "60px",
     },
@@ -149,16 +153,15 @@ const StaffManagement: React.FC = () => {
             "bg-[#360AFE] bg-opacity-30 border border-[#360AFE] text-[#360AFE]",
           Admin:
             "bg-[#50f186] bg-opacity-30 border border-[#50f186] text-[#00ff90]",
-        };
+        }
         return (
           <span
-            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${
-              roleColors[item.role] || "text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600"
-            }`}
+            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${roleColors[item.role] || "text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600"
+              }`}
           >
             {item.role}
           </span>
-        );
+        )
       },
     },
     {
@@ -166,11 +169,10 @@ const StaffManagement: React.FC = () => {
       title: "Gender",
       render: (item) => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.gender === "Male"
-              ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
-              : "bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]"
-          }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === "Male"
+            ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
+            : "bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]"
+            }`}
         >
           {item.gender}
         </span>
@@ -203,7 +205,13 @@ const StaffManagement: React.FC = () => {
       ),
       width: "80px",
     },
-  ];
+  ]
+
+  // Lọc danh sách nhân viên dựa trên từ khóa tìm kiếm
+  const filteredStaff = staffList.filter((staff) =>
+    staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    staff.id.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   // Loading animation
   const loadingVariants = {
@@ -213,7 +221,7 @@ const StaffManagement: React.FC = () => {
       repeat: Infinity,
       ease: "linear"
     }
-  };
+  }
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -223,71 +231,47 @@ const StaffManagement: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading staff data...</p>
     </div>
-  );
+  )
+
+  if (isLoadingStaff && staffList.length === 0) {
+    return <LoadingIndicator />
+  }
 
   return (
     <div className="w-full mt-[60px]">
       <Toaster position="top-right" />
-      
-      <div className="flex flex-col gap-4 mb-4 ml-[90px] mr-[132px]">
-        <div className="flex justify-between items-center">
-          <SearchInput
-            placeholder="Search by username, email or phone"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-[30rem] max-w-xs"
-          />
 
-          <div className="flex gap-4">
-            <FilterDropdown
-              options={roleFilterOptions}
-              selectedValue={selectedRole}
-              onSelect={setSelectedRole}
-              label="Filter by Role"
-            />
-            
-            <AddButton
-              label="Add Staff"
-              icon={<FiUserPlus />}
-              onClick={openModal}
-            />
-          </div>
-        </div>
-      </div>
-
-      {loading && staffList.length === 0 ? (
-        <LoadingIndicator />
-      ) : (
-        <Table<Staff>
-          data={staffList}
-          columns={columns}
-          keyExtractor={(item) => item.id}
-          onRowClick={(item) => console.log("Row clicked:", item)}
-          className="w-[95%] mx-auto"
-          tableClassName="w-full"
-          emptyText="No staff data found"
-          isLoading={loading}
+      <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
+        <SearchInput
+          placeholder="Tìm kiếm theo tên hoặc ID"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-[20rem] max-w-xs"
         />
-      )}
 
-      {/* Pagination */}
-      <div className="w-[95%] mx-auto">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
-          onLimitChange={setItemsPerPage}
+        <AddButton
+          label="Add Staff"
+          icon={<FiUserPlus />}
+          onClick={openModal}
         />
       </div>
 
-      {/* Component thêm nhân viên */}
+      <Table<Staff>
+        data={filteredStaff}
+        columns={columns}
+        keyExtractor={(item) => item.id}
+        onRowClick={(item) => console.log("Row clicked:", item)}
+        className="w-[95%] mx-auto"
+        tableClassName="w-full"
+        isLoading={isLoadingStaff}
+        emptyText="Không tìm thấy dữ liệu nhân viên"
+      />
+
       <AddStaff
         isOpen={isModalOpen}
         onClose={closeModal}
         onAdd={addNewStaff}
-        isLoading={isLoading}
+        isLoading={isAdding}
       />
       {isDeptPosModalOpen && selectedStaff && (
         <DepartmentPositionModal
@@ -295,7 +279,14 @@ const StaffManagement: React.FC = () => {
           onClose={() => setIsDeptPosModalOpen(false)}
           staffId={selectedStaff.id}
           staffName={selectedStaff.name}
-          onSaveSuccess={fetchStaffData}
+          onSaveSuccess={() => {
+            if (selectedStaff) {
+              updateStaffMutation.mutate({
+                staffId: selectedStaff.id,
+                updatedData: {}
+              })
+            }
+          }}
         />
       )}
       {isViewDetailOpen && selectedStaff && (
@@ -306,7 +297,7 @@ const StaffManagement: React.FC = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default StaffManagement;
+export default StaffManagement

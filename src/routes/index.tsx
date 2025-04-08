@@ -18,6 +18,35 @@ import DetailLayout from "@/layouts/DetailLayout"
 import TaskManagement from "@/pages/TaskManagement"
 import Calendar from "@/pages/Calendar"
 import ScheduleJob from "@/pages/scheduleManager/ScheduleJob"
+import { useAuth } from "@/hooks/useAuth"
+
+interface RoleBasedRouteProps {
+  children: React.ReactNode
+  allowedRoles: string[]
+}
+
+const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({ children, allowedRoles }) => {
+  const { user, loading } = useAuth()
+  const token = localStorage.getItem("bmcms_token")
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (!token) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return <>{children}</>
+}
 
 function AppRoutes() {
   return (
@@ -32,22 +61,68 @@ function AppRoutes() {
         {/* Protected Routes - Các đường dẫn yêu cầu xác thực */}
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<div>Dashboard Content</div>} />
-            <Route path="/resident" element={<Resident />} />
-            <Route path="/staff" element={<StaffManagement />} />
-            <Route path="/tasks" element={<TaskManagement />} />
-            <Route path="/building" element={<Building />} />
-            <Route path="/worklog" element={<div>WorkLog Content</div>} />
-            <Route path="/crack" element={<CrackManagement />} />
-            <Route path="/calendar" element={<Calendar />} />
+            {/* Routes cho cả Admin và Manager */}
+            <Route path="/dashboard" element={
+              <RoleBasedRoute allowedRoles={["Admin", "Manager"]}>
+                <div>Dashboard Content</div>
+              </RoleBasedRoute>
+            } />
+            <Route path="/building" element={
+              <RoleBasedRoute allowedRoles={["Admin", "Manager"]}>
+                <Building />
+              </RoleBasedRoute>
+            } />
+
+            {/* Routes chỉ cho Admin */}
+            <Route path="/resident" element={
+              <RoleBasedRoute allowedRoles={["Admin"]}>
+                <Resident />
+              </RoleBasedRoute>
+            } />
+            <Route path="/staff" element={
+              <RoleBasedRoute allowedRoles={["Admin"]}>
+                <StaffManagement />
+              </RoleBasedRoute>
+            } />
+
+            {/* Routes chỉ cho Manager */}
+            <Route path="/tasks" element={
+              <RoleBasedRoute allowedRoles={["Manager"]}>
+                <TaskManagement />
+              </RoleBasedRoute>
+            } />
+            <Route path="/crack" element={
+              <RoleBasedRoute allowedRoles={["Manager"]}>
+                <CrackManagement />
+              </RoleBasedRoute>
+            } />
+            <Route path="/worklog" element={
+              <RoleBasedRoute allowedRoles={["Manager"]}>
+                <div>WorkLog Content</div>
+              </RoleBasedRoute>
+            } />
+            <Route path="/calendar" element={
+              <RoleBasedRoute allowedRoles={["Manager"]}>
+                <Calendar />
+              </RoleBasedRoute>
+            } />
           </Route>
+
           <Route element={<DetailLayout />}>
-            <Route path="/crack/detail/:id" element={<DetailCrack />} />
-            <Route path="/schedule-job/:scheduleId" element={<ScheduleJob />} />
+            <Route path="/crack/detail/:id" element={
+              <RoleBasedRoute allowedRoles={["Manager"]}>
+                <DetailCrack />
+              </RoleBasedRoute>
+            } />
+            <Route path="/schedule-job/:scheduleId" element={
+              <RoleBasedRoute allowedRoles={["Manager"]}>
+                <ScheduleJob />
+              </RoleBasedRoute>
+            } />
           </Route>
         </Route>
 
-        {/* Đường dẫn mặc định - chuyển hướng dựa trên trạng thái xác thực tạm thời tắt sau khi sửa xong có thể mở lại */}
+        {/* Đường dẫn mặc định */}
         <Route
           path="*"
           element={
@@ -58,7 +133,6 @@ function AppRoutes() {
             )
           }
         />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
   )
