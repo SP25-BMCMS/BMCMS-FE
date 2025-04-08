@@ -1,4 +1,5 @@
 // src/routes/AppRoutes.tsx
+import React from "react"
 import {
   BrowserRouter as Router,
   Routes,
@@ -18,6 +19,8 @@ import DetailLayout from "@/layouts/DetailLayout"
 import TaskManagement from "@/pages/TaskManagement"
 import Calendar from "@/pages/Calendar"
 import ScheduleJob from "@/pages/scheduleManager/ScheduleJob"
+import MaterialManagement from "@/pages/MaterialManagement"
+import MaterialDetail from "@/pages/MaterialDetail"
 import { useAuth } from "@/hooks/useAuth"
 
 interface RoleBasedRouteProps {
@@ -96,6 +99,11 @@ function AppRoutes() {
                 <CrackManagement />
               </RoleBasedRoute>
             } />
+            <Route path="/materials" element={
+              <RoleBasedRoute allowedRoles={["Manager"]}>
+                <MaterialManagement />
+              </RoleBasedRoute>
+            } />
             <Route path="/worklog" element={
               <RoleBasedRoute allowedRoles={["Manager"]}>
                 <div>WorkLog Content</div>
@@ -117,6 +125,11 @@ function AppRoutes() {
             <Route path="/schedule-job/:scheduleId" element={
               <RoleBasedRoute allowedRoles={["Manager"]}>
                 <ScheduleJob />
+              </RoleBasedRoute>
+            } />
+            <Route path="/materials/:materialId" element={
+              <RoleBasedRoute allowedRoles={["Manager"]}>
+                <MaterialDetail />
               </RoleBasedRoute>
             } />
           </Route>

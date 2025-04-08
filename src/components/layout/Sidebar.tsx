@@ -13,6 +13,7 @@ import {
 import { IoIosArrowDown } from "react-icons/io"
 import { FaRegBuilding } from "react-icons/fa"
 import { FaHouseCrack } from "react-icons/fa6"
+import { FaBoxes } from "react-icons/fa"
 import toast from "react-hot-toast"
 import { GetCurrentUserAPIResponse } from "../../types"
 import "@/assets/css/Sidebar.css"
@@ -32,6 +33,12 @@ export const sidebarItems = [
     title: "Crack Management",
     path: "/crack",
     icon: <FaHouseCrack />,
+    roles: ["Manager"]
+  },
+  {
+    title: "Material Management",
+    path: "/materials",
+    icon: <FaBoxes />,
     roles: ["Manager"]
   },
   {
