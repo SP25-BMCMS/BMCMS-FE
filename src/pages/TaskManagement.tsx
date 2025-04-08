@@ -1,50 +1,114 @@
-import React, { useState, useEffect } from 'react';
-import Table, { Column } from '@/components/Table';
-import DropdownMenu from '@/components/DropDownMenu';
-import SearchInput from '@/components/SearchInput';
-import FilterDropdown from '@/components/FilterDropdown';
-import AddButton from '@/components/AddButton';
-import { MdOutlineAddTask } from "react-icons/md";
-import { motion } from "framer-motion";
-import tasksApi from '@/services/tasks';
-import { TaskResponse } from '@/types';
-import Pagination from '@/components/Pagination';
+import React, { useState } from 'react'
+import Table, { Column } from '@/components/Table'
+import DropdownMenu from '@/components/DropDownMenu'
+import SearchInput from '@/components/SearchInput'
+import FilterDropdown from '@/components/FilterDropdown'
+import AddButton from '@/components/AddButton'
+import { MdOutlineAddTask } from "react-icons/md"
+import { motion } from "framer-motion"
+import tasksApi from '@/services/tasks'
+import { TaskResponse } from '@/types'
+import Pagination from '@/components/Pagination'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 
-// Define the Task type (using your provided interface)
+interface TasksCacheData {
+  data: TaskResponse[]
+  pagination: {
+    total: number
+    totalPages: number
+  }
+}
 
 const TaskManagement: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [tasks, setTasks] = useState<TaskResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  
-  // Fetch tasks data
-  useEffect(() => {
-    const fetchTasks = async () => {
-      setIsLoading(true);
-      try {
-        const response = await tasksApi.getTasks({
-          page: currentPage,
-          limit: itemsPerPage,
-          search: searchTerm || undefined,
-        });
-        
-        setTasks(response.data);
-        setTotalPages(response.pagination.totalPages);
-        setTotalItems(response.pagination.total);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-        setIsLoading(false);
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+
+  const queryClient = useQueryClient()
+
+  // Fetch tasks with React Query
+  const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['tasks', currentPage, itemsPerPage, searchTerm, selectedStatus],
+    queryFn: async () => {
+      const params: Record<string, string | number | undefined> = {
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchTerm || undefined,
+        ...(selectedStatus !== 'all' && { status: selectedStatus }),
       }
-    };
-    
-    fetchTasks();
-  }, [currentPage, itemsPerPage, searchTerm]);
-  
+      const response = await tasksApi.getTasks(params)
+      return response
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: false
+  })
+
+  // Update task status mutation
+  const updateTaskStatusMutation = useMutation({
+    mutationFn: async ({ taskId, newStatus }: { taskId: string, newStatus: string }) => {
+      // Here you would call your API to update the task status
+      // For now, we'll just simulate a successful update
+      return { taskId, newStatus }
+    },
+    onMutate: async ({ taskId, newStatus }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['tasks'] })
+
+      // Snapshot the previous value
+      const previousTasks = queryClient.getQueryData(['tasks'])
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['tasks'], (old: TasksCacheData) => ({
+        ...old,
+        data: old.data.map((task: TaskResponse) =>
+          task.task_id === taskId
+            ? { ...task, status: newStatus }
+            : task
+        )
+      }))
+
+      return { previousTasks }
+    },
+    onError: (err, variables, context) => {
+      // Revert back to the previous value
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks'], context.previousTasks)
+      }
+      toast.error('Failed to update task status!')
+    },
+    onSettled: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    },
+  })
+
+  const handleFilterChange = (value: string) => {
+    setSelectedStatus(value)
+    setCurrentPage(1)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleLimitChange = (limit: number) => {
+    setItemsPerPage(limit)
+    setCurrentPage(1)
+  }
+
+  const handleStatusChange = (taskId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'Assigned' ? 'In Progress' :
+      currentStatus === 'In Progress' ? 'Completed' : 'Assigned'
+
+    updateTaskStatusMutation.mutate({ taskId, newStatus })
+  }
+
   // Loading animation
   const loadingVariants = {
     rotate: 360,
@@ -53,7 +117,7 @@ const TaskManagement: React.FC = () => {
       repeat: Infinity,
       ease: "linear"
     }
-  };
+  }
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -63,29 +127,14 @@ const TaskManagement: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading tasks data...</p>
     </div>
-  );
+  )
 
   const filterOptions = [
     { value: 'all', label: 'All' },
     { value: 'Assigned', label: 'Assigned' },
     { value: 'In Progress', label: 'In Progress' },
     { value: 'Completed', label: 'Completed' },
-  ];
-  
-  const handleFilterChange = (value: string) => {
-    // Reset to first page when changing filters
-    setCurrentPage(1);
-    // TODO: Implement filter by status if needed
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleLimitChange = (limit: number) => {
-    setItemsPerPage(limit);
-    setCurrentPage(1); // Reset to first page when changing limit
-  };
+  ]
 
   const columns: Column<TaskResponse>[] = [
     {
@@ -118,13 +167,12 @@ const TaskManagement: React.FC = () => {
       key: 'status',
       title: 'Status',
       render: (item) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-          item.status === 'Completed' 
-            ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]' 
-            : item.status === 'In Progress'
-              ? 'bg-[rgba(255,193,7,0.3)] text-[#ffc107] border border-[#ffc107]'
-              : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
-        }`}>
+        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.status === 'Completed'
+          ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
+          : item.status === 'In Progress'
+            ? 'bg-[rgba(255,193,7,0.3)] text-[#ffc107] border border-[#ffc107]'
+            : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+          }`}>
           {item.status}
         </span>
       )
@@ -133,60 +181,61 @@ const TaskManagement: React.FC = () => {
       key: 'action',
       title: 'Action',
       render: (item) => (
-        <DropdownMenu 
+        <DropdownMenu
           onViewDetail={() => console.log('View detail clicked', item)}
-          onChangeStatus={() => console.log("Change Status", item)}
+          onChangeStatus={() => handleStatusChange(item.task_id, item.status)}
           onRemove={() => console.log("Remove", item)}
         />
       ),
       width: '80px',
     }
-  ];
+  ]
 
   return (
     <div className="w-full mt-[60px]">
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
-        <SearchInput 
+        <SearchInput
           placeholder="Search by ID"
           value={searchTerm}
           onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset to first page when searching
+            setSearchTerm(e.target.value)
+            setCurrentPage(1)
           }}
           className="w-[20rem] max-w-xs"
         />
-        
-        <FilterDropdown 
+
+        <FilterDropdown
           options={filterOptions}
           onSelect={handleFilterChange}
+          selectedValue={selectedStatus}
         />
-        
-        <AddButton 
+
+        <AddButton
           label="Add Task"
           icon={<MdOutlineAddTask />}
           className='w-[154px]'
           onClick={() => console.log('Add Task clicked')}
         />
       </div>
-      
-      {isLoading ? (
+
+      {isLoadingTasks ? (
         <LoadingIndicator />
       ) : (
         <>
           <Table<TaskResponse>
-            data={tasks}
+            data={tasksData?.data || []}
             columns={columns}
             keyExtractor={(item) => item.task_id}
             onRowClick={(item) => console.log('Row clicked:', item)}
             className="w-[95%] mx-auto"
             tableClassName="w-full"
           />
-          
-          <Pagination 
+
+          <Pagination
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={tasksData?.pagination.totalPages || 1}
             onPageChange={handlePageChange}
-            totalItems={totalItems}
+            totalItems={tasksData?.pagination.total || 0}
             itemsPerPage={itemsPerPage}
             onLimitChange={handleLimitChange}
             className="w-[95%] mx-auto mt-4"
@@ -194,7 +243,7 @@ const TaskManagement: React.FC = () => {
         </>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default TaskManagement;
+export default TaskManagement

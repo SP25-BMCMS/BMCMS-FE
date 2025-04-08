@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiInstance from '@/lib/axios'
 import { TaskListParams, TaskListPaginationResponse } from '@/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'

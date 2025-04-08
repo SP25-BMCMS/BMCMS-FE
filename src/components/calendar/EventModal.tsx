@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import DatePicker from 'react-datepicker'
-import "react-datepicker/dist/react-datepicker.css"
-import { registerLocale } from 'react-datepicker'
+import { TaskEvent } from '@/types/calendar'
+import { BuildingOfficeIcon, CalendarIcon, DocumentTextIcon, TagIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { vi } from 'date-fns/locale'
+import React, { useEffect, useState } from 'react'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import "react-datepicker/dist/react-datepicker.css"
 import BuildingSelectionModal from './BuildingSelectionModal'
 import ConfirmModal from './ConfirmModal'
-import { TaskEvent } from '@/types/calendar'
-import { toast } from 'react-hot-toast'
-import { XMarkIcon, BuildingOfficeIcon, CalendarIcon, DocumentTextIcon, TagIcon, CheckIcon } from '@heroicons/react/24/outline'
 
 registerLocale('vi', vi)
 

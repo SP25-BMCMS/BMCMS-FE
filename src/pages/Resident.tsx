@@ -1,122 +1,153 @@
-import React, { useState, useEffect } from "react";
-import Table, { Column } from "@/components/Table";
-import { Residents } from "@/types";
-import DropdownMenu from "@/components/DropDownMenu";
-import SearchInput from "@/components/SearchInput";
-import AddButton from "@/components/AddButton";
-import AddResident from "@/components/Residents/AddResidents/AddResidents";
-import RemoveResident from "@/components/Residents/RemoveResidents/RemoveResidents";
-import ConfirmStatusChangeModal from "@/components/Residents/StatusResidents/ConfirmStatusChangeModal";
-import Pagination from "@/components/Pagination";
-import { Toaster } from "react-hot-toast";
-import { useAddNewResident } from "@/components/Residents/AddResidents/use-add-new-residents";
-import { useRemoveResident } from "@/components/Residents/RemoveResidents/use-remove-residents";
-import { FiUserPlus } from "react-icons/fi";
-import { getAllResidents, updateResidentStatus } from "@/services/residents";
-import { toast } from "react-hot-toast";
-import { motion } from "framer-motion";
-import ViewDetailResident from "@/components/Residents/ViewDetailResident";
+import React, { useState } from "react"
+import Table, { Column } from "@/components/Table"
+import { Residents } from "@/types"
+import DropdownMenu from "@/components/DropDownMenu"
+import SearchInput from "@/components/SearchInput"
+import AddButton from "@/components/AddButton"
+import AddResident from "@/components/Residents/AddResidents/AddResidents"
+import RemoveResident from "@/components/Residents/RemoveResidents/RemoveResidents"
+import ConfirmStatusChangeModal from "@/components/Residents/StatusResidents/ConfirmStatusChangeModal"
+import Pagination from "@/components/Pagination"
+import { Toaster } from "react-hot-toast"
+import { useAddNewResident } from "@/components/Residents/AddResidents/use-add-new-residents"
+import { useRemoveResident } from "@/components/Residents/RemoveResidents/use-remove-residents"
+import { FiUserPlus } from "react-icons/fi"
+import { getAllResidents, updateResidentStatus } from "@/services/residents"
+import { toast } from "react-hot-toast"
+import { motion } from "framer-motion"
+import ViewDetailResident from "@/components/Residents/ViewDetailResident"
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
+import FilterDropdown from "@/components/FilterDropdown"
+
+interface ResidentsCacheData {
+  data: Residents[]
+  pagination: {
+    total: number
+    totalPages: number
+  }
+}
+
+type ResidentStatus = "Active" | "Inactive"
+
+interface AddResidentData {
+  fullName: string
+  dateOfBirth: Date | null | string
+  createdDate: string
+  role: string
+  area: string
+  status: "active" | "inactive"
+  gender: string
+}
+
+interface ResidentsResponse {
+  data: Residents[]
+  pagination: {
+    total: number
+    totalPages: number
+  }
+}
 
 const Resident: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [residents, setResidents] = useState<Residents[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState<boolean>(false);
-  const [residentToChangeStatus, setResidentToChangeStatus] = useState<Residents | null>(null);
-  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
-  const [selectedResident, setSelectedResident] = useState<Residents | null>(null);
-  
-  // Phân trang
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  const [totalItems, setTotalItems] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState<boolean>(false)
+  const [residentToChangeStatus, setResidentToChangeStatus] = useState<Residents | null>(null)
+  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false)
+  const [selectedResident, setSelectedResident] = useState<Residents | null>(null)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10)
+  const [selectedStatus, setSelectedStatus] = useState<ResidentStatus | "all">("all")
 
-  const handleViewDetail = (resident: Residents) => {
-    setSelectedResident(resident);
-    setIsViewDetailOpen(true);
-  };
+  const queryClient = useQueryClient()
 
-  // Fetch residents data
-  const fetchResidents = async () => {
-    try {
-      setLoading(true);
-      const result = await getAllResidents({
+  // Fetch residents with React Query
+  const { data: residentsData, isLoading: isLoadingResidents } = useQuery<ResidentsResponse>({
+    queryKey: ['residents', currentPage, itemsPerPage, searchTerm, selectedStatus],
+    queryFn: async () => {
+      const params = {
         search: searchTerm,
         page: currentPage,
         limit: itemsPerPage,
-        status: selectedStatus
-      });
-
-      setResidents(result.data);
-      setTotalItems(result.pagination.total);
-      setTotalPages(result.pagination.totalPages);
-    } catch (err) {
-      setError("Failed to fetch residents");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Gọi API mỗi khi thay đổi các tham số
-  useEffect(() => {
-    fetchResidents();
-  }, [currentPage, itemsPerPage, selectedStatus]);
-
-  // Xử lý tìm kiếm với debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentPage === 1) {
-        fetchResidents();
-      } else {
-        setCurrentPage(1);
+        status: selectedStatus !== "all" ? selectedStatus : undefined
       }
-    }, 500);
+      const response = await getAllResidents(params)
+      return response
+    },
+    initialData: {
+      data: [],
+      pagination: {
+        total: 0,
+        totalPages: 1
+      }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: false
+  })
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  // Update resident status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ userId, newStatus }: { userId: string, newStatus: ResidentStatus }) => {
+      await updateResidentStatus(userId, newStatus)
+      return { userId, newStatus }
+    },
+    onMutate: async ({ userId, newStatus }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['residents'] })
+
+      // Snapshot the previous value
+      const previousResidents = queryClient.getQueryData(['residents'])
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['residents'], (old: ResidentsCacheData) => ({
+        ...old,
+        data: old.data.map((resident: Residents) =>
+          resident.userId === userId
+            ? { ...resident, accountStatus: newStatus }
+            : resident
+        )
+      }))
+
+      return { previousResidents }
+    },
+    onError: (err, variables, context) => {
+      // Revert back to the previous value
+      if (context?.previousResidents) {
+        queryClient.setQueryData(['residents'], context.previousResidents)
+      }
+      toast.error('Failed to update resident status!')
+    },
+    onSettled: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['residents'] })
+    },
+  })
 
   const openStatusChangeModal = (resident: Residents) => {
-    setResidentToChangeStatus(resident);
-    setIsStatusChangeModalOpen(true);
-  };
+    setResidentToChangeStatus(resident)
+    setIsStatusChangeModalOpen(true)
+  }
 
-  // Xử lý thay đổi trạng thái resident
   const handleChangeStatus = async () => {
-    if (!residentToChangeStatus) return;
-    
-    try {
-      // Xác định trạng thái mới
-      const newStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active';
-      
-      // Gọi API để cập nhật trạng thái
-      await updateResidentStatus(residentToChangeStatus.userId, newStatus);
-      
-      // Tải lại dữ liệu sau khi cập nhật
-      fetchResidents();
-      
-      // Hiển thị thông báo thành công
-      toast.success(`Trạng thái của ${residentToChangeStatus.username} đã được thay đổi thành ${newStatus}`);
-      
-      // Đóng modal
-      setIsStatusChangeModalOpen(false);
-      setResidentToChangeStatus(null);
-    } catch (error) {
-      console.error('Không thể thay đổi trạng thái của resident:', error);
-      toast.error('Không thể thay đổi trạng thái của resident');
-    }
-  };
+    if (!residentToChangeStatus) return
 
-  const { isLoading, isModalOpen, openModal, closeModal, addResident } =
+    const newStatus: ResidentStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active'
+    updateStatusMutation.mutate({
+      userId: residentToChangeStatus.userId,
+      newStatus
+    })
+    setIsStatusChangeModalOpen(false)
+    setResidentToChangeStatus(null)
+  }
+
+  const { isLoading: isAdding, isModalOpen, openModal, closeModal, addResident } =
     useAddNewResident({
-      onAddSuccess: (newResident) => {
-        // Tải lại dữ liệu sau khi thêm thành công
-        fetchResidents();
+      onAddSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['residents'] })
       },
-    });
+    })
 
   const {
     isModalOpen: isRemoveModalOpen,
@@ -127,22 +158,15 @@ const Resident: React.FC = () => {
     removeResident,
   } = useRemoveResident({
     onRemoveSuccess: () => {
-      // Tải lại dữ liệu sau khi xóa thành công
-      fetchResidents();
+      queryClient.invalidateQueries({ queryKey: ['residents'] })
     },
-  });
+  })
 
-  // Xử lý thay đổi filter
-  // const handleStatusFilter = (value: string) => {
-  //   setSelectedStatus(value);
-  //   setCurrentPage(1); // Reset về trang đầu tiên khi thay đổi filter
-  // };
-  
-  const filterOptions = [
+  const filterOptions: { value: ResidentStatus | "all"; label: string }[] = [
     { value: "all", label: "Tất cả" },
     { value: "Active", label: "Hoạt động" },
     { value: "Inactive", label: "Không hoạt động" },
-  ];
+  ]
 
   const columns: Column<Residents>[] = [
     {
@@ -183,11 +207,10 @@ const Resident: React.FC = () => {
       title: "Gender",
       render: (item) => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.gender === "Male"
-              ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
-              : "bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]"
-          }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === "Male"
+            ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
+            : "bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]"
+            }`}
         >
           {item.gender}
         </span>
@@ -200,27 +223,27 @@ const Resident: React.FC = () => {
         try {
           // Kiểm tra nếu dateOfBirth là undefined hoặc null
           if (!item.dateOfBirth) {
-            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>;
+            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>
           }
 
           // Tạo đối tượng Date từ chuỗi ngày tháng
-          const date = new Date(item.dateOfBirth);
+          const date = new Date(item.dateOfBirth)
 
           // Kiểm tra xem date có hợp lệ không
           if (isNaN(date.getTime())) {
-            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>;
+            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>
           }
 
           // Format ngày tháng theo định dạng dd/mm/yyyy
-          const day = date.getDate().toString().padStart(2, "0");
-          const month = (date.getMonth() + 1).toString().padStart(2, "0");
-          const year = date.getFullYear();
+          const day = date.getDate().toString().padStart(2, "0")
+          const month = (date.getMonth() + 1).toString().padStart(2, "0")
+          const year = date.getFullYear()
 
-          const formattedDate = `${day}/${month}/${year}`;
-          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>;
+          const formattedDate = `${day}/${month}/${year}`
+          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>
         } catch (error) {
-          console.error("Error formatting date:", error);
-          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>;
+          console.error("Error formatting date:", error)
+          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>
         }
       },
     },
@@ -237,11 +260,10 @@ const Resident: React.FC = () => {
       title: "Status",
       render: (item) => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.accountStatus === "Active"
-              ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
-              : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
-          }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.accountStatus === "Active"
+            ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
+            : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
+            }`}
         >
           {item.accountStatus}
         </span>
@@ -259,14 +281,12 @@ const Resident: React.FC = () => {
       ),
       width: "80px",
     },
-  ];
+  ]
 
-  // Handle submission from the AddResident component
-  const handleAddResident = async (residentData: any) => {
-    await addResident(residentData);
-  };
+  const handleAddResident = async (residentData: AddResidentData) => {
+    await addResident(residentData)
+  }
 
-  // Loading animation
   const loadingVariants = {
     rotate: 360,
     transition: {
@@ -274,7 +294,7 @@ const Resident: React.FC = () => {
       repeat: Infinity,
       ease: "linear"
     }
-  };
+  }
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -284,18 +304,20 @@ const Resident: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading residents data...</p>
     </div>
-  );
+  )
 
-  if (loading && residents.length === 0) {
-    return <LoadingIndicator />;
+  const handleViewDetail = (resident: Residents) => {
+    setSelectedResident(resident)
+    setIsViewDetailOpen(true)
   }
 
-  if (error && residents.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64 text-red-500">
-        {error}
-      </div>
-    );
+  const handleStatusFilter = (value: string) => {
+    setSelectedStatus(value as ResidentStatus | "all")
+    setCurrentPage(1)
+  }
+
+  if (isLoadingResidents && (!residentsData?.data || residentsData.data.length === 0)) {
+    return <LoadingIndicator />
   }
 
   return (
@@ -304,38 +326,43 @@ const Resident: React.FC = () => {
 
       <div className="flex flex-col gap-4 mb-4 ml-[90px] mr-[132px]">
         <div className="flex justify-between items-center">
-          <SearchInput
-            placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-[30rem] max-w-xs"
-          />
+          <div className="flex gap-4">
+            <SearchInput
+              placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-[30rem] max-w-xs"
+            />
+            <FilterDropdown
+              options={filterOptions}
+              onSelect={handleStatusFilter}
+              selectedValue={selectedStatus}
+            />
+          </div>
 
           <div className="flex gap-4">
-
             <AddButton label="Add User" icon={<FiUserPlus />} onClick={openModal} />
           </div>
         </div>
       </div>
 
       <Table<Residents>
-        data={residents}
+        data={(residentsData as ResidentsResponse)?.data || []}
         columns={columns}
         keyExtractor={(item) => item.userId}
         onRowClick={(item) => console.log("Row clicked:", item)}
         className="w-[95%] mx-auto"
         tableClassName="w-full"
-        isLoading={loading}
+        isLoading={isLoadingResidents}
         emptyText="Không tìm thấy dữ liệu"
       />
 
-      {/* Thêm component phân trang */}
       <div className="w-[95%] mx-auto">
         <Pagination
           currentPage={currentPage}
-          totalPages={totalPages}
+          totalPages={(residentsData as ResidentsResponse)?.pagination.totalPages || 1}
           onPageChange={setCurrentPage}
-          totalItems={totalItems}
+          totalItems={(residentsData as ResidentsResponse)?.pagination.total || 0}
           itemsPerPage={itemsPerPage}
           onLimitChange={setItemsPerPage}
         />
@@ -345,9 +372,9 @@ const Resident: React.FC = () => {
         isOpen={isModalOpen}
         onClose={closeModal}
         onAdd={handleAddResident}
-        isLoading={isLoading}
+        isLoading={isAdding}
       />
-      <ConfirmStatusChangeModal 
+      <ConfirmStatusChangeModal
         isOpen={isStatusChangeModalOpen}
         onClose={() => setIsStatusChangeModalOpen(false)}
         onConfirm={handleChangeStatus}
@@ -366,7 +393,7 @@ const Resident: React.FC = () => {
         resident={selectedResident}
       />
     </div>
-  );
-};
+  )
+}
 
-export default Resident;
+export default Resident

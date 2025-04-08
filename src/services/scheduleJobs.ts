@@ -1,4 +1,5 @@
 import apiInstance from '@/lib/axios'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 export interface Schedule {
     schedule_id: string
@@ -157,6 +158,20 @@ const scheduleJobsApi = {
         const response = await apiInstance.put(`/schedule-jobs/status/${scheduleJobId}`, { status })
         return response.data
     }
+}
+
+export const useSendMaintenanceEmail = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: async (scheduleJobId: string) => {
+            const response = await apiInstance.post(`/schedule-jobs/${scheduleJobId}/send-maintenance-email`)
+            return response.data
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
+        }
+    })
 }
 
 export default scheduleJobsApi 

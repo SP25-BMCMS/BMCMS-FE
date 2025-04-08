@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { toast } from 'react-hot-toast'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import schedulesApi from '@/services/schedules'
-import { RiArrowLeftLine, RiEditLine, RiDeleteBinLine, RiMailLine, RiTaskLine, RiCheckLine } from 'react-icons/ri'
-import Pagination from '@/components/Pagination'
-import scheduleJobsApi, { type ScheduleJob, UpdateScheduleJobRequest } from '@/services/scheduleJobs'
 import TaskModal from '@/components/calendar/TaskModal'
+import Pagination from '@/components/Pagination'
+import scheduleJobsApi, { type ScheduleJob, UpdateScheduleJobRequest, useSendMaintenanceEmail } from '@/services/scheduleJobs'
+import schedulesApi from '@/services/schedules'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import { toast } from 'react-hot-toast'
+import { RiArrowLeftLine, RiDeleteBinLine, RiEditLine, RiMailLine, RiTaskLine } from 'react-icons/ri'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const ScheduleJob: React.FC = () => {
     const { scheduleId } = useParams<{ scheduleId: string }>()
@@ -36,17 +36,17 @@ const ScheduleJob: React.FC = () => {
     })
 
     // Update schedule job status mutation
-    const updateStatusMutation = useMutation({
-        mutationFn: ({ jobId, status }: { jobId: string; status: 'Pending' | 'InProgress' | 'Completed' }) =>
-            scheduleJobsApi.updateScheduleJobStatus(jobId, status),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
-            toast.success('Status updated successfully')
-        },
-        onError: () => {
-            toast.error('Failed to update status')
-        }
-    })
+    // const updateStatusMutation = useMutation({
+    //     mutationFn: ({ jobId, status }: { jobId: string; status: 'Pending' | 'InProgress' | 'Completed' }) =>
+    //         scheduleJobsApi.updateScheduleJobStatus(jobId, status),
+    //     onSuccess: () => {
+    //         queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
+    //         toast.success('Status updated successfully')
+    //     },
+    //     onError: () => {
+    //         toast.error('Failed to update status')
+    //     }
+    // })
 
     // Update schedule job mutation
     const updateJobMutation = useMutation({
@@ -60,6 +60,9 @@ const ScheduleJob: React.FC = () => {
             toast.error('Failed to update schedule job')
         }
     })
+
+    // Send maintenance email mutation
+    const sendEmailMutation = useSendMaintenanceEmail()
 
     const handleEditJob = async (job: ScheduleJob) => {
         try {
@@ -83,30 +86,34 @@ const ScheduleJob: React.FC = () => {
         }
     }
 
-    const handleSendEmail = (job: ScheduleJob) => {
-        // TODO: Implement email functionality
-        console.log('Send email for job:', job)
-        toast.success('Email sent successfully')
-    }
-
-    const handleStatusChange = async (jobId: string, newStatus: 'Pending' | 'InProgress' | 'Completed') => {
+    const handleSendEmail = async (job: ScheduleJob) => {
         try {
-            await updateStatusMutation.mutateAsync({ jobId, status: newStatus })
+            await sendEmailMutation.mutateAsync(job.schedule_job_id)
+            toast.success('Maintenance email sent successfully')
         } catch (error) {
-            console.error('Error updating job status:', error)
+            console.error('Error sending maintenance email:', error)
+            toast.error('Failed to send maintenance email')
         }
     }
 
-    const handleCompleteJob = async (job: ScheduleJob) => {
-        try {
-            await updateStatusMutation.mutateAsync({
-                jobId: job.schedule_job_id,
-                status: 'Completed'
-            })
-        } catch (error) {
-            console.error('Error completing job:', error)
-        }
-    }
+    // const handleStatusChange = async (jobId: string, newStatus: 'Pending' | 'InProgress' | 'Completed') => {
+    //     try {
+    //         await updateStatusMutation.mutateAsync({ jobId, status: newStatus })
+    //     } catch (error) {
+    //         console.error('Error updating job status:', error)
+    //     }
+    // }
+
+    // const handleCompleteJob = async (job: ScheduleJob) => {
+    //     try {
+    //         await updateStatusMutation.mutateAsync({
+    //             jobId: job.schedule_job_id,
+    //             status: 'Completed'
+    //         })
+    //     } catch (error) {
+    //         console.error('Error completing job:', error)
+    //     }
+    // }
 
     const getStatusBadge = (status: string) => {
         switch (status.toLowerCase()) {
@@ -276,10 +283,11 @@ const ScheduleJob: React.FC = () => {
                                             title="Delete"
                                         >
                                             <RiDeleteBinLine className="w-5 h-5" />
-                                        </button>                                        <button
+                                        </button>
+                                        <button
                                             onClick={() => handleSendEmail(job)}
-                                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
-
+                                            disabled={sendEmailMutation.isPending}
+                                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                             title="Send Email"
                                         >
                                             <RiMailLine className="w-5 h-5" />
@@ -291,7 +299,6 @@ const ScheduleJob: React.FC = () => {
                                         >
                                             <RiTaskLine className="w-5 h-5" />
                                         </button>
-
                                     </td>
                                 </tr>
                             ))}
