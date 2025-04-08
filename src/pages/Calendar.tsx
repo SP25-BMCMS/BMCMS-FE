@@ -1,32 +1,27 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import { DateSelectArg, EventClickArg, EventContentArg, EventInput } from '@fullcalendar/core';
+import React, { useState, useEffect, useCallback } from 'react'
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
+import interactionPlugin from '@fullcalendar/interaction'
+import { DateSelectArg, EventClickArg, EventContentArg, EventInput } from '@fullcalendar/core'
 import '../../src/styles/Calendar.css'
-
-// Định nghĩa kiểu dữ liệu cho sự kiện
-interface TaskEvent {
-  id: string;
-  title: string;
-  start: Date | string;
-  end?: Date | string;
-  allDay?: boolean;
-  status: 'pending' | 'in_progress' | 'completed';
-  description?: string;
-  assignedTo?: string;
-  location?: string;
-  priority?: 'low' | 'medium' | 'high';
-}
+import schedulesApi from '@/services/schedules'
+import { getBuildings } from '@/services/building'
+import { toast } from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import EventModal from '@/components/calendar/EventModal'
+import BuildingSelectionModal from '@/components/calendar/BuildingSelectionModal'
+import { TaskEvent, ApiSchedule } from '@/types/calendar'
 
 const Calendar: React.FC = () => {
-  const [events, setEvents] = useState<EventInput[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<TaskEvent | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCreateMode, setIsCreateMode] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient()
+  const [events, setEvents] = useState<EventInput[]>([])
+  const [selectedEvent, setSelectedEvent] = useState<TaskEvent | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isCreateMode, setIsCreateMode] = useState(false)
+  const [showBuildingModal, setShowBuildingModal] = useState(false)
+  const [selectedBuildings, setSelectedBuildings] = useState<string[]>([])
   const [initialFormData, setInitialFormData] = useState<Partial<TaskEvent>>({
     title: '',
     start: '',
@@ -36,141 +31,124 @@ const Calendar: React.FC = () => {
     assignedTo: '',
     status: 'pending',
     priority: 'medium',
-    location: ''
-  });
-  
-  // Mock data - Trong thực tế, bạn sẽ lấy dữ liệu từ API
+    location: '',
+    schedule_type: 'Daily',
+    buildingId: []
+  })
+  const navigate = useNavigate()
+
+  // Fetch buildings using React Query
+  const { data: buildings = [] } = useQuery({
+    queryKey: ['buildings'],
+    queryFn: async () => {
+      const response = await getBuildings()
+      return response.data
+    }
+  })
+
+  // Fetch schedules using React Query
+  const { data: schedulesData } = useQuery({
+    queryKey: ['schedules'],
+    queryFn: async () => {
+      const response = await schedulesApi.getSchedules()
+      return response.data
+    }
+  })
+
+  // Create schedule mutation
+  const createScheduleMutation = useMutation({
+    mutationFn: (newSchedule: Omit<ApiSchedule, 'schedule_id' | 'created_at' | 'updated_at'>) => {
+      return schedulesApi.createSchedule(newSchedule)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] })
+      toast.success('Schedule created successfully')
+      setIsModalOpen(false)
+      setIsCreateMode(false)
+    },
+    onError: () => {
+      toast.error('Failed to create schedule')
+    }
+  })
+
+  // Update schedule mutation
+  const updateScheduleMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<ApiSchedule> }) => {
+      return schedulesApi.updateSchedule(id, data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] })
+      toast.success('Schedule updated successfully')
+      setIsModalOpen(false)
+    },
+    onError: () => {
+      toast.error('Failed to update schedule')
+    }
+  })
+
+  // Add delete mutation
+  const deleteScheduleMutation = useMutation({
+    mutationFn: (id: string) => {
+      return schedulesApi.deleteSchedule(id)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] })
+      toast.success('Schedule deleted successfully')
+      setIsModalOpen(false)
+    },
+    onError: () => {
+      toast.error('Failed to delete schedule')
+    }
+  })
+
+  // Update events when schedules change
   useEffect(() => {
-    // Giả lập dữ liệu sự kiện
-    const mockEvents: TaskEvent[] = [
-      {
-        id: '1',
-        title: 'Kiểm tra tòa nhà A',
-        start: new Date(new Date().setHours(10, 0)),
-        end: new Date(new Date().setHours(12, 0)),
-        status: 'pending',
-        description: 'Kiểm tra định kỳ tòa nhà A',
-        assignedTo: 'John Doe',
-        location: 'Tòa nhà A',
-        priority: 'high'
-      },
-      {
-        id: '2',
-        title: 'Sửa chữa khu vực B',
-        start: new Date(new Date().setDate(new Date().getDate() + 1)),
-        end: new Date(new Date().setDate(new Date().getDate() + 1)),
-        allDay: true,
-        status: 'in_progress',
-        description: 'Sửa chữa các vết nứt ở khu vực B',
-        assignedTo: 'Jane Smith',
-        location: 'Khu vực B',
-        priority: 'medium'
-      },
-      {
-        id: '3',
-        title: 'Hoàn thành báo cáo',
-        start: new Date(new Date().setDate(new Date().getDate() - 1)),
-        status: 'completed',
-        description: 'Hoàn thành báo cáo đánh giá tháng',
-        assignedTo: 'Mike Johnson',
-        priority: 'low'
-      },
-      {
-        id: '4',
-        title: 'Cuộc họp hàng tháng',
-        start: new Date(new Date().setDate(new Date().getDate() + 3)),
-        end: new Date(new Date().setDate(new Date().getDate() + 3)),
-        status: 'pending',
-        description: 'Cuộc họp với tất cả nhân viên',
-        assignedTo: 'All Staff',
-        location: 'Phòng họp chính',
-        priority: 'high'
-      },
-      {
-        id: '5',
-        title: 'Bảo trì hệ thống',
-        start: new Date(new Date().setDate(new Date().getDate() + 5)),
-        status: 'pending',
-        description: 'Bảo trì định kỳ hệ thống HVAC',
-        assignedTo: 'Tech Team',
-        location: 'Tầng kỹ thuật',
-        priority: 'medium'
-      }
-    ];
+    if (schedulesData) {
+      const calendarEvents = schedulesData.map((schedule: ApiSchedule) => {
+        const buildingIds = schedule.schedule_job
+          .filter(job => job.status !== "Cancel")
+          .map(job => job.building_id)
 
-    // Chuyển đổi sự kiện để thêm màu sắc tùy thuộc vào trạng thái
-    const formattedEvents = mockEvents.map(event => ({
-      ...event,
-      backgroundColor: getStatusColor(event.status),
-      borderColor: getPriorityBorderColor(event.priority),
-      textColor: '#ffffff'
-    }));
+        // Determine the status color based on schedule_job status
+        let backgroundColor = '#3b82f6' // Default blue
+        const hasInProgress = schedule.schedule_status === "InProgress"
+        const hasCompleted = schedule.schedule_status === "Completed"
+        const hasCancel = schedule.schedule_status === "Cancel"
 
-    setEvents(formattedEvents);
-  }, []);
-
-  // Xử lý click bên ngoài modal để đóng nó
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      // Nếu click bên ngoài modal và không phải trên form input, đóng modal
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        // Kiểm tra xem người dùng có đang nhập liệu không
-        const activeElement = document.activeElement;
-        if (activeElement && (
-          activeElement.tagName === 'INPUT' || 
-          activeElement.tagName === 'TEXTAREA' || 
-          activeElement.tagName === 'SELECT'
-        )) {
-          // Người dùng đang nhập liệu, không đóng modal
-          return;
+        if (hasCancel) {
+          backgroundColor = '#ef4444' // Red
+        } else if (hasInProgress) {
+          backgroundColor = '#f97316' // Orange
+        } else if (hasCompleted) {
+          backgroundColor = '#22c55e' // Green
         }
-        setIsModalOpen(false);
-        setSelectedEvent(null);
-        setIsCreateMode(false);
-      }
-    }
 
-    // Chỉ thêm sự kiện nếu modal đang mở
-    if (isModalOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isModalOpen]);
+        return {
+          id: schedule.schedule_id,
+          title: schedule.schedule_name,
+          start: schedule.start_date,
+          end: schedule.end_date,
+          allDay: true,
+          status: hasCancel ? 'cancel' : hasInProgress ? 'inprogress' : hasCompleted ? 'completed' : 'pending',
+          description: schedule.description,
+          schedule_type: schedule.schedule_type,
+          buildingId: buildingIds,
+          backgroundColor: backgroundColor,
+          borderColor: backgroundColor,
+          textColor: '#ffffff'
+        }
+      })
 
-  // Xác định màu sắc dựa trên trạng thái
-  const getStatusColor = useCallback((status: string) => {
-    switch (status) {
-      case 'pending':
-        return '#f44336'; // Đỏ
-      case 'in_progress':
-        return '#ff9800'; // Cam
-      case 'completed':
-        return '#4caf50'; // Xanh lá
-      default:
-        return '#2196f3'; // Xanh dương
+      // Log the events being set
+      console.log('Setting calendar events:', calendarEvents)
+
+      setEvents(calendarEvents)
     }
-  }, []);
-  
-  // Xác định màu viền dựa trên mức độ ưu tiên
-  const getPriorityBorderColor = useCallback((priority?: string) => {
-    switch (priority) {
-      case 'high':
-        return '#d32f2f'; // Đỏ đậm
-      case 'medium':
-        return '#f57c00'; // Cam đậm
-      case 'low':
-        return '#388e3c'; // Xanh lá đậm
-      default:
-        return '#1976d2'; // Xanh dương đậm
-    }
-  }, []);
+  }, [schedulesData])
 
   // Xử lý khi click vào sự kiện
   const handleEventClick = useCallback((clickInfo: EventClickArg) => {
-    const event = clickInfo.event;
+    const event = clickInfo.event
     setSelectedEvent({
       id: event.id,
       title: event.title,
@@ -179,16 +157,26 @@ const Calendar: React.FC = () => {
       allDay: event.allDay,
       status: event.extendedProps.status,
       description: event.extendedProps.description,
-      assignedTo: event.extendedProps.assignedTo,
-      location: event.extendedProps.location,
-      priority: event.extendedProps.priority
-    });
-    setIsCreateMode(false);
-    setIsModalOpen(true);
-  }, []);
+      priority: event.extendedProps.priority,
+      schedule_type: event.extendedProps.schedule_type,
+      buildingId: event.extendedProps.buildingId || []
+    })
+    setIsCreateMode(false)
+    setIsModalOpen(true)
+  }, [])
 
   // Xử lý khi chọn một ngày/khoảng thời gian trên lịch
   const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
+    // Kiểm tra xem ngày được chọn có phải là quá khứ không
+    const selectedDate = new Date(selectInfo.start)
+    const now = new Date()
+    now.setHours(0, 0, 0, 0) // Reset time to start of day for comparison
+
+    if (selectedDate < now) {
+      toast.error('Cannot create events in the past')
+      return
+    }
+
     setInitialFormData({
       title: '',
       start: selectInfo.startStr,
@@ -196,477 +184,234 @@ const Calendar: React.FC = () => {
       allDay: selectInfo.allDay,
       status: 'pending',
       description: '',
-      assignedTo: '',
-      location: '',
-      priority: 'medium'
-    });
-    
-    setIsCreateMode(true);
-    setIsModalOpen(true);
-  }, []);
+      priority: 'medium',
+      schedule_type: 'Daily'
+    })
+
+    setIsCreateMode(true)
+    setIsModalOpen(true)
+  }, [])
 
   // Xử lý lưu sự kiện mới
-  const handleSaveEvent = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formRef.current) return;
-    
-    const formData = new FormData(formRef.current);
-    const title = formData.get('title') as string;
-    const status = formData.get('status') as string;
-    const priority = formData.get('priority') as string;
-    const description = formData.get('description') as string;
-    const assignedTo = formData.get('assignedTo') as string;
-    const location = formData.get('location') as string;
-    
-    if (!title.trim()) {
-      alert('Vui lòng nhập tiêu đề sự kiện');
-      return;
-    }
-    
-    const eventToAdd = {
-      id: String(Date.now()),
-      title,
-      start: initialFormData.start,
-      end: initialFormData.end,
-      allDay: initialFormData.allDay,
-      status: status || 'pending',
-      priority,
-      description,
-      assignedTo,
-      location,
-      backgroundColor: getStatusColor(status || 'pending'),
-      borderColor: getPriorityBorderColor(priority),
-      textColor: '#ffffff'
-    };
-    
-    setEvents(prev => [...prev, eventToAdd as EventInput]);
-    setIsModalOpen(false);
-    setIsCreateMode(false);
-  }, [initialFormData, getStatusColor, getPriorityBorderColor]);
+  const handleSaveEvent = useCallback(async (formData: any) => {
+    const title = formData.title
+    const description = formData.description
+    const scheduleType = formData.schedule_type
+    const startDate = formData.start_date
+    const endDate = formData.end_date
 
-  // Xử lý cập nhật trạng thái sự kiện
-  const handleUpdateStatus = useCallback((newStatus: 'pending' | 'in_progress' | 'completed') => {
-    if (!selectedEvent) return;
-    
-    setEvents(prev => prev.map(event => {
-      if (event.id === selectedEvent.id) {
-        return {
-          ...event,
-          status: newStatus,
-          backgroundColor: getStatusColor(newStatus)
-        };
-      }
-      return event;
-    }));
-    
-    setSelectedEvent(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        status: newStatus
-      };
-    });
-  }, [selectedEvent, getStatusColor]);
+    if (!title.trim()) {
+      toast.error('Please enter event title')
+      return
+    }
+
+    if (!startDate) {
+      toast.error('Please select start time')
+      return
+    }
+
+    if (!endDate) {
+      toast.error('Please select end time')
+      return
+    }
+
+    const now = new Date()
+    const startDateObj = new Date(startDate)
+    const endDateObj = new Date(endDate)
+
+    if (startDateObj < now) {
+      toast.error('Start time cannot be in the past')
+      return
+    }
+
+    if (endDateObj < startDateObj) {
+      toast.error('End time must be after start time')
+      return
+    }
+
+    // Create UTC dates without timezone adjustment
+    const startDateUTC = new Date(Date.UTC(
+      startDateObj.getFullYear(),
+      startDateObj.getMonth(),
+      startDateObj.getDate(),
+      startDateObj.getHours(),
+      startDateObj.getMinutes()
+    ))
+
+    const endDateUTC = new Date(Date.UTC(
+      endDateObj.getFullYear(),
+      endDateObj.getMonth(),
+      endDateObj.getDate(),
+      endDateObj.getHours(),
+      endDateObj.getMinutes()
+    ))
+
+    // Create schedule jobs with proper structure
+    const scheduleJobs = selectedBuildings.map(buildingId => ({
+      building_id: buildingId,
+      status: "Pending",
+      schedule_job_id: "", // Will be set by backend
+      schedule_id: "", // Will be set by backend
+      run_date: startDateUTC.toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }))
+
+    const newSchedule: Omit<ApiSchedule, 'schedule_id' | 'created_at' | 'updated_at'> = {
+      schedule_name: title,
+      schedule_type: scheduleType || 'Daily',
+      description: description || '',
+      start_date: startDateUTC.toISOString(),
+      end_date: endDateUTC.toISOString(),
+      buildingId: selectedBuildings,
+    }
+
+    createScheduleMutation.mutate(newSchedule)
+  }, [createScheduleMutation, selectedBuildings])
 
   // Hiển thị nội dung sự kiện tùy chỉnh
   const renderEventContent = useCallback((eventContent: EventContentArg) => {
+    // Get building names for this event
+    const buildingIds = eventContent.event.extendedProps.buildingId || []
+
+    // Lọc ra các building ID duy nhất
+    const uniqueBuildingIds = [...new Set(buildingIds)] as string[]
+
+    const buildingNames = uniqueBuildingIds.map((id) => {
+      const building = buildings.find(b => b.buildingId === id)
+      return building ? building.name : 'Unknown Building'
+    }).join(', ')
+
     return (
-      <div className="fc-event-content flex flex-col p-1">
-        <div className="font-semibold">{eventContent.event.title}</div>
-        {eventContent.event.extendedProps.assignedTo && (
-          <div className="text-xs">{eventContent.event.extendedProps.assignedTo}</div>
+      <div className="fc-event-content flex flex-col p-1 max-h-full overflow-hidden">
+        <div className="font-semibold text-white truncate">{eventContent.event.title}</div>
+        {eventContent.event.extendedProps.schedule_type && (
+          <div className="text-xs text-white/80 truncate">{eventContent.event.extendedProps.schedule_type}</div>
         )}
-        {eventContent.event.extendedProps.location && (
-          <div className="text-xs italic mt-1">{eventContent.event.extendedProps.location}</div>
+        {buildingNames && (
+          <div className="text-xs text-white/70 mt-1 truncate" title={buildingNames}>
+            Buildings: {buildingNames}
+          </div>
+        )}
+        {eventContent.event.extendedProps.description && (
+          <div className="text-xs italic mt-1 text-white/70 truncate" title={eventContent.event.extendedProps.description}>
+            {eventContent.event.extendedProps.description}
+          </div>
         )}
       </div>
-    );
-  }, []);
+    )
+  }, [buildings])
 
   // Xử lý đóng modal
   const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-    setSelectedEvent(null);
-    setIsCreateMode(false);
-  }, []);
+    setIsModalOpen(false)
+    setSelectedEvent(null)
+    setIsCreateMode(false)
+  }, [])
 
-  // Thêm CSS tùy chỉnh cho dark mode
-  useEffect(() => {
-    // Thêm CSS tùy chỉnh cho dark mode
-    const style = document.createElement('style');
-    style.textContent = `
-      .dark .fc-theme-standard .fc-toolbar {
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-toolbar-title {
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-button {
-        background-color: #374151;
-        border-color: #4b5563;
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-button:hover {
-        background-color: #4b5563;
-      }
-      .dark .fc-theme-standard .fc-button:disabled {
-        background-color: #374151;
-        opacity: 0.5;
-      }
-      .dark .fc-theme-standard .fc-button-active {
-        background-color: #3b82f6;
-        border-color: #3b82f6;
-      }
-      .dark .fc-theme-standard th {
-        background-color: #374151;
-        color: #f3f4f6;
-        border-color: #4b5563;
-      }
-      .dark .fc-theme-standard td {
-        border-color: #4b5563;
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-day {
-        background-color: #1f2937;
-      }
-      .dark .fc-theme-standard .fc-day-other {
-        background-color: #111827;
-      }
-      .dark .fc-theme-standard .fc-scrollgrid,
-      .dark .fc-theme-standard .fc-scrollgrid-section > td,
-      .dark .fc-theme-standard .fc-scrollgrid-section > th,
-      .dark .fc-theme-standard .fc-scrollgrid-section-liquid > td,
-      .dark .fc-theme-standard .fc-scrollgrid-section-liquid > th,
-      .dark .fc-theme-standard .fc-list {
-        border-color: #4b5563;
-      }
-      .dark .fc-theme-standard .fc-list-day-cushion {
-        background-color: #374151;
-      }
-      .dark .fc-theme-standard .fc-list-event:hover td {
-        background-color: #4b5563;
-      }
-      .dark .fc-theme-standard .fc-timegrid-slot-minor {
-        border-color: #4b5563;
-      }
-      .dark .fc-theme-standard .fc-timegrid-slot-label-cushion,
-      .dark .fc-theme-standard .fc-timegrid-axis-cushion {
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-timegrid-divider {
-        background: #4b5563;
-      }
-      .dark .fc-theme-standard .fc-col-header-cell-cushion {
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-daygrid-day-number {
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-daygrid-day-top {
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-h-event,
-      .dark .fc-theme-standard .fc-v-event {
-        background-color: #3b82f6;
-        border-color: #2563eb;
-      }
-      .dark .fc-theme-standard a.fc-event {
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-event-title-container {
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-more-link {
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-popover {
-        background-color: #1f2937;
-        border-color: #4b5563;
-      }
-      .dark .fc-theme-standard .fc-popover-header {
-        background-color: #374151;
-        color: #f3f4f6;
-      }
-      .dark .fc-theme-standard .fc-today-button {
-        background-color: #3b82f6;
-        border-color: #2563eb;
-      }
-      .dark .fc-theme-standard .fc-today-button:hover {
-        background-color: #2563eb;
-      }
+  // Xử lý cập nhật sự kiện
+  const handleUpdateEvent = useCallback((formData: {
+    title: string
+    description: string
+    schedule_type: string
+    start_date: Date
+    end_date: Date
+    buildingId: string[]
+  }) => {
+    if (!selectedEvent) return
 
-      /* Remove background for prev/next buttons and add theming */
-      .fc-prev-button, .fc-next-button {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        color: #374151 !important;
-      }
-      
-      .fc-prev-button:hover, .fc-next-button:hover {
-        background: rgba(0, 0, 0, 0.05) !important;
-        color: #1f2937 !important;
-      }
-      
-      .dark .fc-prev-button, .dark .fc-next-button {
-        color: #f3f4f6 !important;
-      }
-      
-      .dark .fc-prev-button:hover, .dark .fc-next-button:hover {
-        background: rgba(255, 255, 255, 0.1) !important;
-        color: #ffffff !important;
-      }
-    `;
-    document.head.appendChild(style);
+    // Convert local datetime to UTC for API
+    const startDateObj = new Date(formData.start_date)
+    const endDateObj = new Date(formData.end_date)
 
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
+    // Create UTC dates without timezone adjustment
+    const startDateUTC = new Date(Date.UTC(
+      startDateObj.getFullYear(),
+      startDateObj.getMonth(),
+      startDateObj.getDate(),
+      startDateObj.getHours(),
+      startDateObj.getMinutes()
+    ))
 
-  // Modal hiển thị chi tiết sự kiện
-  const EventModal = React.memo(() => {
-    if (!isModalOpen) return null;
+    const endDateUTC = new Date(Date.UTC(
+      endDateObj.getFullYear(),
+      endDateObj.getMonth(),
+      endDateObj.getDate(),
+      endDateObj.getHours(),
+      endDateObj.getMinutes()
+    ))
 
-    return (
-      <div className="fixed inset-0 flex items-center justify-center z-50" onClick={(e) => e.stopPropagation()}>
-        <div className="absolute inset-0 bg-black opacity-50" onClick={handleCloseModal}></div>
-        <div ref={modalRef} className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-          {isCreateMode ? (
-            // Form tạo sự kiện mới
-            <>
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Tạo sự kiện mới</h2>
-              
-              <form ref={formRef} onSubmit={handleSaveEvent} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="title">Tiêu đề</label>
-                  <input
-                    id="title"
-                    type="text"
-                    name="title"
-                    defaultValue=""
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
-                    placeholder="Nhập tiêu đề sự kiện"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="status">Trạng thái</label>
-                    <select
-                      id="status"
-                      name="status"
-                      defaultValue="pending"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
-                    >
-                      <option value="pending">Chờ xử lý</option>
-                      <option value="in_progress">Đang thực hiện</option>
-                      <option value="completed">Hoàn thành</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="priority">Mức độ ưu tiên</label>
-                    <select
-                      id="priority"
-                      name="priority"
-                      defaultValue="medium"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
-                    >
-                      <option value="low">Thấp</option>
-                      <option value="medium">Trung bình</option>
-                      <option value="high">Cao</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="assignedTo">Người thực hiện</label>
-                  <input
-                    id="assignedTo"
-                    type="text"
-                    name="assignedTo"
-                    defaultValue=""
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
-                    placeholder="Nhập tên người thực hiện"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="location">Địa điểm</label>
-                  <input
-                    id="location"
-                    type="text"
-                    name="location"
-                    defaultValue=""
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
-                    placeholder="Nhập địa điểm"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="description">Mô tả</label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    defaultValue=""
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
-                    placeholder="Nhập mô tả công việc"
-                    rows={3}
-                  ></textarea>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thời gian</label>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(initialFormData.start || '').toLocaleString()} 
-                    {initialFormData.end ? ` - ${new Date(initialFormData.end).toLocaleString()}` : ''}
-                    {initialFormData.allDay ? ' (Cả ngày)' : ''}
-                  </div>
-                </div>
-              
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    className="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded hover:bg-gray-400 dark:hover:bg-gray-600 transition"
-                    onClick={handleCloseModal}
-                    type="button"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition"
-                    type="submit"
-                  >
-                    Lưu
-                  </button>
-                </div>
-              </form>
-            </>
-          ) : (
-            // Hiển thị chi tiết sự kiện
-            selectedEvent && (
-              <>
-                <div className="flex justify-between items-start">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">{selectedEvent.title}</h2>
-                  <span 
-                    className={`px-2 py-1 rounded text-white text-sm ${
-                      selectedEvent.priority === 'high' ? 'bg-red-600' :
-                      selectedEvent.priority === 'medium' ? 'bg-orange-500' : 'bg-green-600'
-                    }`}
-                  >
-                    {selectedEvent.priority === 'high' ? 'Cao' :
-                     selectedEvent.priority === 'medium' ? 'Trung bình' : 'Thấp'}
-                  </span>
-                </div>
-                
-                <div className="space-y-4 text-gray-700 dark:text-gray-300">
-                  <div>
-                    <span className="font-medium">Thời gian:</span> {new Date(selectedEvent.start).toLocaleString()}
-                    {selectedEvent.end && ` - ${new Date(selectedEvent.end).toLocaleString()}`}
-                    {selectedEvent.allDay && ' (Cả ngày)'}
-                  </div>
-                  
-                  <div>
-                    <span className="font-medium">Trạng thái:</span>
-                    <span className={`ml-2 px-2 py-1 rounded text-white text-sm ${
-                      selectedEvent.status === 'completed' ? 'bg-green-500' :
-                      selectedEvent.status === 'in_progress' ? 'bg-orange-500' : 'bg-red-500'
-                    }`}>
-                      {selectedEvent.status === 'completed' ? 'Hoàn thành' :
-                       selectedEvent.status === 'in_progress' ? 'Đang thực hiện' : 'Chờ xử lý'}
-                    </span>
-                  </div>
-                  
-                  {selectedEvent.description && (
-                    <div>
-                      <span className="font-medium">Mô tả:</span> {selectedEvent.description}
-                    </div>
-                  )}
-                  
-                  {selectedEvent.assignedTo && (
-                    <div>
-                      <span className="font-medium">Người thực hiện:</span> {selectedEvent.assignedTo}
-                    </div>
-                  )}
-                  
-                  {selectedEvent.location && (
-                    <div>
-                      <span className="font-medium">Địa điểm:</span> {selectedEvent.location}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="mt-6">
-                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cập nhật trạng thái:</div>
-                  <div className="flex space-x-2">
-                    <button
-                      className={`px-3 py-1.5 rounded text-white text-sm ${
-                        selectedEvent.status === 'pending' ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'
-                      } transition`}
-                      onClick={() => handleUpdateStatus('pending')}
-                      type="button"
-                    >
-                      Chờ xử lý
-                    </button>
-                    <button
-                      className={`px-3 py-1.5 rounded text-white text-sm ${
-                        selectedEvent.status === 'in_progress' ? 'bg-orange-600' : 'bg-orange-500 hover:bg-orange-600'
-                      } transition`}
-                      onClick={() => handleUpdateStatus('in_progress')}
-                      type="button"
-                    >
-                      Đang thực hiện
-                    </button>
-                    <button
-                      className={`px-3 py-1.5 rounded text-white text-sm ${
-                        selectedEvent.status === 'completed' ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'
-                      } transition`}
-                      onClick={() => handleUpdateStatus('completed')}
-                      type="button"
-                    >
-                      Hoàn thành
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="mt-6 flex justify-end">
-                  <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition"
-                    onClick={handleCloseModal}
-                    type="button"
-                  >
-                    Đóng
-                  </button>
-                </div>
-              </>
-            )
-          )}
-        </div>
-      </div>
-    );
-  });
+    // Create schedule jobs with proper structure
+    const scheduleJobs = selectedBuildings.length > 0
+      ? selectedBuildings.map(buildingId => ({
+        building_id: buildingId,
+        status: "Pending" as const,
+        schedule_job_id: "",
+        schedule_id: "",
+        run_date: startDateUTC.toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }))
+      : []
+
+    const updateData: Partial<ApiSchedule> = {
+      schedule_name: formData.title,
+      schedule_type: formData.schedule_type,
+      description: formData.description,
+      start_date: startDateUTC.toISOString(),
+      end_date: endDateUTC.toISOString(),
+      buildingId: selectedBuildings, // This will be empty array if selectedBuildings is empty
+    }
+
+    // Log the data being sent to the API
+    console.log('Updating event with data:', updateData)
+
+    updateScheduleMutation.mutate({ id: selectedEvent.id, data: updateData })
+  }, [selectedEvent, updateScheduleMutation, selectedBuildings])
+
+  // Thêm hàm xử lý chuyển hướng đến trang ScheduleJob
+  const handleViewScheduleJob = useCallback(() => {
+    if (selectedEvent) {
+      navigate(`/schedule-job/${selectedEvent.id}`)
+    }
+  }, [selectedEvent, navigate])
+
+  // Xử lý chọn building
+  const handleBuildingSelect = useCallback((buildingId: string) => {
+    setSelectedBuildings(prev => {
+      if (prev.includes(buildingId)) {
+        return prev.filter(id => id !== buildingId)
+      } else {
+        return [...prev, buildingId]
+      }
+    })
+  }, [])
+
+  // Add handleDelete function
+  const handleDelete = useCallback((id: string) => {
+    deleteScheduleMutation.mutate(id)
+  }, [deleteScheduleMutation])
 
   return (
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Lịch công việc</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Schedule Calendar</h1>
         <div className="flex items-center space-x-2">
           <div className="flex items-center">
-            <span className="w-3 h-3 rounded-full bg-red-500 mr-1"></span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">Chờ xử lý</span>
-          </div>
-          <div className="flex items-center ml-3">
             <span className="w-3 h-3 rounded-full bg-orange-500 mr-1"></span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">Đang thực hiện</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">In Progress</span>
           </div>
           <div className="flex items-center ml-3">
             <span className="w-3 h-3 rounded-full bg-green-500 mr-1"></span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">Hoàn thành</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Completed</span>
+          </div>
+          <div className="flex items-center ml-3">
+            <span className="w-3 h-3 rounded-full bg-red-500 mr-1"></span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Cancel</span>
           </div>
         </div>
       </div>
-      
+
       <div className="calendar-container custom-calendar-view">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -679,31 +424,122 @@ const Calendar: React.FC = () => {
           editable={true}
           selectable={true}
           selectMirror={true}
-          dayMaxEvents={true}
+          dayMaxEvents={3}
           weekends={true}
           events={events}
           eventContent={renderEventContent}
           eventClick={handleEventClick}
           select={handleDateSelect}
           height="auto"
-          locale="vi"
+          locale="en"
           buttonText={{
-            today: 'Hôm nay',
-            month: 'Tháng',
-            week: 'Tuần',
-            day: 'Ngày'
+            today: 'Today',
+            month: 'Month',
+            week: 'Week',
+            day: 'Day'
           }}
           eventTimeFormat={{
             hour: '2-digit',
             minute: '2-digit',
             meridiem: false
           }}
+          eventClassNames={(arg) => {
+            return [`${arg.event.extendedProps.status || 'default'}`]
+          }}
+          eventMaxStack={3}
+          eventMinHeight={25}
+          eventShortHeight={25}
+          eventDisplay="block"
+          displayEventEnd={true}
+          eventDidMount={(info) => {
+            // Add tooltip to event
+            const tooltip = document.createElement('div')
+            tooltip.className = 'fc-tooltip'
+            tooltip.innerHTML = `
+              <div class="font-semibold">${info.event.title}</div>
+              ${info.event.extendedProps.schedule_type ? `<div>Type: ${info.event.extendedProps.schedule_type}</div>` : ''}
+              ${info.event.extendedProps.description ? `<div>${info.event.extendedProps.description}</div>` : ''}
+            `
+            info.el.appendChild(tooltip)
+          }}
         />
       </div>
-      
-      <EventModal />
-    </div>
-  );
-};
 
-export default Calendar;
+      <style>
+        {`
+          .fc-event {
+            margin: 1px 0;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            overflow: hidden;
+          }
+
+          .fc-event-content {
+            min-height: 24px;
+          }
+
+          .fc-tooltip {
+            display: none;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            z-index: 1000;
+            font-size: 0.875rem;
+            max-width: 200px;
+            white-space: normal;
+          }
+
+          .fc-event:hover .fc-tooltip {
+            display: block;
+          }
+
+          .fc-daygrid-event {
+            white-space: normal;
+            align-items: flex-start;
+          }
+
+          .fc-daygrid-day-events {
+            margin-top: 1px;
+          }
+
+          .fc-daygrid-more-link {
+            margin-top: 2px;
+            font-size: 0.75rem;
+          }
+        `}
+      </style>
+
+      <EventModal
+        isOpen={isModalOpen}
+        isCreateMode={isCreateMode}
+        selectedEvent={selectedEvent}
+        onClose={handleCloseModal}
+        onSave={handleSaveEvent}
+        onUpdate={handleUpdateEvent}
+        onDelete={handleDelete}
+        onViewScheduleJob={handleViewScheduleJob}
+        initialFormData={initialFormData}
+        buildings={buildings}
+        selectedBuildings={selectedBuildings}
+        onBuildingSelect={handleBuildingSelect}
+        onSetSelectedBuildings={setSelectedBuildings}
+        onUpdateStatus={(id, status) => updateScheduleMutation.mutate({ id, data: { status } })}
+      />
+
+      <BuildingSelectionModal
+        isOpen={showBuildingModal}
+        selectedEvent={selectedEvent}
+        buildings={buildings}
+        selectedBuildings={selectedBuildings}
+        onClose={() => setShowBuildingModal(false)}
+        onBuildingSelect={handleBuildingSelect}
+      />
+    </div>
+  )
+}
+
+export default Calendar
