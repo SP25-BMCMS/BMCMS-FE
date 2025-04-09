@@ -9,22 +9,21 @@ interface ModalProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-const Modal: React.FC<ModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children,
-  size = 'md'
-}) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
   if (!isOpen) return null;
 
   const getModalSizeClass = () => {
-    switch(size) {
-      case 'sm': return 'sm:max-w-sm';
-      case 'md': return 'sm:max-w-md';
-      case 'lg': return 'sm:max-w-lg';
-      case 'xl': return 'sm:max-w-2xl';
-      default: return 'sm:max-w-md';
+    switch (size) {
+      case 'sm':
+        return 'sm:max-w-sm';
+      case 'md':
+        return 'sm:max-w-md';
+      case 'lg':
+        return 'sm:max-w-lg';
+      case 'xl':
+        return 'sm:max-w-2xl';
+      default:
+        return 'sm:max-w-md';
     }
   };
 
@@ -36,11 +35,13 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4"
       onClick={handleBackdropClick}
     >
-      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full ${getModalSizeClass()} overflow-hidden`}>
+      <div
+        className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full ${getModalSizeClass()} overflow-hidden`}
+      >
         <div className="px-4 py-3 flex items-center justify-between border-b dark:border-gray-700">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">{title}</h3>
           <button
@@ -50,12 +51,10 @@ const Modal: React.FC<ModalProps> = ({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
-          {children}
-        </div>
+        <div className="overflow-y-auto max-h-[calc(100vh-200px)]">{children}</div>
       </div>
     </div>
   );
 };
 
-export default Modal; 
+export default Modal;

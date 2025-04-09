@@ -1,21 +1,20 @@
-import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import Table, { Column } from "@/components/Table"
-import DropdownMenu from "@/components/DropDownMenu"
-import SearchInput from "@/components/SearchInput"
-import FilterDropdown from "@/components/FilterDropdown"
-import Pagination from "@/components/Pagination"
-import { CrackReportResponse, Crack, CrackListParams, CrackListPaginationResponse } from "@/types"
-import crackApi from "@/services/cracks"
-import StatusCrack from "@/components/crackManager/StatusCrack"
-import { useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query"
-import { toast } from "react-hot-toast"
-import { AxiosError } from "axios"
-import { STATUS_COLORS } from "@/constants/colors"
-
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Table, { Column } from '@/components/Table';
+import DropdownMenu from '@/components/DropDownMenu';
+import SearchInput from '@/components/SearchInput';
+import FilterDropdown from '@/components/FilterDropdown';
+import Pagination from '@/components/Pagination';
+import { CrackReportResponse, Crack, CrackListParams, CrackListPaginationResponse } from '@/types';
+import crackApi from '@/services/cracks';
+import StatusCrack from '@/components/crackManager/StatusCrack';
+import { useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import { toast } from 'react-hot-toast';
+import { AxiosError } from 'axios';
+import { STATUS_COLORS } from '@/constants/colors';
 
 interface ErrorResponse {
-  message: string
+  message: string;
 }
 
 // Map API response to UI model
@@ -24,93 +23,96 @@ const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
     id: response.crackReportId,
     reportDescription: response.description,
     createdDate: new Date(response.createdAt).toLocaleDateString(),
-    status: response.status === "Pending"
-      ? "pending"
-      : response.status === "InProgress"
-        ? "InProgress"
-        : response.status === "Reviewing"
-          ? "Reviewing"
-          : "resolved",
-    residentId: typeof response.reportedBy === 'object' ? response.reportedBy.userId : response.reportedBy,
-    residentName: typeof response.reportedBy === 'object' ? response.reportedBy.username : "Unknown",
+    status:
+      response.status === 'Pending'
+        ? 'pending'
+        : response.status === 'InProgress'
+          ? 'InProgress'
+          : response.status === 'Reviewing'
+            ? 'Reviewing'
+            : 'resolved',
+    residentId:
+      typeof response.reportedBy === 'object' ? response.reportedBy.userId : response.reportedBy,
+    residentName:
+      typeof response.reportedBy === 'object' ? response.reportedBy.username : 'Unknown',
     description: response.description,
     originalImage: response.crackDetails[0]?.photoUrl,
     aiDetectedImage: response.crackDetails[0]?.aiDetectionUrl,
-  }
-}
+  };
+};
 
 interface CracksQueryData {
-  cracks: Crack[]
-  pagination: CrackListPaginationResponse['pagination']
+  cracks: Crack[];
+  pagination: CrackListPaginationResponse['pagination'];
 }
 
 const CrackManagement: React.FC = () => {
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const [searchTerm, setSearchTerm] = useState<string>("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [selectedStatus, setSelectedStatus] = useState<string>("all")
-  const [selectedSeverity, setSelectedSeverity] = useState<string>("all")
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
-  const [selectedCrack, setSelectedCrack] = useState<Crack | null>(null)
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedSeverity, setSelectedSeverity] = useState<string>('all');
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedCrack, setSelectedCrack] = useState<Crack | null>(null);
 
   const severityOptions = [
-    { value: "all", label: "All Severities" },
-    { value: "Low", label: "Low" },
-    { value: "Medium", label: "Medium" },
-    { value: "High", label: "High" },
-  ]
+    { value: 'all', label: 'All Severities' },
+    { value: 'Low', label: 'Low' },
+    { value: 'Medium', label: 'Medium' },
+    { value: 'High', label: 'High' },
+  ];
 
   // Get status animation class
   const getStatusAnimationClass = (status: string) => {
     switch (status) {
-      case "resolved":
-        return ""
-      case "InProgress":
-        return "animate-pulse"
+      case 'resolved':
+        return '';
+      case 'InProgress':
+        return 'animate-pulse';
       default:
-        return "animate-pulse-fast"
+        return 'animate-pulse-fast';
     }
-  }
+  };
 
   // Build query params
   const getQueryParams = (): CrackListParams => {
     const params: CrackListParams = {
       page: currentPage,
       limit: itemsPerPage,
-    }
+    };
 
     if (searchTerm) {
-      params.search = searchTerm
+      params.search = searchTerm;
     }
 
-    if (selectedStatus !== "all") {
-      params.status = selectedStatus as "Pending" | "InProgress" | "Resolved" | "Reviewing"
+    if (selectedStatus !== 'all') {
+      params.status = selectedStatus as 'Pending' | 'InProgress' | 'Resolved' | 'Reviewing';
     }
 
-    if (selectedSeverity !== "all") {
-      params.severityFilter = selectedSeverity as "Low" | "Medium" | "High"
+    if (selectedSeverity !== 'all') {
+      params.severityFilter = selectedSeverity as 'Low' | 'Medium' | 'High';
     }
 
-    return params
-  }
+    return params;
+  };
 
   // Fetch cracks using React Query
   const queryOptions: UseQueryOptions<CracksQueryData> = {
     queryKey: ['cracks', currentPage, itemsPerPage, selectedStatus, selectedSeverity, searchTerm],
     queryFn: async () => {
       try {
-        const params = getQueryParams()
-        const response = await crackApi.getCrackList(params)
+        const params = getQueryParams();
+        const response = await crackApi.getCrackList(params);
         return {
           cracks: response.data.map(mapCrackResponseToCrack),
-          pagination: response.pagination
-        }
+          pagination: response.pagination,
+        };
       } catch (error) {
-        const axiosError = error as AxiosError<ErrorResponse>
-        toast.error(axiosError.response?.data?.message || "Failed to fetch cracks")
-        throw error
+        const axiosError = error as AxiosError<ErrorResponse>;
+        toast.error(axiosError.response?.data?.message || 'Failed to fetch cracks');
+        throw error;
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -118,16 +120,16 @@ const CrackManagement: React.FC = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: false
-  }
+    retry: false,
+  };
 
-  const { data: cracksData, isLoading, isFetching } = useQuery<CracksQueryData>(queryOptions)
+  const { data: cracksData, isLoading, isFetching } = useQuery<CracksQueryData>(queryOptions);
 
   // Handle search with debounce
   const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    setCurrentPage(1)
-  }
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
 
   // const handleStatusChange = (value: string) => {
   //   setSelectedStatus(value)
@@ -135,69 +137,69 @@ const CrackManagement: React.FC = () => {
   // }
 
   const handleSeverityChange = (value: string) => {
-    setSelectedSeverity(value)
-    setCurrentPage(1)
-  }
+    setSelectedSeverity(value);
+    setCurrentPage(1);
+  };
 
   // Handle status update with staff assignment
   const handleStatusUpdate = (crack: Crack) => {
-    setSelectedCrack(crack)
-    setIsStatusModalOpen(true)
-  }
+    setSelectedCrack(crack);
+    setIsStatusModalOpen(true);
+  };
 
   const columns: Column<Crack>[] = [
     {
-      key: "index",
-      title: "No",
+      key: 'index',
+      title: 'No',
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
         </div>
       ),
-      width: "60px",
+      width: '60px',
     },
     {
-      key: "id",
-      title: "Crack ID",
-      render: (item) => (
+      key: 'id',
+      title: 'Crack ID',
+      render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.id.substring(0, 8)}...</div>
       ),
     },
     {
-      key: "reportDescription",
-      title: "Report Description",
-      render: (item) => (
+      key: 'reportDescription',
+      title: 'Report Description',
+      render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
           {item.reportDescription}
         </div>
       ),
     },
     {
-      key: "residentName",
-      title: "Reported By",
-      render: (item) => (
+      key: 'residentName',
+      title: 'Reported By',
+      render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.residentName}</div>
       ),
     },
     {
-      key: "createdDate",
-      title: "Created Date",
-      render: (item) => (
+      key: 'createdDate',
+      title: 'Created Date',
+      render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
       ),
     },
     {
-      key: "status",
-      title: "Status",
-      render: (item) => {
+      key: 'status',
+      title: 'Status',
+      render: item => {
         const statusColors =
-          item.status === "resolved"
+          item.status === 'resolved'
             ? STATUS_COLORS.RESOLVED
-            : item.status === "InProgress"
+            : item.status === 'InProgress'
               ? STATUS_COLORS.IN_PROGRESS
-              : item.status === "Reviewing"
+              : item.status === 'Reviewing'
                 ? STATUS_COLORS.REVIEWING
-                : STATUS_COLORS.PENDING
+                : STATUS_COLORS.PENDING;
 
         return (
           <span
@@ -215,7 +217,7 @@ const CrackManagement: React.FC = () => {
                   backgroundColor: statusColors.TEXT,
                 }}
               ></span>
-              {item.status !== "resolved" && (
+              {item.status !== 'resolved' && (
                 <span
                   className="absolute -inset-0.5 rounded-full opacity-30 animate-ping"
                   style={{
@@ -224,30 +226,30 @@ const CrackManagement: React.FC = () => {
                 ></span>
               )}
             </span>
-            {item.status === "resolved"
-              ? "Resolved"
-              : item.status === "InProgress"
-                ? "In Progress"
-                : item.status === "Reviewing"
-                  ? "Reviewing"
-                  : "Pending"}
+            {item.status === 'resolved'
+              ? 'Resolved'
+              : item.status === 'InProgress'
+                ? 'In Progress'
+                : item.status === 'Reviewing'
+                  ? 'Reviewing'
+                  : 'Pending'}
           </span>
-        )
+        );
       },
     },
     {
-      key: "action",
-      title: "Action",
-      render: (item) => (
+      key: 'action',
+      title: 'Action',
+      render: item => (
         <DropdownMenu
           onViewDetail={() => navigate(`/crack/detail/${item.id}`)}
           onChangeStatus={() => handleStatusUpdate(item)}
-          onRemove={() => console.log("Remove", item)}
+          onRemove={() => console.log('Remove', item)}
         />
       ),
-      width: "80px",
+      width: '80px',
     },
-  ]
+  ];
 
   return (
     <div className="w-full mt-[60px]">
@@ -256,7 +258,7 @@ const CrackManagement: React.FC = () => {
           <SearchInput
             placeholder="Search by ID or description"
             value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={e => handleSearch(e.target.value)}
             className="w-[20rem] max-w-xs"
           />
 
@@ -338,7 +340,7 @@ const CrackManagement: React.FC = () => {
       <Table<Crack>
         data={cracksData?.cracks || []}
         columns={columns}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         className="w-[95%] mx-auto"
         tableClassName="w-full"
         isLoading={isLoading || isFetching}
@@ -366,12 +368,12 @@ const CrackManagement: React.FC = () => {
           crackId={selectedCrack.id}
           crackStatus={selectedCrack.status}
           onUpdateSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['cracks'] })
+            queryClient.invalidateQueries({ queryKey: ['cracks'] });
           }}
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default CrackManagement
+export default CrackManagement;

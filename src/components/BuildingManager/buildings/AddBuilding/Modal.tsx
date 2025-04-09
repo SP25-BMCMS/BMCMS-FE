@@ -19,15 +19,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
         </div>
 
         <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-         <div className='bg-gray-700 px-4 py-3 flex items-center justify-between'>
-          <div className='flex-1 text-center'>
-            <h3 className='text-lg leading-6 font-medium text-white inline-block'>{title}</h3>
-          </div>
-          <button onClick={onClose}
-          className='text-white hover:text-gray-300 focus:outline-none'>
-            <XIcon className='h-6 w-6' />
+          <div className="bg-gray-700 px-4 py-3 flex items-center justify-between">
+            <div className="flex-1 text-center">
+              <h3 className="text-lg leading-6 font-medium text-white inline-block">{title}</h3>
+            </div>
+            <button onClick={onClose} className="text-white hover:text-gray-300 focus:outline-none">
+              <XIcon className="h-6 w-6" />
             </button>
-         </div>
+          </div>
           {children}
         </div>
       </div>

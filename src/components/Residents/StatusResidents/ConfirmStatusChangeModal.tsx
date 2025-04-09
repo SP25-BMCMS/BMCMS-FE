@@ -13,7 +13,7 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  resident
+  resident,
 }) => {
   if (!resident) return null;
 
@@ -24,7 +24,20 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
       <div className="p-6 space-y-4">
         <div className="text-center">
           <p className="text-sm text-gray-700 dark:text-gray-300">
-            Bạn có chắc chắn muốn thay đổi trạng thái của <span className="font-medium">{resident.username}</span> từ <span className={`font-medium ${resident.accountStatus === 'Active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{resident.accountStatus}</span> sang <span className={`font-medium ${newStatus === 'Active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{newStatus}</span> không?
+            Bạn có chắc chắn muốn thay đổi trạng thái của{' '}
+            <span className="font-medium">{resident.username}</span> từ{' '}
+            <span
+              className={`font-medium ${resident.accountStatus === 'Active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+            >
+              {resident.accountStatus}
+            </span>{' '}
+            sang{' '}
+            <span
+              className={`font-medium ${newStatus === 'Active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+            >
+              {newStatus}
+            </span>{' '}
+            không?
           </p>
         </div>
 

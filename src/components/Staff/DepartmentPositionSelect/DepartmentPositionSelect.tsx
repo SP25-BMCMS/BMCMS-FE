@@ -46,7 +46,7 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
   onSaveSuccess,
   onCancel,
   initialDepartmentId,
-  initialPositionId
+  initialPositionId,
 }) => {
   const { theme } = useTheme();
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -63,36 +63,55 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
       setIsLoading(true);
       try {
         // Fetch departments from API using VITE_VIEW_DEPARTMENT_LIST
-        const departmentsResponse = await apiInstance.get(import.meta.env.VITE_VIEW_DEPARTMENT_LIST);
-        console.log("Departments API Response:", departmentsResponse.data);
-        
-        if (departmentsResponse.data && departmentsResponse.data.data && Array.isArray(departmentsResponse.data.data)) {
+        const departmentsResponse = await apiInstance.get(
+          import.meta.env.VITE_VIEW_DEPARTMENT_LIST
+        );
+        console.log('Departments API Response:', departmentsResponse.data);
+
+        if (
+          departmentsResponse.data &&
+          departmentsResponse.data.data &&
+          Array.isArray(departmentsResponse.data.data)
+        ) {
           setDepartments(departmentsResponse.data.data);
         } else {
-          console.error("Unexpected department API response format:", departmentsResponse.data);
+          console.error('Unexpected department API response format:', departmentsResponse.data);
           toast.error('Department data is not in the correct format');
         }
 
         // Call API to get position list from VITE_VIEW_POSITION_LIST
         const positionsResponse = await apiInstance.get(import.meta.env.VITE_VIEW_POSITION_LIST);
-        console.log("Positions API Response:", positionsResponse.data);
-        
+        console.log('Positions API Response:', positionsResponse.data);
+
         // Process actual API structure with workingPositions
-        if (positionsResponse.data && positionsResponse.data.workingPositions && Array.isArray(positionsResponse.data.workingPositions)) {
+        if (
+          positionsResponse.data &&
+          positionsResponse.data.workingPositions &&
+          Array.isArray(positionsResponse.data.workingPositions)
+        ) {
           setPositions(positionsResponse.data.workingPositions);
         } else {
-          console.error("Unexpected API response format:", positionsResponse.data);
+          console.error('Unexpected API response format:', positionsResponse.data);
           toast.error('Position data is not in the correct format');
         }
       } catch (error) {
         console.error('Failed to fetch departments and positions:', error);
         toast.error('Could not load departments and positions list');
-        
+
         // Fallback to mock department data if API fails
         const mockDepartments: Department[] = [
-          { departmentId: "2a2ae0a4-067a-4faf-be79-a2c9d4518fea", departmentName: "Technical Department" },
-          { departmentId: "3b3bf1b5-178b-5gbg-cf80-b3d0d5629gfb", departmentName: "Administrative Department" },
-          { departmentId: "4c4cg2c6-289c-6hch-dg91-c4e1e6730hgc", departmentName: "Business Department" },
+          {
+            departmentId: '2a2ae0a4-067a-4faf-be79-a2c9d4518fea',
+            departmentName: 'Technical Department',
+          },
+          {
+            departmentId: '3b3bf1b5-178b-5gbg-cf80-b3d0d5629gfb',
+            departmentName: 'Administrative Department',
+          },
+          {
+            departmentId: '4c4cg2c6-289c-6hch-dg91-c4e1e6730hgc',
+            departmentName: 'Business Department',
+          },
         ];
         setDepartments(mockDepartments);
       } finally {
@@ -137,7 +156,7 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
         import.meta.env.VITE_UPDATE_STAFF_DEPARTMENT_POSITION.replace('{staffId}', staffId),
         {
           departmentId: selectedDepartment,
-          positionId: selectedPosition
+          positionId: selectedPosition,
         }
       );
 
@@ -160,7 +179,7 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
       <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
         Update Department and Position
       </h2>
-      
+
       {isLoading ? (
         <div className="flex justify-center py-4">
           <div className="animate-spin h-6 w-6 border-2 border-blue-500 rounded-full border-t-transparent"></div>
@@ -168,7 +187,10 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
       ) : (
         <>
           <div>
-            <label htmlFor="department" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="department"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               Department
             </label>
             <select
@@ -187,7 +209,10 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
           </div>
 
           <div>
-            <label htmlFor="position" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="position"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               Position
             </label>
             <select
@@ -199,11 +224,12 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
               <option value="">-- Select Position --</option>
               {positions.map(pos => (
                 <option key={pos.positionId} value={pos.positionId}>
-                  {getPositionName(pos.positionName)} {pos.description ? `(${pos.description})` : ''}
+                  {getPositionName(pos.positionName)}{' '}
+                  {pos.description ? `(${pos.description})` : ''}
                 </option>
               ))}
             </select>
-          </div>   
+          </div>
 
           <div className="flex justify-end space-x-3 mt-6">
             {onCancel && (
@@ -238,4 +264,4 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
   );
 };
 
-export default DepartmentPositionSelect; 
+export default DepartmentPositionSelect;

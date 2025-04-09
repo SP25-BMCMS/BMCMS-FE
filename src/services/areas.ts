@@ -1,7 +1,5 @@
-
 import axios from 'axios';
 import { Area, AddAreaRequest } from '@/types';
-
 
 export const getAreaList = async (): Promise<Area[]> => {
   try {
@@ -30,7 +28,10 @@ export const addNewArea = async (areaData: AddAreaRequest): Promise<Area> => {
 
 export const getAreaById = async (id: string): Promise<Area> => {
   try {
-    const url = `${import.meta.env.VITE_API_SECRET}${import.meta.env.VITE_GET_AREA_ID}`.replace('{id}', id);
+    const url = `${import.meta.env.VITE_API_SECRET}${import.meta.env.VITE_GET_AREA_ID}`.replace(
+      '{id}',
+      id
+    );
     const response = await axios.get(url);
     return response.data.data;
   } catch (error) {

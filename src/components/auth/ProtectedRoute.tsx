@@ -1,8 +1,9 @@
 // src/routes/ProtectedRoute.tsx
-import { Navigate, Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
-import authApi from "@/services/auth";
-import { motion } from "framer-motion";
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import authApi from '@/services/auth';
+import { motion } from 'framer-motion';
 
 const ProtectedRoute = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -11,7 +12,7 @@ const ProtectedRoute = () => {
   useEffect(() => {
     const checkAuth = async () => {
       // Kiểm tra xem có token không
-      const token = localStorage.getItem("bmcms_token");
+      const token = localStorage.getItem('bmcms_token');
       if (!token) {
         setIsAuthenticated(false);
         setIsLoading(false);
@@ -43,14 +44,14 @@ const ProtectedRoute = () => {
           transition={{
             duration: 3,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: 'easeInOut',
           }}
           className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full"
         />
       </div>
     );
   }
-  
+
   if (!isAuthenticated) {
     // Chuyển hướng đến trang đăng nhập nếu chưa xác thực
     return <Navigate to="/" replace />;

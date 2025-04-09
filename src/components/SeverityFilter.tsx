@@ -1,6 +1,5 @@
 import React from 'react';
-import { SeverityFilterProps} from '@/types';
-
+import { SeverityFilterProps } from '@/types';
 
 const SeverityFilter: React.FC<SeverityFilterProps> = ({
   options,
@@ -13,7 +12,7 @@ const SeverityFilter: React.FC<SeverityFilterProps> = ({
     <div className={`flex items-center ${className}`}>
       <span className="text-sm font-medium text-gray-700 mr-2">{label}</span>
       <div className="flex space-x-2">
-        {options.map((option) => (
+        {options.map(option => (
           <button
             key={option.value}
             onClick={() => onSelect(option.value)}
@@ -31,4 +30,4 @@ const SeverityFilter: React.FC<SeverityFilterProps> = ({
   );
 };
 
-export default SeverityFilter; 
+export default SeverityFilter;

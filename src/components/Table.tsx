@@ -1,29 +1,29 @@
-import React, { ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import '../../src/styles/Table.css'
+import React, { ReactNode } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import '../../src/styles/Table.css';
 
 export type Column<T> = {
-  key: string
-  title: string
-  render?: (item: T, index: number) => ReactNode
-  width?: string | number
-  className?: string
-}
+  key: string;
+  title: string;
+  render?: (item: T, index: number) => ReactNode;
+  width?: string | number;
+  className?: string;
+};
 
 type TableProps<T> = {
-  data: T[]
-  columns: Column<T>[]
-  keyExtractor: (item: T) => string | number
-  onRowClick?: (item: T) => void
-  className?: string
-  tableClassName?: string
-  headerClassName?: string
-  bodyClassName?: string
-  emptyText?: string
-  isLoading?: boolean
-  loadingComponent?: ReactNode
-  animated?: boolean
-}
+  data: T[];
+  columns: Column<T>[];
+  keyExtractor: (item: T) => string | number;
+  onRowClick?: (item: T) => void;
+  className?: string;
+  tableClassName?: string;
+  headerClassName?: string;
+  bodyClassName?: string;
+  emptyText?: string;
+  isLoading?: boolean;
+  loadingComponent?: ReactNode;
+  animated?: boolean;
+};
 
 const rowVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -33,15 +33,15 @@ const rowVariants = {
     transition: {
       delay: index * 0.05,
       duration: 0.3,
-      ease: "easeOut"
-    }
+      ease: 'easeOut',
+    },
   }),
   exit: {
     opacity: 0,
     y: -20,
-    transition: { duration: 0.2 }
-  }
-}
+    transition: { duration: 0.2 },
+  },
+};
 
 const Table = <T extends {}>({
   data,
@@ -60,10 +60,10 @@ const Table = <T extends {}>({
   // Wrapper for content to ensure dark mode compatibility
   const ContentWrapper = ({ children }: { children: ReactNode }) => (
     <div className="text-gray-700 dark:text-gray-300">{children}</div>
-  )
+  );
 
   // Animated row component
-  const AnimatedRow = ({ item, index }: { item: T, index: number }) => (
+  const AnimatedRow = ({ item, index }: { item: T; index: number }) => (
     <motion.tr
       key={keyExtractor(item)}
       variants={rowVariants}
@@ -74,7 +74,7 @@ const Table = <T extends {}>({
       className={`${onRowClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150' : ''} border-b border-gray-200 dark:border-gray-700`}
       onClick={() => onRowClick && onRowClick(item)}
     >
-      {columns.map((column) => (
+      {columns.map(column => (
         <td
           key={`${keyExtractor(item)}-${column.key}`}
           className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"
@@ -87,16 +87,16 @@ const Table = <T extends {}>({
         </td>
       ))}
     </motion.tr>
-  )
+  );
 
   // Regular row component
-  const RegularRow = ({ item, index }: { item: T, index: number }) => (
+  const RegularRow = ({ item, index }: { item: T; index: number }) => (
     <tr
       key={keyExtractor(item)}
       className={`${onRowClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150' : ''} border-b border-gray-200 dark:border-gray-700`}
       onClick={() => onRowClick && onRowClick(item)}
     >
-      {columns.map((column) => (
+      {columns.map(column => (
         <td
           key={`${keyExtractor(item)}-${column.key}`}
           className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"
@@ -109,7 +109,7 @@ const Table = <T extends {}>({
         </td>
       ))}
     </tr>
-  )
+  );
 
   // Loading animation
   const loadingVariants = {
@@ -118,10 +118,10 @@ const Table = <T extends {}>({
       transition: {
         duration: 1,
         repeat: Infinity,
-        ease: "linear"
-      }
-    }
-  }
+        ease: 'linear',
+      },
+    },
+  };
 
   const LoadingAnimation = () => (
     <div className="flex justify-center items-center py-8">
@@ -132,14 +132,18 @@ const Table = <T extends {}>({
       />
       <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">Loading data...</span>
     </div>
-  )
+  );
 
   return (
-    <div className={`overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}>
-      <table className={`min-w-full divide-y divide-gray-200 dark:divide-gray-700 ${tableClassName}`}>
+    <div
+      className={`overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}
+    >
+      <table
+        className={`min-w-full divide-y divide-gray-200 dark:divide-gray-700 ${tableClassName}`}
+      >
         <thead className={headerClassName}>
           <tr>
-            {columns.map((column) => (
+            {columns.map(column => (
               <th
                 key={column.key}
                 className={`px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ${column.className || ''}`}
@@ -192,7 +196,7 @@ const Table = <T extends {}>({
         </tbody>
       </table>
     </div>
-  )
-}
+  );
+};
 
-export default Table
+export default Table;

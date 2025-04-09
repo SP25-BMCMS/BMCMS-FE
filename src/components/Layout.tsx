@@ -10,7 +10,9 @@ const Layout: React.FC = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white dark:bg-gray-800 shadow-sm">
           <div className="flex justify-between items-center px-6 py-4">
-            <h1 className="text-xl font-semibold text-gray-800 dark:text-white">Building Management System</h1>
+            <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
+              Building Management System
+            </h1>
             <ThemeToggle />
           </div>
         </header>
@@ -24,4 +26,4 @@ const Layout: React.FC = () => {
   );
 };
 
-export default Layout; 
+export default Layout;

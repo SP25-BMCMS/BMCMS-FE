@@ -1,6 +1,6 @@
 // services/buildings.ts
 import apiInstance from '@/lib/axios';
-import { BuildingResponse,  AddBuildingRequest } from '@/types';
+import { BuildingResponse, AddBuildingRequest } from '@/types';
 
 export interface BuildingListParams {
   page?: number;
@@ -36,9 +36,9 @@ export interface BuildingDetailResponse {
         description: string;
         createdAt: string;
         updatedAt: string;
-      }
-    }
-  }
+      };
+    };
+  };
 }
 
 export interface AllBuildingDetailsResponse {
@@ -63,7 +63,9 @@ export interface AllBuildingDetailsResponse {
 }
 
 // Hàm lấy danh sách tòa nhà với pagination và search
-export const getBuildings = async (params: BuildingListParams = {}): Promise<BuildingListResponse> => {
+export const getBuildings = async (
+  params: BuildingListParams = {}
+): Promise<BuildingListResponse> => {
   try {
     const response = await apiInstance.get<BuildingListResponse>(
       import.meta.env.VITE_VIEW_BUILDING_LIST,
@@ -78,10 +80,11 @@ export const getBuildings = async (params: BuildingListParams = {}): Promise<Bui
 
 export const addBuilding = async (buildingData: AddBuildingRequest): Promise<BuildingResponse> => {
   try {
-    const response = await apiInstance.post<{statusCode: number, message: string, data: BuildingResponse}>(
-      import.meta.env.VITE_ADD_BUILDING,
-      buildingData
-    );
+    const response = await apiInstance.post<{
+      statusCode: number;
+      message: string;
+      data: BuildingResponse;
+    }>(import.meta.env.VITE_ADD_BUILDING, buildingData);
     return response.data.data;
   } catch (error) {
     console.error('Error adding new building:', error);
@@ -99,7 +102,9 @@ export const deleteBuilding = async (buildingId: string): Promise<void> => {
   }
 };
 
-export const getBuildingDetail = async (buildingDetailId: string): Promise<BuildingDetailResponse> => {
+export const getBuildingDetail = async (
+  buildingDetailId: string
+): Promise<BuildingDetailResponse> => {
   try {
     const url = import.meta.env.VITE_VIEW_BUILDING_DETAIL.replace('{id}', buildingDetailId);
     console.log(`Fetching building detail with URL: ${url}, buildingDetailId: ${buildingDetailId}`);
@@ -122,4 +127,3 @@ export const getAllBuildingDetails = async (): Promise<AllBuildingDetailsRespons
     throw error;
   }
 };
-

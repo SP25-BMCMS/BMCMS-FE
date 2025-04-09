@@ -1,6 +1,6 @@
-import React from "react";
-import Modal from "./Modal";
-import { Residents } from "@/types";
+import React from 'react';
+import Modal from './Modal';
+import { Residents } from '@/types';
 
 interface RemoveResidentProps {
   isOpen: boolean;
@@ -20,17 +20,11 @@ const RemoveResident: React.FC<RemoveResidentProps> = ({
   if (!resident) return null;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Confirm Remove"
-      size="sm"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Confirm Remove" size="sm">
       <div className="space-y-4">
         <p className="text-gray-700">
-          Do You want to remove this Resident{" "}
-          <span className="font-medium">{resident.name}</span> (ID:{" "}
-          {resident.id})?
+          Do You want to remove this Resident <span className="font-medium">{resident.name}</span>{' '}
+          (ID: {resident.id})?
         </p>
         <p className="text-sm text-gray-500">This action will not be undone.</p>
         <div className="flex justify-center space-x-3 pt-2">
@@ -71,7 +65,7 @@ const RemoveResident: React.FC<RemoveResidentProps> = ({
                 Deleting...
               </div>
             ) : (
-              "Delete"
+              'Delete'
             )}
           </button>
         </div>

@@ -1,42 +1,42 @@
-import React, { useState } from "react"
-import Table, { Column } from "@/components/Table"
-import { Residents } from "@/types"
-import DropdownMenu from "@/components/DropDownMenu"
-import SearchInput from "@/components/SearchInput"
-import AddButton from "@/components/AddButton"
-import AddResident from "@/components/Residents/AddResidents/AddResidents"
-import RemoveResident from "@/components/Residents/RemoveResidents/RemoveResidents"
-import ConfirmStatusChangeModal from "@/components/Residents/StatusResidents/ConfirmStatusChangeModal"
-import Pagination from "@/components/Pagination"
-import { Toaster } from "react-hot-toast"
-import { useAddNewResident } from "@/components/Residents/AddResidents/use-add-new-residents"
-import { useRemoveResident } from "@/components/Residents/RemoveResidents/use-remove-residents"
-import { FiUserPlus } from "react-icons/fi"
-import { getAllResidents, updateResidentStatus } from "@/services/residents"
-import { toast } from "react-hot-toast"
-import { motion } from "framer-motion"
-import ViewDetailResident from "@/components/Residents/ViewDetailResident"
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
+import React, { useState } from 'react';
+import Table, { Column } from '@/components/Table';
+import { Residents } from '@/types';
+import DropdownMenu from '@/components/DropDownMenu';
+import SearchInput from '@/components/SearchInput';
+import AddButton from '@/components/AddButton';
+import AddResident from '@/components/Residents/AddResidents/AddResidents';
+import RemoveResident from '@/components/Residents/RemoveResidents/RemoveResidents';
+import ConfirmStatusChangeModal from '@/components/Residents/StatusResidents/ConfirmStatusChangeModal';
+import Pagination from '@/components/Pagination';
+import { Toaster } from 'react-hot-toast';
+import { useAddNewResident } from '@/components/Residents/AddResidents/use-add-new-residents';
+import { useRemoveResident } from '@/components/Residents/RemoveResidents/use-remove-residents';
+import { FiUserPlus } from 'react-icons/fi';
+import { getAllResidents, updateResidentStatus } from '@/services/residents';
+import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import ViewDetailResident from '@/components/Residents/ViewDetailResident';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 
 interface ResidentsResponse {
-  data: Residents[]
+  data: Residents[];
   pagination: {
-    total: number
-    totalPages: number
-  }
+    total: number;
+    totalPages: number;
+  };
 }
 
 const Resident: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("")
-  const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState<boolean>(false)
-  const [residentToChangeStatus, setResidentToChangeStatus] = useState<Residents | null>(null)
-  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false)
-  const [selectedResident, setSelectedResident] = useState<Residents | null>(null)
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10)
-  const [selectedStatus, setSelectedStatus] = useState<string>("all")
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState<boolean>(false);
+  const [residentToChangeStatus, setResidentToChangeStatus] = useState<Residents | null>(null);
+  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
+  const [selectedResident, setSelectedResident] = useState<Residents | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   // Fetch residents with React Query
   const { data: residentsResponse, isLoading: isLoadingResidents } = useQuery<ResidentsResponse>({
@@ -46,71 +46,80 @@ const Resident: React.FC = () => {
         search: searchTerm,
         page: currentPage,
         limit: itemsPerPage,
-        status: selectedStatus
-      })
-      return result
+        status: selectedStatus,
+      });
+      return result;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: false
-  })
+    retry: false,
+  });
 
   // Update status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ userId, newStatus }: { userId: string, newStatus: "Active" | "Inactive" }) => {
-      await updateResidentStatus(userId, newStatus)
-      return { userId, newStatus }
+    mutationFn: async ({
+      userId,
+      newStatus,
+    }: {
+      userId: string;
+      newStatus: 'Active' | 'Inactive';
+    }) => {
+      await updateResidentStatus(userId, newStatus);
+      return { userId, newStatus };
     },
     onMutate: async ({ userId, newStatus }) => {
-      await queryClient.cancelQueries({ queryKey: ['residents'] })
-      const previousResidents = queryClient.getQueryData(['residents'])
+      await queryClient.cancelQueries({ queryKey: ['residents'] });
+      const previousResidents = queryClient.getQueryData(['residents']);
       queryClient.setQueryData(['residents'], (old: ResidentsResponse) => ({
         ...old,
         data: old.data.map((resident: Residents) =>
-          resident.userId === userId
-            ? { ...resident, accountStatus: newStatus }
-            : resident
-        )
-      }))
-      return { previousResidents }
+          resident.userId === userId ? { ...resident, accountStatus: newStatus } : resident
+        ),
+      }));
+      return { previousResidents };
     },
     onError: (err, variables, context) => {
       if (context?.previousResidents) {
-        queryClient.setQueryData(['residents'], context.previousResidents)
+        queryClient.setQueryData(['residents'], context.previousResidents);
       }
-      toast.error('Failed to update resident status!')
+      toast.error('Failed to update resident status!');
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['residents'] })
+      queryClient.invalidateQueries({ queryKey: ['residents'] });
     },
-  })
+  });
 
   const openStatusChangeModal = (resident: Residents) => {
-    setResidentToChangeStatus(resident)
-    setIsStatusChangeModalOpen(true)
-  }
+    setResidentToChangeStatus(resident);
+    setIsStatusChangeModalOpen(true);
+  };
 
   const handleChangeStatus = async () => {
-    if (!residentToChangeStatus) return
+    if (!residentToChangeStatus) return;
 
-    const newStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active'
+    const newStatus = residentToChangeStatus.accountStatus === 'Active' ? 'Inactive' : 'Active';
     updateStatusMutation.mutate({
       userId: residentToChangeStatus.userId,
-      newStatus: newStatus as "Active" | "Inactive"
-    })
-    setIsStatusChangeModalOpen(false)
-    setResidentToChangeStatus(null)
-  }
+      newStatus: newStatus as 'Active' | 'Inactive',
+    });
+    setIsStatusChangeModalOpen(false);
+    setResidentToChangeStatus(null);
+  };
 
-  const { isLoading: isAdding, isModalOpen, openModal, closeModal, addResident } =
-    useAddNewResident({
-      onAddSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['residents'] })
-      },
-    })
+  const {
+    isLoading: isAdding,
+    isModalOpen,
+    openModal,
+    closeModal,
+    addResident,
+  } = useAddNewResident({
+    onAddSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['residents'] });
+    },
+  });
 
   const {
     isModalOpen: isRemoveModalOpen,
@@ -121,158 +130,154 @@ const Resident: React.FC = () => {
     removeResident,
   } = useRemoveResident({
     onRemoveSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['residents'] })
+      queryClient.invalidateQueries({ queryKey: ['residents'] });
     },
-  })
+  });
 
   const filterOptions = [
-    { value: "all", label: "Tất cả" },
-    { value: "Active", label: "Hoạt động" },
-    { value: "Inactive", label: "Không hoạt động" },
-  ]
+    { value: 'all', label: 'Tất cả' },
+    { value: 'Active', label: 'Hoạt động' },
+    { value: 'Inactive', label: 'Không hoạt động' },
+  ];
 
   const columns: Column<Residents>[] = [
     {
-      key: "index",
-      title: "No",
+      key: 'index',
+      title: 'No',
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
         </div>
       ),
-      width: "60px",
+      width: '60px',
     },
     {
-      key: "name",
-      title: "Resident Name",
-      render: (item) => (
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          {item.username}
-        </div>
+      key: 'name',
+      title: 'Resident Name',
+      render: item => (
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.username}</div>
       ),
     },
     {
-      key: "email",
-      title: "Email",
-      render: (item) => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.email}</div>
-      ),
+      key: 'email',
+      title: 'Email',
+      render: item => <div className="text-sm text-gray-500 dark:text-gray-400">{item.email}</div>,
     },
     {
-      key: "phone",
-      title: "Phone",
-      render: (item) => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.phone}</div>
-      ),
+      key: 'phone',
+      title: 'Phone',
+      render: item => <div className="text-sm text-gray-500 dark:text-gray-400">{item.phone}</div>,
     },
     {
-      key: "Gender",
-      title: "Gender",
-      render: (item) => (
+      key: 'Gender',
+      title: 'Gender',
+      render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === "Male"
-            ? "bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]"
-            : "bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]"
-            }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            item.gender === 'Male'
+              ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
+              : 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]'
+          }`}
         >
           {item.gender}
         </span>
       ),
     },
     {
-      key: "Date Of Birth",
-      title: "Date Of Birth",
-      render: (item) => {
+      key: 'Date Of Birth',
+      title: 'Date Of Birth',
+      render: item => {
         try {
           if (!item.dateOfBirth) {
-            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>
+            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>;
           }
 
-          const date = new Date(item.dateOfBirth)
+          const date = new Date(item.dateOfBirth);
 
           if (isNaN(date.getTime())) {
-            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>
+            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>;
           }
 
-          const day = date.getDate().toString().padStart(2, "0")
-          const month = (date.getMonth() + 1).toString().padStart(2, "0")
-          const year = date.getFullYear()
+          const day = date.getDate().toString().padStart(2, '0');
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const year = date.getFullYear();
 
-          const formattedDate = `${day}/${month}/${year}`
-          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>
+          const formattedDate = `${day}/${month}/${year}`;
+          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>;
         } catch (error) {
-          console.error("Error formatting date:", error)
-          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>
+          console.error('Error formatting date:', error);
+          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>;
         }
       },
     },
     {
-      key: "createdDate",
-      title: "Created Date",
-      render: (item) => {
+      key: 'createdDate',
+      title: 'Created Date',
+      render: item => {
         try {
           if (!item.createdDate) {
-            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>
+            return <div className="text-sm text-gray-500 dark:text-gray-400">N/A</div>;
           }
 
-          const date = new Date(item.createdDate)
+          const date = new Date(item.createdDate);
 
           if (isNaN(date.getTime())) {
-            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>
+            return <div className="text-sm text-gray-500 dark:text-gray-400">Invalid date</div>;
           }
 
-          const day = date.getDate().toString().padStart(2, "0")
-          const month = (date.getMonth() + 1).toString().padStart(2, "0")
-          const year = date.getFullYear()
+          const day = date.getDate().toString().padStart(2, '0');
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const year = date.getFullYear();
 
-          const formattedDate = `${day}/${month}/${year}`
-          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>
+          const formattedDate = `${day}/${month}/${year}`;
+          return <div className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</div>;
         } catch (error) {
-          console.error("Error formatting date:", error)
-          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>
+          console.error('Error formatting date:', error);
+          return <div className="text-sm text-gray-500 dark:text-gray-400">Error</div>;
         }
       },
     },
     {
-      key: "status",
-      title: "Status",
-      render: (item) => (
+      key: 'status',
+      title: 'Status',
+      render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.accountStatus === "Active"
-            ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
-            : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
-            }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            item.accountStatus === 'Active'
+              ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
+              : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+          }`}
         >
           {item.accountStatus}
         </span>
       ),
     },
     {
-      key: "action",
-      title: "Action",
-      render: (item) => (
+      key: 'action',
+      title: 'Action',
+      render: item => (
         <DropdownMenu
           onViewDetail={() => handleViewDetail(item)}
           onChangeStatus={() => openStatusChangeModal(item)}
           onRemove={() => openRemoveModal(item)}
         />
       ),
-      width: "80px",
+      width: '80px',
     },
-  ]
+  ];
 
   const handleAddResident = async (residentData: Omit<Residents, 'userId'>) => {
-    await addResident(residentData)
-  }
+    await addResident(residentData);
+  };
 
   const loadingVariants = {
     rotate: 360,
     transition: {
       duration: 1,
       repeat: Infinity,
-      ease: "linear"
-    }
-  }
+      ease: 'linear',
+    },
+  };
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -282,15 +287,15 @@ const Resident: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading residents data...</p>
     </div>
-  )
+  );
 
   const handleViewDetail = (resident: Residents) => {
-    setSelectedResident(resident)
-    setIsViewDetailOpen(true)
-  }
+    setSelectedResident(resident);
+    setIsViewDetailOpen(true);
+  };
 
   if (isLoadingResidents && (!residentsResponse?.data || residentsResponse.data.length === 0)) {
-    return <LoadingIndicator />
+    return <LoadingIndicator />;
   }
 
   return (
@@ -302,7 +307,7 @@ const Resident: React.FC = () => {
           <SearchInput
             placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             className="w-[30rem] max-w-xs"
           />
 
@@ -315,8 +320,8 @@ const Resident: React.FC = () => {
       <Table<Residents>
         data={residentsResponse?.data || []}
         columns={columns}
-        keyExtractor={(item) => item.userId}
-        onRowClick={(item) => console.log("Row clicked:", item)}
+        keyExtractor={item => item.userId}
+        onRowClick={item => console.log('Row clicked:', item)}
         className="w-[95%] mx-auto"
         tableClassName="w-full"
         isLoading={isLoadingResidents}
@@ -359,7 +364,7 @@ const Resident: React.FC = () => {
         resident={selectedResident}
       />
     </div>
-  )
-}
+  );
+};
 
-export default Resident
+export default Resident;

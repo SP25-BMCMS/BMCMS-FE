@@ -1,35 +1,34 @@
-import React, { useState } from "react"
-import Table, { Column } from "@/components/Table"
-import { BuildingResponse, Area } from "@/types"
-import { getBuildings, deleteBuilding } from "@/services/building"
-import { getAreaList } from "@/services/areas"
-import { PiMapPinAreaBold } from "react-icons/pi"
-import { FaRegBuilding } from "react-icons/fa"
-import AddBuildingModal from "@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal"
-import RemoveBuilding from "@/components/BuildingManager/buildings/DeleteBuilding/RemoveBuilding"
-import DropdownMenu from "@/components/DropDownMenu"
-import SearchInput from "@/components/SearchInput"
-import FilterDropdown from "@/components/FilterDropdown"
-import AddButton from "@/components/AddButton"
-import AddAreaModal from "@/components/BuildingManager/areas/addAreas/AddAreaModal"
-import Pagination from "@/components/Pagination"
-import toast from "react-hot-toast"
-import { motion } from "framer-motion"
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
-import { AxiosError } from "axios"
+import React, { useState } from 'react';
+import Table, { Column } from '@/components/Table';
+import { BuildingResponse } from '@/types';
+import { getBuildings, deleteBuilding } from '@/services/building';
+import { getAreaList } from '@/services/areas';
+import { PiMapPinAreaBold } from 'react-icons/pi';
+import { FaRegBuilding } from 'react-icons/fa';
+import AddBuildingModal from '@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal';
+import RemoveBuilding from '@/components/BuildingManager/buildings/DeleteBuilding/RemoveBuilding';
+import DropdownMenu from '@/components/DropDownMenu';
+import SearchInput from '@/components/SearchInput';
+import FilterDropdown from '@/components/FilterDropdown';
+import AddButton from '@/components/AddButton';
+import AddAreaModal from '@/components/BuildingManager/areas/addAreas/AddAreaModal';
+import Pagination from '@/components/Pagination';
+import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 
 const Building: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("")
-  const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false)
-  const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false)
-  const [isRemoveBuildingModalOpen, setIsRemoveBuildingModalOpen] = useState(false)
-  const [selectedBuilding, setSelectedBuilding] = useState<BuildingResponse | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [selectedStatus, setSelectedStatus] = useState<string>("all")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
+  const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
+  const [isRemoveBuildingModalOpen, setIsRemoveBuildingModalOpen] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState<BuildingResponse | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   // Fetch buildings with React Query
   const { data: buildingsData, isLoading: isLoadingBuildings } = useQuery({
@@ -39,18 +38,21 @@ const Building: React.FC = () => {
         page: currentPage,
         limit: itemsPerPage,
         search: searchTerm,
-        status: selectedStatus === "all" ? undefined : (selectedStatus as "operational" | "under_construction"),
-      }
-      const response = await getBuildings(params)
-      return response
+        status:
+          selectedStatus === 'all'
+            ? undefined
+            : (selectedStatus as 'operational' | 'under_construction'),
+      };
+      const response = await getBuildings(params);
+      return response;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: false
-  })
+    retry: false,
+  });
 
   // Fetch areas with React Query
   const { data: areas = [] } = useQuery({
@@ -61,18 +63,18 @@ const Building: React.FC = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: false
-  })
+    retry: false,
+  });
 
   // Delete building mutation
   const deleteBuildingMutation = useMutation({
     mutationFn: (buildingId: string) => deleteBuilding(buildingId),
-    onMutate: async (buildingId) => {
+    onMutate: async buildingId => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['buildings'] })
+      await queryClient.cancelQueries({ queryKey: ['buildings'] });
 
       // Snapshot the previous value
-      const previousBuildings = queryClient.getQueryData(['buildings'])
+      const previousBuildings = queryClient.getQueryData(['buildings']);
 
       // Optimistically update to the new value
       queryClient.setQueryData(['buildings'], (old: any) => ({
@@ -80,135 +82,134 @@ const Building: React.FC = () => {
         data: old.data.filter((building: BuildingResponse) => building.buildingId !== buildingId),
         pagination: {
           ...old.pagination,
-          total: old.pagination.total - 1
-        }
-      }))
+          total: old.pagination.total - 1,
+        },
+      }));
 
-      return { previousBuildings }
+      return { previousBuildings };
     },
     onError: (err, buildingId, context) => {
       // Revert back to the previous value
       if (context?.previousBuildings) {
-        queryClient.setQueryData(['buildings'], context.previousBuildings)
+        queryClient.setQueryData(['buildings'], context.previousBuildings);
       }
-      toast.error("Failed to delete building!")
+      toast.error('Failed to delete building!');
     },
     onSettled: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['buildings'] })
+      queryClient.invalidateQueries({ queryKey: ['buildings'] });
     },
-  })
+  });
 
   const getAreaName = (areaId: string): string => {
-    const area = areas.find((a) => a.areaId === areaId)
-    return area ? area.name : "N/A"
-  }
+    const area = areas.find(a => a.areaId === areaId);
+    return area ? area.name : 'N/A';
+  };
 
   const handleRemoveBuilding = (building: BuildingResponse) => {
-    setSelectedBuilding(building)
-    setIsRemoveBuildingModalOpen(true)
-  }
+    setSelectedBuilding(building);
+    setIsRemoveBuildingModalOpen(true);
+  };
 
   const confirmRemoveBuilding = async () => {
-    if (!selectedBuilding) return
+    if (!selectedBuilding) return;
 
-    setIsDeleting(true)
+    setIsDeleting(true);
     try {
-      await deleteBuildingMutation.mutateAsync(selectedBuilding.buildingId)
-      toast.success("Building deleted successfully!")
-      setIsRemoveBuildingModalOpen(false)
+      await deleteBuildingMutation.mutateAsync(selectedBuilding.buildingId);
+      toast.success('Building deleted successfully!');
+      setIsRemoveBuildingModalOpen(false);
     } catch (error) {
-      console.error("Failed to delete building:", error)
+      console.error('Failed to delete building:', error);
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const filterOptions = [
-    { value: "all", label: "All" },
-    { value: "operational", label: "Operational" },
-    { value: "under_construction", label: "Under Construction" },
-  ]
+    { value: 'all', label: 'All' },
+    { value: 'operational', label: 'Operational' },
+    { value: 'under_construction', label: 'Under Construction' },
+  ];
 
   const columns: Column<BuildingResponse>[] = [
     {
-      key: "index",
-      title: "No",
+      key: 'index',
+      title: 'No',
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
       ),
-      width: "60px",
+      width: '60px',
     },
     {
-      key: "name",
-      title: "Building Name",
-      render: (item) => (
+      key: 'name',
+      title: 'Building Name',
+      render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
       ),
     },
     {
-      key: "areaId",
-      title: "Area Name",
-      render: (item) => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {getAreaName(item.areaId)}
-        </div>
+      key: 'areaId',
+      title: 'Area Name',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400">{getAreaName(item.areaId)}</div>
       ),
     },
     {
-      key: "Floor",
-      title: "Floor",
-      render: (item) => (
+      key: 'Floor',
+      title: 'Floor',
+      render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.numberFloor}</div>
       ),
     },
     {
-      key: "createdAt",
-      title: "Created Date",
-      render: (item) => (
+      key: 'createdAt',
+      title: 'Created Date',
+      render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {new Date(item.createdAt).toLocaleDateString()}
         </div>
       ),
     },
     {
-      key: "completion Date",
-      title: "Completion Date",
-      render: (item) => (
+      key: 'completion Date',
+      title: 'Completion Date',
+      render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.completion_date}</div>
       ),
     },
     {
-      key: "status",
-      title: "Status",
-      render: (item) => (
+      key: 'status',
+      title: 'Status',
+      render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.Status === "operational"
-            ? "bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]"
-            : "bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]"
-            }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            item.Status === 'operational'
+              ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
+              : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+          }`}
         >
           {item.Status}
         </span>
       ),
     },
     {
-      key: "action",
-      title: "Action",
-      render: (item) => (
+      key: 'action',
+      title: 'Action',
+      render: item => (
         <DropdownMenu
-          onViewDetail={() => console.log("View detail clicked")}
-          onChangeStatus={() => console.log("Change Status", item)}
+          onViewDetail={() => console.log('View detail clicked')}
+          onChangeStatus={() => console.log('Change Status', item)}
           onRemove={() => handleRemoveBuilding(item)}
         />
       ),
-      width: "80px",
+      width: '80px',
     },
-  ]
+  ];
 
   const handleAddSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['buildings'] })
-  }
+    queryClient.invalidateQueries({ queryKey: ['buildings'] });
+  };
 
   // Loading animation for standalone use
   const loadingVariants = {
@@ -216,9 +217,9 @@ const Building: React.FC = () => {
     transition: {
       duration: 1,
       repeat: Infinity,
-      ease: "linear"
-    }
-  }
+      ease: 'linear',
+    },
+  };
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -228,7 +229,7 @@ const Building: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading buildings data...</p>
     </div>
-  )
+  );
 
   return (
     <div className="w-full mt-[60px]">
@@ -236,7 +237,7 @@ const Building: React.FC = () => {
         <SearchInput
           placeholder="Search by building name or description"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
           className="w-[20rem] max-w-xs"
         />
 
@@ -267,8 +268,8 @@ const Building: React.FC = () => {
           <Table<BuildingResponse>
             data={buildingsData?.data || []}
             columns={columns}
-            keyExtractor={(item) => item.buildingId}
-            onRowClick={(item) => console.log("Row clicked:", item)}
+            keyExtractor={item => item.buildingId}
+            onRowClick={item => console.log('Row clicked:', item)}
             className="w-[95%] mx-auto"
             tableClassName="w-full"
           />
@@ -308,7 +309,7 @@ const Building: React.FC = () => {
         building={selectedBuilding}
       />
     </div>
-  )
-}
+  );
+};
 
-export default Building
+export default Building;

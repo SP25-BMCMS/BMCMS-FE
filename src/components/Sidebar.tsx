@@ -8,7 +8,7 @@ import {
   Settings,
   FileText,
   AlertCircle,
-  LogOut
+  LogOut,
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -31,7 +31,7 @@ const Sidebar: React.FC = () => {
         <h2 className="text-xl font-bold text-gray-800 dark:text-white">BMCMS</h2>
       </div>
       <nav className="mt-4">
-        {menuItems.map((item) => {
+        {menuItems.map(item => {
           const isActive = location.pathname === item.path;
           return (
             <Link
@@ -57,4 +57,4 @@ const Sidebar: React.FC = () => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

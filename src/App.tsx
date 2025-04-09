@@ -1,6 +1,7 @@
-import AppRoutes from "@/routes"
-import { Toaster } from "react-hot-toast"
-import { ThemeProvider } from "./contexts/ThemeContext"
+import React from 'react';
+import AppRoutes from '@/routes';
+import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
   return (
@@ -10,7 +11,7 @@ function App() {
         <AppRoutes />
       </div>
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;

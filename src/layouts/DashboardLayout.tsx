@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
-import Sidebar from "@/components/layout/Sidebar";
-import { sidebarItems } from "@/components/layout/Sidebar"; // Import sidebarItems để lấy tiêu đề động
-import ThemeToggle from "@/components/ThemeToggle";
+import React from 'react';
+import { useState } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import Sidebar from '@/components/layout/Sidebar';
+import { sidebarItems } from '@/components/layout/Sidebar'; // Import sidebarItems để lấy tiêu đề động
+import ThemeToggle from '@/components/ThemeToggle';
 
 const DashboardLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const isAuthenticated = localStorage.getItem("bmcms_token");
+  const isAuthenticated = localStorage.getItem('bmcms_token');
   const location = useLocation();
 
   if (!isAuthenticated) {
@@ -16,21 +17,19 @@ const DashboardLayout = () => {
   // Hàm lấy tiêu đề động từ sidebarItems dựa vào đường dẫn hiện tại
   const getCurrentTitle = () => {
     // Kiểm tra các mục cấp cao nhất
-    const mainItem = sidebarItems.find((item) => item.path === location.pathname);
+    const mainItem = sidebarItems.find(item => item.path === location.pathname);
     if (mainItem) return mainItem.title;
-    
+
     // Kiểm tra các mục con
     for (const item of sidebarItems) {
       if (item.children) {
-        const childItem = item.children.find(
-          (child) => child.path === location.pathname
-        );
+        const childItem = item.children.find(child => child.path === location.pathname);
         if (childItem) return childItem.title;
       }
     }
-    
+
     // Mặc định trả về Dashboard nếu không tìm thấy
-    return "Dashboard";
+    return 'Dashboard';
   };
 
   const currentTitle = getCurrentTitle();
@@ -38,8 +37,10 @@ const DashboardLayout = () => {
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
       {/* Placeholder để giữ không gian cho sidebar */}
-      <div className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} flex-shrink-0 transition-all duration-300`}></div>
-      
+      <div
+        className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} flex-shrink-0 transition-all duration-300`}
+      ></div>
+
       {/* Sidebar */}
       <Sidebar onToggle={setIsSidebarCollapsed} />
 

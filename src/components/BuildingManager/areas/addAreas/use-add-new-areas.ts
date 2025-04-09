@@ -36,20 +36,20 @@ export const useAddNewArea = (props?: UseAddNewAreaProps) => {
       // Gọi API để thêm khu vực mới
       const response = await addNewArea({
         name: data.name,
-        description: data.description || ''
+        description: data.description || '',
       });
-      
+
       // Hiển thị thông báo thành công
       toast.success('Add area successfully!');
-      
+
       // Đóng modal
       closeModal();
-      
+
       // Gọi callback nếu có
       if (onAddSuccess) {
         onAddSuccess(response);
       }
-      
+
       setIsLoading(false);
       return response;
     } catch (error) {
@@ -66,6 +66,6 @@ export const useAddNewArea = (props?: UseAddNewAreaProps) => {
     isModalOpen,
     openModal,
     closeModal,
-    addArea
+    addArea,
   };
 };

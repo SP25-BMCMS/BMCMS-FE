@@ -1,1 +1,1 @@
-export { default } from './DepartmentPositionSelect'; 
+export { default } from './DepartmentPositionSelect';

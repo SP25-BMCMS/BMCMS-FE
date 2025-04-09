@@ -1,6 +1,6 @@
-import React from "react";
-import Modal  from "./Modal";
-import { BuildingResponse } from "@/types";
+import React from 'react';
+import Modal from './Modal';
+import { BuildingResponse } from '@/types';
 
 interface RemoveBuildingProps {
   isOpen: boolean;
@@ -20,16 +20,10 @@ const RemoveBuilding: React.FC<RemoveBuildingProps> = ({
   if (!building) return null;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Remove Building"
-      size="sm"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Remove Building" size="sm">
       <div className="space-y-4">
         <p className="text-gray-700">
-          Do you want to remove this Building{" "}
-          <span className="font-medium">{building.name}</span>?
+          Do you want to remove this Building <span className="font-medium">{building.name}</span>?
         </p>
         <p className="text-sm text-gray-500">This Action will not be undone.</p>
         <div className="flex justify-center space-x-3 pt-2">
@@ -70,7 +64,7 @@ const RemoveBuilding: React.FC<RemoveBuildingProps> = ({
                 Deleting...
               </div>
             ) : (
-              "Delete"
+              'Delete'
             )}
           </button>
         </div>
