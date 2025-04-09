@@ -58,7 +58,7 @@ const Calendar: React.FC = () => {
   // Create schedule mutation
   const createScheduleMutation = useMutation({
     mutationFn: (newSchedule: Omit<ApiSchedule, 'schedule_id' | 'created_at' | 'updated_at'>) => {
-      return schedulesApi.createSchedule(newSchedule)
+      return schedulesApi.createSchedule(newSchedule as any)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedules'] })
@@ -74,7 +74,7 @@ const Calendar: React.FC = () => {
   // Update schedule mutation
   const updateScheduleMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ApiSchedule> }) => {
-      return schedulesApi.updateSchedule(id, data)
+      return schedulesApi.updateSchedule(id, data as any)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedules'] })
@@ -104,10 +104,10 @@ const Calendar: React.FC = () => {
   // Update events when schedules change
   useEffect(() => {
     if (schedulesData) {
-      const calendarEvents = schedulesData.map((schedule: ApiSchedule) => {
+      const calendarEvents = (schedulesData as any[]).map((schedule: ApiSchedule) => {
         const buildingIds = schedule.schedule_job
-          .filter(job => job.status !== "Cancel")
-          .map(job => job.building_id)
+          ?.filter(job => job.status !== "Cancel")
+          .map(job => job.building_id) || []
 
         // Determine the status color based on schedule_job status
         let backgroundColor = '#3b82f6' // Default blue
@@ -493,6 +493,11 @@ const Calendar: React.FC = () => {
             white-space: normal;
           }
 
+          .dark .fc-tooltip {
+            background: rgba(30, 41, 59, 0.95);
+            color: #e5e7eb;
+          }
+
           .fc-event:hover .fc-tooltip {
             display: block;
           }
@@ -509,6 +514,91 @@ const Calendar: React.FC = () => {
           .fc-daygrid-more-link {
             margin-top: 2px;
             font-size: 0.75rem;
+          }
+          
+          /* Fix dark mode issues */
+          .dark .fc-toolbar-title {
+            color: #e5e7eb !important;
+          }
+          
+          .dark .fc-col-header-cell-cushion {
+            color: #e5e7eb !important;
+          }
+          
+          .dark .fc-daygrid-day-number {
+            color: #e5e7eb !important;
+          }
+          
+          .dark .fc-day-today {
+            background-color: rgba(59, 130, 246, 0.1) !important;
+          }
+
+          /* Navigation buttons (prev, next) - remove background */
+          .fc-prev-button, .fc-next-button {
+            background: transparent !important;
+            border: 1px solid #d1d5db !important;
+            color: #4b5563 !important;
+          }
+
+          .fc-prev-button:hover, .fc-next-button:hover {
+            background-color: rgba(243, 244, 246, 0.1) !important;
+          }
+
+          .dark .fc-prev-button, .dark .fc-next-button {
+            background: transparent !important;
+            border: 1px solid #4b5563 !important;
+            color: #e5e7eb !important;
+          }
+
+          .dark .fc-prev-button:hover, .dark .fc-next-button:hover {
+            background-color: rgba(75, 85, 99, 0.2) !important;
+          }
+          
+          .dark .fc-button {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #e5e7eb !important;
+          }
+          
+          .dark .fc-button:hover {
+            background-color: #4b5563 !important;
+          }
+          
+          .dark .fc-daygrid-day.fc-day-other {
+            background-color: #1a202c !important;
+          }
+          
+          .dark .fc-theme-standard td,
+          .dark .fc-theme-standard th,
+          .dark .fc-theme-standard .fc-scrollgrid {
+            border-color: #374151 !important;
+          }
+          
+          .dark .fc-theme-standard .fc-scrollgrid-section-header th {
+            background-color: #1F2937 !important;
+          }
+          
+          .dark .fc-theme-standard .fc-scrollgrid-section > * {
+            border-color: #374151 !important;
+          }
+          
+          .dark .fc-daygrid-more-link {
+            color: #60a5fa !important;
+          }
+          
+          .dark .fc .fc-timegrid-slot-label-cushion,
+          .dark .fc .fc-timegrid-axis-cushion {
+            color: #e5e7eb !important;
+          }
+          
+          .dark .fc .fc-list-sticky .fc-list-day > * {
+            background-color: #1F2937 !important;
+            color: #e5e7eb !important;
+          }
+
+          .dark .fc .fc-cell-shaded, 
+          .dark .fc .fc-day-disabled {
+            background-color: #1a202c !important;
           }
         `}
       </style>
@@ -527,7 +617,7 @@ const Calendar: React.FC = () => {
         selectedBuildings={selectedBuildings}
         onBuildingSelect={handleBuildingSelect}
         onSetSelectedBuildings={setSelectedBuildings}
-        onUpdateStatus={(id, status) => updateScheduleMutation.mutate({ id, data: { status } })}
+        onUpdateStatus={(id, status) => updateScheduleMutation.mutate({ id, data: { status } as any })}
       />
 
       <BuildingSelectionModal
