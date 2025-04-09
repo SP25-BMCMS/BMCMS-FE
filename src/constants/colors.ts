@@ -14,6 +14,11 @@ export const STATUS_COLORS = {
         TEXT: '#50F186', // Màu chữ xanh lá
         BORDER: '#50F186' // Màu viền xanh lá
     },
+    REVIEWING: {
+        BG: 'rgba(88, 86, 214, 0.35)', // Màu nền từ 5856D6 nhạt 35%
+        TEXT: '#5856D6', // Màu chữ tím
+        BORDER: '#5856D6' // Màu viền tím
+    },
     ACTIVE:{
         BG: 'rgba(80, 241, 134, 0.35)', // Màu nền từ 50F186 nhạt 35%
         TEXT: '#50F186', // Màu chữ xanh lá

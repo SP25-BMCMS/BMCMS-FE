@@ -199,7 +199,7 @@ export type CrackReportResponse = {
   description: string
   isPrivatesAsset: boolean
   position: string | null
-  status: 'Pending' | 'InProgress' | 'Resolved'
+  status: 'Pending' | 'InProgress' | 'Resolved' | 'Reviewing'
   reportedBy: {
     userId: string
     username: string
@@ -228,7 +228,7 @@ export type CrackListParams = {
   limit?: number
   search?: string
   severityFilter?: 'Low' | 'Medium' | 'High'
-  status?: 'Pending' | 'InProgress' | 'Resolved'
+  status?: 'Pending' | 'InProgress' | 'Resolved' | 'Reviewing'
 }
 //task
 export interface TaskResponse {
@@ -239,6 +239,37 @@ export interface TaskResponse {
   updated_at: string
   crack_id: string
   schedule_job_id: string
+  crackInfo?: {
+    isSuccess: boolean
+    message: string
+    data: {
+      crackReportId: string
+      buildingDetailId: string
+      description: string
+      isPrivatesAsset: boolean
+      position: string
+      status: 'Pending' | 'InProgress' | 'Resolved' | 'Reviewing'
+      reportedBy: {
+        userId: string
+        username: string
+      }
+      verifiedBy?: {
+        userId: string
+        username: string
+      }
+      createdAt: string
+      updatedAt: string
+      crackDetails: {
+        crackDetailsId: string
+        crackReportId: string
+        photoUrl: string
+        severity: string
+        aiDetectionUrl: string
+        createdAt: string
+        updatedAt: string
+      }[]
+    }[]
+  }
 }
 
 export interface TaskListPaginationResponse {
@@ -276,7 +307,7 @@ export type Crack = {
   id: string
   reportDescription: string
   createdDate: string
-  status: 'pending' | 'InProgress' | 'resolved'
+  status: 'pending' | 'InProgress' | 'resolved' | 'Reviewing'
   residentId: string
   residentName?: string
   location?: string

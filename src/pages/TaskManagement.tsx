@@ -7,10 +7,11 @@ import AddButton from '@/components/AddButton'
 import { MdOutlineAddTask } from "react-icons/md"
 import { motion } from "framer-motion"
 import tasksApi from '@/services/tasks'
-import { TaskResponse } from '@/types'
+import { TaskResponse} from '@/types'
 import Pagination from '@/components/Pagination'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
+import { STATUS_COLORS } from '@/constants/colors'
 
 interface TasksCacheData {
   data: TaskResponse[]
@@ -156,7 +157,62 @@ const TaskManagement: React.FC = () => {
     {
       key: 'crack_id',
       title: 'Crack ID',
-      render: (item) => <div className="text-sm text-gray-500 dark:text-gray-400">{item.crack_id.substring(0, 8)}</div>
+      render: (item) => <div className="text-sm text-gray-500 dark:text-gray-400">{item.crack_id ? item.crack_id.substring(0, 8) : '-'}</div>
+    },
+    {
+      key: 'crack_status',
+      title: 'Crack Status',
+      render: (item) => {
+        if (!item.crackInfo || !item.crackInfo.isSuccess || !item.crackInfo.data.length) {
+          return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>
+        }
+        
+        const crackStatus = item.crackInfo.data[0].status;
+        let bgColor = '';
+        let textColor = '';
+        let borderColor = '';
+        
+        switch (crackStatus) {
+          case 'Reviewing':
+            bgColor = STATUS_COLORS.REVIEWING.BG;
+            textColor = STATUS_COLORS.REVIEWING.TEXT;
+            borderColor = STATUS_COLORS.REVIEWING.BORDER;
+            break;
+          case 'Pending':
+            bgColor = STATUS_COLORS.PENDING.BG;
+            textColor = STATUS_COLORS.PENDING.TEXT;
+            borderColor = STATUS_COLORS.PENDING.BORDER;
+            break;
+          case 'InProgress':
+            bgColor = STATUS_COLORS.IN_PROGRESS.BG;
+            textColor = STATUS_COLORS.IN_PROGRESS.TEXT;
+            borderColor = STATUS_COLORS.IN_PROGRESS.BORDER;
+            break;
+          case 'Resolved':
+            bgColor = STATUS_COLORS.RESOLVED.BG;
+            textColor = STATUS_COLORS.RESOLVED.TEXT;
+            borderColor = STATUS_COLORS.RESOLVED.BORDER;
+            break;
+          default:
+            bgColor = 'rgba(128, 128, 128, 0.35)';
+            textColor = '#808080';
+            borderColor = '#808080';
+        }
+        
+        return (
+          <span 
+            className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+            style={{ 
+              backgroundColor: bgColor, 
+              color: textColor, 
+              borderColor: borderColor,
+              border: '1px solid' 
+            }}
+          >
+            {crackStatus}
+          </span>
+        )
+      }
     },
     {
       key: 'created_at',

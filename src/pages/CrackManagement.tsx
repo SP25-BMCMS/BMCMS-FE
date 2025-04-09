@@ -28,7 +28,9 @@ const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
       ? "pending"
       : response.status === "InProgress"
         ? "InProgress"
-        : "resolved",
+        : response.status === "Reviewing"
+          ? "Reviewing"
+          : "resolved",
     residentId: typeof response.reportedBy === 'object' ? response.reportedBy.userId : response.reportedBy,
     residentName: typeof response.reportedBy === 'object' ? response.reportedBy.username : "Unknown",
     description: response.description,
@@ -84,7 +86,7 @@ const CrackManagement: React.FC = () => {
     }
 
     if (selectedStatus !== "all") {
-      params.status = selectedStatus as "Pending" | "InProgress" | "Resolved"
+      params.status = selectedStatus as "Pending" | "InProgress" | "Resolved" | "Reviewing"
     }
 
     if (selectedSeverity !== "all") {
@@ -193,7 +195,9 @@ const CrackManagement: React.FC = () => {
             ? STATUS_COLORS.RESOLVED
             : item.status === "InProgress"
               ? STATUS_COLORS.IN_PROGRESS
-              : STATUS_COLORS.PENDING
+              : item.status === "Reviewing"
+                ? STATUS_COLORS.REVIEWING
+                : STATUS_COLORS.PENDING
 
         return (
           <span
@@ -224,7 +228,9 @@ const CrackManagement: React.FC = () => {
               ? "Resolved"
               : item.status === "InProgress"
                 ? "In Progress"
-                : "Pending"}
+                : item.status === "Reviewing"
+                  ? "Reviewing"
+                  : "Pending"}
           </span>
         )
       },
@@ -295,6 +301,21 @@ const CrackManagement: React.FC = () => {
                 ></span>
               </span>
               <span className="text-sm text-gray-600 dark:text-gray-300">In Progress</span>
+            </div>
+
+            {/* Reviewing */}
+            <div className="flex items-center">
+              <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
+                <span
+                  className="inline-block w-2 h-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: STATUS_COLORS.REVIEWING.TEXT }}
+                ></span>
+                <span
+                  className="absolute -inset-0.5 rounded-full opacity-30 animate-ping"
+                  style={{ backgroundColor: STATUS_COLORS.REVIEWING.TEXT }}
+                ></span>
+              </span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">Reviewing</span>
             </div>
 
             {/* Resolved */}

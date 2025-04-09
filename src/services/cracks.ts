@@ -25,7 +25,7 @@ const getCrackDetail = async (id: string) => {
   }
 };
 
-const updateCrackStatus = async (id: string, status: 'Pending' | 'InProgress' | 'Resolved', staffId: string) => {
+const updateCrackStatus = async (id: string, status: 'Pending' | 'InProgress' | 'Resolved' | 'Reviewing', staffId: string) => {
   try {
     const { data } = await apiInstance.patch(
       import.meta.env.VITE_CHANGE_STATUS_CRACK.replace('{id}', id),
