@@ -1,3 +1,3 @@
-import ViewDetailResident from './ViewDetailResident';
+import ViewDetailResident from './VIewDetailResident';
 
 export default ViewDetailResident;
