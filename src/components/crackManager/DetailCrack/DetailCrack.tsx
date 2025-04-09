@@ -206,7 +206,8 @@ const DetailCrack: React.FC = () => {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      second: '2-digit'
     })
   }
 
@@ -240,21 +241,49 @@ const DetailCrack: React.FC = () => {
 
             <div className="ml-auto flex items-center space-x-4">
               <div className="flex items-center">
-                <div className="relative">
-                  <div className={`w-3 h-3 rounded-full ${getStatusAnimationClass(crack.status)}`}></div>
-                  {crack.status !== "Resolved" && (
-                    <div className={`absolute -inset-1 rounded-full ${crack.status === "InProgress"
-                      ? `bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`
-                      : `bg-[${STATUS_COLORS.PENDING.TEXT}]`
-                      } opacity-30 animate-ping`}></div>
-                  )}
-                </div>
-                <span className={`ml-2 font-medium ${crack.status === "Resolved"
-                  ? `text-[${STATUS_COLORS.RESOLVED.TEXT}]`
-                  : crack.status === "InProgress"
-                    ? `text-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`
-                    : `text-[${STATUS_COLORS.PENDING.TEXT}]`
-                  }`}>
+                <span
+                  className="px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full"
+                  style={{
+                    backgroundColor: crack.status === "Resolved"
+                      ? STATUS_COLORS.RESOLVED.BG
+                      : crack.status === "InProgress"
+                        ? STATUS_COLORS.IN_PROGRESS.BG
+                        : STATUS_COLORS.PENDING.BG,
+                    color: crack.status === "Resolved"
+                      ? STATUS_COLORS.RESOLVED.TEXT
+                      : crack.status === "InProgress"
+                        ? STATUS_COLORS.IN_PROGRESS.TEXT
+                        : STATUS_COLORS.PENDING.TEXT,
+                    border: `1px solid ${crack.status === "Resolved"
+                      ? STATUS_COLORS.RESOLVED.BORDER
+                      : crack.status === "InProgress"
+                        ? STATUS_COLORS.IN_PROGRESS.BORDER
+                        : STATUS_COLORS.PENDING.BORDER
+                      }`
+                  }}
+                >
+                  <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
+                    <span
+                      className="inline-block w-2 h-2 rounded-full"
+                      style={{
+                        backgroundColor: crack.status === "Resolved"
+                          ? STATUS_COLORS.RESOLVED.TEXT
+                          : crack.status === "InProgress"
+                            ? STATUS_COLORS.IN_PROGRESS.TEXT
+                            : STATUS_COLORS.PENDING.TEXT
+                      }}
+                    ></span>
+                    {crack.status !== "Resolved" && (
+                      <span
+                        className="absolute -inset-0.5 rounded-full opacity-30 animate-ping"
+                        style={{
+                          backgroundColor: crack.status === "InProgress"
+                            ? STATUS_COLORS.IN_PROGRESS.TEXT
+                            : STATUS_COLORS.PENDING.TEXT
+                        }}
+                      ></span>
+                    )}
+                  </span>
                   {crack.status}
                 </span>
               </div>
