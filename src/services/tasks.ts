@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiInstance from '@/lib/axios'
-import { TaskListParams, TaskListPaginationResponse, TaskAssignmentResponse } from '@/types'
+import { TaskListParams, TaskListPaginationResponse, TaskAssignmentResponse, TaskAssignmentDetailResponse, InspectionResponse } from '@/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 
@@ -43,6 +43,46 @@ const getTaskAssignmentsByTaskId = async (taskId: string): Promise<TaskAssignmen
   }
 }
 
+const getTaskAssignmentDetail = async (assignmentId: string): Promise<TaskAssignmentDetailResponse> => {
+  try {
+    console.log(`Calling API: ${import.meta.env.VITE_GET_TASK_ASSIGNMENT_BY_ID.replace('{id}', assignmentId)}`);
+    const endpoint = import.meta.env.VITE_GET_TASK_ASSIGNMENT_BY_ID.replace('{id}', assignmentId);
+    const { data } = await apiInstance.get<TaskAssignmentDetailResponse>(endpoint);
+    
+    // Validate response structure
+    if (!data || !data.data) {
+      console.error('Invalid response structure from task assignment detail API:', data);
+      throw new Error('Invalid response structure from API');
+    }
+    
+    return data;
+  } catch (error: any) {
+    console.error('Error in getTaskAssignmentDetail:', error);
+    console.error('Error response:', error.response?.data);
+    throw new Error(error.response?.data?.message || "Failed to fetch task assignment details");
+  }
+}
+
+const getInspectionsByAssignmentId = async (assignmentId: string): Promise<InspectionResponse> => {
+  try {
+    console.log(`Calling API: ${import.meta.env.VITE_GET_INSPECTION_ASSIGNMENT_ID.replace('{task_assignment_id}', assignmentId)}`);
+    const endpoint = import.meta.env.VITE_GET_INSPECTION_ASSIGNMENT_ID.replace('{task_assignment_id}', assignmentId);
+    const { data } = await apiInstance.get<InspectionResponse>(endpoint);
+
+    // Validate response structure
+    if (!data) {
+      console.error('Invalid response structure from inspections API');
+      throw new Error('Invalid response structure from API');
+    }
+    
+    return data;
+  } catch (error: any) {
+    console.error('Error in getInspectionsByAssignmentId:', error);
+    console.error('Error response:', error.response?.data);
+    throw new Error(error.response?.data?.message || "Failed to fetch inspections");
+  }
+}
+
 const createTask = async (data: CreateTaskRequest) => {
   try {
     const response = await apiInstance.post('/tasks/task', data)
@@ -72,7 +112,9 @@ export const useCreateTask = () => {
 const tasksApi = {
   getTasks,
   createTask,
-  getTaskAssignmentsByTaskId
+  getTaskAssignmentsByTaskId,
+  getTaskAssignmentDetail,
+  getInspectionsByAssignmentId
 }
 
 export default tasksApi

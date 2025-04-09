@@ -343,3 +343,68 @@ export interface TaskAssignmentResponse {
     taskAssignments: TaskAssignment[]
   }
 }
+
+export interface TaskAssignmentDetailResponse {
+  success: boolean
+  message: string
+  data: {
+    assignment_id: string
+    task_id: string
+    description: string
+    employee: {
+      employee_id: string
+      username: string
+    }
+    status: string
+    created_at: string
+    updated_at: string
+    task: {
+      task_id: string
+      description: string
+      status: string
+      created_at: string
+      updated_at: string
+      crack_id?: string
+      schedule_job_id?: string
+    }
+    crackInfo?: {
+      isSuccess: boolean
+      message: string
+      data: {
+        crackReportId: string
+        buildingDetailId: string
+        description: string
+        isPrivatesAsset: boolean
+        position: string
+        status: string
+        reportedBy: {
+          userId: string
+          username: string
+        }
+        verifiedBy?: {
+          userId: string
+          username: string
+        }
+        createdAt: string
+        updatedAt: string
+      }[]
+    }
+  }
+}
+
+export interface Inspection {
+  inspection_id: string
+  task_assignment_id: string
+  inspected_by: string
+  image_urls: string[]
+  description: string
+  created_at: string
+  updated_at: string
+  total_cost: string
+}
+
+export interface InspectionResponse {
+  statusCode: number
+  message: string
+  data: Inspection[]
+}

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import tasksApi from '@/services/tasks'
@@ -6,11 +6,13 @@ import { motion } from 'framer-motion'
 import { FORMAT_DATE_TIME } from '@/utils/helpers'
 import { STATUS_COLORS } from '@/constants/colors'
 import { IoArrowBack } from 'react-icons/io5'
-import { FaClipboardList, FaUser, FaCalendarAlt, FaCheckCircle, FaExchangeAlt, FaTools, FaCheck } from 'react-icons/fa'
+import { FaUser, FaCalendarAlt, FaClipboardList, FaCheckCircle, FaExchangeAlt, FaTools, FaCheck } from 'react-icons/fa'
+import SimpleInspectionModal from '@/components/TaskManager/SimpleInspectionModal'
 
 const TaskDetail: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>()
   const navigate = useNavigate()
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null)
 
   // Fetch task details and assignments
   const { data: taskData, isLoading } = useQuery({
@@ -19,6 +21,26 @@ const TaskDetail: React.FC = () => {
     enabled: !!taskId,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false
+  })
+
+  // Fetch inspections for selected assignment only
+  const { data: inspections, isLoading: isLoadingInspections, error: inspectionsError } = useQuery({
+    queryKey: ['inspections', selectedAssignmentId],
+    queryFn: async () => {
+      try {
+        console.log('Fetching inspections for ID:', selectedAssignmentId);
+        const response = await tasksApi.getInspectionsByAssignmentId(selectedAssignmentId || '');
+        console.log('Inspections response:', response);
+        return response;
+      } catch (error) {
+        console.error('Error fetching inspections:', error);
+        throw error;
+      }
+    },
+    enabled: !!selectedAssignmentId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1
   })
 
   if (isLoading) {
@@ -53,22 +75,6 @@ const TaskDetail: React.FC = () => {
     Fixed: task.taskAssignments.filter(a => a.status === 'Fixed')
   }
 
-  // Get status color based on status
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Confirmed':
-        return STATUS_COLORS.IN_PROGRESS
-      case 'Reassigned':
-        return STATUS_COLORS.REVIEWING
-      case 'InFixing':
-        return STATUS_COLORS.PENDING
-      case 'Fixed':
-        return STATUS_COLORS.RESOLVED
-      default:
-        return STATUS_COLORS.PENDING
-    }
-  }
-
   // Get status icon based on status
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -84,6 +90,22 @@ const TaskDetail: React.FC = () => {
         return null
     }
   }
+
+  // Find the selected assignment from task data
+  const findSelectedAssignment = () => {
+    if (!selectedAssignmentId || !task.taskAssignments) return null;
+    return task.taskAssignments.find(a => a.assignment_id === selectedAssignmentId) || null;
+  }
+
+  const handleAssignmentClick = (assignmentId: string) => {
+    setSelectedAssignmentId(assignmentId)
+  }
+
+  const handleCloseModal = () => {
+    setSelectedAssignmentId(null)
+  }
+
+  const selectedAssignment = findSelectedAssignment();
 
   return (
     <div className="p-6 w-full bg-gray-50 dark:bg-gray-800 min-h-screen">
@@ -167,8 +189,9 @@ const TaskDetail: React.FC = () => {
             {assignmentsByStatus.Confirmed.map((assignment) => (
               <div 
                 key={assignment.assignment_id} 
-                className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition"
+                className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
                 style={{ borderLeftColor: STATUS_COLORS.IN_PROGRESS.TEXT }}
+                onClick={() => handleAssignmentClick(assignment.assignment_id)}
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">{assignment.description}</h4>
@@ -207,8 +230,9 @@ const TaskDetail: React.FC = () => {
             {assignmentsByStatus.Reassigned.map((assignment) => (
               <div 
                 key={assignment.assignment_id} 
-                className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition"
+                className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
                 style={{ borderLeftColor: STATUS_COLORS.REVIEWING.TEXT }}
+                onClick={() => handleAssignmentClick(assignment.assignment_id)}
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">{assignment.description}</h4>
@@ -247,8 +271,9 @@ const TaskDetail: React.FC = () => {
             {assignmentsByStatus.InFixing.map((assignment) => (
               <div 
                 key={assignment.assignment_id} 
-                className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition"
+                className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
                 style={{ borderLeftColor: STATUS_COLORS.PENDING.TEXT }}
+                onClick={() => handleAssignmentClick(assignment.assignment_id)}
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">{assignment.description}</h4>
@@ -287,8 +312,9 @@ const TaskDetail: React.FC = () => {
             {assignmentsByStatus.Fixed.map((assignment) => (
               <div 
                 key={assignment.assignment_id} 
-                className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition"
+                className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
                 style={{ borderLeftColor: STATUS_COLORS.RESOLVED.TEXT }}
+                onClick={() => handleAssignmentClick(assignment.assignment_id)}
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">{assignment.description}</h4>
@@ -314,6 +340,18 @@ const TaskDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Simple Inspection Modal */}
+      {selectedAssignmentId && selectedAssignment && (
+        <SimpleInspectionModal
+          isOpen={!!selectedAssignmentId}
+          onClose={handleCloseModal}
+          assignment={selectedAssignment}
+          inspections={inspections}
+          isLoading={isLoadingInspections}
+          error={inspectionsError ? String(inspectionsError) : undefined}
+        />
+      )}
     </div>
   )
 }
