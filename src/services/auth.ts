@@ -1,18 +1,17 @@
-import apiInstance from '@/lib/axios'
-import { GetCurrentUserAPIResponse,LoginUserAPIResponse } from '@/types'
+import apiInstance from '@/lib/axios';
+import { GetCurrentUserAPIResponse, LoginUserAPIResponse } from '@/types';
 
 const signIn = async (username: string, password: string): Promise<LoginUserAPIResponse> => {
   try {
-    const { data } = await apiInstance.post<LoginUserAPIResponse>(
-      import.meta.env.VITE_LOGIN_API,
-      { username, password }
-    );
+    const { data } = await apiInstance.post<LoginUserAPIResponse>(import.meta.env.VITE_LOGIN_API, {
+      username,
+      password,
+    });
     return data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Invalid username or password");
+    throw new Error(error.response?.data?.message || 'Invalid username or password');
   }
 };
-
 
 // const logOut = async () => {
 //   try {
@@ -36,18 +35,20 @@ const signIn = async (username: string, password: string): Promise<LoginUserAPIR
 
 const getCurrentUser = async () => {
   try {
-    const { data } = await apiInstance.get<GetCurrentUserAPIResponse>(import.meta.env.VITE_CURRENT_USER_API)
-    return data
+    const { data } = await apiInstance.get<GetCurrentUserAPIResponse>(
+      import.meta.env.VITE_CURRENT_USER_API
+    );
+    return data;
   } catch (error) {
-    return null
+    return null;
   }
-}
+};
 
 const authApi = {
   signIn,
-//   logOut,
-//   refreshToken,
-  getCurrentUser
-}
+  //   logOut,
+  //   refreshToken,
+  getCurrentUser,
+};
 
-export default authApi
+export default authApi;

@@ -1,4 +1,3 @@
-
 import { Task } from '../types';
 
 export const mockTasks: Task[] = [
@@ -8,7 +7,7 @@ export const mockTasks: Task[] = [
     description: 'Water leak reported on the 3rd floor near apartment 304',
     status: 'pending',
     assignedTo: 'John Smith',
-    createdAt: '2025-03-10'
+    createdAt: '2025-03-10',
   },
   {
     id: 1002,
@@ -16,7 +15,7 @@ export const mockTasks: Task[] = [
     description: 'Scheduled maintenance for electrical systems in Building B',
     status: 'in_progress',
     assignedTo: 'Emily Johnson',
-    createdAt: '2025-03-12'
+    createdAt: '2025-03-12',
   },
   {
     id: 1003,
@@ -24,7 +23,7 @@ export const mockTasks: Task[] = [
     description: 'Front lobby window needs replacement due to crack',
     status: 'completed',
     assignedTo: 'Michael Chen',
-    createdAt: '2025-03-05'
+    createdAt: '2025-03-05',
   },
   {
     id: 1004,
@@ -32,7 +31,7 @@ export const mockTasks: Task[] = [
     description: 'Routine inspection of HVAC systems in all buildings',
     status: 'in_progress',
     assignedTo: 'Sarah Williams',
-    createdAt: '2025-03-15'
+    createdAt: '2025-03-15',
   },
   {
     id: 1005,
@@ -40,7 +39,7 @@ export const mockTasks: Task[] = [
     description: 'Repainting walls in common areas of Building C',
     status: 'pending',
     assignedTo: 'David Lee',
-    createdAt: '2025-03-16'
+    createdAt: '2025-03-16',
   },
   {
     id: 1006,
@@ -48,7 +47,7 @@ export const mockTasks: Task[] = [
     description: 'Install new security cameras at entrance points',
     status: 'completed',
     assignedTo: 'Lisa Garcia',
-    createdAt: '2025-03-07'
+    createdAt: '2025-03-07',
   },
   {
     id: 1007,
@@ -56,6 +55,6 @@ export const mockTasks: Task[] = [
     description: 'Trim trees and bushes around property perimeter',
     status: 'pending',
     assignedTo: 'Robert Taylor',
-    createdAt: '2025-03-14'
-  }
+    createdAt: '2025-03-14',
+  },
 ];

@@ -25,21 +25,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
               ×
             </button>
           </div>
-          
+
           {/* Body */}
-          <div className="relative flex-auto p-6">
-            {children}
-          </div>
+          <div className="relative flex-auto p-6">{children}</div>
         </div>
       </div>
-      
+
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 z-40 bg-black opacity-25" 
-        onClick={onClose}
-      ></div>
+      <div className="fixed inset-0 z-40 bg-black opacity-25" onClick={onClose}></div>
     </div>
   );
 };
 
-export default Modal; 
+export default Modal;

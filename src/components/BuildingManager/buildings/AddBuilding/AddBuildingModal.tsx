@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
-import Modal from "./Modal";
-import { addBuilding } from "@/services/building";
-import { getAreaList } from "@/services/areas";
-import { Area } from "@/types";
-import toast from "react-hot-toast";
-import { Loader2 } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { addBuilding } from '@/services/building';
+import { getAreaList } from '@/services/areas';
+import { Area } from '@/types';
+import toast from 'react-hot-toast';
+import { Loader2 } from 'lucide-react';
 
 interface AddBuildingModalProps {
   isOpen: boolean;
@@ -12,22 +11,18 @@ interface AddBuildingModalProps {
   onSuccess: () => void;
 }
 
-const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
-  isOpen,
-  onClose,
-  onSuccess,
-}) => {
+const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [areas, setAreas] = useState<Area[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
+    name: '',
+    description: '',
     numberFloor: 1,
-    imageCover: "",
-    areaId: "",
-    construction_date: new Date().toLocaleDateString("en-CA"),
-    completion_date: new Date().toLocaleDateString("en-CA"),
-    status: "operational",
+    imageCover: '',
+    areaId: '',
+    construction_date: new Date().toLocaleDateString('en-CA'),
+    completion_date: new Date().toLocaleDateString('en-CA'),
+    status: 'operational',
   });
 
   const [errors, setErrors] = useState<{
@@ -35,14 +30,13 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
   }>({});
 
   useEffect(() => {
-    if (formData.status === "under_construction") {
-      setFormData((prev) => ({
+    if (formData.status === 'under_construction') {
+      setFormData(prev => ({
         ...prev,
-        completion_date: "dd/mm/yyyy",
+        completion_date: 'dd/mm/yyyy',
       }));
     }
   }, [formData.status]);
-  
 
   useEffect(() => {
     const fetchAreas = async () => {
@@ -50,11 +44,11 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
         const areasData = await getAreaList();
         setAreas(areasData);
         if (areasData.length > 0) {
-          setFormData((prev) => ({ ...prev, areaId: areasData[0].areaId }));
+          setFormData(prev => ({ ...prev, areaId: areasData[0].areaId }));
         }
       } catch (error) {
-        console.error("Error fetching area list:", error);
-        toast.error("Unable to load area list!");
+        console.error('Error fetching area list:', error);
+        toast.error('Unable to load area list!');
       }
     };
 
@@ -64,33 +58,31 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
   }, [isOpen]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
-    if (name === "numberFloor") {
-      setFormData((prev) => ({
+    if (name === 'numberFloor') {
+      setFormData(prev => ({
         ...prev,
         [name]: parseInt(value) || 1,
       }));
-    } else if (name === "status") {
-      if (value === "under_construction") {
-        setFormData((prev) => ({
+    } else if (name === 'status') {
+      if (value === 'under_construction') {
+        setFormData(prev => ({
           ...prev,
           status: value,
-          completion_date: "dd/mm/yyyy",
+          completion_date: 'dd/mm/yyyy',
         }));
       } else {
-        setFormData((prev) => ({
+        setFormData(prev => ({
           ...prev,
           status: value,
-          completion_date: new Date().toLocaleDateString("en-CA"),
+          completion_date: new Date().toLocaleDateString('en-CA'),
         }));
       }
     } else {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         [name]: value,
       }));
@@ -98,7 +90,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
 
     // Clear error when user types
     if (errors[name]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [name]: undefined,
       }));
@@ -109,19 +101,19 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Building name is required";
+      newErrors.name = 'Building name is required';
     }
 
     if (!formData.areaId) {
-      newErrors.areaId = "Please select an area";
+      newErrors.areaId = 'Please select an area';
     }
 
     if (!formData.construction_date) {
-      newErrors.construction_date = "Construction date is required";
+      newErrors.construction_date = 'Construction date is required';
     }
 
-    if (formData.status === "operational" && !formData.completion_date) {
-      newErrors.completion_date = "Completion date is required for operational buildings";
+    if (formData.status === 'operational' && !formData.completion_date) {
+      newErrors.completion_date = 'Completion date is required for operational buildings';
     }
 
     setErrors(newErrors);
@@ -143,28 +135,28 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
         areaId: formData.areaId,
         construction_date: formData.construction_date,
         completion_date: formData.completion_date,
-        status: formData.status as "operational" | "under_construction",
+        status: formData.status as 'operational' | 'under_construction',
       });
 
-      toast.success("Building added successfully!");
+      toast.success('Building added successfully!');
 
       // Reset form
       setFormData({
-        name: "",
-        description: "",
+        name: '',
+        description: '',
         numberFloor: 1,
-        imageCover: "",
-        areaId: "",
-        construction_date: new Date().toLocaleDateString("en-CA"),
-        completion_date: new Date().toLocaleDateString("en-CA"),
-        status: "operational",
+        imageCover: '',
+        areaId: '',
+        construction_date: new Date().toLocaleDateString('en-CA'),
+        completion_date: new Date().toLocaleDateString('en-CA'),
+        status: 'operational',
       });
 
       onSuccess();
       onClose();
     } catch (err) {
-      console.error("Error adding building:", err);
-      toast.error("Error adding new building!");
+      console.error('Error adding building:', err);
+      toast.error('Error adding new building!');
     } finally {
       setIsLoading(false);
     }
@@ -177,19 +169,18 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-full max-w-[800px] shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Add New Building</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill in the information below to add a new building</p>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              Add New Building
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Fill in the information below to add a new building
+            </p>
           </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -200,7 +191,13 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          className="space-y-6"
+        >
           <div className="grid grid-cols-2 gap-6">
             {/* Building Name */}
             <div className="space-y-2">
@@ -214,7 +211,9 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 onChange={handleChange}
                 placeholder="Enter building name"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.name ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.name
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.name && (
@@ -234,7 +233,9 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 onChange={handleChange}
                 min="1"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                  errors.numberFloor ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.numberFloor
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.numberFloor && (
@@ -254,7 +255,9 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 onChange={handleChange}
                 placeholder="Enter image URL"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.imageCover ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.imageCover
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.imageCover && (
@@ -272,11 +275,13 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 value={formData.areaId}
                 onChange={handleChange}
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                  errors.areaId ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.areaId
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               >
                 <option value="">Select area</option>
-                {areas.map((area) => (
+                {areas.map(area => (
                   <option key={area.areaId} value={area.areaId}>
                     {area.name}
                   </option>
@@ -298,11 +303,15 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 value={formData.construction_date}
                 onChange={handleChange}
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                  errors.construction_date ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.construction_date
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.construction_date && (
-                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.construction_date}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">
+                  {errors.construction_date}
+                </p>
               )}
             </div>
 
@@ -317,7 +326,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                     type="radio"
                     name="status"
                     value="operational"
-                    checked={formData.status === "operational"}
+                    checked={formData.status === 'operational'}
                     onChange={handleChange}
                     className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                   />
@@ -328,7 +337,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                     type="radio"
                     name="status"
                     value="under_construction"
-                    checked={formData.status === "under_construction"}
+                    checked={formData.status === 'under_construction'}
                     onChange={handleChange}
                     className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                   />
@@ -342,7 +351,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Completion Date
               </label>
-              {formData.status === "under_construction" ? (
+              {formData.status === 'under_construction' ? (
                 <input
                   type="text"
                   name="completion_date"
@@ -358,12 +367,16 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                   value={formData.completion_date}
                   onChange={handleChange}
                   className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                    errors.completion_date ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                    errors.completion_date
+                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                   }`}
                 />
               )}
               {errors.completion_date && (
-                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.completion_date}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">
+                  {errors.completion_date}
+                </p>
               )}
             </div>
 
@@ -378,7 +391,9 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                 onChange={handleChange}
                 placeholder="Enter building description"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.description ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.description
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
                 rows={4}
               />
@@ -408,7 +423,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({
                   Processing...
                 </span>
               ) : (
-                "Add Building"
+                'Add Building'
               )}
             </button>
           </div>

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { addNewArea } from "@/services/areas";
+import React, { useState } from 'react';
+import { addNewArea } from '@/services/areas';
 import toast from 'react-hot-toast';
-import { Loader2 } from "lucide-react";
+import { Loader2 } from 'lucide-react';
 
 interface AddAreaModalProps {
   isOpen: boolean;
@@ -10,30 +10,24 @@ interface AddAreaModalProps {
   isLoading?: boolean;
 }
 
-const AddAreaModal: React.FC<AddAreaModalProps> = ({
-  isOpen,
-  onClose,
-  onSuccess,
-}) => {
+const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    createdDate: new Date().toLocaleDateString("en-CA"),
+    name: '',
+    description: '',
+    createdDate: new Date().toLocaleDateString('en-CA'),
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{
     [key: string]: string;
   }>({});
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
 
     // Clear error when user types
     if (errors[name]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [name]: undefined,
       }));
@@ -44,7 +38,7 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Area name is required";
+      newErrors.name = 'Area name is required';
     }
 
     setErrors(newErrors);
@@ -61,22 +55,22 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({
     try {
       await addNewArea({
         name: formData.name,
-        description: formData.description
+        description: formData.description,
       });
 
-      toast.success("Area added successfully!");
+      toast.success('Area added successfully!');
 
       setFormData({
-        name: "",
-        description: "",
-        createdDate: new Date().toLocaleDateString("en-CA"),
+        name: '',
+        description: '',
+        createdDate: new Date().toLocaleDateString('en-CA'),
       });
 
       onSuccess();
       onClose();
     } catch (err) {
-      console.error("Error adding area:", err);
-      toast.error("Error adding new area!");
+      console.error('Error adding area:', err);
+      toast.error('Error adding new area!');
     } finally {
       setIsLoading(false);
     }
@@ -90,18 +84,15 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Add New Area</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill in the information below to add a new area</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Fill in the information below to add a new area
+            </p>
           </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -125,7 +116,9 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({
                 onChange={handleChange}
                 placeholder="Enter area name"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.name ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.name
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.name && (
@@ -158,7 +151,9 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({
                 onChange={handleChange}
                 placeholder="Enter area description"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.description ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.description
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
                 rows={4}
               />
@@ -187,7 +182,7 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({
                   Processing...
                 </span>
               ) : (
-                "Add Area"
+                'Add Area'
               )}
             </button>
           </div>

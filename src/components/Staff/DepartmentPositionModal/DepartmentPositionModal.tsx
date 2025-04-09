@@ -19,7 +19,7 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
   staffName,
   onSaveSuccess,
   initialDepartmentId,
-  initialPositionId
+  initialPositionId,
 }) => {
   if (!isOpen) return null;
 
@@ -35,12 +35,14 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
           <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
         </div>
 
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+          &#8203;
+        </span>
 
-        <div 
+        <div
           className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-          role="dialog" 
-          aria-modal="true" 
+          role="dialog"
+          aria-modal="true"
           aria-labelledby="modal-headline"
         >
           <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -54,7 +56,7 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
               <X className="h-5 w-5" />
             </button>
           </div>
-          
+
           <div className="px-6 py-4">
             <DepartmentPositionSelect
               staffId={staffId}
@@ -68,4 +70,4 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
   );
 };
 
-export default DepartmentPositionModal; 
+export default DepartmentPositionModal;

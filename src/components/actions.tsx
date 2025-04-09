@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface ActionProps {
   className?: string;
@@ -25,20 +25,16 @@ export default function Actions({
         onClick={onOk}
         disabled={isLoading || isDisabled}
         className={`px-4 py-2 rounded bg-blue-500 text-white 
-          ${
-            isDisabled || isLoading
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-blue-600"
-          } 
+          ${isDisabled || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'} 
           transition duration-300 ease-in-out`}
       >
-        {isLoading ? "Loading..." : okText}
+        {isLoading ? 'Loading...' : okText}
       </button>
       <button
         onClick={onCancel}
         disabled={isDisabled}
         className={`px-4 py-2 rounded bg-gray-500 text-white 
-          ${isDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-600"} 
+          ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'} 
           transition duration-300 ease-in-out`}
       >
         {cancelText}

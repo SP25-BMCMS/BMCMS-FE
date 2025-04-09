@@ -23,18 +23,18 @@ export const useRemoveResident = ({ onRemoveSuccess }: UseRemoveResidentProps) =
 
   const removeResident = async () => {
     if (!residentToRemove) return;
-    
+
     setIsLoading(true);
-    
+
     try {
       // Giả lập API call để xóa resident
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Gọi callback khi xóa thành công
       if (onRemoveSuccess) {
         onRemoveSuccess(residentToRemove.id);
       }
-      
+
       toast.success('Xóa khách hàng thành công!');
       closeModal();
     } catch (error) {
@@ -51,6 +51,6 @@ export const useRemoveResident = ({ onRemoveSuccess }: UseRemoveResidentProps) =
     residentToRemove,
     openModal,
     closeModal,
-    removeResident
+    removeResident,
   };
 };

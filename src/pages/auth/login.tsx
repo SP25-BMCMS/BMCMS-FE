@@ -1,33 +1,32 @@
-import React, { useState } from "react";
-import useToast from "@/hooks/use-toash";
+import React, { useState } from 'react';
+import useToast from '@/hooks/use-toash';
 import '../auth/login.css';
-import loginImage from "../../image/login-screen.png"
-import authApi from "@/services/auth";
-import ThemeToggle from "@/components/ThemeToggle";
+import loginImage from '../../image/login-screen.png';
+import authApi from '@/services/auth';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const toast = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     try {
       const response = await authApi.signIn(username, password);
-      
+
       // Lưu token vào localStorage
       localStorage.setItem('bmcms_token', response.accessToken);
       localStorage.setItem('bmcms_refresh_token', response.refreshToken);
-      
-      toast.success("Đăng nhập thành công");
 
-      window.location.reload(); 
-      
+      toast.success('Đăng nhập thành công');
+
+      window.location.reload();
     } catch (error: any) {
-      const errorMessage = error.message || "Tên đăng nhập hoặc mật khẩu không đúng";
+      const errorMessage = error.message || 'Tên đăng nhập hoặc mật khẩu không đúng';
       setError(errorMessage);
       toast.error(errorMessage); // Hiển thị toast lỗi
     }
@@ -38,7 +37,7 @@ const Login = () => {
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
-      
+
       <div className="flex max-w-4xl w-full mx-auto">
         {/* Phần Login Box */}
         <div className="w-1/2 h-[500px] p-8 bg-white dark:bg-gray-800 shadow-lg rounded-lg border-4 border-[#0AEEFE] dark:border-blue-700">
@@ -61,7 +60,7 @@ const Login = () => {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 placeholder="John_Doe"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value)}
                 required
               />
             </div>
@@ -79,7 +78,7 @@ const Login = () => {
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   placeholder="****************"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   required
                 />
                 <div className="absolute inset-y-0 right-4 flex items-center">

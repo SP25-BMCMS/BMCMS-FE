@@ -1,3 +1,3 @@
 import StatusCrack from './StatusCrack';
 
-export default StatusCrack; 
+export default StatusCrack;

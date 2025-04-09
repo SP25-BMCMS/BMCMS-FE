@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { AddStaffData } from "@/services/staffs";
-import { Loader2 } from "lucide-react";
+import React, { useState } from 'react';
+import { AddStaffData } from '@/services/staffs';
+import { Loader2 } from 'lucide-react';
 
 interface AddStaffProps {
   isOpen: boolean;
@@ -9,37 +9,30 @@ interface AddStaffProps {
   isLoading: boolean;
 }
 
-const AddStaff: React.FC<AddStaffProps> = ({
-  isOpen,
-  onClose,
-  onAdd,
-  isLoading,
-}) => {
+const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }) => {
   const [formData, setFormData] = useState<AddStaffData>({
-    username: "",
-    email: "",
-    password: "",
-    phone: "",
-    role: "Staff",
-    dateOfBirth: "",
-    gender: "Male",
+    username: '',
+    email: '',
+    password: '',
+    phone: '',
+    role: 'Staff',
+    dateOfBirth: '',
+    gender: 'Male',
   });
 
   const [errors, setErrors] = useState<{
     [key in keyof AddStaffData]?: string;
   }>({});
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
 
     if (errors[name as keyof AddStaffData]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [name]: undefined,
       }));
@@ -47,13 +40,13 @@ const AddStaff: React.FC<AddStaffProps> = ({
   };
 
   const handleSelectChange = (field: keyof AddStaffData, value: string) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
-    
+
     if (errors[field]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [field]: undefined,
       }));
@@ -62,15 +55,15 @@ const AddStaff: React.FC<AddStaffProps> = ({
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = e.target.value;
-    const isoDate = dateValue ? new Date(dateValue).toISOString() : "";
-    
-    setFormData((prev) => ({
+    const isoDate = dateValue ? new Date(dateValue).toISOString() : '';
+
+    setFormData(prev => ({
       ...prev,
       dateOfBirth: isoDate,
     }));
-    
+
     if (errors.dateOfBirth) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         dateOfBirth: undefined,
       }));
@@ -81,37 +74,37 @@ const AddStaff: React.FC<AddStaffProps> = ({
     const newErrors: { [key in keyof AddStaffData]?: string } = {};
 
     if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
+      newErrors.username = 'Username is required';
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
+      newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = 'Invalid email format';
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = 'Password must be at least 6 characters';
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
+      newErrors.phone = 'Phone number is required';
     } else if (!/^\d{10,11}$/.test(formData.phone)) {
-      newErrors.phone = "Invalid phone number";
+      newErrors.phone = 'Invalid phone number';
     }
 
     if (!formData.role) {
-      newErrors.role = "Please select a role";
+      newErrors.role = 'Please select a role';
     }
 
     if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = "Please select date of birth";
+      newErrors.dateOfBirth = 'Please select date of birth';
     }
 
     if (!formData.gender) {
-      newErrors.gender = "Please select gender";
+      newErrors.gender = 'Please select gender';
     }
 
     setErrors(newErrors);
@@ -123,13 +116,13 @@ const AddStaff: React.FC<AddStaffProps> = ({
     if (validateForm()) {
       await onAdd(formData);
       setFormData({
-        username: "",
-        email: "",
-        password: "",
-        phone: "",
-        role: "Staff",
-        dateOfBirth: "",
-        gender: "Male",
+        username: '',
+        email: '',
+        password: '',
+        phone: '',
+        role: 'Staff',
+        dateOfBirth: '',
+        gender: 'Male',
       });
     }
   };
@@ -142,18 +135,15 @@ const AddStaff: React.FC<AddStaffProps> = ({
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Add New Staff</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill in the information below to add a new staff member</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Fill in the information below to add a new staff member
+            </p>
           </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -167,7 +157,10 @@ const AddStaff: React.FC<AddStaffProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Username
               </label>
               <input
@@ -178,7 +171,9 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 onChange={handleChange}
                 placeholder="Enter username"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.username ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.username
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.username && (
@@ -187,7 +182,10 @@ const AddStaff: React.FC<AddStaffProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Email
               </label>
               <input
@@ -198,7 +196,9 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 onChange={handleChange}
                 placeholder="Enter email"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.email ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.email
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.email && (
@@ -207,7 +207,10 @@ const AddStaff: React.FC<AddStaffProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Password
               </label>
               <input
@@ -218,7 +221,9 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 onChange={handleChange}
                 placeholder="Enter password"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.password ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.password
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.password && (
@@ -227,7 +232,10 @@ const AddStaff: React.FC<AddStaffProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Phone Number
               </label>
               <input
@@ -238,7 +246,9 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 onChange={handleChange}
                 placeholder="Enter phone number"
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.phone ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.phone
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.phone && (
@@ -247,16 +257,21 @@ const AddStaff: React.FC<AddStaffProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Role
               </label>
               <select
                 id="role"
                 name="role"
                 value={formData.role}
-                onChange={(e) => handleSelectChange("role", e.target.value)}
+                onChange={e => handleSelectChange('role', e.target.value)}
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                  errors.role ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.role
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               >
                 <option value="Staff">Staff</option>
@@ -269,16 +284,21 @@ const AddStaff: React.FC<AddStaffProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Gender
               </label>
               <select
                 id="gender"
                 name="gender"
                 value={formData.gender}
-                onChange={(e) => handleSelectChange("gender", e.target.value)}
+                onChange={e => handleSelectChange('gender', e.target.value)}
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                  errors.gender ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.gender
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               >
                 <option value="Male">Male</option>
@@ -290,7 +310,10 @@ const AddStaff: React.FC<AddStaffProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="dateOfBirth"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Date of Birth
               </label>
               <input
@@ -299,7 +322,9 @@ const AddStaff: React.FC<AddStaffProps> = ({
                 type="date"
                 onChange={handleDateChange}
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                  errors.dateOfBirth ? "border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : "border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
+                  errors.dateOfBirth
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               />
               {errors.dateOfBirth && (
@@ -327,7 +352,7 @@ const AddStaff: React.FC<AddStaffProps> = ({
                   Processing...
                 </span>
               ) : (
-                "Add Staff"
+                'Add Staff'
               )}
             </button>
           </div>
@@ -337,4 +362,4 @@ const AddStaff: React.FC<AddStaffProps> = ({
   );
 };
 
-export default AddStaff; 
+export default AddStaff;

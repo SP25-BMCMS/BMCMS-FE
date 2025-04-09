@@ -36,8 +36,10 @@ export const useAddNewResident = (props?: UseAddNewResidentProps) => {
       }
 
       // Tạo ID mới (thông thường sẽ được tạo từ server)
-      const newId = `RES${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-      
+      const newId = `RES${Math.floor(Math.random() * 10000)
+        .toString()
+        .padStart(4, '0')}`;
+
       // Tạo resident mới
       const newResident: Residents = {
         id: newId,
@@ -49,18 +51,18 @@ export const useAddNewResident = (props?: UseAddNewResidentProps) => {
 
       // Giả lập API call - đây là nơi bạn sẽ gọi API thực tế
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Hiển thị thông báo thành công
       toast.success('Thêm cư dân mới thành công!');
-      
+
       // Đóng modal
       closeModal();
-      
+
       // Gọi callback nếu có
       if (onAddSuccess) {
         onAddSuccess(newResident);
       }
-      
+
       setIsLoading(false);
       return newResident;
     } catch (error) {
@@ -77,6 +79,6 @@ export const useAddNewResident = (props?: UseAddNewResidentProps) => {
     isModalOpen,
     openModal,
     closeModal,
-    addResident
+    addResident,
   };
 };

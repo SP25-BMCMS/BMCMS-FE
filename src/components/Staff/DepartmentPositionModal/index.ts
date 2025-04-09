@@ -1,1 +1,1 @@
-export { default } from './DepartmentPositionModal'; 
+export { default } from './DepartmentPositionModal';
