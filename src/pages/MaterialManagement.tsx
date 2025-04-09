@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Table, { Column } from "@/components/Table"
@@ -10,17 +9,21 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import { toast } from "react-hot-toast"
 import { AxiosError } from "axios"
 import { Dialog } from "@headlessui/react"
+import { ACTIVE, INACTIVE } from "@/constants/colors"
 import materialsApi, { Material, MaterialListParams, CreateMaterialData, MaterialResponse } from "@/services/materials"
 import CreateMaterialModal from "@/components/materialManager/CreateMaterialModal"
 import UpdateUnitPriceModal from "@/components/materialManager/UpdateUnitPriceModal"
 import UpdateStockQuantityModal from "@/components/materialManager/UpdateStockQuantityModal"
 import UpdateStatusModal from "@/components/materialManager/UpdateStatusModal"
 import MaterialDetailModal from "@/components/materialManager/MaterialDetailModal"
+import AddButton from "@/components/AddButton"
+import { Plus } from "lucide-react"
 
-interface Column<T> {
+// Rename to MaterialColumn to avoid conflict with imported Column
+interface MaterialColumn<T> {
     key: keyof T | string
     title: string
-    render?: (item: T) => React.ReactNode
+    render?: (item: T, index?: number) => React.ReactNode
     width?: string
 }
 
@@ -189,11 +192,11 @@ const MaterialManagement: React.FC = () => {
         setIsDetailModalOpen(true)
     }
 
-    const columns: Column<Material>[] = [
+    const columns: MaterialColumn<Material>[] = [
         {
             key: "index",
             title: "No",
-            render: (item: Material, index: number) => (
+            render: (item: Material, index = 0) => (
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                     {(currentPage - 1) * itemsPerPage + index + 1}
                 </div>
@@ -245,8 +248,8 @@ const MaterialManagement: React.FC = () => {
                 <span
                     className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full
             ${item.status === "ACTIVE"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                            ? ACTIVE
+                            : INACTIVE
                         }`}
                 >
                     {item.status}
@@ -294,12 +297,12 @@ const MaterialManagement: React.FC = () => {
                             selectedValue={selectedStatus}
                             label="Status"
                         />
-                        <button
+                        <AddButton
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            Create Material
-                        </button>
+                            label="Create Material"
+                            icon={<Plus />}
+                            className="w-auto"
+                        />
                     </div>
                 </div>
 

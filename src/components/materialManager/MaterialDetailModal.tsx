@@ -3,6 +3,7 @@ import { Dialog } from "@headlessui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "react-hot-toast"
 import { AxiosError } from "axios"
+import { ACTIVE, INACTIVE } from "@/constants/colors"
 import materialsApi, { Material } from "@/services/materials"
 import UpdateMaterialModal from "./UpdateMaterialModal"
 import UpdateUnitPriceModal from "./UpdateUnitPriceModal"
@@ -148,8 +149,8 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
                                                 <span
                                                     className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full
                                                         ${material.status === "ACTIVE"
-                                                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                                                            ? ACTIVE
+                                                            : INACTIVE
                                                         }`}
                                                 >
                                                     {material.status}

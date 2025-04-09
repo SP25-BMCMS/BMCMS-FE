@@ -1,17 +1,29 @@
 export const STATUS_COLORS = {
     PENDING: {
-        BG: 'rgba(211, 211, 211, 0.3)', // Xám nhạt
-        TEXT: '#808080', // Xám
-        BORDER: '#d3d3d3' // Xám nhạt
+        BG: 'rgba(254, 164, 19, 0.35)', // Màu nền từ FEA413 nhạt 35%
+        TEXT: '#FFA500', // Màu chữ cam/vàng đậm
+        BORDER: '#FFA500' // Màu viền cam/vàng đậm
     },
     IN_PROGRESS: {
-        BG: 'rgba(173, 216, 230, 0.3)', // Xanh dương nhạt
-        TEXT: '#0000ff', // Xanh dương
-        BORDER: '#add8e6' // Xanh dương nhạt
+        BG: 'rgba(54, 10, 254, 0.35)', // Màu nền từ 360AFE nhạt 35%
+        TEXT: '#360AFE', // Màu chữ xanh dương
+        BORDER: '#360AFE' // Màu viền xanh dương
     },
     RESOLVED: {
-        BG: 'rgba(80, 241, 134, 0.31)', // Giữ nguyên màu xanh lá cây ban đầu
-        TEXT: '#00ff90', // Giữ nguyên màu xanh lá cây ban đầu
-        BORDER: '#50f186' // Giữ nguyên màu xanh lá cây ban đầu
+        BG: 'rgba(80, 241, 134, 0.35)', // Màu nền từ 50F186 nhạt 35%
+        TEXT: '#50F186', // Màu chữ xanh lá
+        BORDER: '#50F186' // Màu viền xanh lá
+    },
+    ACTIVE:{
+        BG: 'rgba(80, 241, 134, 0.35)', // Màu nền từ 50F186 nhạt 35%
+        TEXT: '#50F186', // Màu chữ xanh lá
+        BORDER: '#50F186' // Màu viền xanh lá
+    },
+    INACTIVE:{
+        BG: 'rgba(248, 8, 8, 0.3)', // Màu nền đỏ nhạt 30%
+        TEXT: '#ff0000', // Màu chữ đỏ
+        BORDER: '#f80808' // Màu viền đỏ
     }
 };
+export const ACTIVE = 'bg-[rgba(80,241,134,0.35)] text-[#50F186] border border-[#50F186]';
+export const INACTIVE = 'bg-[rgba(248,8,8,0.3)] text-[#ff0000] border border-[#f80808]';
