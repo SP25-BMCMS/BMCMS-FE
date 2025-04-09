@@ -83,6 +83,35 @@ const getInspectionsByAssignmentId = async (assignmentId: string): Promise<Inspe
   }
 }
 
+const updateTaskStatus = async (taskId: string, status: string): Promise<any> => {
+  try {
+    console.log(`Updating task status: ${taskId} to ${status}`);
+    const endpoint = import.meta.env.VITE_CHANGE_STATUS_TASK.replace('{task_id}', taskId);
+    const { data } = await apiInstance.put(endpoint, { status });
+    return data;
+  } catch (error: any) {
+    console.error('Error updating task status:', error);
+    console.error('Error response:', error.response?.data);
+    throw new Error(error.response?.data?.message || "Failed to update task status");
+  }
+}
+
+const updateCrackStatus = async (crackId: string, status: string, description: string): Promise<any> => {
+  try {
+    console.log(`Updating crack status: ${crackId} to ${status}`);
+    const endpoint = import.meta.env.VITE_CHANGE_PATCH_CRACK.replace('{id}', crackId);
+    const { data } = await apiInstance.patch(endpoint, { 
+      status, 
+      description: description || `The crack has been ${status}.`
+    });
+    return data;
+  } catch (error: any) {
+    console.error('Error updating crack status:', error);
+    console.error('Error response:', error.response?.data);
+    throw new Error(error.response?.data?.message || "Failed to update crack status");
+  }
+}
+
 const createTask = async (data: CreateTaskRequest) => {
   try {
     const response = await apiInstance.post('/tasks/task', data)
@@ -114,7 +143,9 @@ const tasksApi = {
   createTask,
   getTaskAssignmentsByTaskId,
   getTaskAssignmentDetail,
-  getInspectionsByAssignmentId
+  getInspectionsByAssignmentId,
+  updateTaskStatus,
+  updateCrackStatus
 }
 
 export default tasksApi

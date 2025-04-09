@@ -13,6 +13,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { STATUS_COLORS } from '@/constants/colors'
 import { useNavigate } from 'react-router-dom'
+import ChangeStatusModal from '@/components/TaskManager/ChangeStatusModal'
 
 interface TasksCacheData {
   data: TaskResponse[]
@@ -27,6 +28,10 @@ const TaskManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null)
+  const [modalType, setModalType] = useState<'task' | 'crack'>('task')
+  const [currentCrackStatus, setCurrentCrackStatus] = useState<string>('')
   const navigate = useNavigate()
 
   const queryClient = useQueryClient()
@@ -105,11 +110,27 @@ const TaskManagement: React.FC = () => {
     setCurrentPage(1)
   }
 
-  const handleStatusChange = (taskId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'Assigned' ? 'In Progress' :
-      currentStatus === 'In Progress' ? 'Completed' : 'Assigned'
+  const handleTaskStatusChange = (task: TaskResponse) => {
+    setSelectedTask(task)
+    setModalType('task')
+    setIsStatusModalOpen(true)
+  }
 
-    updateTaskStatusMutation.mutate({ taskId, newStatus })
+  const handleCrackStatusChange = (task: TaskResponse) => {
+    if (!task.crackInfo || !task.crackInfo.isSuccess || !task.crackInfo.data.length) {
+      toast.error('Crack information is not available')
+      return
+    }
+
+    setSelectedTask(task)
+    setModalType('crack')
+    setCurrentCrackStatus(task.crackInfo.data[0].status)
+    setIsStatusModalOpen(true)
+  }
+
+  const handleCloseStatusModal = () => {
+    setIsStatusModalOpen(false)
+    setSelectedTask(null)
   }
 
   // Loading animation
@@ -190,7 +211,8 @@ const TaskManagement: React.FC = () => {
             textColor = STATUS_COLORS.IN_PROGRESS.TEXT;
             borderColor = STATUS_COLORS.IN_PROGRESS.BORDER;
             break;
-          case 'Resolved':
+          // @ts-ignore
+          case 'Completed':
             bgColor = STATUS_COLORS.RESOLVED.BG;
             textColor = STATUS_COLORS.RESOLVED.TEXT;
             borderColor = STATUS_COLORS.RESOLVED.BORDER;
@@ -203,13 +225,14 @@ const TaskManagement: React.FC = () => {
         
         return (
           <span 
-            className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+            className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80"
             style={{ 
               backgroundColor: bgColor, 
               color: textColor, 
               borderColor: borderColor,
               border: '1px solid' 
             }}
+            onClick={() => item.crack_id && handleCrackStatusChange(item)}
           >
             {crackStatus}
           </span>
@@ -225,12 +248,15 @@ const TaskManagement: React.FC = () => {
       key: 'status',
       title: 'Status',
       render: (item) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.status === 'Completed'
-          ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
-          : item.status === 'In Progress'
-            ? 'bg-[rgba(255,193,7,0.3)] text-[#ffc107] border border-[#ffc107]'
-            : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
-          }`}>
+        <span 
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80 ${item.status === 'Completed'
+            ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
+            : item.status === 'In Progress'
+              ? 'bg-[rgba(255,193,7,0.3)] text-[#ffc107] border border-[#ffc107]'
+              : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+            }`}
+          onClick={() => handleTaskStatusChange(item)}
+        >
           {item.status}
         </span>
       )
@@ -241,13 +267,25 @@ const TaskManagement: React.FC = () => {
       render: (item) => (
         <DropdownMenu
           onViewDetail={() => navigate(`/task-detail/${item.task_id}`)}
-          onChangeStatus={() => handleStatusChange(item.task_id, item.status)}
+          onChangeStatus={() => handleTaskStatusChange(item)}
           onRemove={() => console.log("Remove", item)}
         />
       ),
       width: '80px',
     }
   ]
+
+  const getCustomCrackMenu = (item: TaskResponse) => {
+    if (item.crack_id && item.crackInfo?.isSuccess && item.crackInfo.data.length) {
+      return [
+        {
+          label: 'Change Crack Status',
+          onClick: () => handleCrackStatusChange(item)
+        }
+      ]
+    }
+    return []
+  }
 
   return (
     <div className="w-full mt-[60px]">
@@ -299,6 +337,20 @@ const TaskManagement: React.FC = () => {
             className="w-[95%] mx-auto mt-4"
           />
         </>
+      )}
+
+      {/* Change Status Modal */}
+      {selectedTask && (
+        <ChangeStatusModal
+          isOpen={isStatusModalOpen}
+          onClose={handleCloseStatusModal}
+          taskId={selectedTask.task_id}
+          crackId={selectedTask.crack_id}
+          currentTaskStatus={selectedTask.status}
+          currentCrackStatus={selectedTask.crackInfo?.isSuccess && selectedTask.crackInfo.data.length > 0 
+            ? selectedTask.crackInfo.data[0].status
+            : undefined}
+        />
       )}
     </div>
   )
