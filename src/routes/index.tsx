@@ -17,6 +17,7 @@ import CrackManagement from "@/pages/CrackManagement"
 import DetailCrack from "@/components/crackManager/DetailCrack/DetailCrack"
 import DetailLayout from "@/layouts/DetailLayout"
 import TaskManagement from "@/pages/TaskManagement"
+import TaskDetail from "@/pages/TaskDetail"
 import Calendar from "@/pages/Calendar"
 import ScheduleJob from "@/pages/scheduleManager/ScheduleJob"
 import MaterialManagement from "@/pages/MaterialManagement"
@@ -130,6 +131,11 @@ function AppRoutes() {
             <Route path="/materials/:materialId" element={
               <RoleBasedRoute allowedRoles={["Manager"]}>
                 <MaterialDetail />
+              </RoleBasedRoute>
+            } />
+            <Route path="/task-detail/:taskId" element={
+              <RoleBasedRoute allowedRoles={["Manager"]}>
+                <TaskDetail />
               </RoleBasedRoute>
             } />
           </Route>

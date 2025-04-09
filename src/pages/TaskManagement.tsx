@@ -12,6 +12,7 @@ import Pagination from '@/components/Pagination'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { STATUS_COLORS } from '@/constants/colors'
+import { useNavigate } from 'react-router-dom'
 
 interface TasksCacheData {
   data: TaskResponse[]
@@ -26,6 +27,7 @@ const TaskManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const navigate = useNavigate()
 
   const queryClient = useQueryClient()
 
@@ -238,7 +240,7 @@ const TaskManagement: React.FC = () => {
       title: 'Action',
       render: (item) => (
         <DropdownMenu
-          onViewDetail={() => console.log('View detail clicked', item)}
+          onViewDetail={() => navigate(`/task-detail/${item.task_id}`)}
           onChangeStatus={() => handleStatusChange(item.task_id, item.status)}
           onRemove={() => console.log("Remove", item)}
         />

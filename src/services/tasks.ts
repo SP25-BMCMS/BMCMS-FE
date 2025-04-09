@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiInstance from '@/lib/axios'
-import { TaskListParams, TaskListPaginationResponse } from '@/types'
+import { TaskListParams, TaskListPaginationResponse, TaskAssignmentResponse } from '@/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 
@@ -33,6 +33,16 @@ const getTasks = async (params: TaskListParams = {}): Promise<TaskListPagination
   }
 }
 
+const getTaskAssignmentsByTaskId = async (taskId: string): Promise<TaskAssignmentResponse> => {
+  try {
+    const endpoint = import.meta.env.VITE_GET_TASK_ASSIGNMENT_BY_TASK_ID.replace('{taskId}', taskId)
+    const { data } = await apiInstance.get<TaskAssignmentResponse>(endpoint)
+    return data
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to fetch task assignments")
+  }
+}
+
 const createTask = async (data: CreateTaskRequest) => {
   try {
     const response = await apiInstance.post('/tasks/task', data)
@@ -61,7 +71,8 @@ export const useCreateTask = () => {
 
 const tasksApi = {
   getTasks,
-  createTask
+  createTask,
+  getTaskAssignmentsByTaskId
 }
 
 export default tasksApi

@@ -317,3 +317,29 @@ export type Crack = {
   aiDetectedImage?: string
   aiDetectedImage2?: string
 }
+
+// Task Assignment types
+export interface TaskAssignment {
+  assignment_id: string
+  task_id: string
+  employee_id: string
+  description: string
+  status: 'Confirmed' | 'Reassigned' | 'InFixing' | 'Fixed'
+  created_at: string
+  updated_at: string
+}
+
+export interface TaskAssignmentResponse {
+  statusCode: number
+  message: string
+  data: {
+    task_id: string
+    description: string
+    status: string
+    created_at: string
+    updated_at: string
+    crack_id?: string
+    schedule_job_id?: string
+    taskAssignments: TaskAssignment[]
+  }
+}
