@@ -27,18 +27,18 @@ export interface DashboardSummary {
 const getDashboardSummary = async (): Promise<DashboardSummary> => {
   try {
     const token = localStorage.getItem('bmcms_token');
-    
+
     if (!token) {
       throw new Error('No authentication token found');
     }
-    
+
     const response = await axios.get(
       `${import.meta.env.VITE_API_SECRET}${import.meta.env.VITE_GET_DASHBOARD_SUMMARY}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       }
     );
     return response.data.data;
@@ -50,4 +50,4 @@ const getDashboardSummary = async (): Promise<DashboardSummary> => {
 
 export default {
   getDashboardSummary,
-}; 
+};

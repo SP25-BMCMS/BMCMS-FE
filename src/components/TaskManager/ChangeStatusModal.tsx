@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react'
-import { STATUS_COLORS } from '@/constants/colors'
-import { IoClose } from 'react-icons/io5'
-import { FaInfoCircle, FaCheck, FaExclamationTriangle } from 'react-icons/fa'
-import tasksApi from '@/services/tasks'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
+import React, { useState, useEffect } from 'react';
+import { STATUS_COLORS } from '@/constants/colors';
+import { IoClose } from 'react-icons/io5';
+import { FaInfoCircle, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
+import tasksApi from '@/services/tasks';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 interface ChangeStatusModalProps {
-  isOpen: boolean
-  onClose: () => void
-  taskId: string
-  crackId?: string
-  currentTaskStatus: string
-  currentCrackStatus?: string
+  isOpen: boolean;
+  onClose: () => void;
+  taskId: string;
+  crackId?: string;
+  currentTaskStatus: string;
+  currentCrackStatus?: string;
 }
 
 const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({
@@ -23,105 +23,105 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({
   currentTaskStatus,
   currentCrackStatus,
 }) => {
-  const [taskStatus, setTaskStatus] = useState<string>(currentTaskStatus)
-  const [crackStatus, setCrackStatus] = useState<string>(currentCrackStatus || '')
-  const [crackDescription, setCrackDescription] = useState<string>('')
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
-  const queryClient = useQueryClient()
+  const [taskStatus, setTaskStatus] = useState<string>(currentTaskStatus);
+  const [crackStatus, setCrackStatus] = useState<string>(currentCrackStatus || '');
+  const [crackDescription, setCrackDescription] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setTaskStatus(currentTaskStatus)
-      setCrackStatus(currentCrackStatus || '')
-      setCrackDescription('')
-      setError(null)
+      setTaskStatus(currentTaskStatus);
+      setCrackStatus(currentCrackStatus || '');
+      setCrackDescription('');
+      setError(null);
     }
-  }, [isOpen, currentTaskStatus, currentCrackStatus])
+  }, [isOpen, currentTaskStatus, currentCrackStatus]);
 
   // Generate default description based on status
   useEffect(() => {
     if (crackStatus === 'Resolved') {
-      setCrackDescription('Vết nứt đã được xử lý thành công.')
+      setCrackDescription('Vết nứt đã được xử lý thành công.');
     } else if (crackStatus === 'Cancelled') {
-      setCrackDescription('Hủy bỏ việc xử lý vết nứt.')
+      setCrackDescription('Hủy bỏ việc xử lý vết nứt.');
     }
-  }, [crackStatus])
+  }, [crackStatus]);
 
   // Handle ESC key press
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose()
+        onClose();
       }
-    }
-    window.addEventListener('keydown', handleEsc)
+    };
+    window.addEventListener('keydown', handleEsc);
 
     return () => {
-      window.removeEventListener('keydown', handleEsc)
-    }
-  }, [onClose])
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [onClose]);
 
   // Prevent scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'auto'
+      document.body.style.overflow = 'auto';
     }
 
     return () => {
-      document.body.style.overflow = 'auto'
-    }
-  }, [isOpen])
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
 
   // Task status mutation
   const updateTaskStatusMutation = useMutation({
     mutationFn: async (status: string) => {
-      console.log(`Updating task status: ${taskId} to ${status}`)
-      return await tasksApi.updateTaskStatus(taskId, status)
+      console.log(`Updating task status: ${taskId} to ${status}`);
+      return await tasksApi.updateTaskStatus(taskId, status);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      toast.success('Task status updated successfully')
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      toast.success('Task status updated successfully');
     },
     onError: (error: any) => {
-      console.error('Error updating task status:', error)
-      setError(error?.message || 'Failed to update task status')
-      toast.error('Failed to update task status')
-      throw error
+      console.error('Error updating task status:', error);
+      setError(error?.message || 'Failed to update task status');
+      toast.error('Failed to update task status');
+      throw error;
     },
-  })
+  });
 
   // Crack status mutation
   const updateCrackStatusMutation = useMutation({
     mutationFn: async ({ status, description }: { status: string; description: string }) => {
-      if (!crackId) throw new Error('No crack associated with this task')
-      console.log(`Updating crack status: ${crackId} to ${status}`)
-      return await tasksApi.updateCrackStatus(crackId, status, description)
+      if (!crackId) throw new Error('No crack associated with this task');
+      console.log(`Updating crack status: ${crackId} to ${status}`);
+      return await tasksApi.updateCrackStatus(crackId, status, description);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      toast.success('Crack status updated successfully')
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      toast.success('Crack status updated successfully');
     },
     onError: (error: any) => {
-      console.error('Error updating crack status:', error)
-      setError(error?.message || 'Failed to update crack status')
-      toast.error('Failed to update crack status')
-      throw error
+      console.error('Error updating crack status:', error);
+      setError(error?.message || 'Failed to update crack status');
+      toast.error('Failed to update crack status');
+      throw error;
     },
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
     try {
       // Update task status
       if (taskStatus !== currentTaskStatus) {
-        await updateTaskStatusMutation.mutateAsync(taskStatus)
+        await updateTaskStatusMutation.mutateAsync(taskStatus);
       }
 
       // If crack exists and status is changed, update crack status
@@ -129,65 +129,65 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({
         await updateCrackStatusMutation.mutateAsync({
           status: crackStatus,
           description: crackDescription || `Vết nứt đã được ${crackStatus}.`,
-        })
+        });
       }
 
       // Close modal if both operations succeed
-      onClose()
+      onClose();
     } catch (error) {
-      console.error('Error submitting form:', error)
+      console.error('Error submitting form:', error);
       // Error state is already set in the mutation error handlers
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   // Get task status options
   const getTaskStatusOptions = () => {
     return [
       { value: 'Assigned', label: 'Assigned' },
       { value: 'Completed', label: 'Completed' },
-    ]
-  }
+    ];
+  };
 
   // Get crack status options - only Resolved and Cancelled
   const getCrackStatusOptions = () => {
     return [
       { value: 'Completed', label: 'Completed' },
       { value: 'Rejected', label: 'Rejected' },
-    ]
-  }
+    ];
+  };
 
   // Get status color
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Completed':
       case 'Resolved':
-        return STATUS_COLORS.RESOLVED
+        return STATUS_COLORS.RESOLVED;
       case 'In Progress':
       case 'InProgress':
-        return STATUS_COLORS.IN_PROGRESS
+        return STATUS_COLORS.IN_PROGRESS;
       case 'Assigned':
       case 'Pending':
-        return STATUS_COLORS.INACTIVE
+        return STATUS_COLORS.INACTIVE;
       case 'Reviewing':
-        return STATUS_COLORS.REVIEWING
+        return STATUS_COLORS.REVIEWING;
       case 'Cancelled':
-        return STATUS_COLORS.INACTIVE
+        return STATUS_COLORS.INACTIVE;
       default:
-        return STATUS_COLORS.INACTIVE
+        return STATUS_COLORS.INACTIVE;
     }
-  }
+  };
 
-  const taskStatusOptions = getTaskStatusOptions()
-  const crackStatusOptions = getCrackStatusOptions()
-  const taskStatusColor = getStatusColor(taskStatus)
-  const crackStatusColor = getStatusColor(crackStatus)
-  const hasCrack = !!crackId
+  const taskStatusOptions = getTaskStatusOptions();
+  const crackStatusOptions = getCrackStatusOptions();
+  const taskStatusColor = getStatusColor(taskStatus);
+  const crackStatusColor = getStatusColor(crackStatus);
+  const hasCrack = !!crackId;
   const hasChanges =
-    taskStatus !== currentTaskStatus || (hasCrack && crackStatus !== currentCrackStatus)
+    taskStatus !== currentTaskStatus || (hasCrack && crackStatus !== currentCrackStatus);
 
   return (
     <>
@@ -247,17 +247,18 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({
                     {taskStatusOptions.map(option => (
                       <div
                         key={option.value}
-                        className={`relative px-3 py-2 border rounded-md cursor-pointer transition-all ${taskStatus === option.value
+                        className={`relative px-3 py-2 border rounded-md cursor-pointer transition-all ${
+                          taskStatus === option.value
                             ? 'ring-2 ring-offset-2 ring-blue-500'
                             : 'border-gray-300 dark:border-gray-600'
-                          }`}
+                        }`}
                         style={
                           taskStatus === option.value
                             ? {
-                              backgroundColor: getStatusColor(option.value).BG,
-                              color: getStatusColor(option.value).TEXT,
-                              borderColor: getStatusColor(option.value).BORDER,
-                            }
+                                backgroundColor: getStatusColor(option.value).BG,
+                                color: getStatusColor(option.value).TEXT,
+                                borderColor: getStatusColor(option.value).BORDER,
+                              }
                             : {}
                         }
                         onClick={() => setTaskStatus(option.value)}
@@ -307,17 +308,18 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({
                       {crackStatusOptions.map(option => (
                         <div
                           key={option.value}
-                          className={`relative px-3 py-2 border rounded-md cursor-pointer transition-all ${crackStatus === option.value
+                          className={`relative px-3 py-2 border rounded-md cursor-pointer transition-all ${
+                            crackStatus === option.value
                               ? 'ring-2 ring-offset-2 ring-blue-500'
                               : 'border-gray-300 dark:border-gray-600'
-                            }`}
+                          }`}
                           style={
                             crackStatus === option.value
                               ? {
-                                backgroundColor: getStatusColor(option.value).BG,
-                                color: getStatusColor(option.value).TEXT,
-                                borderColor: getStatusColor(option.value).BORDER,
-                              }
+                                  backgroundColor: getStatusColor(option.value).BG,
+                                  color: getStatusColor(option.value).TEXT,
+                                  borderColor: getStatusColor(option.value).BORDER,
+                                }
                               : {}
                           }
                           onClick={() => setCrackStatus(option.value)}
@@ -390,7 +392,7 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default ChangeStatusModal
+export default ChangeStatusModal;
