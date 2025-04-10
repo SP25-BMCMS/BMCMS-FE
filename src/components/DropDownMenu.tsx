@@ -1,42 +1,46 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { RiEyeLine, RiFilterLine, RiDeleteBinLine } from 'react-icons/ri';
+import React, { useState, useRef, useEffect } from 'react'
+import { RiEyeLine, RiFilterLine, RiDeleteBinLine, RiFileDownloadLine } from 'react-icons/ri'
 
 interface DropdownMenuProps {
-  onViewDetail: () => void;
-  onChangeStatus: () => void;
-  onRemove: () => void;
-  changeStatusTitle?: string;
-  viewDetailDisabled?: boolean;
+  onViewDetail: () => void
+  onChangeStatus: () => void
+  onRemove: () => void
+  onExportPdf?: () => void
+  changeStatusTitle?: string
+  viewDetailDisabled?: boolean
+  showExportPdf?: boolean
 }
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({
   onViewDetail,
   onChangeStatus,
   onRemove,
+  onExportPdf,
   changeStatusTitle = 'Change Status',
   viewDetailDisabled = false,
+  showExportPdf = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   // Đóng dropdown khi click bên ngoài
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleViewDetail = () => {
     if (!viewDetailDisabled) {
-      onViewDetail();
-      setIsOpen(false);
+      onViewDetail()
+      setIsOpen(false)
     }
-  };
+  }
 
   return (
     <div className="relative" ref={menuRef}>
@@ -62,11 +66,10 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
         <div className="fixed right-0 mt-2 w-44 bg-white border border-gray-300 shadow-lg rounded-md z-50 mr-[3.5rem]">
           <button
             onClick={handleViewDetail}
-            className={`flex items-center w-full px-4 py-2 ${
-              viewDetailDisabled
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-700 hover:bg-gray-100'
-            }`}
+            className={`flex items-center w-full px-4 py-2 ${viewDetailDisabled
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-blue-700 hover:bg-gray-100'
+              }`}
             disabled={viewDetailDisabled}
             title={viewDetailDisabled ? 'Không khả dụng với tòa nhà đang xây dựng' : 'Xem chi tiết'}
           >
@@ -74,10 +77,21 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
             View Detail
             {viewDetailDisabled && <span className="ml-1 text-xs">(Không khả dụng)</span>}
           </button>
+          {showExportPdf && onExportPdf && (
+            <button
+              onClick={() => {
+                onExportPdf()
+                setIsOpen(false)
+              }}
+              className="flex items-center w-full px-4 py-2 text-green-600 hover:bg-gray-100"
+            >
+              <RiFileDownloadLine className="mr-2" /> Export PDF
+            </button>
+          )}
           <button
             onClick={() => {
-              onChangeStatus();
-              setIsOpen(false);
+              onChangeStatus()
+              setIsOpen(false)
             }}
             className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
           >
@@ -85,8 +99,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
           </button>
           <button
             onClick={() => {
-              onRemove();
-              setIsOpen(false);
+              onRemove()
+              setIsOpen(false)
             }}
             className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100"
           >
@@ -95,7 +109,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default DropdownMenu;
+export default DropdownMenu

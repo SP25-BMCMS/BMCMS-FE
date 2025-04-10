@@ -407,3 +407,42 @@ export interface InspectionResponse {
   message: string;
   data: Inspection[];
 }
+
+// WorkLog types
+export interface WorkLog {
+  worklog_id: string;
+  task_id: string;
+  title: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  task: {
+    task_id: string;
+    description: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    crack_id: string;
+    schedule_job_id: string;
+  };
+}
+
+export interface WorkLogListPaginationResponse {
+  statusCode: number;
+  message: string;
+  data: WorkLog[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface WorkLogListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+}

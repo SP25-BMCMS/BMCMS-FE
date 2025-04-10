@@ -18,6 +18,7 @@ import ScheduleJob from '@/pages/scheduleManager/ScheduleJob';
 import MaterialManagement from '@/pages/MaterialManagement';
 import MaterialDetail from '@/pages/MaterialDetail';
 import { useAuth } from '@/hooks/useAuth';
+import WorkLog from '@/pages/WorkLog';
 
 interface RoleBasedRouteProps {
   children: React.ReactNode;
@@ -125,7 +126,7 @@ function AppRoutes() {
               path="/worklog"
               element={
                 <RoleBasedRoute allowedRoles={['Manager']}>
-                  <div>WorkLog Content</div>
+                  <WorkLog />
                 </RoleBasedRoute>
               }
             />
