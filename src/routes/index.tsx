@@ -19,6 +19,7 @@ import MaterialManagement from '@/pages/MaterialManagement';
 import MaterialDetail from '@/pages/MaterialDetail';
 import { useAuth } from '@/hooks/useAuth';
 import WorkLog from '@/pages/WorkLog';
+import Dashboard from '@/pages/Dashboard';
 
 interface RoleBasedRouteProps {
   children: React.ReactNode;
@@ -66,7 +67,7 @@ function AppRoutes() {
               path="/dashboard"
               element={
                 <RoleBasedRoute allowedRoles={['Admin', 'Manager']}>
-                  <div>Dashboard Content</div>
+                  <Dashboard />
                 </RoleBasedRoute>
               }
             />
