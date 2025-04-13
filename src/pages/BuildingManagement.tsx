@@ -7,6 +7,7 @@ import { PiMapPinAreaBold } from 'react-icons/pi';
 import { FaRegBuilding } from 'react-icons/fa';
 import AddBuildingModal from '@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal';
 import RemoveBuilding from '@/components/BuildingManager/buildings/DeleteBuilding/RemoveBuilding';
+import ViewBuildingModal from '@/components/BuildingManager/buildings/ViewBuilding/ViewBuildingModal';
 import DropdownMenu from '@/components/DropDownMenu';
 import SearchInput from '@/components/SearchInput';
 import FilterDropdown from '@/components/FilterDropdown';
@@ -22,6 +23,7 @@ const Building: React.FC = () => {
   const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
   const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
   const [isRemoveBuildingModalOpen, setIsRemoveBuildingModalOpen] = useState(false);
+  const [isViewBuildingModalOpen, setIsViewBuildingModalOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingResponse | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -104,6 +106,11 @@ const Building: React.FC = () => {
   const getAreaName = (areaId: string): string => {
     const area = areas.find(a => a.areaId === areaId);
     return area ? area.name : 'N/A';
+  };
+
+  const handleViewBuildingDetail = (building: BuildingResponse) => {
+    setSelectedBuilding(building);
+    setIsViewBuildingModalOpen(true);
   };
 
   const handleRemoveBuilding = (building: BuildingResponse) => {
@@ -198,9 +205,10 @@ const Building: React.FC = () => {
       title: 'Action',
       render: item => (
         <DropdownMenu
-          onViewDetail={() => console.log('View detail clicked')}
+          onViewDetail={() => handleViewBuildingDetail(item)}
           onChangeStatus={() => console.log('Change Status', item)}
           onRemove={() => handleRemoveBuilding(item)}
+          changeStatusTitle="Thay đổi trạng thái"
         />
       ),
       width: '80px',
@@ -307,6 +315,13 @@ const Building: React.FC = () => {
         onConfirm={confirmRemoveBuilding}
         isLoading={isDeleting}
         building={selectedBuilding}
+      />
+
+      {/* View Building Modal */}
+      <ViewBuildingModal
+        isOpen={isViewBuildingModalOpen}
+        onClose={() => setIsViewBuildingModalOpen(false)}
+        buildingId={selectedBuilding?.buildingId || null}
       />
     </div>
   );

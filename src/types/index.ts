@@ -165,12 +165,15 @@ export interface BuildingResponse {
   completion_date: string;
   Status: string;
   updatedAt: string;
+  Warranty_date?: string;
 }
+
 export interface BuildingsListResponse {
   statusCode: number;
   message: string;
   data: BuildingResponse[];
 }
+
 export interface AddBuildingRequest {
   name: string;
   description: string;
@@ -181,6 +184,82 @@ export interface AddBuildingRequest {
   completion_date: string;
   status: 'operational' | 'under_construction';
 }
+
+export interface BuildingListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: 'operational' | 'under_construction';
+}
+
+export interface BuildingListResponse {
+  data: BuildingResponse[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface BuildingDetailByIdResponse {
+  statusCode: number;
+  message: string;
+  data: BuildingResponse & {
+    area: {
+      areaId: string;
+      name: string;
+      description: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+    buildingDetails: any[];
+  };
+}
+
+export interface BuildingDetailResponse {
+  statusCode: number;
+  message: string;
+  data: {
+    buildingDetailId: string;
+    buildingId: string;
+    name: string;
+    total_apartments: number;
+    createdAt: string;
+    updatedAt: string;
+    building: BuildingResponse & {
+      area: {
+        areaId: string;
+        name: string;
+        description: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    };
+  };
+}
+
+export interface AllBuildingDetailsResponse {
+  statusCode: number;
+  message: string;
+  data: Array<{
+    buildingDetailId: string;
+    buildingId: string;
+    name: string;
+    total_apartments: number;
+    createdAt: string;
+    updatedAt: string;
+    building: BuildingResponse;
+    locationDetails?: Array<any>;
+  }>;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 //crack
 export type CrackDetailsResponse = {
   crackDetailsId: string;
