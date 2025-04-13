@@ -1,13 +1,13 @@
 // services/buildings.ts
 import apiInstance from '@/lib/axios';
-import { 
-  BuildingResponse, 
-  AddBuildingRequest, 
-  BuildingListParams, 
+import {
+  BuildingResponse,
+  AddBuildingRequest,
+  BuildingListParams,
   BuildingListResponse,
   BuildingDetailResponse,
   BuildingDetailByIdResponse,
-  AllBuildingDetailsResponse
+  AllBuildingDetailsResponse,
 } from '@/types';
 
 // Hàm lấy danh sách tòa nhà với pagination và search
@@ -64,9 +64,7 @@ export const getBuildingDetail = async (
   }
 };
 
-export const getBuildingById = async (
-  buildingId: string
-): Promise<BuildingDetailByIdResponse> => {
+export const getBuildingById = async (buildingId: string): Promise<BuildingDetailByIdResponse> => {
   try {
     const url = import.meta.env.VITE_DETAIL_BUILDING.replace('{id}', buildingId);
     const response = await apiInstance.get<BuildingDetailByIdResponse>(url);
