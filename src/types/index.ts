@@ -160,6 +160,7 @@ export interface BuildingResponse {
   numberFloor: number;
   imageCover: string;
   areaId: string;
+  manager_id?: string;
   createdAt: string;
   construction_date: string;
   completion_date: string;

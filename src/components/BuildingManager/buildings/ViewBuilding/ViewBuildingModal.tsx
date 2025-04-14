@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getBuildingById, getBuildingDetail, getAllBuildingDetails } from '@/services/building';
+import { getAllStaff } from '@/services/staff';
 import { toast } from 'react-hot-toast';
 import {
   Building,
@@ -11,6 +12,7 @@ import {
   Clock,
   ShieldCheck,
   GripVertical,
+  User
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FORMAT_DATE } from '@/utils/format';
@@ -76,6 +78,25 @@ interface ViewBuildingModalProps {
   buildingId: string | null;
 }
 
+interface BuildingDetailColumn {
+  field: string;
+  label: string;
+  width: number;
+  pinned?: boolean;
+}
+
+const buildingDetailColumns: BuildingDetailColumn[] = [
+  { field: 'buildingName', label: 'Building Name', width: 180, pinned: true },
+  { field: 'areaName', label: 'Area', width: 150 },
+  { field: 'status', label: 'Status', width: 150 },
+  { field: 'constructionDate', label: 'Construction Date', width: 180 },
+  { field: 'completionDate', label: 'Completion Date', width: 180 },
+  { field: 'warranty_date', label: 'Warranty Date', width: 180 },
+  { field: 'numOfFloors', label: 'Number of Floors', width: 150 },
+  { field: 'managerName', label: 'Manager', width: 180 },
+  { field: 'description', label: 'Description', width: 300 },
+];
+
 const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, buildingId }) => {
   const [buildingDetail, setBuildingDetail] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -83,6 +104,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
   const [leftColumnWidth, setLeftColumnWidth] = useState<number>(30); // Default width percentage
   const [isResizing, setIsResizing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [managerName, setManagerName] = useState<string>('Not assigned');
 
   useEffect(() => {
     setBuildingDetail(null);
@@ -163,6 +185,15 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
           ...buildingDetailResponse.data,
         };
         setBuildingDetail(combinedData);
+        
+        // Check for manager_id in different possible locations in the data structure
+        const managerId = 
+          (buildingResponse.data && buildingResponse.data.manager_id) || 
+          (combinedData.building && combinedData.building.manager_id);
+        
+        if (managerId) {
+          fetchManagerInfo(managerId);
+        }
       } else {
         setError('Unable to load building details');
         toast.error('Unable to load building details');
@@ -176,9 +207,33 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
     }
   };
 
+  // Function to fetch manager information
+  const fetchManagerInfo = async (managerId: string) => {
+    try {
+      const staffResponse = await getAllStaff();
+      
+      if (staffResponse && staffResponse.data) {
+        const manager = staffResponse.data.find((staff: any) => staff.userId === managerId);
+        
+        if (manager) {
+          setManagerName(manager.username);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching manager info:', error);
+      // We don't set an error state here to avoid disrupting the main view
+    }
+  };
+
   // Format date
-  const formatDate = (dateString: string) => {
-    return FORMAT_DATE(dateString);
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
   };
 
   // Define building status styles
@@ -211,6 +266,18 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
       opacity: 1,
       transition: { type: 'spring', stiffness: 100 },
     },
+  };
+
+  const buildingData = {
+    buildingName: buildingDetail?.name || '-',
+    areaName: buildingDetail?.area.name || '-',
+    status: buildingDetail?.Status === 'operational' ? 'Operational' : 'Under Construction',
+    constructionDate: formatDate(buildingDetail?.construction_date),
+    completionDate: formatDate(buildingDetail?.completion_date),
+    warranty_date: buildingDetail?.Warranty_date ? formatDate(buildingDetail.Warranty_date) : '-',
+    numOfFloors: buildingDetail?.numberFloor?.toString() || '-',
+    managerName: managerName || '-',
+    description: buildingDetail?.description || '-',
   };
 
   return (
@@ -342,29 +409,40 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                 </h3>
 
                 <div className="space-y-3">
+                  {/* Building basic info */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-gray-500 dark:text-gray-400">Building Name</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
-                      {buildingDetail.name}
+                      {buildingData.buildingName}
                     </span>
                   </div>
 
+                  {/* Status */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-gray-500 dark:text-gray-400">Status</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
-                      {buildingDetail.Status === 'operational'
-                        ? 'Operational'
-                        : 'Under Construction'}
+                      {buildingData.status}
                     </span>
                   </div>
 
+                  {/* Floor count */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-gray-500 dark:text-gray-400">Number of Floors</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
-                      {buildingDetail.numberFloor}
+                      {buildingData.numOfFloors}
+                    </span>
+                  </div>
+                  
+                  {/* Building manager info - always displayed */}
+                  <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">Building Manager</span>
+                    <span className="text-gray-900 dark:text-white text-sm font-medium flex items-center">
+                      <User className="h-4 w-4 mr-1 text-blue-500" />
+                      {buildingData.managerName}
                     </span>
                   </div>
 
+                  {/* Created date */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-gray-500 dark:text-gray-400">Created Date</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
@@ -372,6 +450,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                     </span>
                   </div>
 
+                  {/* Last updated date */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-gray-500 dark:text-gray-400">Last Updated</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
@@ -379,6 +458,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                     </span>
                   </div>
 
+                  {/* Construction start date */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-gray-500 dark:text-gray-400">Construction Start</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
@@ -386,6 +466,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                     </span>
                   </div>
 
+                  {/* Completion date */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-gray-500 dark:text-gray-400">Completion Date</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
@@ -393,6 +474,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                     </span>
                   </div>
 
+                  {/* Warranty date */}
                   {buildingDetail.Warranty_date && (
                     <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
                       <span className="text-gray-500 dark:text-gray-400">Warranty Until</span>

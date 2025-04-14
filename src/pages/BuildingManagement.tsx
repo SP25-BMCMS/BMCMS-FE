@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Table, { Column } from '@/components/Table';
 import { BuildingResponse } from '@/types';
 import { getBuildings, deleteBuilding } from '@/services/building';
 import { getAreaList } from '@/services/areas';
+import { getAllStaff } from '@/services/staff';
 import { PiMapPinAreaBold } from 'react-icons/pi';
 import { FaRegBuilding } from 'react-icons/fa';
+import { User } from 'lucide-react';
 import AddBuildingModal from '@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal';
 import RemoveBuilding from '@/components/BuildingManager/buildings/DeleteBuilding/RemoveBuilding';
 import ViewBuildingModal from '@/components/BuildingManager/buildings/ViewBuilding/ViewBuildingModal';
+import EditBuildingModal from '@/components/BuildingManager/buildings/EditBuilding/EditBuildingModal';
 import DropdownMenu from '@/components/DropDownMenu';
 import SearchInput from '@/components/SearchInput';
 import FilterDropdown from '@/components/FilterDropdown';
@@ -24,11 +27,13 @@ const Building: React.FC = () => {
   const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
   const [isRemoveBuildingModalOpen, setIsRemoveBuildingModalOpen] = useState(false);
   const [isViewBuildingModalOpen, setIsViewBuildingModalOpen] = useState(false);
+  const [isEditBuildingModalOpen, setIsEditBuildingModalOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingResponse | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [managerNames, setManagerNames] = useState<Record<string, string>>({});
 
   const queryClient = useQueryClient();
 
@@ -67,6 +72,29 @@ const Building: React.FC = () => {
     refetchOnReconnect: false,
     retry: false,
   });
+
+  // Fetch staff with React Query
+  const { data: staffData } = useQuery({
+    queryKey: ['staff'],
+    queryFn: getAllStaff,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: false
+  });
+
+  // Process staff data for manager names
+  useEffect(() => {
+    if (staffData && staffData.data) {
+      const managerMapping: Record<string, string> = {};
+      staffData.data.forEach(staff => {
+        managerMapping[staff.userId] = staff.username;
+      });
+      setManagerNames(managerMapping);
+    }
+  }, [staffData]);
 
   // Delete building mutation
   const deleteBuildingMutation = useMutation({
@@ -108,9 +136,19 @@ const Building: React.FC = () => {
     return area ? area.name : 'N/A';
   };
 
+  const getManagerName = (managerId?: string): string => {
+    if (!managerId) return 'Not assigned';
+    return managerNames[managerId] || 'Unknown';
+  };
+
   const handleViewBuildingDetail = (building: BuildingResponse) => {
     setSelectedBuilding(building);
     setIsViewBuildingModalOpen(true);
+  };
+
+  const handleEditBuilding = (building: BuildingResponse) => {
+    setSelectedBuilding(building);
+    setIsEditBuildingModalOpen(true);
   };
 
   const handleRemoveBuilding = (building: BuildingResponse) => {
@@ -163,6 +201,16 @@ const Building: React.FC = () => {
       ),
     },
     {
+      key: 'manager',
+      title: 'Manager',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+          <User className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+          {getManagerName(item.manager_id)}
+        </div>
+      ),
+    },
+    {
       key: 'Floor',
       title: 'Floor',
       render: item => (
@@ -208,9 +256,9 @@ const Building: React.FC = () => {
       render: item => (
         <DropdownMenu
           onViewDetail={() => handleViewBuildingDetail(item)}
-          onChangeStatus={() => console.log('Change Status', item)}
+          onChangeStatus={() => handleEditBuilding(item)}
           onRemove={() => handleRemoveBuilding(item)}
-          changeStatusTitle="Thay đổi trạng thái"
+          changeStatusTitle="Edit Building"
         />
       ),
       width: '80px',
@@ -308,6 +356,14 @@ const Building: React.FC = () => {
         isOpen={isAddBuildingModalOpen}
         onClose={() => setIsAddBuildingModalOpen(false)}
         onSuccess={handleAddSuccess}
+      />
+
+      {/* Edit Building Modal */}
+      <EditBuildingModal
+        isOpen={isEditBuildingModalOpen}
+        onClose={() => setIsEditBuildingModalOpen(false)}
+        onSuccess={handleAddSuccess}
+        buildingId={selectedBuilding?.buildingId || null}
       />
 
       {/* Remove Building Modal */}
