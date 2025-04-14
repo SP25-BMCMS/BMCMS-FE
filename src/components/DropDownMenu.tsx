@@ -3,8 +3,8 @@ import { RiEyeLine, RiFilterLine, RiDeleteBinLine, RiFileDownloadLine } from 're
 
 interface DropdownMenuProps {
   onViewDetail: () => void;
-  onChangeStatus: () => void;
-  onRemove: () => void;
+  onChangeStatus?: () => void;
+  onRemove?: () => void;
   onExportPdf?: () => void;
   changeStatusTitle?: string;
   viewDetailDisabled?: boolean;
@@ -78,6 +78,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
             View Detail
             {viewDetailDisabled && <span className="ml-1 text-xs">(Không khả dụng)</span>}
           </button>
+
           {showExportPdf && onExportPdf && (
             <button
               onClick={() => {
@@ -89,24 +90,32 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
               <RiFileDownloadLine className="mr-2" /> Export PDF
             </button>
           )}
-          <button
-            onClick={() => {
-              onChangeStatus();
-              setIsOpen(false);
-            }}
-            className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
-          >
-            <RiFilterLine className="mr-2" /> {changeStatusTitle}
-          </button>
-          <button
-            onClick={() => {
-              onRemove();
-              setIsOpen(false);
-            }}
-            className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100"
-          >
-            <RiDeleteBinLine className="mr-2" /> Remove
-          </button>
+
+          {/* Only show Change Status button if onChangeStatus is provided */}
+          {onChangeStatus && (
+            <button
+              onClick={() => {
+                onChangeStatus();
+                setIsOpen(false);
+              }}
+              className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
+            >
+              <RiFilterLine className="mr-2" /> {changeStatusTitle}
+            </button>
+          )}
+
+          {/* Only show Remove button if onRemove is provided */}
+          {onRemove && (
+            <button
+              onClick={() => {
+                onRemove();
+                setIsOpen(false);
+              }}
+              className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100"
+            >
+              <RiDeleteBinLine className="mr-2" /> Remove
+            </button>
+          )}
         </div>
       )}
     </div>
