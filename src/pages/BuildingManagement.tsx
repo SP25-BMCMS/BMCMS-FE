@@ -82,7 +82,7 @@ const Building: React.FC = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: false
+    retry: false,
   });
 
   // Process staff data for manager names

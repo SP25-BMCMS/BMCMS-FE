@@ -12,7 +12,7 @@ import {
   Clock,
   ShieldCheck,
   GripVertical,
-  User
+  User,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FORMAT_DATE } from '@/utils/format';
@@ -185,12 +185,12 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
           ...buildingDetailResponse.data,
         };
         setBuildingDetail(combinedData);
-        
+
         // Check for manager_id in different possible locations in the data structure
-        const managerId = 
-          (buildingResponse.data && buildingResponse.data.manager_id) || 
+        const managerId =
+          (buildingResponse.data && buildingResponse.data.manager_id) ||
           (combinedData.building && combinedData.building.manager_id);
-        
+
         if (managerId) {
           fetchManagerInfo(managerId);
         }
@@ -211,10 +211,10 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
   const fetchManagerInfo = async (managerId: string) => {
     try {
       const staffResponse = await getAllStaff();
-      
+
       if (staffResponse && staffResponse.data) {
         const manager = staffResponse.data.find((staff: any) => staff.userId === managerId);
-        
+
         if (manager) {
           setManagerName(manager.username);
         }
@@ -389,11 +389,15 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
           </motion.div>
 
           {/* Main Content - Resizable Two Column Layout */}
-          <div ref={containerRef} className="flex relative" style={{ minHeight: '400px', maxHeight: 'calc(70vh - 200px)' }}>
+          <div
+            ref={containerRef}
+            className="flex relative"
+            style={{ minHeight: '400px', maxHeight: 'calc(70vh - 200px)' }}
+          >
             {/* Left Column - Building and Area Information with scroll */}
-            <motion.div 
-              className="overflow-y-auto pr-3 min-w-[250px] h-full scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800" 
-              style={{ 
+            <motion.div
+              className="overflow-y-auto pr-3 min-w-[250px] h-full scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+              style={{
                 width: `${leftColumnWidth}%`,
               }}
               variants={itemVariants}
@@ -432,7 +436,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                       {buildingData.numOfFloors}
                     </span>
                   </div>
-                  
+
                   {/* Building manager info - always displayed */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-gray-500 dark:text-gray-400">Building Manager</span>
@@ -489,7 +493,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
             </motion.div>
 
             {/* Resizer */}
-            <div 
+            <div
               className={`flex items-center justify-center cursor-col-resize w-4 mx-1 transition-colors group ${isResizing ? 'bg-blue-200 dark:bg-blue-900' : ''}`}
               onMouseDown={handleMouseDown}
             >
@@ -497,9 +501,9 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
             </div>
 
             {/* Right Column - Building Details */}
-            <motion.div 
-              className="overflow-y-auto pl-3 min-w-[250px] h-full scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800" 
-              style={{ 
+            <motion.div
+              className="overflow-y-auto pl-3 min-w-[250px] h-full scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+              style={{
                 width: `${100 - leftColumnWidth - 2}%`, // 2% for resizer
               }}
               variants={itemVariants}

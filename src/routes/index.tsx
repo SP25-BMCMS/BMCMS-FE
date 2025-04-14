@@ -8,6 +8,7 @@ import PublicRoute from '@/components/auth/PublicRoute';
 import Resident from '@/pages/Resident';
 import StaffManagement from '@/pages/StaffManagement';
 import Building from '@/pages/BuildingManagement';
+import BuildingForManager from '@/pages/BuildingforManager';
 import CrackManagement from '@/pages/CrackManagement';
 import DetailCrack from '@/components/crackManager/DetailCrack/DetailCrack';
 import DetailLayout from '@/layouts/DetailLayout';
@@ -71,21 +72,20 @@ function AppRoutes() {
                 </RoleBasedRoute>
               }
             />
-            <Route
-              path="/building"
-              element={
-                <RoleBasedRoute allowedRoles={['Admin', 'Manager']}>
-                  <Building />
-                </RoleBasedRoute>
-              }
-            />
-
             {/* Routes chỉ cho Admin */}
             <Route
               path="/resident"
               element={
                 <RoleBasedRoute allowedRoles={['Admin']}>
                   <Resident />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/building"
+              element={
+                <RoleBasedRoute allowedRoles={['Admin']}>
+                  <Building />
                 </RoleBasedRoute>
               }
             />
@@ -99,6 +99,14 @@ function AppRoutes() {
             />
 
             {/* Routes chỉ cho Manager */}
+            <Route
+              path="/buildings-for-manager"
+              element={
+                <RoleBasedRoute allowedRoles={['Manager']}>
+                  <BuildingForManager />
+                </RoleBasedRoute>
+              }
+            />
             <Route
               path="/tasks"
               element={

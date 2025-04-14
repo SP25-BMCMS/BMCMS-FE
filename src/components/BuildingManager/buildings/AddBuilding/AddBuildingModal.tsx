@@ -38,7 +38,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
       setFormData(prev => ({
         ...prev,
         completion_date: 'dd/mm/yyyy',
-        manager_id: '',  // Reset manager_id when under construction
+        manager_id: '', // Reset manager_id when under construction
         Warranty_date: '', // Reset warranty date when under construction
       }));
     }
@@ -155,8 +155,12 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         construction_date: formData.construction_date,
         completion_date: formData.completion_date,
         status: formData.status as 'operational' | 'under_construction',
-        ...(formData.status === 'operational' && formData.manager_id ? { manager_id: formData.manager_id } : {}),
-        ...(formData.status === 'operational' && formData.Warranty_date ? { Warranty_date: formData.Warranty_date } : {})
+        ...(formData.status === 'operational' && formData.manager_id
+          ? { manager_id: formData.manager_id }
+          : {}),
+        ...(formData.status === 'operational' && formData.Warranty_date
+          ? { Warranty_date: formData.Warranty_date }
+          : {}),
       };
 
       await addBuilding(buildingData);
@@ -445,11 +449,13 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                   className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:text-gray-100"
                 >
                   <option value="">Select a manager</option>
-                  {staff.filter(s => s.role === 'Manager' || s.role === 'manager').map(manager => (
-                    <option key={manager.userId} value={manager.userId}>
-                      {manager.username}
-                    </option>
-                  ))}
+                  {staff
+                    .filter(s => s.role === 'Manager' || s.role === 'manager')
+                    .map(manager => (
+                      <option key={manager.userId} value={manager.userId}>
+                        {manager.username}
+                      </option>
+                    ))}
                 </select>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Select a manager for this building. This can be updated later.

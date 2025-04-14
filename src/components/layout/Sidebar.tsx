@@ -32,7 +32,13 @@ export const sidebarItems = [
     title: 'Building Management',
     path: '/building',
     icon: <FaRegBuilding />,
-    roles: ['Admin', 'Manager'],
+    roles: ['Admin'],
+  },
+  {
+    title: 'My Buildings',
+    path: '/buildings-for-manager',
+    icon: <FaRegBuilding />,
+    roles: ['Manager'],
   },
   {
     title: 'Crack Management',

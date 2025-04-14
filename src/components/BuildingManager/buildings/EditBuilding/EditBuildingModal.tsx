@@ -13,7 +13,12 @@ interface EditBuildingModalProps {
   buildingId: string | null;
 }
 
-const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, onSuccess, buildingId }) => {
+const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  buildingId,
+}) => {
   const [areas, setAreas] = useState<Area[]>([]);
   const [staff, setStaff] = useState<StaffData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,26 +45,26 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
   useEffect(() => {
     const fetchBuildingData = async () => {
       if (!buildingId) return;
-      
+
       setIsLoadingData(true);
       try {
         const buildingResponse = await getBuildingById(buildingId);
         if (buildingResponse.data) {
           const building = buildingResponse.data;
-          
+
           // Format the dates properly for input fields
-          const formattedConstructionDate = building.construction_date ? 
-            new Date(building.construction_date).toLocaleDateString('en-CA') : 
-            new Date().toLocaleDateString('en-CA');
-            
-          const formattedCompletionDate = building.completion_date ? 
-            new Date(building.completion_date).toLocaleDateString('en-CA') : 
-            new Date().toLocaleDateString('en-CA');
-            
-          const formattedWarrantyDate = building.Warranty_date ? 
-            new Date(building.Warranty_date).toLocaleDateString('en-CA') : 
-            '';
-            
+          const formattedConstructionDate = building.construction_date
+            ? new Date(building.construction_date).toLocaleDateString('en-CA')
+            : new Date().toLocaleDateString('en-CA');
+
+          const formattedCompletionDate = building.completion_date
+            ? new Date(building.completion_date).toLocaleDateString('en-CA')
+            : new Date().toLocaleDateString('en-CA');
+
+          const formattedWarrantyDate = building.Warranty_date
+            ? new Date(building.Warranty_date).toLocaleDateString('en-CA')
+            : '';
+
           setFormData({
             buildingId: building.buildingId,
             name: building.name || '',
@@ -92,7 +97,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
       setFormData(prev => ({
         ...prev,
         completion_date: 'dd/mm/yyyy',
-        manager_id: '',  // Reset manager_id when under construction
+        manager_id: '', // Reset manager_id when under construction
         Warranty_date: '', // Reset warranty date when under construction
       }));
     }
@@ -207,8 +212,12 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
         construction_date: formData.construction_date,
         completion_date: formData.completion_date,
         status: formData.status as 'operational' | 'under_construction',
-        ...(formData.status === 'operational' && formData.manager_id ? { manager_id: formData.manager_id } : {}),
-        ...(formData.status === 'operational' && formData.Warranty_date ? { Warranty_date: formData.Warranty_date } : {})
+        ...(formData.status === 'operational' && formData.manager_id
+          ? { manager_id: formData.manager_id }
+          : {}),
+        ...(formData.status === 'operational' && formData.Warranty_date
+          ? { Warranty_date: formData.Warranty_date }
+          : {}),
       };
 
       await updateBuilding(buildingId, buildingData);
@@ -231,9 +240,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
       <div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-full max-w-[800px] shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-              Edit Building
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Edit Building</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Update building information below
             </p>
@@ -307,7 +314,9 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
                   }`}
                 />
                 {errors.numberFloor && (
-                  <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.numberFloor}</p>
+                  <p className="text-red-500 dark:text-red-400 text-xs mt-1">
+                    {errors.numberFloor}
+                  </p>
                 )}
               </div>
 
@@ -409,7 +418,9 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
                       onChange={handleChange}
                       className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                     />
-                    <span className="ml-2 text-gray-700 dark:text-gray-300">Under construction</span>
+                    <span className="ml-2 text-gray-700 dark:text-gray-300">
+                      Under construction
+                    </span>
                   </label>
                 </div>
               </div>
@@ -488,11 +499,13 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:text-gray-100"
                   >
                     <option value="">Select a manager</option>
-                    {staff.filter(s => s.role === 'Manager' || s.role === 'manager').map(manager => (
-                      <option key={manager.userId} value={manager.userId}>
-                        {manager.username}
-                      </option>
-                    ))}
+                    {staff
+                      .filter(s => s.role === 'Manager' || s.role === 'manager')
+                      .map(manager => (
+                        <option key={manager.userId} value={manager.userId}>
+                          {manager.username}
+                        </option>
+                      ))}
                   </select>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     Select a manager for this building.
@@ -518,7 +531,9 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
                   rows={4}
                 />
                 {errors.description && (
-                  <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.description}</p>
+                  <p className="text-red-500 dark:text-red-400 text-xs mt-1">
+                    {errors.description}
+                  </p>
                 )}
               </div>
             </div>
@@ -554,4 +569,4 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
   );
 };
 
-export default EditBuildingModal; 
+export default EditBuildingModal;
