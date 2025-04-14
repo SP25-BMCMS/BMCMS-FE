@@ -44,9 +44,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, size = 'md', chil
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
       <div
-        className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full ${getMaxWidth()} overflow-hidden`}
+        className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full ${getMaxWidth()} flex flex-col max-h-[90vh]`}
       >
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
           <button
             onClick={onClose}
@@ -62,7 +62,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, size = 'md', chil
             </svg>
           </button>
         </div>
-        <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+        <div className="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
           {children}
         </div>
       </div>
@@ -322,13 +322,12 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
           </motion.div>
 
           {/* Main Content - Resizable Two Column Layout */}
-          <div ref={containerRef} className="flex relative" style={{ minHeight: '500px' }}>
+          <div ref={containerRef} className="flex relative" style={{ minHeight: '400px', maxHeight: 'calc(70vh - 200px)' }}>
             {/* Left Column - Building and Area Information with scroll */}
-            <motion.div
-              className="overflow-y-auto pr-3 min-w-[250px] scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
-              style={{
+            <motion.div 
+              className="overflow-y-auto pr-3 min-w-[250px] h-full scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800" 
+              style={{ 
                 width: `${leftColumnWidth}%`,
-                maxHeight: '500px',
               }}
               variants={itemVariants}
             >
@@ -408,7 +407,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
             </motion.div>
 
             {/* Resizer */}
-            <div
+            <div 
               className={`flex items-center justify-center cursor-col-resize w-4 mx-1 transition-colors group ${isResizing ? 'bg-blue-200 dark:bg-blue-900' : ''}`}
               onMouseDown={handleMouseDown}
             >
@@ -416,11 +415,10 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
             </div>
 
             {/* Right Column - Building Details */}
-            <motion.div
-              className="overflow-y-auto pl-3 min-w-[250px] scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
-              style={{
+            <motion.div 
+              className="overflow-y-auto pl-3 min-w-[250px] h-full scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800" 
+              style={{ 
                 width: `${100 - leftColumnWidth - 2}%`, // 2% for resizer
-                maxHeight: '500px',
               }}
               variants={itemVariants}
             >
@@ -431,7 +429,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                 >
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     <Home className="h-5 w-5 text-blue-500" />
-                    Wing Details ({buildingDetail.buildingDetails.length})
+                    Area Details ({buildingDetail.buildingDetails.length})
                   </h3>
 
                   <div className="space-y-4">

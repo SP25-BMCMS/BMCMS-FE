@@ -182,7 +182,9 @@ const Building: React.FC = () => {
       key: 'completion Date',
       title: 'Completion Date',
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.completion_date}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {item.completion_date ? new Date(item.completion_date).toLocaleDateString() : 'N/A'}
+        </div>
       ),
     },
     {
