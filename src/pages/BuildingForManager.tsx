@@ -60,35 +60,28 @@ const BuildingForManager: React.FC = () => {
   };
 
   // Use TanStack Query for data fetching
-  const { 
-    data: buildingsData, 
-    isLoading, 
-    refetch 
-  } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['buildings', pagination.currentPage, pagination.itemsPerPage, searchQuery],
     queryFn: () => fetchBuildingsData({ pageParam: pagination.currentPage }),
-    keepPreviousData: true,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    onSuccess: (data) => {
-      // Update pagination when data is loaded
-      if (data.pagination) {
-        setPagination(prev => ({
-          ...prev,
-          totalPages: data.pagination?.totalPages || 1,
-          totalItems: data.pagination?.total || 0,
-        }));
-      }
-    },
-    onError: (error) => {
-      console.error('Error fetching buildings:', error);
-      toast.error("Couldn't load building data");
-    }
   });
+
+  // Extract data and update pagination when data changes
+  const buildingsData = data as BuildingManagerResponse | undefined;
+
+  React.useEffect(() => {
+    if (buildingsData?.pagination) {
+      setPagination(prev => ({
+        ...prev,
+        totalPages: buildingsData.pagination?.totalPages || 1,
+        totalItems: buildingsData.pagination?.total || 0,
+      }));
+    }
+  }, [buildingsData]);
 
   const handlePageChange = (page: number) => {
     setPagination(prev => ({
       ...prev,
-      currentPage: page
+      currentPage: page,
     }));
   };
 
@@ -96,7 +89,7 @@ const BuildingForManager: React.FC = () => {
     setPagination(prev => ({
       ...prev,
       currentPage: 1,
-      itemsPerPage: limit
+      itemsPerPage: limit,
     }));
   };
 
@@ -107,7 +100,7 @@ const BuildingForManager: React.FC = () => {
   const handleSearchSubmit = () => {
     setPagination(prev => ({
       ...prev,
-      currentPage: 1
+      currentPage: 1,
     }));
     refetch();
   };
@@ -257,15 +250,6 @@ const BuildingForManager: React.FC = () => {
             onChange={handleSearch}
             className="w-[20rem] max-w-xs"
           />
-          <button
-            onClick={handleSearchSubmit}
-            className="ml-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-          >
-            Search
-          </button>
-        </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
         </div>
       </div>
 
