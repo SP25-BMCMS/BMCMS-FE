@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { addBuilding } from '@/services/building';
 import { getAreaList } from '@/services/areas';
-import { Area } from '@/types';
+import { getAllStaff } from '@/services/staff';
+import { Area, StaffData } from '@/types';
 import toast from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, UserIcon, ShieldCheck } from 'lucide-react';
 
 interface AddBuildingModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface AddBuildingModalProps {
 
 const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [areas, setAreas] = useState<Area[]>([]);
+  const [staff, setStaff] = useState<StaffData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -20,8 +22,10 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
     numberFloor: 1,
     imageCover: '',
     areaId: '',
+    manager_id: '',
     construction_date: new Date().toLocaleDateString('en-CA'),
     completion_date: new Date().toLocaleDateString('en-CA'),
+    Warranty_date: '',
     status: 'operational',
   });
 
@@ -34,26 +38,35 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
       setFormData(prev => ({
         ...prev,
         completion_date: 'dd/mm/yyyy',
+        manager_id: '', // Reset manager_id when under construction
+        Warranty_date: '', // Reset warranty date when under construction
       }));
     }
   }, [formData.status]);
 
   useEffect(() => {
-    const fetchAreas = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch areas
         const areasData = await getAreaList();
         setAreas(areasData);
         if (areasData.length > 0) {
           setFormData(prev => ({ ...prev, areaId: areasData[0].areaId }));
         }
+
+        // Fetch staff for manager selection
+        const staffResponse = await getAllStaff();
+        if (staffResponse && staffResponse.data) {
+          setStaff(staffResponse.data);
+        }
       } catch (error) {
-        console.error('Error fetching area list:', error);
-        toast.error('Unable to load area list!');
+        console.error('Error fetching data:', error);
+        toast.error('Unable to load required data!');
       }
     };
 
     if (isOpen) {
-      fetchAreas();
+      fetchData();
     }
   }, [isOpen]);
 
@@ -73,6 +86,8 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
           ...prev,
           status: value,
           completion_date: 'dd/mm/yyyy',
+          manager_id: '', // Clear manager when status is under construction
+          Warranty_date: '', // Clear warranty date when status is under construction
         }));
       } else {
         setFormData(prev => ({
@@ -116,6 +131,10 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
       newErrors.completion_date = 'Completion date is required for operational buildings';
     }
 
+    if (formData.status === 'operational' && !formData.Warranty_date) {
+      newErrors.Warranty_date = 'Warranty date is required for operational buildings';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -127,7 +146,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
 
     setIsLoading(true);
     try {
-      await addBuilding({
+      const buildingData = {
         name: formData.name,
         description: formData.description,
         numberFloor: formData.numberFloor,
@@ -136,7 +155,15 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         construction_date: formData.construction_date,
         completion_date: formData.completion_date,
         status: formData.status as 'operational' | 'under_construction',
-      });
+        ...(formData.status === 'operational' && formData.manager_id
+          ? { manager_id: formData.manager_id }
+          : {}),
+        ...(formData.status === 'operational' && formData.Warranty_date
+          ? { Warranty_date: formData.Warranty_date }
+          : {}),
+      };
+
+      await addBuilding(buildingData);
 
       toast.success('Building added successfully!');
 
@@ -147,8 +174,10 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         numberFloor: 1,
         imageCover: '',
         areaId: '',
+        manager_id: '',
         construction_date: new Date().toLocaleDateString('en-CA'),
         completion_date: new Date().toLocaleDateString('en-CA'),
+        Warranty_date: '',
         status: 'operational',
       });
 
@@ -379,6 +408,60 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                 </p>
               )}
             </div>
+
+            {/* Warranty Date - Only shows for operational buildings */}
+            {formData.status === 'operational' && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 items-center">
+                  <ShieldCheck className="w-4 h-4 mr-1.5 text-green-500" />
+                  Warranty Date
+                </label>
+                <input
+                  type="date"
+                  name="Warranty_date"
+                  value={formData.Warranty_date}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                    errors.Warranty_date
+                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
+                />
+                {errors.Warranty_date && (
+                  <p className="text-red-500 dark:text-red-400 text-xs mt-1">
+                    {errors.Warranty_date}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Manager Selection - Only shows for operational buildings */}
+            {formData.status === 'operational' && (
+              <div className="space-y-2 col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 items-center">
+                  <UserIcon className="w-4 h-4 mr-1.5 text-blue-500" />
+                  Building Manager
+                </label>
+                <select
+                  name="manager_id"
+                  value={formData.manager_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:text-gray-100"
+                >
+                  <option value="">Select a manager</option>
+                  {staff
+                    .filter(s => s.role === 'Manager' || s.role === 'manager')
+                    .map(manager => (
+                      <option key={manager.userId} value={manager.userId}>
+                        {manager.username}
+                      </option>
+                    ))}
+                </select>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Select a manager for this building. This can be updated later.
+                </p>
+              </div>
+            )}
 
             {/* Description - Full Width */}
             <div className="col-span-2 space-y-2">

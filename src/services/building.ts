@@ -1,66 +1,14 @@
 // services/buildings.ts
 import apiInstance from '@/lib/axios';
-import { BuildingResponse, AddBuildingRequest } from '@/types';
-
-export interface BuildingListParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  status?: 'operational' | 'under_construction';
-}
-
-export interface BuildingListResponse {
-  data: BuildingResponse[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
-
-export interface BuildingDetailResponse {
-  statusCode: number;
-  message: string;
-  data: {
-    buildingDetailId: string;
-    buildingId: string;
-    name: string;
-    total_apartments: number;
-    createdAt: string;
-    updatedAt: string;
-    building: BuildingResponse & {
-      area: {
-        areaId: string;
-        name: string;
-        description: string;
-        createdAt: string;
-        updatedAt: string;
-      };
-    };
-  };
-}
-
-export interface AllBuildingDetailsResponse {
-  statusCode: number;
-  message: string;
-  data: Array<{
-    buildingDetailId: string;
-    buildingId: string;
-    name: string;
-    total_apartments: number;
-    createdAt: string;
-    updatedAt: string;
-    building: BuildingResponse;
-    locationDetails?: Array<any>;
-  }>;
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
+import {
+  BuildingResponse,
+  AddBuildingRequest,
+  BuildingListParams,
+  BuildingListResponse,
+  BuildingDetailResponse,
+  BuildingDetailByIdResponse,
+  AllBuildingDetailsResponse,
+} from '@/types';
 
 // Hàm lấy danh sách tòa nhà với pagination và search
 export const getBuildings = async (
@@ -92,6 +40,24 @@ export const addBuilding = async (buildingData: AddBuildingRequest): Promise<Bui
   }
 };
 
+export const updateBuilding = async (
+  buildingId: string,
+  buildingData: Partial<AddBuildingRequest> & { buildingId: string }
+): Promise<BuildingResponse> => {
+  try {
+    const url = import.meta.env.VITE_EDIT_BUILDING.replace('{id}', buildingId);
+    const response = await apiInstance.put<{
+      statusCode: number;
+      message: string;
+      data: BuildingResponse;
+    }>(url, buildingData);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error updating building:', error);
+    throw error;
+  }
+};
+
 export const deleteBuilding = async (buildingId: string): Promise<void> => {
   try {
     const url = import.meta.env.VITE_DELETE_BUIDLING.replace('{id}', buildingId);
@@ -112,6 +78,17 @@ export const getBuildingDetail = async (
     return response.data;
   } catch (error) {
     console.error('Error fetching building detail:', error);
+    throw error;
+  }
+};
+
+export const getBuildingById = async (buildingId: string): Promise<BuildingDetailByIdResponse> => {
+  try {
+    const url = import.meta.env.VITE_DETAIL_BUILDING.replace('{id}', buildingId);
+    const response = await apiInstance.get<BuildingDetailByIdResponse>(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching building by id:', error);
     throw error;
   }
 };

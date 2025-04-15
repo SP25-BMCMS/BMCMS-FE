@@ -2,8 +2,27 @@ import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import crackApi from '@/services/cracks';
 import { getAllStaff } from '@/services/staffs';
-import { StaffData } from '@/types';
+import { StaffData, StaffDetailResponse } from '@/types';
 import { toast } from 'react-hot-toast';
+import { getStaffDetail } from '@/services/staffs';
+
+interface StaffWithPosition extends StaffData {
+  userDetails?: {
+    positionId: string;
+    departmentId: string;
+    position: {
+      positionId: string;
+      positionName: string;
+      description: string;
+    };
+    department: {
+      departmentId: string;
+      departmentName: string;
+      description: string;
+      area: string;
+    };
+  };
+}
 
 interface StatusCrackProps {
   isOpen: boolean;
@@ -20,7 +39,8 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
   crackStatus,
   onUpdateSuccess,
 }) => {
-  const [staffList, setStaffList] = useState<StaffData[]>([]);
+  const [staffList, setStaffList] = useState<StaffWithPosition[]>([]);
+  const [filteredStaffList, setFilteredStaffList] = useState<StaffWithPosition[]>([]);
   const [selectedStaffId, setSelectedStaffId] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -58,6 +78,19 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
         // Filter to only include staff with the "Staff" role
         const staffMembers = response.data.filter(staff => staff.role === 'Staff');
         setStaffList(staffMembers);
+
+        // Get detailed info for each staff to check position
+        const staffDetailsPromises = staffMembers.map(staff => getStaffDetail(staff.userId));
+
+        const staffDetailsResponses = await Promise.all(staffDetailsPromises);
+
+        // Filter staff to only include those with "Leader" position
+        const leadersOnly = staffMembers.filter((staff, index) => {
+          const details = staffDetailsResponses[index];
+          return details.isSuccess && details.data.userDetails?.position?.positionName === 'Leader';
+        });
+
+        setFilteredStaffList(leadersOnly);
       } else {
         toast.error('Failed to load staff list');
       }
@@ -179,16 +212,16 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
             htmlFor="staff"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Assign Staff Member
+            Assign Leader Staff Member
           </label>
           {isLoading ? (
             <div className="flex justify-center py-4">
               <div className="animate-spin h-6 w-6 border-2 border-blue-500 rounded-full border-t-transparent"></div>
             </div>
-          ) : staffList.length === 0 ? (
+          ) : filteredStaffList.length === 0 ? (
             <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg text-yellow-700 dark:text-yellow-400">
-              No staff members available to assign. Please add staff members with the "Staff" role
-              first.
+              No leader staff members available to assign. Please add staff members with the "Staff"
+              role and "Leader" position first.
             </div>
           ) : (
             <select
@@ -198,10 +231,10 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
               className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
               disabled={isSaving}
             >
-              <option value="">-- Select Staff Member --</option>
-              {staffList.map(staff => (
+              <option value="">-- Select Leader Staff Member --</option>
+              {filteredStaffList.map(staff => (
                 <option key={staff.userId} value={staff.userId}>
-                  {staff.username}
+                  {staff.username} (Leader)
                 </option>
               ))}
             </select>
@@ -218,7 +251,8 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
             The selected staff will be responsible for addressing this crack report.
           </p>
           <p className="mt-1 text-blue-500 dark:text-blue-400">
-            Note: Only users with the "Staff" role can be assigned to handle crack reports.
+            Note: Only users with the "Staff" role and "Leader" position can be assigned to handle
+            crack reports.
           </p>
         </div>
 

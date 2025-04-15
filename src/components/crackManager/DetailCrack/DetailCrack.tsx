@@ -1,8 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import crackApi from '@/services/cracks';
-import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Loader2 } from 'lucide-react';
+import { getBuildingDetail } from '@/services/building';
+import {
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  User,
+  Calendar,
+  Loader2,
+  Building2,
+  MapPin,
+} from 'lucide-react';
 import { STATUS_COLORS } from '@/constants/colors';
+import { useQuery } from '@tanstack/react-query';
 
 // Add this CSS class at the top of the file
 const pulseAnimation = {
@@ -30,6 +41,38 @@ interface CrackDetail {
     severity: string;
     createdAt: string;
   }>;
+}
+
+// Define types for building detail data
+interface BuildingDetailData {
+  buildingDetailId: string;
+  buildingId: string;
+  name: string;
+  total_apartments: number;
+  createdAt: string;
+  updatedAt: string;
+  building: {
+    buildingId: string;
+    name: string;
+    description: string;
+    numberFloor: number;
+    imageCover: string;
+    manager_id: string;
+    areaId: string;
+    createdAt: string;
+    updatedAt: string;
+    Status: string;
+    construction_date: string;
+    completion_date: string;
+    Warranty_date: string;
+    area: {
+      areaId: string;
+      name: string;
+      description: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  };
 }
 
 // Function to generate a tiny placeholder URL
@@ -116,6 +159,14 @@ const DetailCrack: React.FC = () => {
 
     fetchCrackDetail();
   }, [id]);
+
+  // Fetch building detail data using TanStack Query
+  const { data: buildingDetail, isLoading: isBuildingLoading } = useQuery({
+    queryKey: ['buildingDetail', crack?.buildingDetailId],
+    queryFn: () => getBuildingDetail(crack?.buildingDetailId || ''),
+    enabled: !!crack?.buildingDetailId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   // Get reporter username
   const getReporterName = () => {
@@ -212,6 +263,16 @@ const DetailCrack: React.FC = () => {
       second: '2-digit',
     });
   };
+
+  // Get building detail name and area name
+  const buildingDetailName = buildingDetail?.data?.name || 'Loading...';
+  const buildingAreaName = buildingDetail?.data?.building?.area?.name || '';
+
+  const buildingDetailInfo = isBuildingLoading
+    ? 'Loading building details...'
+    : buildingDetail
+      ? `${buildingDetailName}${buildingAreaName ? ` (${buildingAreaName})` : ''}`
+      : 'Building detail not found';
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors pb-12">
@@ -344,11 +405,25 @@ const DetailCrack: React.FC = () => {
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Building Detail ID</p>
-                  <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
-                    {crack.buildingDetailId}
-                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Building</p>
+                  <div className="flex items-center text-gray-800 dark:text-gray-200 font-medium mt-1">
+                    <Building2 className="h-4 w-4 mr-1.5 text-blue-500" />
+                    {buildingDetailInfo}
+                    {isBuildingLoading && (
+                      <Loader2 className="h-3 w-3 ml-2 text-gray-400 animate-spin" />
+                    )}
+                  </div>
                 </div>
+
+                {buildingAreaName && (
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Area</p>
+                    <div className="flex items-center text-gray-800 dark:text-gray-200 font-medium mt-1">
+                      <MapPin className="h-4 w-4 mr-1.5 text-green-500" />
+                      {buildingAreaName}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Asset Type</p>
@@ -595,24 +670,6 @@ const DetailCrack: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-8 flex justify-center space-x-6">
-          <button
-            className="px-6 py-3 rounded-lg text-red-500 border border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center"
-            onClick={handleBack}
-          >
-            <XCircle className="h-5 w-5 mr-2" />
-            Reject Report
-          </button>
-          <button
-            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center"
-            onClick={handleBack}
-          >
-            <CheckCircle className="h-5 w-5 mr-2" />
-            Approve Report
-          </button>
         </div>
       </div>
     </div>

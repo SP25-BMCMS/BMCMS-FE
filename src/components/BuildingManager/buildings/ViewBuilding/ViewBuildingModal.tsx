@@ -1,0 +1,588 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { getBuildingById, getBuildingDetail, getAllBuildingDetails } from '@/services/building';
+import { getAllStaff } from '@/services/staff';
+import { toast } from 'react-hot-toast';
+import {
+  Building,
+  MapPin,
+  Calendar,
+  Home,
+  Layers,
+  ArrowRight,
+  Clock,
+  ShieldCheck,
+  GripVertical,
+  User,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { FORMAT_DATE } from '@/utils/format';
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  children: React.ReactNode;
+}
+
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, size = 'md', children }) => {
+  if (!isOpen) return null;
+
+  const getMaxWidth = () => {
+    switch (size) {
+      case 'sm':
+        return 'max-w-md';
+      case 'md':
+        return 'max-w-2xl';
+      case 'lg':
+        return 'max-w-4xl';
+      case 'xl':
+        return 'max-w-6xl';
+      default:
+        return 'max-w-2xl';
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+      <div
+        className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full ${getMaxWidth()} flex flex-col max-h-[90vh]`}
+      >
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface ViewBuildingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  buildingId: string | null;
+}
+
+interface BuildingDetailColumn {
+  field: string;
+  label: string;
+  width: number;
+  pinned?: boolean;
+}
+
+const buildingDetailColumns: BuildingDetailColumn[] = [
+  { field: 'buildingName', label: 'Building Name', width: 180, pinned: true },
+  { field: 'areaName', label: 'Area', width: 150 },
+  { field: 'status', label: 'Status', width: 150 },
+  { field: 'constructionDate', label: 'Construction Date', width: 180 },
+  { field: 'completionDate', label: 'Completion Date', width: 180 },
+  { field: 'warranty_date', label: 'Warranty Date', width: 180 },
+  { field: 'numOfFloors', label: 'Number of Floors', width: 150 },
+  { field: 'managerName', label: 'Manager', width: 180 },
+  { field: 'description', label: 'Description', width: 300 },
+];
+
+const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, buildingId }) => {
+  const [buildingDetail, setBuildingDetail] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [leftColumnWidth, setLeftColumnWidth] = useState<number>(30); // Default width percentage
+  const [isResizing, setIsResizing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [managerName, setManagerName] = useState<string>('Not assigned');
+
+  useEffect(() => {
+    setBuildingDetail(null);
+    setError(null);
+
+    if (isOpen && buildingId) {
+      fetchBuildingDetail();
+    }
+  }, [isOpen, buildingId]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  // Add resizer functionality
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing || !container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const containerWidth = containerRect.width;
+      const mouseX = e.clientX - containerRect.left;
+
+      // Calculate percentage (constrain between 20% and 80%)
+      let newWidthPercent = (mouseX / containerWidth) * 100;
+      newWidthPercent = Math.max(20, Math.min(newWidthPercent, 80));
+
+      setLeftColumnWidth(newWidthPercent);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
+  const fetchBuildingDetail = async () => {
+    if (!buildingId) return;
+
+    setIsLoading(true);
+
+    try {
+      // Fetch building detail by buildingId
+      const buildingResponse = await getBuildingById(buildingId);
+
+      // Fetch all building details
+      const allBuildingDetailsResponse = await getAllBuildingDetails();
+
+      // Find the correct buildingDetailId using buildingId
+      const buildingDetail = allBuildingDetailsResponse.data.find(
+        (detail: any) => detail.buildingId === buildingId
+      );
+
+      if (!buildingDetail) {
+        setError('Unable to find building details');
+        toast.error('Unable to find building details');
+        return;
+      }
+
+      // Fetch specific building detail using buildingDetailId
+      const buildingDetailResponse = await getBuildingDetail(buildingDetail.buildingDetailId);
+
+      if (buildingResponse.data && buildingDetailResponse.data) {
+        // Combine data from both responses
+        const combinedData = {
+          ...buildingResponse.data,
+          ...buildingDetailResponse.data,
+        };
+        setBuildingDetail(combinedData);
+
+        // Check for manager_id in different possible locations in the data structure
+        const managerId =
+          (buildingResponse.data && buildingResponse.data.manager_id) ||
+          (combinedData.building && combinedData.building.manager_id);
+
+        if (managerId) {
+          fetchManagerInfo(managerId);
+        }
+      } else {
+        setError('Unable to load building details');
+        toast.error('Unable to load building details');
+      }
+    } catch (error: any) {
+      console.error('Error fetching building detail:', error);
+      setError(error.message || 'An error occurred');
+      toast.error(error.message || 'Unable to load building details');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to fetch manager information
+  const fetchManagerInfo = async (managerId: string) => {
+    try {
+      const staffResponse = await getAllStaff();
+
+      if (staffResponse && staffResponse.data) {
+        const manager = staffResponse.data.find((staff: any) => staff.userId === managerId);
+
+        if (manager) {
+          setManagerName(manager.username);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching manager info:', error);
+      // We don't set an error state here to avoid disrupting the main view
+    }
+  };
+
+  // Format date
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  // Define building status styles
+  const getStatusStyle = (status: string) => {
+    if (status === 'operational') {
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+    }
+    return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
+  };
+
+  if (!buildingId) {
+    return null;
+  }
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 100 },
+    },
+  };
+
+  const buildingData = {
+    buildingName: buildingDetail?.name || '-',
+    areaName: buildingDetail?.area.name || '-',
+    status: buildingDetail?.Status === 'operational' ? 'Operational' : 'Under Construction',
+    constructionDate: formatDate(buildingDetail?.construction_date),
+    completionDate: formatDate(buildingDetail?.completion_date),
+    warranty_date: buildingDetail?.Warranty_date ? formatDate(buildingDetail.Warranty_date) : '-',
+    numOfFloors: buildingDetail?.numberFloor?.toString() || '-',
+    managerName: managerName || '-',
+    description: buildingDetail?.description || '-',
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Building Details" size="xl">
+      {isLoading ? (
+        <div className="flex justify-center items-center p-8">
+          <div className="h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : error ? (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-6 px-4"
+        >
+          <div className="inline-flex justify-center items-center p-3 mb-3 bg-red-100 rounded-full text-red-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Unable to load information
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">{error}</p>
+        </motion.div>
+      ) : buildingDetail ? (
+        <motion.div className="p-6" variants={containerVariants} initial="hidden" animate="visible">
+          {/* Header with basic info */}
+          <motion.div className="mb-8" variants={itemVariants}>
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <div className="w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden shadow-md border-2 border-gray-200 dark:border-gray-700">
+                <img
+                  src={
+                    buildingDetail.imageCover
+                      ? `${import.meta.env.VITE_API_SECRET}/uploads/${buildingDetail.imageCover}`
+                      : 'https://via.placeholder.com/128?text=No+Image'
+                  }
+                  alt={buildingDetail.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="flex-1 text-center md:text-left">
+                <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold shadow-sm ${getStatusStyle(buildingDetail.Status)}`}
+                  >
+                    {buildingDetail.Status === 'operational' ? 'Operational' : 'Under Construction'}
+                  </span>
+                </div>
+
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                  {buildingDetail.name}
+                </h1>
+
+                <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-2xl">
+                  {buildingDetail.description}
+                </p>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Area</div>
+                      <div className="font-medium">{buildingDetail.area.name}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Floors</div>
+                      <div className="font-medium">{buildingDetail.numberFloor}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Construction</div>
+                      <div className="font-medium">
+                        {formatDate(buildingDetail.construction_date)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Completion</div>
+                      <div className="font-medium">
+                        {formatDate(buildingDetail.completion_date)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Main Content - Resizable Two Column Layout */}
+          <div
+            ref={containerRef}
+            className="flex relative"
+            style={{ minHeight: '400px', maxHeight: 'calc(70vh - 200px)' }}
+          >
+            {/* Left Column - Building and Area Information with scroll */}
+            <motion.div
+              className="overflow-y-auto pr-3 min-w-[250px] h-full scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+              style={{
+                width: `${leftColumnWidth}%`,
+              }}
+              variants={itemVariants}
+            >
+              {/* Building Information */}
+              <motion.div
+                className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6"
+                variants={itemVariants}
+              >
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Building className="h-5 w-5 text-blue-500" />
+                  Building Information
+                </h3>
+
+                <div className="space-y-3">
+                  {/* Building basic info */}
+                  <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">Building Name</span>
+                    <span className="text-gray-900 dark:text-white text-sm font-medium">
+                      {buildingData.buildingName}
+                    </span>
+                  </div>
+
+                  {/* Status */}
+                  <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">Status</span>
+                    <span className="text-gray-900 dark:text-white text-sm font-medium">
+                      {buildingData.status}
+                    </span>
+                  </div>
+
+                  {/* Floor count */}
+                  <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">Number of Floors</span>
+                    <span className="text-gray-900 dark:text-white text-sm font-medium">
+                      {buildingData.numOfFloors}
+                    </span>
+                  </div>
+
+                  {/* Building manager info - always displayed */}
+                  <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">Building Manager</span>
+                    <span className="text-gray-900 dark:text-white text-sm font-medium flex items-center">
+                      <User className="h-4 w-4 mr-1 text-blue-500" />
+                      {buildingData.managerName}
+                    </span>
+                  </div>
+
+                  {/* Created date */}
+                  <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">Created Date</span>
+                    <span className="text-gray-900 dark:text-white text-sm font-medium">
+                      {formatDate(buildingDetail.createdAt)}
+                    </span>
+                  </div>
+
+                  {/* Last updated date */}
+                  <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">Last Updated</span>
+                    <span className="text-gray-900 dark:text-white text-sm font-medium">
+                      {formatDate(buildingDetail.updatedAt)}
+                    </span>
+                  </div>
+
+                  {/* Construction start date */}
+                  <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">Construction Start</span>
+                    <span className="text-gray-900 dark:text-white text-sm font-medium">
+                      {formatDate(buildingDetail.construction_date)}
+                    </span>
+                  </div>
+
+                  {/* Completion date */}
+                  <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">Completion Date</span>
+                    <span className="text-gray-900 dark:text-white text-sm font-medium">
+                      {formatDate(buildingDetail.completion_date)}
+                    </span>
+                  </div>
+
+                  {/* Warranty date */}
+                  {buildingDetail.Warranty_date && (
+                    <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
+                      <span className="text-gray-500 dark:text-gray-400">Warranty Until</span>
+                      <span className="text-green-600 dark:text-green-400 text-sm font-medium flex items-center">
+                        <ShieldCheck className="h-4 w-4 mr-1" />
+                        {formatDate(buildingDetail.Warranty_date)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Resizer */}
+            <div
+              className={`flex items-center justify-center cursor-col-resize w-4 mx-1 transition-colors group ${isResizing ? 'bg-blue-200 dark:bg-blue-900' : ''}`}
+              onMouseDown={handleMouseDown}
+            >
+              <div className="h-24 w-1 rounded-full bg-gray-300 dark:bg-gray-700 group-hover:bg-blue-400 dark:group-hover:bg-blue-600 transition-all group-hover:h-32"></div>
+            </div>
+
+            {/* Right Column - Building Details */}
+            <motion.div
+              className="overflow-y-auto pl-3 min-w-[250px] h-full scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+              style={{
+                width: `${100 - leftColumnWidth - 2}%`, // 2% for resizer
+              }}
+              variants={itemVariants}
+            >
+              {buildingDetail.buildingDetails && buildingDetail.buildingDetails.length > 0 ? (
+                <motion.div
+                  className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm h-full"
+                  variants={itemVariants}
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Home className="h-5 w-5 text-blue-500" />
+                    Area Details ({buildingDetail.buildingDetails.length})
+                  </h3>
+
+                  <div className="space-y-4">
+                    {buildingDetail.buildingDetails.map((detail: any) => (
+                      <div
+                        key={detail.buildingDetailId}
+                        className="py-3 border-b border-gray-200 dark:border-gray-700 last:border-0"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium text-base text-gray-900 dark:text-white">
+                            {detail.name}
+                          </span>
+                          <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                            {detail.total_apartments} apartments
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
+                          <div className="flex items-center">
+                            <MapPin className="h-3.5 w-3.5 text-blue-500 mr-1.5 flex-shrink-0" />
+                            <span className="truncate">
+                              Area: <span className="font-medium">{buildingDetail.area.name}</span>
+                            </span>
+                          </div>
+
+                          <div className="flex items-center">
+                            <Clock className="h-3.5 w-3.5 text-blue-500 mr-1.5 flex-shrink-0" />
+                            <span className="truncate">
+                              Created Date:{' '}
+                              <span className="font-medium">{formatDate(detail.createdAt)}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm flex items-center justify-center h-full"
+                  variants={itemVariants}
+                >
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <Home className="h-10 w-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                    <p>No wing details available</p>
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          </div>
+
+          {/* Footer button */}
+          <motion.div
+            className="flex justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"
+            variants={itemVariants}
+          >
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+            >
+              Close
+            </button>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </Modal>
+  );
+};
+
+export default ViewBuildingModal;
