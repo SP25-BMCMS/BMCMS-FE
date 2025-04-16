@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, Building2, MapPin } from 'lucide-react';
 import Table, { Column } from '@/components/Table';
@@ -10,6 +10,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import Pagination from '@/components/Pagination';
 import SearchInput from '@/components/SearchInput';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 
 interface BuildingWithArea extends BuildingResponse {
   area?: {
@@ -34,8 +35,6 @@ interface BuildingManagerResponse {
 }
 
 const BuildingForManager: React.FC = () => {
-  const [buildings, setBuildings] = useState<BuildingWithArea[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -45,48 +44,53 @@ const BuildingForManager: React.FC = () => {
   });
   const navigate = useNavigate();
 
-  const fetchBuildings = async (page = 1, limit = 10, search = '') => {
-    try {
-      setIsLoading(true);
-      const user = JSON.parse(localStorage.getItem('bmcms_user') || '{}');
-      const params = new URLSearchParams();
+  // Function to fetch buildings data
+  const fetchBuildingsData = async ({ pageParam = 1 }) => {
+    const user = JSON.parse(localStorage.getItem('bmcms_user') || '{}');
+    const params = new URLSearchParams();
 
-      if (page) params.append('page', page.toString());
-      if (limit) params.append('limit', limit.toString());
-      if (search) params.append('search', search);
+    params.append('page', pageParam.toString());
+    params.append('limit', pagination.itemsPerPage.toString());
+    if (searchQuery) params.append('search', searchQuery);
 
-      const url = `${import.meta.env.VITE_VIEW_BUILDING_LIST_FOR_MANAGER.replace('{managerId}', user.userId)}?${params.toString()}`;
+    const url = `${import.meta.env.VITE_VIEW_BUILDING_LIST_FOR_MANAGER.replace('{managerId}', user.userId)}?${params.toString()}`;
 
-      const { data } = await apiInstance.get<BuildingManagerResponse>(url);
-
-      setBuildings(data.data || []);
-
-      if (data.pagination) {
-        setPagination({
-          currentPage: data.pagination.page,
-          totalPages: data.pagination.totalPages,
-          totalItems: data.pagination.total,
-          itemsPerPage: data.pagination.limit,
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching buildings:', error);
-      toast.error("Couldn't load building data");
-    } finally {
-      setIsLoading(false);
-    }
+    const { data } = await apiInstance.get<BuildingManagerResponse>(url);
+    return data;
   };
 
-  useEffect(() => {
-    fetchBuildings(pagination.currentPage, pagination.itemsPerPage, searchQuery);
-  }, [pagination.currentPage, pagination.itemsPerPage]);
+  // Use TanStack Query for data fetching
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['buildings', pagination.currentPage, pagination.itemsPerPage, searchQuery],
+    queryFn: () => fetchBuildingsData({ pageParam: pagination.currentPage }),
+  });
+
+  // Extract data and update pagination when data changes
+  const buildingsData = data as BuildingManagerResponse | undefined;
+
+  React.useEffect(() => {
+    if (buildingsData?.pagination) {
+      setPagination(prev => ({
+        ...prev,
+        totalPages: buildingsData.pagination?.totalPages || 1,
+        totalItems: buildingsData.pagination?.total || 0,
+      }));
+    }
+  }, [buildingsData]);
 
   const handlePageChange = (page: number) => {
-    fetchBuildings(page, pagination.itemsPerPage, searchQuery);
+    setPagination(prev => ({
+      ...prev,
+      currentPage: page,
+    }));
   };
 
   const handleLimitChange = (limit: number) => {
-    fetchBuildings(1, limit, searchQuery);
+    setPagination(prev => ({
+      ...prev,
+      currentPage: 1,
+      itemsPerPage: limit,
+    }));
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +98,11 @@ const BuildingForManager: React.FC = () => {
   };
 
   const handleSearchSubmit = () => {
-    fetchBuildings(1, pagination.itemsPerPage, searchQuery);
+    setPagination(prev => ({
+      ...prev,
+      currentPage: 1,
+    }));
+    refetch();
   };
 
   const handleViewDetail = (buildingId: string) => {
@@ -235,7 +243,7 @@ const BuildingForManager: React.FC = () => {
   return (
     <div className="w-full mt-[60px]">
       <div className="flex justify-between mb-4 mx-auto w-[95%]">
-        <div>
+        <div className="flex items-center">
           <SearchInput
             placeholder="Search by building name"
             value={searchQuery}
@@ -250,7 +258,7 @@ const BuildingForManager: React.FC = () => {
       ) : (
         <>
           <Table
-            data={buildings}
+            data={buildingsData?.data || []}
             columns={columns}
             keyExtractor={item => item.buildingId}
             isLoading={isLoading}
@@ -261,7 +269,7 @@ const BuildingForManager: React.FC = () => {
             className="w-[95%] mx-auto"
           />
 
-          {buildings.length > 0 && (
+          {(buildingsData?.data?.length || 0) > 0 && (
             <Pagination
               currentPage={pagination.currentPage}
               totalPages={pagination.totalPages}
