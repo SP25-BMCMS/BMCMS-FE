@@ -170,9 +170,29 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
       );
 
       if (!buildingDetail) {
-        setError('Unable to find building details');
-        toast.error('Unable to find building details');
-        return;
+        // Trường hợp không tìm thấy buildingDetailId, chỉ hiển thị thông tin cơ bản
+        if (buildingResponse.data) {
+          setBuildingDetail({
+            ...buildingResponse.data,
+            // Thêm thông tin giả để hiển thị
+            buildingDetailId: null,
+            name: buildingResponse.data.name,
+            total_apartments: 0,
+            // Thông tin tòa nhà
+            building: buildingResponse.data,
+          });
+
+          // Kiểm tra manager_id
+          const managerId = buildingResponse.data.manager_id;
+          if (managerId) {
+            fetchManagerInfo(managerId);
+          }
+          return;
+        } else {
+          setError('Không tìm thấy thông tin tòa nhà');
+          toast.error('Không tìm thấy thông tin tòa nhà');
+          return;
+        }
       }
 
       // Fetch specific building detail using buildingDetailId
@@ -309,7 +329,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Unable to load information
+            Không thể tải thông tin
           </h3>
           <p className="text-gray-600 dark:text-gray-400">{error}</p>
         </motion.div>
@@ -337,6 +357,12 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   >
                     {buildingDetail.Status === 'operational' ? 'Operational' : 'Under Construction'}
                   </span>
+
+                  {buildingDetail.buildingDetailId === null && (
+                    <span className="px-3 py-1 rounded-full text-sm font-semibold shadow-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                      Không có ID chi tiết tòa nhà
+                    </span>
+                  )}
                 </div>
 
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -560,7 +586,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                 >
                   <div className="text-center text-gray-500 dark:text-gray-400">
                     <Home className="h-10 w-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                    <p>No wing details available</p>
+                    <p>No Areas details available</p>
                   </div>
                 </motion.div>
               )}
