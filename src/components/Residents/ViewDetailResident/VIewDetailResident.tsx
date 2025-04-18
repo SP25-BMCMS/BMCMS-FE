@@ -32,7 +32,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   // Debug: console log when component renders with resident
   useEffect(() => {
     if (isOpen && resident) {
-      console.log("ViewDetailResident mở với resident:", resident);
+      console.log('ViewDetailResident mở với resident:', resident);
     }
   }, [isOpen, resident]);
 
@@ -46,7 +46,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
       // Reset apartments when resident changes
       setApartments([]);
       setError(null);
-      console.log("Trạng thái tài khoản:", resident.accountStatus);
+      console.log('Trạng thái tài khoản:', resident.accountStatus);
 
       // Only fetch if resident is active
       if (resident.accountStatus === 'Active') {
@@ -65,23 +65,23 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
 
   const fetchResidentApartments = async () => {
     if (!resident) {
-      console.error("Không thể lấy thông tin căn hộ: resident là null");
+      console.error('Không thể lấy thông tin căn hộ: resident là null');
       return;
     }
 
     setIsLoading(true);
     setError(null);
     try {
-      console.log("Đang gọi API getResidentApartments với userId:", resident.userId);
+      console.log('Đang gọi API getResidentApartments với userId:', resident.userId);
       const response = await getResidentApartments(resident.userId);
-      console.log("API response:", response);
-      
+      console.log('API response:', response);
+
       if (response && response.isSuccess && Array.isArray(response.data)) {
-        console.log("Tìm thấy căn hộ:", response.data.length);
+        console.log('Tìm thấy căn hộ:', response.data.length);
         setApartments(response.data);
       } else {
         const errorMsg = response?.message || 'Không thể tải thông tin căn hộ';
-        console.error("Lỗi khi lấy danh sách căn hộ:", errorMsg);
+        console.error('Lỗi khi lấy danh sách căn hộ:', errorMsg);
         setError(errorMsg);
         toast.error(errorMsg);
       }
@@ -97,7 +97,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
 
   // Handle custom close function to ensure state is reset
   const handleClose = () => {
-    console.log("Đóng modal");
+    console.log('Đóng modal');
     setApartments([]);
     setError(null);
     onClose();
@@ -112,7 +112,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
         day: 'numeric',
       });
     } catch (error) {
-      console.error("Lỗi khi định dạng ngày:", error);
+      console.error('Lỗi khi định dạng ngày:', error);
       return dateString;
     }
   };
@@ -134,13 +134,13 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   };
 
   if (!resident) {
-    console.log("Không hiển thị modal vì resident là null");
+    console.log('Không hiển thị modal vì resident là null');
     return null;
   }
 
   // Show warning for inactive residents
   const isInactive = resident.accountStatus !== 'Active';
-  console.log("Trạng thái tài khoản hiện tại:", resident.accountStatus, "isInactive:", isInactive);
+  console.log('Trạng thái tài khoản hiện tại:', resident.accountStatus, 'isInactive:', isInactive);
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Resident Details" size="lg">
@@ -300,7 +300,9 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                       </p>
                       <p className="text-gray-900 dark:text-white">
                         {[
-                          ...new Set(apartments.map(apt => apt.buildingDetails?.building?.name || "Unknown")),
+                          ...new Set(
+                            apartments.map(apt => apt.buildingDetails?.building?.name || 'Unknown')
+                          ),
                         ].join(', ')}
                       </p>
                     </div>
@@ -312,7 +314,11 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Areas</p>
                       <p className="text-gray-900 dark:text-white">
                         {[
-                          ...new Set(apartments.map(apt => apt.buildingDetails?.building?.area?.name || "Unknown")),
+                          ...new Set(
+                            apartments.map(
+                              apt => apt.buildingDetails?.building?.area?.name || 'Unknown'
+                            )
+                          ),
                         ].join(', ')}
                       </p>
                     </div>
@@ -334,16 +340,21 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
               </h3>
 
               <div className="grid grid-cols-1 gap-4">
-                {apartments.map((apartment) => {
+                {apartments.map(apartment => {
                   // Kiểm tra xem apartment và các thuộc tính con có tồn tại không
-                  const buildingName = apartment?.buildingDetails?.building?.name || "Unknown Building";
-                  const buildingDetailName = apartment?.buildingDetails?.name || "";
-                  const areaName = apartment?.buildingDetails?.building?.area?.name || "Unknown Area";
-                  const buildingDescription = apartment?.buildingDetails?.building?.description || "";
+                  const buildingName =
+                    apartment?.buildingDetails?.building?.name || 'Unknown Building';
+                  const buildingDetailName = apartment?.buildingDetails?.name || '';
+                  const areaName =
+                    apartment?.buildingDetails?.building?.area?.name || 'Unknown Area';
+                  const buildingDescription =
+                    apartment?.buildingDetails?.building?.description || '';
                   const buildingFloors = apartment?.buildingDetails?.building?.numberFloor || 0;
-                  const buildingStatus = apartment?.buildingDetails?.building?.Status || "Unknown";
-                  const buildingImage = apartment?.buildingDetails?.building?.imageCover || 'https://via.placeholder.com/64?text=No+Image';
-                  
+                  const buildingStatus = apartment?.buildingDetails?.building?.Status || 'Unknown';
+                  const buildingImage =
+                    apartment?.buildingDetails?.building?.imageCover ||
+                    'https://via.placeholder.com/64?text=No+Image';
+
                   return (
                     <div
                       key={apartment.apartmentId}
@@ -355,9 +366,10 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                             src={buildingImage}
                             alt={buildingName}
                             className="w-full h-full object-cover"
-                            onError={(e) => {
+                            onError={e => {
                               // Fallback khi ảnh lỗi
-                              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/64?text=No+Image';
+                              (e.target as HTMLImageElement).src =
+                                'https://via.placeholder.com/64?text=No+Image';
                             }}
                           />
                         </div>
@@ -371,18 +383,18 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                           </h4>
 
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            <span className="font-medium">Building:</span>{' '}
-                            {buildingName} {buildingDetailName ? `(${buildingDetailName})` : ''}
+                            <span className="font-medium">Building:</span> {buildingName}{' '}
+                            {buildingDetailName ? `(${buildingDetailName})` : ''}
                           </p>
 
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            <span className="font-medium">Area:</span>{' '}
-                            {areaName}
+                            <span className="font-medium">Area:</span> {areaName}
                           </p>
 
                           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             <span className="font-medium">Building Info:</span>{' '}
-                            {buildingDescription} {buildingFloors > 0 ? `• ${buildingFloors} floors` : ''}
+                            {buildingDescription}{' '}
+                            {buildingFloors > 0 ? `• ${buildingFloors} floors` : ''}
                           </p>
                         </div>
                       </div>

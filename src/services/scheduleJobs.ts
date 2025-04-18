@@ -128,7 +128,7 @@ const scheduleJobsApi = {
     params?: { page: number; limit: number }
   ): Promise<ScheduleJobListResponse> => {
     const url = import.meta.env.VITE_GET_DETAIL_SCHEDULE_JOB.replace('{scheduleId}', scheduleId);
-    
+
     let queryString = '';
     if (params) {
       const { page, limit } = params;
@@ -138,7 +138,7 @@ const scheduleJobsApi = {
       });
       queryString = `?${queryParams.toString()}`;
     }
-    
+
     const response = await apiInstance.get(`${url}${queryString}`);
     return response.data;
   },

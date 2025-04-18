@@ -85,15 +85,17 @@ const Calendar: React.FC = () => {
     queryFn: async () => {
       // Only fetch if we're in table view to avoid unnecessary API calls
       if (viewMode !== 'table') return null;
-      
+
       // Create an object to store the counts for each schedule
       const buildingCountsBySchedule: { [scheduleId: string]: number } = {};
-      
+
       // For each schedule, fetch the jobs to count buildings
       if (schedulesData?.data) {
-        const promises = schedulesData.data.map(async (schedule) => {
+        const promises = schedulesData.data.map(async schedule => {
           try {
-            const response = await scheduleJobsApi.fetchScheduleJobsByScheduleId(schedule.schedule_id);
+            const response = await scheduleJobsApi.fetchScheduleJobsByScheduleId(
+              schedule.schedule_id
+            );
             // Count only non-cancelled jobs
             const activeJobs = response.data.filter(job => job.status.toLowerCase() !== 'cancel');
             // Use Set to count unique buildings
@@ -104,10 +106,10 @@ const Calendar: React.FC = () => {
             buildingCountsBySchedule[schedule.schedule_id] = 0;
           }
         });
-        
+
         await Promise.all(promises);
       }
-      
+
       return buildingCountsBySchedule;
     },
     enabled: viewMode === 'table' && !!schedulesData?.data,
@@ -772,7 +774,7 @@ const Calendar: React.FC = () => {
                       // Use the building counts from our query instead of the buildings array
                       const buildingCounts = scheduleJobsQuery.data || {};
                       const buildingCount = buildingCounts[item.schedule_id] || 0;
-                      
+
                       return (
                         <span className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                           {buildingCount} {buildingCount === 1 ? 'Building' : 'Buildings'}
@@ -786,7 +788,7 @@ const Calendar: React.FC = () => {
                     render: item => (
                       <div className="flex justify-center">
                         <button
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             navigate(`/schedule-job/${item.schedule_id}`);
                           }}

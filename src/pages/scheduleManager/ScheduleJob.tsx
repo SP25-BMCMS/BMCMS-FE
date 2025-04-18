@@ -109,27 +109,32 @@ const ScheduleJob: React.FC = () => {
     switch (status.toLowerCase()) {
       case 'pending':
         return {
-          className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border border-yellow-300',
+          className:
+            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border border-yellow-300',
           icon: <RiAlertLine className="mr-1" />,
         };
       case 'inprogress':
         return {
-          className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border border-blue-300',
+          className:
+            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border border-blue-300',
           icon: <RiTimeLine className="mr-1" />,
         };
       case 'completed':
         return {
-          className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-300',
+          className:
+            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-300',
           icon: <RiCheckboxCircleLine className="mr-1" />,
         };
       case 'cancel':
         return {
-          className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border border-red-300',
+          className:
+            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border border-red-300',
           icon: <RiCloseCircleLine className="mr-1" />,
         };
       default:
         return {
-          className: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border border-gray-300',
+          className:
+            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border border-gray-300',
           icon: <RiInformationLine className="mr-1" />,
         };
     }
@@ -176,7 +181,7 @@ const ScheduleJob: React.FC = () => {
   const scheduleJobs = scheduleJobsData?.data || [];
   const totalItems = scheduleJobsData?.pagination.total || 0;
   const totalPages = scheduleJobsData?.pagination.totalPages || 1;
-  
+
   // Get status for schedule and display appropriate color/icon
   const scheduleStatus = schedule?.schedule_status || 'Pending';
   const statusInfo = getStatusBadge(scheduleStatus);
@@ -199,7 +204,9 @@ const ScheduleJob: React.FC = () => {
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 px-6 py-4 border-b border-blue-700">
               <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-white">Schedule Details</h1>
-                <div className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${statusInfo.className}`}>
+                <div
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${statusInfo.className}`}
+                >
                   {statusInfo.icon} {scheduleStatus}
                 </div>
               </div>
@@ -229,13 +236,13 @@ const ScheduleJob: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="mt-4">
                     <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                       Description
                     </h3>
                     <p className="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
-                      {schedule.description || "No description provided"}
+                      {schedule.description || 'No description provided'}
                     </p>
                   </div>
                 </div>
@@ -248,13 +255,17 @@ const ScheduleJob: React.FC = () => {
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="text-gray-500 dark:text-gray-400">Schedule ID:</div>
                     <div className="font-mono text-gray-700 dark:text-gray-300">{scheduleId}</div>
-                    
+
                     <div className="text-gray-500 dark:text-gray-400">Created At:</div>
-                    <div className="text-gray-700 dark:text-gray-300">{formatDate(schedule.created_at)}</div>
-                    
+                    <div className="text-gray-700 dark:text-gray-300">
+                      {formatDate(schedule.created_at)}
+                    </div>
+
                     <div className="text-gray-500 dark:text-gray-400">Updated At:</div>
-                    <div className="text-gray-700 dark:text-gray-300">{formatDate(schedule.updated_at)}</div>
-                    
+                    <div className="text-gray-700 dark:text-gray-300">
+                      {formatDate(schedule.updated_at)}
+                    </div>
+
                     <div className="text-gray-500 dark:text-gray-400">Total Jobs:</div>
                     <div className="text-gray-700 dark:text-gray-300">{totalItems}</div>
                   </div>
@@ -285,7 +296,9 @@ const ScheduleJob: React.FC = () => {
               <div className="text-blue-500 w-16 h-16 mb-4">
                 <RiInformationLine className="w-full h-full" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No schedule jobs found</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No schedule jobs found
+              </h3>
               <p className="text-gray-500 dark:text-gray-400 max-w-md">
                 There are no jobs associated with this schedule yet or they may have been cancelled.
               </p>
@@ -317,7 +330,10 @@ const ScheduleJob: React.FC = () => {
                 {scheduleJobs.map(job => {
                   const statusInfo = getStatusBadge(job.status);
                   return (
-                    <tr key={job.schedule_job_id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <tr
+                      key={job.schedule_job_id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-blue-100 dark:bg-blue-800 text-blue-500 rounded-lg">
@@ -348,39 +364,40 @@ const ScheduleJob: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          {job.status.toLowerCase() !== 'cancel' && job.status.toLowerCase() !== 'completed' && (
-                            <>
-                              <button
-                                onClick={() => handleEditJob(job)}
-                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
-                                title="Mark as In Progress"
-                              >
-                                <RiEditLine className="w-5 h-5" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteJob(job.schedule_job_id)}
-                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                title="Cancel Job"
-                              >
-                                <RiDeleteBinLine className="w-5 h-5" />
-                              </button>
-                              <button
-                                onClick={() => handleSendEmail(job)}
-                                disabled={sendEmailMutation.isPending}
-                                className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded-full hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Send Maintenance Email"
-                              >
-                                <RiMailLine className="w-5 h-5" />
-                              </button>
-                              <button
-                                onClick={() => handleCreateTask(job)}
-                                className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 p-1 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
-                                title="Create Task"
-                              >
-                                <RiTaskLine className="w-5 h-5" />
-                              </button>
-                            </>
-                          )}
+                          {job.status.toLowerCase() !== 'cancel' &&
+                            job.status.toLowerCase() !== 'completed' && (
+                              <>
+                                <button
+                                  onClick={() => handleEditJob(job)}
+                                  className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                                  title="Mark as In Progress"
+                                >
+                                  <RiEditLine className="w-5 h-5" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteJob(job.schedule_job_id)}
+                                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                  title="Cancel Job"
+                                >
+                                  <RiDeleteBinLine className="w-5 h-5" />
+                                </button>
+                                <button
+                                  onClick={() => handleSendEmail(job)}
+                                  disabled={sendEmailMutation.isPending}
+                                  className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded-full hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Send Maintenance Email"
+                                >
+                                  <RiMailLine className="w-5 h-5" />
+                                </button>
+                                <button
+                                  onClick={() => handleCreateTask(job)}
+                                  className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 p-1 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
+                                  title="Create Task"
+                                >
+                                  <RiTaskLine className="w-5 h-5" />
+                                </button>
+                              </>
+                            )}
                           {job.status.toLowerCase() === 'cancel' && (
                             <span className="text-gray-400 dark:text-gray-500 text-xs italic">
                               Cancelled
