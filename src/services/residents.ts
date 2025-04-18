@@ -99,7 +99,7 @@ export const updateResidentStatus = async (
     const url = `${API_SECRET}${STATUS_RESIDENT_API.replace('{id}', residentId)}`;
     console.log('Updating resident status with URL:', url);
     console.log('Request body:', JSON.stringify({ accountStatus: newStatus }));
-    
+
     const token = localStorage.getItem('bmcms_token');
     const response = await axios.patch(
       url,

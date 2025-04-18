@@ -113,9 +113,9 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
   // State cho TanStack Query
   const [buildingDetailId, setBuildingDetailId] = useState<string | null>(null);
-  
+
   // Truy vấn contracts data
-  const { 
+  const {
     data: contractsData,
     isLoading: isLoadingContracts,
     isError: isErrorContracts,
@@ -386,7 +386,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {buildingDetail.buildingDetailId === null && (
                     <span className="px-3 py-1 rounded-full text-sm font-semibold shadow-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-                     No Id Detail
+                      No Id Detail
                     </span>
                   )}
                 </div>
@@ -641,7 +641,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   </div>
                 ) : contractsData && contractsData.length > 0 ? (
                   <div className="space-y-4">
-                    {contractsData.map((contract) => (
+                    {contractsData.map(contract => (
                       <div
                         key={contract.contract_id}
                         className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
@@ -651,46 +651,61 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                             {contract.vendor}
                           </h4>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {new Date(contract.start_date).toLocaleDateString()} - {new Date(contract.end_date).toLocaleDateString()}
+                            {new Date(contract.start_date).toLocaleDateString()} -{' '}
+                            {new Date(contract.end_date).toLocaleDateString()}
                           </span>
                         </div>
-                        
+
                         {/* Devices Information */}
                         <div className="mt-2 mb-3">
                           <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 mr-1 text-blue-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
+                              />
                             </svg>
                             Devices ({contract.devices.length})
                           </div>
-                          
+
                           <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2">
                             {contract.devices.map(device => (
-                              <div 
+                              <div
                                 key={device.device_id}
                                 className={`text-xs p-2 mb-1 last:mb-0 rounded border-l-2 ${
-                                  device.buildingDetailId === buildingDetailId 
-                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                                  device.buildingDetailId === buildingDetailId
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                                     : 'border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700'
                                 }`}
                               >
                                 <div className="flex justify-between items-center">
                                   <span className="font-medium">{device.name}</span>
-                                  <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300">{device.type}</span>
+                                  <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300">
+                                    {device.type}
+                                  </span>
                                 </div>
                                 <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1">
                                   <div className="text-gray-600 dark:text-gray-400">
                                     <span className="font-medium">Model:</span> {device.model}
                                   </div>
                                   <div className="text-gray-600 dark:text-gray-400">
-                                    <span className="font-medium">Manufacturer:</span> {device.manufacturer}
+                                    <span className="font-medium">Manufacturer:</span>{' '}
+                                    {device.manufacturer}
                                   </div>
                                 </div>
                               </div>
                             ))}
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-2 mt-3">
                           <a
                             href={`${import.meta.env.VITE_API_SECRET}${contract.fileUrl}`}
@@ -727,7 +742,9 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   <div className="text-center py-8">
                     <FileText className="h-10 w-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                     <p className="text-gray-500 dark:text-gray-400">
-                      {buildingDetail.buildingDetailId ? 'No contracts found for this building' : 'Cannot find contract information'}
+                      {buildingDetail.buildingDetailId
+                        ? 'No contracts found for this building'
+                        : 'Cannot find contract information'}
                     </p>
                   </div>
                 )}

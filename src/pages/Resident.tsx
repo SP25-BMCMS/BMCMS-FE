@@ -96,7 +96,7 @@ const Resident: React.FC = () => {
       }
       toast.error(error.message || 'Failed to update resident status!');
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast.success(`Resident status updated to ${data.newStatus} successfully!`);
       queryClient.invalidateQueries({ queryKey: ['residents'] });
     },
@@ -276,9 +276,9 @@ const Resident: React.FC = () => {
     },
   ];
 
-  const handleAddResident = async (residentData: Omit<Residents, 'userId'>) => {
-    await addResident(residentData);
-  };
+  // const handleAddResident = async (residentData: Omit<Residents, 'userId'>) => {
+  //   await addResident(residentData);
+  // };
 
   const loadingVariants = {
     rotate: 360,
@@ -304,8 +304,16 @@ const Resident: React.FC = () => {
     setIsViewDetailOpen(true);
   };
 
-  if (isLoadingResidents && (!residentsResponse?.data || residentsResponse.data.length === 0)) {
+  if (isLoadingResidents) {
     return <LoadingIndicator />;
+  }
+
+  if (!residentsResponse?.data || residentsResponse.data.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-gray-700 dark:text-gray-300">No residents found.</p>
+      </div>
+    );
   }
 
   return (
@@ -349,12 +357,12 @@ const Resident: React.FC = () => {
         />
       </div>
 
-      <AddResident
+      {/* <AddResident
         isOpen={isModalOpen}
         onClose={closeModal}
         onAdd={handleAddResident}
         isLoading={isAdding}
-      />
+      /> */}
       <ConfirmStatusChangeModal
         isOpen={isStatusChangeModalOpen}
         onClose={() => setIsStatusChangeModalOpen(false)}

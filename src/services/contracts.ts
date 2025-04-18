@@ -68,22 +68,24 @@ export const getContractById = async (contractId: string): Promise<ContractRespo
 };
 
 // Hàm lọc contracts theo buildingDetailId
-export const getContractsByBuildingDetailId = async (buildingDetailId: string): Promise<Contract[]> => {
+export const getContractsByBuildingDetailId = async (
+  buildingDetailId: string
+): Promise<Contract[]> => {
   try {
     const contractsResponse = await getContracts();
-    
+
     if (!contractsResponse.data || contractsResponse.data.length === 0) {
       return [];
     }
-    
+
     // Lọc contracts có chứa thiết bị với buildingDetailId tương ứng
-    const matchingContracts = contractsResponse.data.filter(contract => 
+    const matchingContracts = contractsResponse.data.filter(contract =>
       contract.devices.some(device => device.buildingDetailId === buildingDetailId)
     );
-    
+
     return matchingContracts;
   } catch (error) {
     console.error(`Error filtering contracts for building detail ID ${buildingDetailId}:`, error);
     throw error;
   }
-}; 
+};

@@ -36,9 +36,22 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
 
         <div className="py-4">
           <p className="text-gray-700 mb-3">
-            Are you sure you want to change the status of <span className="font-semibold">{resident.username}</span> from <span className={resident.accountStatus === 'Active' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>{resident.accountStatus}</span> to <span className={statusColor + " font-medium"}>{newStatus}</span>?
+            Are you sure you want to change the status of{' '}
+            <span className="font-semibold">{resident.username}</span> from{' '}
+            <span
+              className={
+                resident.accountStatus === 'Active'
+                  ? 'text-green-600 font-medium'
+                  : 'text-red-600 font-medium'
+              }
+            >
+              {resident.accountStatus}
+            </span>{' '}
+            to <span className={statusColor + ' font-medium'}>{newStatus}</span>?
           </p>
-          <p className="text-sm text-gray-500">This action will change the user's ability to access the system.</p>
+          <p className="text-sm text-gray-500">
+            This action will change the user's ability to access the system.
+          </p>
         </div>
 
         <div className="flex justify-end space-x-3 mt-4">
