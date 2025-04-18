@@ -127,24 +127,25 @@ const scheduleJobsApi = {
     scheduleId: string,
     params?: { page: number; limit: number }
   ): Promise<ScheduleJobListResponse> => {
-    let url = `/schedule-jobs/schedule/${scheduleId}`;
-
+    const url = import.meta.env.VITE_GET_DETAIL_SCHEDULE_JOB.replace('{scheduleId}', scheduleId);
+    
+    let queryString = '';
     if (params) {
       const { page, limit } = params;
       const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
       });
-      url += `?${queryParams.toString()}`;
+      queryString = `?${queryParams.toString()}`;
     }
-
-    const response = await apiInstance.get(url);
+    
+    const response = await apiInstance.get(`${url}${queryString}`);
     return response.data;
   },
 
   // Get schedule job by ID
-  getScheduleJobById: async (scheduleJobId: string): Promise<ScheduleJobResponse> => {
-    const response = await apiInstance.get(`/schedule-jobs/${scheduleJobId}`);
+  getScheduleJobById: async (scheduleId: string): Promise<ScheduleJobResponse> => {
+    const response = await apiInstance.get(`/schedule-jobs/schedule/${scheduleId}`);
     return response.data;
   },
 

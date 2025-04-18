@@ -24,6 +24,7 @@ export interface Schedule {
   updated_at: string;
   schedule_status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel';
   cycle_id?: string;
+  schedule_type?: string;
   scheduleJobs: ScheduleJob[];
   schedule_job: ScheduleJob[];
   buildings?: Array<{

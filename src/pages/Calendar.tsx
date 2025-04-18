@@ -6,6 +6,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { DateSelectArg, EventClickArg, EventContentArg, EventInput } from '@fullcalendar/core';
 import '../../src/styles/Calendar.css';
 import schedulesApi, { PaginationResponse, Schedule } from '@/services/schedules';
+import scheduleJobsApi from '@/services/scheduleJobs';
 import { getBuildings } from '@/services/building';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -78,6 +79,40 @@ const Calendar: React.FC = () => {
     },
   });
 
+  // Fetch schedule jobs for building count in table view
+  const scheduleJobsQuery = useQuery({
+    queryKey: ['scheduleJobs', 'allCounts'],
+    queryFn: async () => {
+      // Only fetch if we're in table view to avoid unnecessary API calls
+      if (viewMode !== 'table') return null;
+      
+      // Create an object to store the counts for each schedule
+      const buildingCountsBySchedule: { [scheduleId: string]: number } = {};
+      
+      // For each schedule, fetch the jobs to count buildings
+      if (schedulesData?.data) {
+        const promises = schedulesData.data.map(async (schedule) => {
+          try {
+            const response = await scheduleJobsApi.fetchScheduleJobsByScheduleId(schedule.schedule_id);
+            // Count only non-cancelled jobs
+            const activeJobs = response.data.filter(job => job.status.toLowerCase() !== 'cancel');
+            // Use Set to count unique buildings
+            const uniqueBuildingIds = new Set(activeJobs.map(job => job.building_id));
+            buildingCountsBySchedule[schedule.schedule_id] = uniqueBuildingIds.size;
+          } catch (error) {
+            console.error(`Error fetching jobs for schedule ${schedule.schedule_id}:`, error);
+            buildingCountsBySchedule[schedule.schedule_id] = 0;
+          }
+        });
+        
+        await Promise.all(promises);
+      }
+      
+      return buildingCountsBySchedule;
+    },
+    enabled: viewMode === 'table' && !!schedulesData?.data,
+  });
+
   // Create schedule mutation
   const createScheduleMutation = useMutation({
     mutationFn: (newSchedule: Omit<ApiSchedule, 'schedule_id' | 'created_at' | 'updated_at'>) => {
@@ -120,18 +155,8 @@ const Calendar: React.FC = () => {
 
   // Handle view schedule details from table
   const handleViewScheduleDetails = (schedule: any) => {
-    setSelectedEvent({
-      id: schedule.schedule_id,
-      title: schedule.schedule_name,
-      start: schedule.start_date || '',
-      end: schedule.end_date || '',
-      allDay: true,
-      status: schedule.schedule_status || 'pending',
-      description: schedule.description,
-      buildingId: schedule.buildings?.map((b: any) => b.buildingId) || [],
-    });
-    setIsCreateMode(false);
-    setIsModalOpen(true);
+    // Navigate directly to schedule job detail page using the correct path
+    navigate(`/schedule-job/${schedule.schedule_id}`);
   };
 
   // Add delete mutation with 5-minute delay
@@ -662,7 +687,7 @@ const Calendar: React.FC = () => {
         </div>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-          {isLoading ? (
+          {isLoading || scheduleJobsQuery.isLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               <span className="ml-3 text-gray-600 dark:text-gray-300">Loading...</span>
@@ -744,7 +769,10 @@ const Calendar: React.FC = () => {
                     key: 'buildings',
                     title: 'Buildings',
                     render: item => {
-                      const buildingCount = item.buildings?.length || 0;
+                      // Use the building counts from our query instead of the buildings array
+                      const buildingCounts = scheduleJobsQuery.data || {};
+                      const buildingCount = buildingCounts[item.schedule_id] || 0;
+                      
                       return (
                         <span className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                           {buildingCount} {buildingCount === 1 ? 'Building' : 'Buildings'}
@@ -758,18 +786,14 @@ const Calendar: React.FC = () => {
                     render: item => (
                       <div className="flex justify-center">
                         <button
-                          onClick={() => handleViewScheduleDetails(item)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/schedule-job/${item.schedule_id}`);
+                          }}
                           className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                          title="View Details"
+                          title="View Schedule Details"
                         >
                           <Eye size={18} />
-                        </button>
-                        <button
-                          onClick={() => navigate(`/schedule-job/${item.schedule_id}`)}
-                          className="p-1 ml-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
-                          title="View Schedule Jobs"
-                        >
-                          <List size={18} />
                         </button>
                       </div>
                     ),
@@ -777,7 +801,6 @@ const Calendar: React.FC = () => {
                 ]}
                 keyExtractor={item => item.schedule_id}
                 className="mt-0"
-                onRowClick={item => handleViewScheduleDetails(item)}
                 headerClassName="bg-gray-50 dark:bg-gray-800 text-xs uppercase text-gray-500 dark:text-gray-400"
                 tableClassName="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
               />
