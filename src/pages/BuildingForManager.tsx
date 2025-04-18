@@ -6,7 +6,6 @@ import { BuildingResponse } from '@/types';
 import apiInstance from '@/lib/axios';
 import { toast } from 'react-hot-toast';
 import { STATUS_COLORS } from '@/constants/colors';
-import ThemeToggle from '@/components/ThemeToggle';
 import Pagination from '@/components/Pagination';
 import SearchInput from '@/components/SearchInput';
 import { motion } from 'framer-motion';
@@ -20,6 +19,14 @@ interface BuildingWithArea extends BuildingResponse {
     createdAt: string;
     updatedAt: string;
   };
+  buildingDetails?: Array<{
+    buildingDetailId: string;
+    buildingId: string;
+    name: string;
+    total_apartments: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
 }
 
 interface BuildingManagerResponse {
@@ -105,8 +112,16 @@ const BuildingForManager: React.FC = () => {
     refetch();
   };
 
-  const handleViewDetail = (buildingId: string) => {
-    navigate(import.meta.env.VITE_VIEW_BUILDING_DETAIL.replace('{id}', buildingId));
+  const handleViewDetail = (building: BuildingWithArea) => {
+    // Check if the building has details
+    if (building.buildingDetails && building.buildingDetails.length > 0) {
+      // Navigate using the first buildingDetailId
+      const buildingDetailId = building.buildingDetails[0].buildingDetailId;
+      navigate(`/buildingdetails/${buildingDetailId}`);
+    } else {
+      // If no building details, show a toast message
+      toast.error('No building details available for this building');
+    }
   };
 
   const getStatusStyle = (status: string) => {
@@ -227,7 +242,7 @@ const BuildingForManager: React.FC = () => {
           <button
             onClick={e => {
               e.stopPropagation();
-              handleViewDetail(item.buildingId);
+              handleViewDetail(item);
             }}
             className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
             title="View Details"
@@ -263,7 +278,7 @@ const BuildingForManager: React.FC = () => {
             keyExtractor={item => item.buildingId}
             isLoading={isLoading}
             emptyText="No buildings found"
-            onRowClick={item => handleViewDetail(item.buildingId)}
+            onRowClick={item => handleViewDetail(item)}
             animated={true}
             tableClassName="w-full"
             className="w-[95%] mx-auto"

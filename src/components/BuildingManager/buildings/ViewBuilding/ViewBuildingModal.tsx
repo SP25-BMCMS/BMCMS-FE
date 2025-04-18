@@ -113,9 +113,9 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
   // State cho TanStack Query
   const [buildingDetailId, setBuildingDetailId] = useState<string | null>(null);
-  
+
   // Truy vấn contracts data
-  const { 
+  const {
     data: contractsData,
     isLoading: isLoadingContracts,
     isError: isErrorContracts,
@@ -290,6 +290,136 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
     return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
   };
 
+  // Helper function to get device icon based on type
+  const getDeviceIcon = (deviceType: string) => {
+    switch (deviceType.toLowerCase()) {
+      case 'hvac':
+        return (
+          <svg
+            className="h-5 w-5 text-blue-500 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M20 7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V7z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M15 11h.01M12 11h.01M9 11h.01"
+            />
+          </svg>
+        );
+      case 'elevator':
+        return (
+          <svg
+            className="h-5 w-5 text-indigo-500 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            />
+          </svg>
+        );
+      case 'cctv':
+        return (
+          <svg
+            className="h-5 w-5 text-purple-500 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+            />
+          </svg>
+        );
+      case 'plumbing':
+        return (
+          <svg
+            className="h-5 w-5 text-cyan-500 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
+          </svg>
+        );
+      case 'electrical':
+        return (
+          <svg
+            className="h-5 w-5 text-yellow-500 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
+          </svg>
+        );
+      case 'fireprotection':
+        return (
+          <svg
+            className="h-5 w-5 text-red-500 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"
+            />
+          </svg>
+        );
+      default:
+        return (
+          <svg
+            className="h-5 w-5 text-gray-500 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
+          </svg>
+        );
+    }
+  };
+
   if (!buildingId) {
     return null;
   }
@@ -386,7 +516,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {buildingDetail.buildingDetailId === null && (
                     <span className="px-3 py-1 rounded-full text-sm font-semibold shadow-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-                     No Id Detail
+                      No Id Detail
                     </span>
                   )}
                 </div>
@@ -454,6 +584,63 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               }}
               variants={itemVariants}
             >
+              {/* Building Details Section */}
+              {buildingDetail.buildingDetails && buildingDetail.buildingDetails.length > 0 ? (
+                <motion.div
+                  className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6"
+                  variants={itemVariants}
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Home className="h-5 w-5 text-blue-500" />
+                    Area Details ({buildingDetail.buildingDetails.length})
+                  </h3>
+
+                  <div className="space-y-4">
+                    {buildingDetail.buildingDetails.map((detail: any) => (
+                      <div
+                        key={detail.buildingDetailId}
+                        className="py-3 border-b border-gray-200 dark:border-gray-700 last:border-0"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium text-base text-gray-900 dark:text-white">
+                            {detail.name}
+                          </span>
+                          <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                            {detail.total_apartments} apartments
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
+                          <div className="flex items-center">
+                            <MapPin className="h-3.5 w-3.5 text-blue-500 mr-1.5 flex-shrink-0" />
+                            <span className="truncate">
+                              Area: <span className="font-medium">{buildingDetail.area.name}</span>
+                            </span>
+                          </div>
+
+                          <div className="flex items-center">
+                            <Clock className="h-3.5 w-3.5 text-blue-500 mr-1.5 flex-shrink-0" />
+                            <span className="truncate">
+                              Created Date:{' '}
+                              <span className="font-medium">{formatDate(detail.createdAt)}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm flex items-center justify-center mb-6"
+                  variants={itemVariants}
+                >
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <Home className="h-10 w-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                    <p>No Areas details available</p>
+                  </div>
+                </motion.div>
+              )}
               {/* Building Information */}
               <motion.div
                 className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6"
@@ -560,64 +747,121 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               }}
               variants={itemVariants}
             >
-              {/* Building Details Section */}
-              {buildingDetail.buildingDetails && buildingDetail.buildingDetails.length > 0 ? (
+              {/* Device Information Section */}
+              {buildingDetail.device && buildingDetail.device.length > 0 ? (
                 <motion.div
                   className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6"
                   variants={itemVariants}
                 >
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Home className="h-5 w-5 text-blue-500" />
-                    Area Details ({buildingDetail.buildingDetails.length})
-                  </h3>
+                  <div className="flex justify-between items-center mb-5">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-blue-500 dark:text-blue-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                      </svg>
+                      Device Information
+                    </h3>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
+                      {buildingDetail.device.length}{' '}
+                      {buildingDetail.device.length === 1 ? 'Device' : 'Devices'}
+                    </span>
+                  </div>
 
                   <div className="space-y-4">
-                    {buildingDetail.buildingDetails.map((detail: any) => (
-                      <div
-                        key={detail.buildingDetailId}
-                        className="py-3 border-b border-gray-200 dark:border-gray-700 last:border-0"
+                    {buildingDetail.device.map((device: any) => (
+                      <motion.div
+                        key={device.device_id}
+                        className="py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-md transition-all bg-gray-50 dark:bg-gray-700"
+                        whileHover={{
+                          scale: 1.01,
+                          boxShadow:
+                            '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        }}
+                        transition={{ type: 'spring', stiffness: 300 }}
                       >
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium text-base text-gray-900 dark:text-white">
-                            {detail.name}
-                          </span>
-                          <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                            {detail.total_apartments} apartments
+                        <div className="flex justify-between items-center mb-3">
+                          <div className="flex items-center">
+                            {getDeviceIcon(device.type)}
+                            <span className="font-medium text-base text-gray-900 dark:text-white ml-2">
+                              {device.name}
+                            </span>
+                          </div>
+                          <span className="px-2.5 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 font-medium">
+                            {device.type}
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
-                          <div className="flex items-center">
-                            <MapPin className="h-3.5 w-3.5 text-blue-500 mr-1.5 flex-shrink-0" />
-                            <span className="truncate">
-                              Area: <span className="font-medium">{buildingDetail.area.name}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300 mt-3">
+                          <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600">
+                            <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
+                              Model:
+                            </span>
+                            <span className="text-gray-900 dark:text-gray-100">{device.model}</span>
+                          </div>
+                          <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600">
+                            <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
+                              Manufacturer:
+                            </span>
+                            <span className="text-gray-900 dark:text-gray-100">
+                              {device.manufacturer}
                             </span>
                           </div>
-
-                          <div className="flex items-center">
-                            <Clock className="h-3.5 w-3.5 text-blue-500 mr-1.5 flex-shrink-0" />
-                            <span className="truncate">
-                              Created Date:{' '}
-                              <span className="font-medium">{formatDate(detail.createdAt)}</span>
-                            </span>
-                          </div>
+                          {device.contract_id && (
+                            <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600 col-span-2">
+                              <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
+                                Contract ID:
+                              </span>
+                              <span className="text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded border border-blue-100 dark:border-blue-700">
+                                {device.contract_id}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </motion.div>
               ) : (
                 <motion.div
-                  className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm flex items-center justify-center mb-6"
+                  className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm flex flex-col items-center justify-center mb-6"
                   variants={itemVariants}
                 >
                   <div className="text-center text-gray-500 dark:text-gray-400">
-                    <Home className="h-10 w-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                    <p>No Areas details available</p>
+                    <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-full mb-4 inline-flex">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-gray-400 dark:text-gray-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-lg font-medium mb-2 dark:text-gray-300">
+                      No devices available
+                    </p>
+                    <p className="text-sm max-w-md">
+                      This building currently has no registered devices in the system.
+                    </p>
                   </div>
                 </motion.div>
               )}
-
               {/* Contracts Section */}
               <motion.div
                 className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm"
@@ -641,7 +885,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   </div>
                 ) : contractsData && contractsData.length > 0 ? (
                   <div className="space-y-4">
-                    {contractsData.map((contract) => (
+                    {contractsData.map(contract => (
                       <div
                         key={contract.contract_id}
                         className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
@@ -651,46 +895,52 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                             {contract.vendor}
                           </h4>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {new Date(contract.start_date).toLocaleDateString()} - {new Date(contract.end_date).toLocaleDateString()}
+                            {new Date(contract.start_date).toLocaleDateString()} -{' '}
+                            {new Date(contract.end_date).toLocaleDateString()}
                           </span>
                         </div>
-                        
+
                         {/* Devices Information */}
                         <div className="mt-2 mb-3">
                           <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 mr-1 text-blue-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
+                              />
                             </svg>
                             Devices ({contract.devices.length})
                           </div>
-                          
+
                           <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2">
                             {contract.devices.map(device => (
-                              <div 
+                              <div
                                 key={device.device_id}
                                 className={`text-xs p-2 mb-1 last:mb-0 rounded border-l-2 ${
-                                  device.buildingDetailId === buildingDetailId 
-                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                                  device.buildingDetailId === buildingDetailId
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                                     : 'border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700'
                                 }`}
                               >
                                 <div className="flex justify-between items-center">
                                   <span className="font-medium">{device.name}</span>
-                                  <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300">{device.type}</span>
-                                </div>
-                                <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1">
-                                  <div className="text-gray-600 dark:text-gray-400">
-                                    <span className="font-medium">Model:</span> {device.model}
-                                  </div>
-                                  <div className="text-gray-600 dark:text-gray-400">
-                                    <span className="font-medium">Manufacturer:</span> {device.manufacturer}
-                                  </div>
+                                  <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300">
+                                    {device.type}
+                                  </span>
                                 </div>
                               </div>
                             ))}
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-2 mt-3">
                           <a
                             href={`${import.meta.env.VITE_API_SECRET}${contract.fileUrl}`}
@@ -727,7 +977,9 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   <div className="text-center py-8">
                     <FileText className="h-10 w-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                     <p className="text-gray-500 dark:text-gray-400">
-                      {buildingDetail.buildingDetailId ? 'No contracts found for this building' : 'Cannot find contract information'}
+                      {buildingDetail.buildingDetailId
+                        ? 'No contracts found for this building'
+                        : 'Cannot find contract information'}
                     </p>
                   </div>
                 )}

@@ -9,6 +9,7 @@ import Resident from '@/pages/Resident';
 import StaffManagement from '@/pages/StaffManagement';
 import Building from '@/pages/BuildingManagement';
 import BuildingForManager from '@/pages/BuildingForManager';
+import BuildingDetail from '@/pages/BuildingDetail';
 import CrackManagement from '@/pages/CrackManagement';
 import DetailCrack from '@/components/crackManager/DetailCrack/DetailCrack';
 import DetailLayout from '@/layouts/DetailLayout';
@@ -143,6 +144,14 @@ function AppRoutes() {
             element={
               <RoleBasedRoute allowedRoles={['Manager']}>
                 <Calendar />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/buildingdetails/:id"
+            element={
+              <RoleBasedRoute allowedRoles={['Manager']}>
+                <BuildingDetail />
               </RoleBasedRoute>
             }
           />
