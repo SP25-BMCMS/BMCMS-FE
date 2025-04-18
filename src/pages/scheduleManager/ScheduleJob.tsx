@@ -204,11 +204,6 @@ const ScheduleJob: React.FC = () => {
                   {schedule.schedule_name}
                 </h1>
                 <div className="flex items-center space-x-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${getScheduleTypeBadge(schedule.schedule_type)}`}
-                  >
-                    {schedule.schedule_type}
-                  </span>
                   <span className="text-gray-500 dark:text-gray-400">
                     {new Date(schedule.start_date).toLocaleDateString()} -{' '}
                     {new Date(schedule.end_date).toLocaleDateString()}
