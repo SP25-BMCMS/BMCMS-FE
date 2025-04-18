@@ -220,17 +220,6 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                     </p>
                   </div>
                 </div>
-
-                <div className="flex items-center">
-                  <UserCheck className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">User ID</p>
-                    <p className="text-gray-900 dark:text-white text-xs md:text-sm">
-                      {resident.userId}
-                    </p>
-                  </div>
-                </div>
-
                 <div className="flex items-center">
                   <CalendarDays className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
                   <div>

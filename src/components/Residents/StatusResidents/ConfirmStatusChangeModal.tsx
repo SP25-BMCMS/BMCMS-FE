@@ -1,6 +1,6 @@
 import React from 'react';
-import Modal from './Modal';
 import { Residents } from '@/types';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface ConfirmStatusChangeModalProps {
   isOpen: boolean;
@@ -15,50 +15,54 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
   onConfirm,
   resident,
 }) => {
-  if (!resident) return null;
+  if (!isOpen || !resident) return null;
 
   const newStatus = resident.accountStatus === 'Active' ? 'Inactive' : 'Active';
+  const statusColor = newStatus === 'Active' ? 'text-green-600' : 'text-red-600';
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Xác nhận thay đổi trạng thái">
-      <div className="p-6 space-y-4">
-        <div className="text-center">
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            Bạn có chắc chắn muốn thay đổi trạng thái của{' '}
-            <span className="font-medium">{resident.username}</span> từ{' '}
-            <span
-              className={`font-medium ${resident.accountStatus === 'Active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
-            >
-              {resident.accountStatus}
-            </span>{' '}
-            sang{' '}
-            <span
-              className={`font-medium ${newStatus === 'Active' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
-            >
-              {newStatus}
-            </span>{' '}
-            không?
-          </p>
-        </div>
-
-        <div className="mt-6 flex justify-center space-x-4">
+    <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center z-50">
+      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold text-gray-900">Confirm Status Change</h3>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-red-400"
+            className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg p-1.5"
           >
-            Hủy bỏ
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="py-4">
+          <p className="text-gray-700 mb-3">
+            Are you sure you want to change the status of <span className="font-semibold">{resident.username}</span> from <span className={resident.accountStatus === 'Active' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>{resident.accountStatus}</span> to <span className={statusColor + " font-medium"}>{newStatus}</span>?
+          </p>
+          <p className="text-sm text-gray-500">This action will change the user's ability to access the system.</p>
+        </div>
+
+        <div className="flex justify-end space-x-3 mt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg"
+          >
+            Cancel
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+            className={`px-4 py-2 ${
+              newStatus === 'Active'
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-red-600 hover:bg-red-700'
+            } text-white font-medium rounded-lg`}
           >
-            Xác nhận
+            Confirm
           </button>
         </div>
       </div>
-    </Modal>
+    </div>
   );
 };
 
