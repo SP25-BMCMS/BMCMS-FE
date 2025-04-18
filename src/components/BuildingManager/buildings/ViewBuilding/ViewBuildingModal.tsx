@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getBuildingById, getBuildingDetail, getAllBuildingDetails } from '@/services/building';
 import { getAllStaff } from '@/services/staff';
+import { getContractsByBuildingDetailId, Contract } from '@/services/contracts';
 import { toast } from 'react-hot-toast';
 import {
   Building,
@@ -13,8 +14,12 @@ import {
   ShieldCheck,
   GripVertical,
   User,
+  FileText,
+  Download,
+  Eye,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { FORMAT_DATE } from '@/utils/format';
 
 interface ModalProps {
@@ -106,6 +111,21 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
   const containerRef = useRef<HTMLDivElement>(null);
   const [managerName, setManagerName] = useState<string>('Not assigned');
 
+  // State cho TanStack Query
+  const [buildingDetailId, setBuildingDetailId] = useState<string | null>(null);
+  
+  // Truy vấn contracts data
+  const { 
+    data: contractsData,
+    isLoading: isLoadingContracts,
+    isError: isErrorContracts,
+  } = useQuery({
+    queryKey: ['contracts', buildingDetailId],
+    queryFn: () => getContractsByBuildingDetailId(buildingDetailId || ''),
+    enabled: !!buildingDetailId, // Chỉ query khi có buildingDetailId
+    staleTime: 5 * 60 * 1000, // 5 phút
+  });
+
   useEffect(() => {
     setBuildingDetail(null);
     setError(null);
@@ -182,6 +202,9 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
             building: buildingResponse.data,
           });
 
+          // Reset buildingDetailId state để không gọi API contracts
+          setBuildingDetailId(null);
+
           // Kiểm tra manager_id
           const managerId = buildingResponse.data.manager_id;
           if (managerId) {
@@ -189,11 +212,14 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
           }
           return;
         } else {
-          setError('Không tìm thấy thông tin tòa nhà');
-          toast.error('Không tìm thấy thông tin tòa nhà');
+          setError('cannot find any information this building');
+          toast.error('cannot find any information this building');
           return;
         }
       }
+
+      // Đặt buildingDetailId để TanStack Query có thể gọi API contracts
+      setBuildingDetailId(buildingDetail.buildingDetailId);
 
       // Fetch specific building detail using buildingDetailId
       const buildingDetailResponse = await getBuildingDetail(buildingDetail.buildingDetailId);
@@ -360,7 +386,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {buildingDetail.buildingDetailId === null && (
                     <span className="px-3 py-1 rounded-full text-sm font-semibold shadow-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-                      Không có ID chi tiết tòa nhà
+                     No Id Detail
                     </span>
                   )}
                 </div>
@@ -534,9 +560,10 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               }}
               variants={itemVariants}
             >
+              {/* Building Details Section */}
               {buildingDetail.buildingDetails && buildingDetail.buildingDetails.length > 0 ? (
                 <motion.div
-                  className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm h-full"
+                  className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6"
                   variants={itemVariants}
                 >
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -581,7 +608,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                 </motion.div>
               ) : (
                 <motion.div
-                  className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm flex items-center justify-center h-full"
+                  className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm flex items-center justify-center mb-6"
                   variants={itemVariants}
                 >
                   <div className="text-center text-gray-500 dark:text-gray-400">
@@ -590,6 +617,121 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   </div>
                 </motion.div>
               )}
+
+              {/* Contracts Section */}
+              <motion.div
+                className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm"
+                variants={itemVariants}
+              >
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-500" />
+                  Contracts Information
+                </h3>
+
+                {isLoadingContracts ? (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : isErrorContracts ? (
+                  <div className="text-center py-8">
+                    <p className="text-red-500 mb-2">Error loading contracts</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      There was an error fetching contracts information.
+                    </p>
+                  </div>
+                ) : contractsData && contractsData.length > 0 ? (
+                  <div className="space-y-4">
+                    {contractsData.map((contract) => (
+                      <div
+                        key={contract.contract_id}
+                        className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                      >
+                        <div className="flex flex-wrap justify-between items-center mb-3">
+                          <h4 className="text-base font-medium text-gray-900 dark:text-white">
+                            {contract.vendor}
+                          </h4>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(contract.start_date).toLocaleDateString()} - {new Date(contract.end_date).toLocaleDateString()}
+                          </span>
+                        </div>
+                        
+                        {/* Devices Information */}
+                        <div className="mt-2 mb-3">
+                          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Devices ({contract.devices.length})
+                          </div>
+                          
+                          <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2">
+                            {contract.devices.map(device => (
+                              <div 
+                                key={device.device_id}
+                                className={`text-xs p-2 mb-1 last:mb-0 rounded border-l-2 ${
+                                  device.buildingDetailId === buildingDetailId 
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                                    : 'border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700'
+                                }`}
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span className="font-medium">{device.name}</span>
+                                  <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300">{device.type}</span>
+                                </div>
+                                <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1">
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    <span className="font-medium">Model:</span> {device.model}
+                                  </div>
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    <span className="font-medium">Manufacturer:</span> {device.manufacturer}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          <a
+                            href={`${import.meta.env.VITE_API_SECRET}${contract.fileUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                          >
+                            <Download className="w-3.5 h-3.5 mr-1" />
+                            Download
+                          </a>
+                          <a
+                            href={`${import.meta.env.VITE_API_SECRET}${contract.viewUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
+                          >
+                            <Eye className="w-3.5 h-3.5 mr-1" />
+                            View
+                          </a>
+                          <a
+                            href={`${import.meta.env.VITE_API_SECRET}${contract.directFileUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-800 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                          >
+                            <FileText className="w-3.5 h-3.5 mr-1" />
+                            Direct File
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <FileText className="h-10 w-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {buildingDetail.buildingDetailId ? 'No contracts found for this building' : 'Cannot find contract information'}
+                    </p>
+                  </div>
+                )}
+              </motion.div>
             </motion.div>
           </div>
 

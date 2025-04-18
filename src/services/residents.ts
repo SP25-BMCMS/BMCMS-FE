@@ -97,6 +97,10 @@ export const updateResidentStatus = async (
 ) => {
   try {
     const url = `${API_SECRET}${STATUS_RESIDENT_API.replace('{id}', residentId)}`;
+    console.log('Updating resident status with URL:', url);
+    console.log('Request body:', JSON.stringify({ accountStatus: newStatus }));
+    
+    const token = localStorage.getItem('bmcms_token');
     const response = await axios.patch(
       url,
       {
@@ -105,17 +109,20 @@ export const updateResidentStatus = async (
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('bmcms_token')}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
 
+    console.log('Status update response:', response.data);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating resident status:', error);
+    console.error('Error details:', error.response?.data || error.message);
     throw error;
   }
 };
+
 export const getAllBuildingDetails = async () => {
   try {
     const url = `${API_SECRET}${BUILDING_DETAILS_API}`;
@@ -130,6 +137,7 @@ export const getAllBuildingDetails = async () => {
     throw error;
   }
 };
+
 export const addApartmentForResident = async (
   residentId: string,
   apartmentData: { apartments: Array<{ apartmentName: string; buildingDetailId: string }> }
