@@ -192,7 +192,7 @@ const BuildingDetail: React.FC = () => {
         <Link to="/buildings-for-manager" className="hover:text-blue-400 transition-colors mr-2">
           <div className="flex items-center">
             <Building2 className="h-4 w-4 mr-1" />
-            Building Management
+            Buildings
           </div>
         </Link>
         <ChevronRight size={16} className="mx-1" />

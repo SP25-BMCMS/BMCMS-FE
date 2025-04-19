@@ -13,6 +13,7 @@ import BuildingDetail from '@/pages/BuildingDetail';
 import CrackManagement from '@/pages/CrackManagement';
 import DetailCrack from '@/components/crackManager/DetailCrack/DetailCrack';
 import DetailLayout from '@/layouts/DetailLayout';
+import BuildingDetailLayout from '@/layouts/BuildingDetailLayout';
 import TaskManagement from '@/pages/TaskManagement';
 import TaskDetail from '@/components/TaskManager/TaskDetail';
 import Calendar from '@/pages/Calendar';
@@ -147,6 +148,10 @@ function AppRoutes() {
               </RoleBasedRoute>
             }
           />
+        </Route>
+
+        {/* Sử dụng BuildingDetailLayout cho BuildingDetail */}
+        <Route element={<BuildingDetailLayout />}>
           <Route
             path="/buildingdetails/:id"
             element={
