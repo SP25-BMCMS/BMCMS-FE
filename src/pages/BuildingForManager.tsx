@@ -265,7 +265,7 @@ const BuildingForManager: React.FC = () => {
           >
             <Eye size={16} />
           </button>
-          <button
+          {/* <button
             onClick={e => {
               e.stopPropagation();
               handleOpenTechnicalRecordModal(item);
@@ -274,7 +274,7 @@ const BuildingForManager: React.FC = () => {
             title="Technical Records"
           >
             <FileText size={16} />
-          </button>
+          </button> */}
         </div>
       ),
       width: '120px',
