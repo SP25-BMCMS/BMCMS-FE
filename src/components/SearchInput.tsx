@@ -1,10 +1,11 @@
 // SearchInput.tsx
-import React from 'react';
+import React, { KeyboardEvent } from 'react';
 
 type SearchInputProps = {
   placeholder?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearch?: () => void;
   className?: string;
 };
 
@@ -12,8 +13,16 @@ const SearchInput: React.FC<SearchInputProps> = ({
   placeholder = 'Search by ID',
   value = '',
   onChange,
+  onSearch,
   className = '',
 }) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && onSearch) {
+      e.preventDefault();
+      onSearch();
+    }
+  };
+
   return (
     <div className={`relative ${className}`}>
       <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
@@ -44,6 +53,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        onKeyDown={handleKeyDown}
       />
     </div>
   );

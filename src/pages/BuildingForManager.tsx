@@ -33,7 +33,7 @@ interface BuildingManagerResponse {
   statusCode: number;
   message: string;
   data: BuildingWithArea[];
-  pagination?: {
+  meta?: {
     total: number;
     page: number;
     limit: number;
@@ -76,11 +76,11 @@ const BuildingForManager: React.FC = () => {
   const buildingsData = data as BuildingManagerResponse | undefined;
 
   React.useEffect(() => {
-    if (buildingsData?.pagination) {
+    if (buildingsData?.meta) {
       setPagination(prev => ({
         ...prev,
-        totalPages: buildingsData.pagination?.totalPages || 1,
-        totalItems: buildingsData.pagination?.total || 0,
+        totalPages: buildingsData.meta?.totalPages || 1,
+        totalItems: buildingsData.meta?.total || 0,
       }));
     }
   }, [buildingsData]);
@@ -263,6 +263,7 @@ const BuildingForManager: React.FC = () => {
             placeholder="Search by building name"
             value={searchQuery}
             onChange={handleSearch}
+            onSearch={handleSearchSubmit}
             className="w-[20rem] max-w-xs"
           />
         </div>
