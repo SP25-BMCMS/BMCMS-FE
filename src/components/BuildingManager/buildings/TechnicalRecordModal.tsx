@@ -1,8 +1,9 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getTechnicalRecordsByBuildingId, TechnicalRecord } from '@/services/technicalRecord';
+import { TechnicalRecord } from '@/services/technicalRecord';
 import { Download, Eye, FileText, FileIcon, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
+import apiInstance from '@/lib/axios';
 
 interface ModalProps {
   isOpen: boolean;
@@ -67,6 +68,17 @@ interface TechnicalRecordModalProps {
   buildingName: string;
 }
 
+// Response type for the technical records API
+interface TechnicalRecordsByBuildingResponse {
+  data: TechnicalRecord[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   isOpen,
   onClose,
@@ -74,15 +86,30 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   buildingDetailId,
   buildingName,
 }) => {
-  // Get technical records for the building detail
+  // Function to fetch technical records by building ID using the new API endpoint
+  const fetchTechnicalRecordsByBuildingId = async (buildingId: string) => {
+    try {
+      const url = import.meta.env.VITE_GET_TECHNICAL_RECORD_BY_BUILDING_ID.replace(
+        '{buildingId}',
+        buildingId
+      );
+      const response = await apiInstance.get<TechnicalRecordsByBuildingResponse>(url);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching technical records for building:', error);
+      throw error;
+    }
+  };
+
+  // Get technical records for the building
   const {
     data: technicalRecords,
     isLoading,
     isError,
     error,
   } = useQuery({
-    queryKey: ['technicalRecords', buildingId],
-    queryFn: () => getTechnicalRecordsByBuildingId(buildingId),
+    queryKey: ['technicalRecordsByBuilding', buildingId],
+    queryFn: () => fetchTechnicalRecordsByBuildingId(buildingId),
     enabled: !!buildingId && isOpen,
   });
 
@@ -104,16 +131,29 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
 
   // Get file type icon
   const getFileTypeIcon = (fileType: string) => {
-    switch (fileType.toLowerCase()) {
-      case 'manual':
-        return <BookOpen className="h-5 w-5 text-blue-500" />;
-      case 'specification':
-        return <FileText className="h-5 w-5 text-green-500" />;
-      case 'certificate':
-        return <FileIcon className="h-5 w-5 text-yellow-500" />;
-      default:
-        return <FileText className="h-5 w-5 text-gray-500" />;
+    const type = fileType.toLowerCase();
+    if (type.includes('manual')) {
+      return <BookOpen className="h-5 w-5 text-blue-500" />;
+    } else if (type.includes('technical') || type.includes('specification')) {
+      return <FileText className="h-5 w-5 text-green-500" />;
+    } else if (type.includes('certificate')) {
+      return <FileIcon className="h-5 w-5 text-yellow-500" />;
     }
+    return <FileText className="h-5 w-5 text-gray-500" />;
+  };
+
+  // Extract filename from URL
+  const extractFilename = (path: string) => {
+    // Try to extract filename from URL or path
+    if (!path) return 'Unnamed Document';
+
+    // Check if it contains a slash and get the part after the last slash
+    if (path.includes('/')) {
+      const parts = path.split('/');
+      return parts[parts.length - 1];
+    }
+
+    return path;
   };
 
   // Animation variants
@@ -234,7 +274,7 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
                     {getFileTypeIcon(record.file_type)}
                     <div>
                       <h5 className="text-base font-medium text-gray-900 dark:text-white">
-                        {record.file_name.split('/').pop() || 'Unnamed Document'}
+                        {extractFilename(record.file_name)}
                       </h5>
                       <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
                         <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded-md text-xs font-medium mr-2">
@@ -282,24 +322,6 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
                   >
                     <Download className="w-4 h-4 mr-1.5" />
                     Download
-                  </a>
-                  <a
-                    href={record.viewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
-                  >
-                    <Eye className="w-4 h-4 mr-1.5" />
-                    View
-                  </a>
-                  <a
-                    href={record.directUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-800 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                  >
-                    <FileText className="w-4 h-4 mr-1.5" />
-                    Direct Link
                   </a>
                 </div>
               </motion.div>
