@@ -1,9 +1,10 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TechnicalRecord } from '@/services/technicalRecord';
-import { Download, Eye, FileText, FileIcon, BookOpen } from 'lucide-react';
+import { Download, Eye, FileText, FileIcon, BookOpen, Upload, Plus, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import apiInstance from '@/lib/axios';
+import { toast } from 'react-hot-toast';
 
 interface ModalProps {
   isOpen: boolean;
@@ -60,6 +61,300 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, size = 'md', chil
   );
 };
 
+// Interface for device data
+interface Device {
+  device_id: string;
+  name: string;
+  type: string;
+  buildingDetail: {
+    buildingDetailId: string;
+    name: string;
+  };
+}
+
+// Interface for device response
+interface DeviceResponse {
+  data: Device[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+// Interface for technical record upload form
+interface UploadTechnicalRecordFormProps {
+  buildingId: string;
+  buildingDetailId: string | null;
+  onSuccess: () => void;
+  onCancel: () => void;
+}
+
+// Technical Record Upload Form Component
+const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
+  buildingId,
+  buildingDetailId,
+  onSuccess,
+  onCancel,
+}) => {
+  const [deviceId, setDeviceId] = useState<string>('');
+  const [fileType, setFileType] = useState<string>('');
+  const [file, setFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+
+  // Fetch technical records for the building to find devices that already have records
+  const { data: existingRecords } = useQuery({
+    queryKey: ['technicalRecordsByBuilding', buildingId],
+    queryFn: async () => {
+      if (!buildingId) return [];
+      
+      const url = import.meta.env.VITE_GET_TECHNICAL_RECORD_BY_BUILDING_ID.replace(
+        '{buildingId}',
+        buildingId
+      );
+      const response = await apiInstance.get<TechnicalRecordsByBuildingResponse>(url);
+      return response.data.data || [];
+    },
+    enabled: !!buildingId,
+  });
+
+  // Fetch devices for the building detail
+  const { data: devices, isLoading: isLoadingDevices } = useQuery({
+    queryKey: ['devices', buildingDetailId],
+    queryFn: async () => {
+      if (!buildingDetailId) return { data: [] };
+      
+      const url = import.meta.env.VITE_GET_DEVICE_BY_BUILDING_DETAIL_ID.replace(
+        '{buildingDetailId}',
+        buildingDetailId
+      );
+      const response = await apiInstance.get<DeviceResponse>(url);
+      return response.data;
+    },
+    enabled: !!buildingDetailId,
+  });
+
+  // Filter out devices that already have technical records
+  const availableDevices = useMemo(() => {
+    if (!devices?.data || !existingRecords) return [];
+    
+    // Get all device IDs that already have technical records
+    const usedDeviceIds = new Set(existingRecords.map(record => record.device_id));
+    
+    // Filter devices that don't have technical records yet
+    return devices.data.filter(device => !usedDeviceIds.has(device.device_id));
+  }, [devices, existingRecords]);
+
+  // File type options
+  const fileTypeOptions = [
+    { value: 'Manual', label: 'User Manual' },
+    { value: 'Specification', label: 'Technical Specification' },
+    { value: 'Certificate', label: 'Certificate' },
+    { value: 'Warranty', label: 'Warranty Document' },
+    { value: 'Maintenance', label: 'Maintenance Guide' },
+  ];
+
+  // Handle file change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      // Check if file is PDF
+      if (selectedFile.type !== 'application/pdf') {
+        toast.error('Only PDF files are allowed');
+        e.target.value = '';
+        return;
+      }
+      
+      // Check file size (10MB = 10 * 1024 * 1024 bytes)
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        toast.error('File size should not exceed 10MB');
+        e.target.value = '';
+        return;
+      }
+      
+      setFile(selectedFile);
+    }
+  };
+
+  // Create technical record mutation
+  const createTechnicalRecord = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await apiInstance.post(
+        import.meta.env.VITE_CREATE_TECHNICAL_RECORD,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['technicalRecordsByBuilding', buildingId] });
+      toast.success('Technical record uploaded successfully');
+      onSuccess();
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to upload: ${error.message || 'Unknown error'}`);
+      setIsSubmitting(false);
+    },
+  });
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (!deviceId) {
+      toast.error('Please select a device');
+      return;
+    }
+    
+    if (!fileType) {
+      toast.error('Please select a file type');
+      return;
+    }
+    
+    if (!file) {
+      toast.error('Please select a file to upload');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    const formData = new FormData();
+    formData.append('device_id', deviceId);
+    formData.append('file_type', fileType);
+    formData.append('recordFile', file);
+    
+    createTechnicalRecord.mutate(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Device <span className="text-red-500">*</span>
+        </label>
+        {isLoadingDevices ? (
+          <div className="animate-pulse h-10 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+        ) : availableDevices.length > 0 ? (
+          <select
+            value={deviceId}
+            onChange={(e) => setDeviceId(e.target.value)}
+            className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+          >
+            <option value="">Select a device</option>
+            {availableDevices.map((device) => (
+              <option key={device.device_id} value={device.device_id}>
+                {device.name} ({device.type})
+              </option>
+            ))}
+          </select>
+        ) : (
+          <div className="text-sm text-red-500 py-2 bg-red-50 dark:bg-red-900/20 px-3 rounded-md">
+            All devices in this building already have technical records. You can only upload one technical record per device.
+          </div>
+        )}
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Document Type <span className="text-red-500">*</span>
+        </label>
+        <select
+          value={fileType}
+          onChange={(e) => setFileType(e.target.value)}
+          className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+          disabled={availableDevices.length === 0}
+        >
+          <option value="">Select document type</option>
+          {fileTypeOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          File Upload <span className="text-red-500">*</span>
+        </label>
+        <div className={`border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 ${availableDevices.length === 0 ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className="space-y-2 text-center">
+            {file ? (
+              <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                <div className="flex items-center">
+                  <FileText className="h-5 w-5 text-blue-500 mr-2" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFile(null)}
+                  className="text-red-500 hover:text-red-700"
+                  disabled={availableDevices.length === 0}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                <div className="flex justify-center text-sm text-gray-600 dark:text-gray-400">
+                  <label
+                    htmlFor="file-upload"
+                    className={`relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 ${availableDevices.length === 0 ? 'pointer-events-none' : ''}`}
+                  >
+                    <span>Upload a file</span>
+                    <input
+                      id="file-upload"
+                      name="file-upload"
+                      type="file"
+                      accept=".pdf"
+                      className="sr-only"
+                      onChange={handleFileChange}
+                      disabled={availableDevices.length === 0}
+                    />
+                  </label>
+                  <p className="pl-1">or drag and drop</p>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  PDF only, up to 10MB
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isSubmitting}
+          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting || !deviceId || !fileType || !file || availableDevices.length === 0}
+          className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none ${
+            isSubmitting || !deviceId || !fileType || !file || availableDevices.length === 0
+              ? 'opacity-70 cursor-not-allowed'
+              : ''
+          }`}
+        >
+          {isSubmitting ? 'Uploading...' : 'Upload Document'}
+        </button>
+      </div>
+    </form>
+  );
+};
+
 interface TechnicalRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -86,6 +381,8 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   buildingDetailId,
   buildingName,
 }) => {
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  
   // Function to fetch technical records by building ID using the new API endpoint
   const fetchTechnicalRecordsByBuildingId = async (buildingId: string) => {
     try {
@@ -100,13 +397,14 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
       throw error;
     }
   };
-
+  
   // Get technical records for the building
   const {
     data: technicalRecords,
     isLoading,
     isError,
     error,
+    refetch
   } = useQuery({
     queryKey: ['technicalRecordsByBuilding', buildingId],
     queryFn: () => fetchTechnicalRecordsByBuildingId(buildingId),
@@ -146,14 +444,30 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   const extractFilename = (path: string) => {
     // Try to extract filename from URL or path
     if (!path) return 'Unnamed Document';
-
+    
     // Check if it contains a slash and get the part after the last slash
     if (path.includes('/')) {
       const parts = path.split('/');
       return parts[parts.length - 1];
     }
-
+    
     return path;
+  };
+
+  // Open upload modal
+  const handleOpenUploadModal = () => {
+    setIsUploadModalOpen(true);
+  };
+  
+  // Close upload modal
+  const handleCloseUploadModal = () => {
+    setIsUploadModalOpen(false);
+  };
+  
+  // Handle successful upload
+  const handleUploadSuccess = () => {
+    handleCloseUploadModal();
+    refetch();
   };
 
   // Animation variants
@@ -175,6 +489,25 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
       transition: { type: 'spring', stiffness: 100 },
     },
   };
+
+  // If upload modal is open, show it instead of the main content
+  if (isUploadModalOpen) {
+    return (
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={`Upload Technical Record - ${buildingName}`}
+        size="md"
+      >
+        <UploadTechnicalRecordForm
+          buildingId={buildingId}
+          buildingDetailId={buildingDetailId}
+          onSuccess={handleUploadSuccess}
+          onCancel={handleCloseUploadModal}
+        />
+      </Modal>
+    );
+  }
 
   return (
     <Modal
@@ -232,22 +565,6 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
             {error instanceof Error ? error.message : 'An unknown error occurred.'}
           </p>
         </motion.div>
-      ) : !technicalRecords || technicalRecords.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-8"
-        >
-          <div className="inline-flex justify-center items-center p-4 mb-4 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-500 dark:text-gray-400">
-            <FileText className="h-8 w-8" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            No Technical Records
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            There are no technical records available for this building at the moment.
-          </p>
-        </motion.div>
       ) : (
         <motion.div
           className="space-y-6"
@@ -257,76 +574,101 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
         >
           <div className="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700">
             <h4 className="text-lg font-medium text-gray-900 dark:text-white">
-              Found {technicalRecords.length} Technical Document
-              {technicalRecords.length !== 1 ? 's' : ''}
+              Found {technicalRecords?.length || 0} Technical Document
+              {technicalRecords?.length !== 1 ? 's' : ''}
             </h4>
+            <button
+              onClick={handleOpenUploadModal}
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-4 h-4 mr-1.5" />
+              Upload New
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            {technicalRecords.map((record: TechnicalRecord) => (
-              <motion.div
-                key={record.record_id}
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 hover:shadow-md transition-shadow"
-                variants={itemVariants}
-              >
-                <div className="flex flex-wrap justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    {getFileTypeIcon(record.file_type)}
-                    <div>
-                      <h5 className="text-base font-medium text-gray-900 dark:text-white">
-                        {extractFilename(record.file_name)}
-                      </h5>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
-                        <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded-md text-xs font-medium mr-2">
-                          {record.file_type}
-                        </span>
-                        <span>Uploaded on {formatDate(record.upload_date)}</span>
+          {!technicalRecords || technicalRecords.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-8"
+            >
+              <div className="inline-flex justify-center items-center p-4 mb-4 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-500 dark:text-gray-400">
+                <FileText className="h-8 w-8" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No Technical Records
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+                There are no technical records available for this building at the moment.
+              </p>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6">
+              {technicalRecords.map((record: TechnicalRecord) => (
+                <motion.div
+                  key={record.record_id}
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 hover:shadow-md transition-shadow"
+                  variants={itemVariants}
+                >
+                  <div className="flex flex-wrap justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      {getFileTypeIcon(record.file_type)}
+                      <div>
+                        <h5 className="text-base font-medium text-gray-900 dark:text-white">
+                          {extractFilename(record.file_name)}
+                        </h5>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                          <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded-md text-xs font-medium mr-2">
+                            {record.file_type}
+                          </span>
+                          <span>Uploaded on {formatDate(record.upload_date)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-4">
-                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Device Information
+                  <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-4">
+                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Device Information
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="flex items-center">
+                        <span className="text-gray-500 dark:text-gray-400 mr-2">Device:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">
+                          {record.device.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-gray-500 dark:text-gray-400 mr-2">Type:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">
+                          {record.device.type}
+                        </span>
+                      </div>
+                      <div className="flex items-center md:col-span-2">
+                        <span className="text-gray-500 dark:text-gray-400 mr-2">Building:</span>
+                        <span className="text-gray-900 dark:text-white font-medium">
+                          {record.device.buildingDetail.building.name} (
+                          {record.device.buildingDetail.name})
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="flex items-center">
-                      <span className="text-gray-500 dark:text-gray-400 mr-2">Device:</span>
-                      <span className="text-gray-900 dark:text-white font-medium">
-                        {record.device.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-gray-500 dark:text-gray-400 mr-2">Type:</span>
-                      <span className="text-gray-900 dark:text-white font-medium">
-                        {record.device.type}
-                      </span>
-                    </div>
-                    <div className="flex items-center md:col-span-2">
-                      <span className="text-gray-500 dark:text-gray-400 mr-2">Building:</span>
-                      <span className="text-gray-900 dark:text-white font-medium">
-                        {record.device.buildingDetail.building.name} (
-                        {record.device.buildingDetail.name})
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="flex flex-wrap gap-2">
-                  <a
-                    href={record.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    <Download className="w-4 h-4 mr-1.5" />
-                    Download
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href={record.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      <Download className="w-4 h-4 mr-1.5" />
+                      Download
+                    </a>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </motion.div>
       )}
     </Modal>
