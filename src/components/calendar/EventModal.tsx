@@ -5,13 +5,16 @@ import {
   DocumentTextIcon,
   TagIcon,
   XMarkIcon,
+  CogIcon,
 } from '@heroicons/react/24/outline';
 import { vi } from 'date-fns/locale';
 import React, { useEffect, useState } from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import BuildingSelectionModal from './BuildingSelectionModal';
+import BuildingDetailSelectionModal from './BuildingDetailSelectionModal';
 import ConfirmModal from './ConfirmModal';
+import { BuildingDetail } from '@/services/buildingDetails';
+import { MaintenanceCycle } from '@/types';
 
 registerLocale('vi', vi);
 
@@ -21,7 +24,9 @@ interface FormData {
   schedule_type: string;
   start_date: Date;
   end_date: Date;
-  buildingId: string[];
+  buildingDetailIds: string[];
+  cycle_id: string;
+  schedule_status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel';
 }
 
 interface EventModalProps {
@@ -41,9 +46,11 @@ interface EventModalProps {
     description?: string;
     Status: string;
   }>;
-  selectedBuildings: string[];
-  onBuildingSelect: (buildingId: string) => void;
-  onSetSelectedBuildings: (buildings: string[]) => void;
+  buildingDetails: BuildingDetail[];
+  selectedBuildingDetails: string[];
+  onBuildingDetailSelect: (buildingDetailId: string) => void;
+  onSetSelectedBuildingDetails: (buildingDetails: string[]) => void;
+  maintenanceCycles: MaintenanceCycle[];
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -57,9 +64,11 @@ const EventModal: React.FC<EventModalProps> = ({
   onViewScheduleJob,
   initialFormData,
   buildings,
-  selectedBuildings,
-  onBuildingSelect,
-  onSetSelectedBuildings,
+  buildingDetails,
+  selectedBuildingDetails,
+  onBuildingDetailSelect,
+  onSetSelectedBuildingDetails,
+  maintenanceCycles,
 }) => {
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -67,7 +76,9 @@ const EventModal: React.FC<EventModalProps> = ({
     schedule_type: 'Daily',
     start_date: new Date(),
     end_date: new Date(),
-    buildingId: [],
+    buildingDetailIds: [],
+    cycle_id: '',
+    schedule_status: 'InProgress',
   });
   const [showBuildingModal, setShowBuildingModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -80,7 +91,9 @@ const EventModal: React.FC<EventModalProps> = ({
         schedule_type: initialFormData.schedule_type || 'Daily',
         start_date: initialFormData.start ? new Date(initialFormData.start) : new Date(),
         end_date: initialFormData.end ? new Date(initialFormData.end) : new Date(),
-        buildingId: selectedBuildings,
+        buildingDetailIds: selectedBuildingDetails,
+        cycle_id: '',
+        schedule_status: 'InProgress',
       });
     } else if (selectedEvent) {
       setFormData({
@@ -89,10 +102,12 @@ const EventModal: React.FC<EventModalProps> = ({
         schedule_type: selectedEvent.schedule_type || 'Daily',
         start_date: selectedEvent.start ? new Date(selectedEvent.start) : new Date(),
         end_date: selectedEvent.end ? new Date(selectedEvent.end) : new Date(),
-        buildingId: selectedEvent.buildingId || [],
+        buildingDetailIds: selectedBuildingDetails,
+        cycle_id: '',
+        schedule_status: 'InProgress',
       });
-      // Set selectedBuildings directly
-      onSetSelectedBuildings(selectedEvent.buildingId || []);
+      // Set selectedBuildingDetails directly
+      onSetSelectedBuildingDetails(selectedBuildingDetails || []);
     }
   }, [isCreateMode, initialFormData, selectedEvent]);
 
@@ -100,7 +115,7 @@ const EventModal: React.FC<EventModalProps> = ({
     e.preventDefault();
     const submitData = {
       ...formData,
-      buildingId: selectedBuildings,
+      buildingDetailIds: selectedBuildingDetails,
     };
 
     if (isCreateMode) {
@@ -221,35 +236,55 @@ const EventModal: React.FC<EventModalProps> = ({
               />
             </div>
 
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <CogIcon className="w-4 h-4 inline-block mr-2" />
+                Maintenance Cycle
+              </label>
+              <select
+                value={formData.cycle_id}
+                onChange={e => setFormData(prev => ({ ...prev, cycle_id: e.target.value }))}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                aria-label="Maintenance Cycle"
+              >
+                <option value="">Select a maintenance cycle</option>
+                {maintenanceCycles.map(cycle => (
+                  <option key={cycle.cycle_id} value={cycle.cycle_id}>
+                    {cycle.device_type} - {cycle.frequency} ({cycle.basis})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="md:col-span-2 space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 <BuildingOfficeIcon className="w-4 h-4 inline-block mr-2" />
-                Buildings
+                Building Details
               </label>
               <button
                 type="button"
                 onClick={() => setShowBuildingModal(true)}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 transition"
-                aria-label="Select buildings"
+                aria-label="Select building details"
               >
-                Select Buildings
+                Select Building Details
               </button>
 
-              {selectedBuildings.length > 0 && (
+              {selectedBuildingDetails.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedBuildings.map(buildingId => {
-                    const building = buildings.find(b => b.buildingId === buildingId);
-                    return building ? (
+                  {selectedBuildingDetails.map(buildingDetailId => {
+                    const buildingDetail = buildingDetails.find(b => b.buildingDetailId === buildingDetailId);
+                    return buildingDetail ? (
                       <div
-                        key={buildingId}
+                        key={buildingDetailId}
                         className="flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full"
                       >
-                        <span>{building.name}</span>
+                        <span>{buildingDetail.name}</span>
                         <button
                           type="button"
-                          onClick={() => onBuildingSelect(buildingId)}
+                          onClick={() => onBuildingDetailSelect(buildingDetailId)}
                           className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
-                          aria-label={`Remove ${building.name}`}
+                          aria-label={`Remove ${buildingDetail.name}`}
                         >
                           <XMarkIcon className="w-4 h-4" />
                         </button>
@@ -312,12 +347,12 @@ const EventModal: React.FC<EventModalProps> = ({
         </form>
       </div>
 
-      <BuildingSelectionModal
+      <BuildingDetailSelectionModal
         isOpen={showBuildingModal}
         onClose={() => setShowBuildingModal(false)}
-        buildings={buildings}
-        selectedBuildings={selectedBuildings}
-        onBuildingSelect={onBuildingSelect}
+        buildingDetails={buildingDetails}
+        selectedBuildingDetails={selectedBuildingDetails}
+        onBuildingDetailSelect={onBuildingDetailSelect}
         selectedEvent={selectedEvent}
       />
 

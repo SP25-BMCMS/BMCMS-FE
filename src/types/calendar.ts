@@ -31,9 +31,11 @@ export interface ApiSchedule {
   description: string;
   start_date: string;
   end_date: string;
-  buildingId: string[];
+  buildingId?: string[];
+  buildingDetailIds?: string[];
+  cycle_id?: string;
   schedule_job?: ScheduleJob[];
   created_at: string;
   updated_at: string;
-  schedule_status?: string;
+  schedule_status?: 'Pending' | 'InProgress' | 'Completed' | 'Cancel';
 }

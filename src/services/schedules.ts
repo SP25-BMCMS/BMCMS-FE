@@ -75,7 +75,7 @@ const schedulesApi = {
       statusCode: number;
       message: string;
       data: Schedule;
-    }>(import.meta.env.VITE_GET_SCHEDULE_LIST, schedule);
+    }>(import.meta.env.VITE_CREATE_SCHEDULE, schedule);
     return response.data;
   },
 

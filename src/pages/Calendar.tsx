@@ -12,7 +12,6 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import EventModal from '@/components/calendar/EventModal';
-import BuildingSelectionModal from '@/components/calendar/BuildingSelectionModal';
 import { TaskEvent, ApiSchedule } from '@/types/calendar';
 import Table from '@/components/Table';
 import Pagination from '@/components/Pagination';
@@ -21,11 +20,14 @@ import {
   List,
   Eye,
   Clock,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { STATUS_COLORS } from '@/constants/colors';
+import buildingDetailsApi, { BuildingDetail } from '@/services/buildingDetails';
+import { getMaintenanceCycles } from '@/services/maintenanceCycle';
+import apiInstance from '@/lib/axios';
+import { MaintenanceCycle } from '@/types';
+import BuildingDetailSelectionModal from '@/components/calendar/BuildingDetailSelectionModal';
 
 const Calendar: React.FC = () => {
   const queryClient = useQueryClient();
@@ -35,6 +37,7 @@ const Calendar: React.FC = () => {
   const [isCreateMode, setIsCreateMode] = useState(false);
   const [showBuildingModal, setShowBuildingModal] = useState(false);
   const [selectedBuildings, setSelectedBuildings] = useState<string[]>([]);
+  const [selectedBuildingDetails, setSelectedBuildingDetails] = useState<string[]>([]);
   const [initialFormData, setInitialFormData] = useState<Partial<TaskEvent>>({
     title: '',
     start: '',
@@ -53,6 +56,16 @@ const Calendar: React.FC = () => {
   const [viewMode, setViewMode] = useState<'calendar' | 'table'>('calendar');
   const [deletedScheduleIds, setDeletedScheduleIds] = useState<{ [key: string]: number }>({});
   const deletionTimersRef = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
+  const [buildingDetails, setBuildingDetails] = useState<BuildingDetail[]>([]);
+
+  // Fetch current user for manager ID
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const response = await apiInstance.get(import.meta.env.VITE_CURRENT_USER_API);
+      return response.data;
+    },
+  });
 
   // Fetch buildings using React Query
   const { data: buildings = [] } = useQuery({
@@ -60,6 +73,27 @@ const Calendar: React.FC = () => {
     queryFn: async () => {
       const response = await getBuildings();
       return response.data;
+    },
+  });
+
+  // Fetch building details for the current manager
+  const { data: buildingDetailsData } = useQuery({
+    queryKey: ['buildingDetails', currentUser?.userId],
+    queryFn: async () => {
+      if (!currentUser?.userId) return [];
+      const response = await buildingDetailsApi.getBuildingDetailsForManager(currentUser.userId);
+      setBuildingDetails(response);
+      return response;
+    },
+    enabled: !!currentUser?.userId,
+  });
+
+  // Fetch maintenance cycles
+  const { data: maintenanceCycles = [] } = useQuery({
+    queryKey: ['maintenanceCycles'],
+    queryFn: async () => {
+      const response = await getMaintenanceCycles();
+      return response.data || [];
     },
   });
 
@@ -318,6 +352,9 @@ const Calendar: React.FC = () => {
       return;
     }
 
+    // Clear selected building details when creating a new schedule
+    setSelectedBuildingDetails([]);
+
     setInitialFormData({
       title: '',
       start: selectInfo.startStr,
@@ -341,6 +378,8 @@ const Calendar: React.FC = () => {
       const scheduleType = formData.schedule_type;
       const startDate = formData.start_date;
       const endDate = formData.end_date;
+      const cycleId = formData.cycle_id;
+      const buildingDetailIds = formData.buildingDetailIds;
 
       if (!title.trim()) {
         toast.error('Please enter event title');
@@ -354,6 +393,16 @@ const Calendar: React.FC = () => {
 
       if (!endDate) {
         toast.error('Please select end time');
+        return;
+      }
+
+      if (buildingDetailIds.length === 0) {
+        toast.error('Please select at least one building detail');
+        return;
+      }
+
+      if (!cycleId) {
+        toast.error('Please select a maintenance cycle');
         return;
       }
 
@@ -392,29 +441,21 @@ const Calendar: React.FC = () => {
         )
       );
 
-      // Create schedule jobs with proper structure
-      const scheduleJobs = selectedBuildings.map(buildingId => ({
-        building_id: buildingId,
-        status: 'Pending',
-        schedule_job_id: '', // Will be set by backend
-        schedule_id: '', // Will be set by backend
-        run_date: startDateUTC.toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }));
-
-      const newSchedule: Omit<ApiSchedule, 'schedule_id' | 'created_at' | 'updated_at'> = {
+      // Format the data according to the API requirements
+      const newSchedule = {
         schedule_name: title,
-        schedule_type: scheduleType || 'Daily',
         description: description || '',
         start_date: startDateUTC.toISOString(),
         end_date: endDateUTC.toISOString(),
-        buildingId: selectedBuildings,
+        cycle_id: cycleId,
+        schedule_status: 'InProgress',
+        buildingDetailIds: buildingDetailIds,
       };
 
-      createScheduleMutation.mutate(newSchedule);
+      console.log('Creating schedule with data:', newSchedule);
+      createScheduleMutation.mutate(newSchedule as any);
     },
-    [createScheduleMutation, selectedBuildings]
+    [createScheduleMutation]
   );
 
   // Hiển thị nội dung sự kiện tùy chỉnh
@@ -470,7 +511,9 @@ const Calendar: React.FC = () => {
       schedule_type: string;
       start_date: Date;
       end_date: Date;
-      buildingId: string[];
+      buildingDetailIds: string[];
+      cycle_id: string;
+      schedule_status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel';
     }) => {
       if (!selectedEvent) return;
 
@@ -499,35 +542,22 @@ const Calendar: React.FC = () => {
         )
       );
 
-      // Create schedule jobs with proper structure
-      const scheduleJobs =
-        selectedBuildings.length > 0
-          ? selectedBuildings.map(buildingId => ({
-              building_id: buildingId,
-              status: 'Pending' as const,
-              schedule_job_id: '',
-              schedule_id: '',
-              run_date: startDateUTC.toISOString(),
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            }))
-          : [];
-
-      const updateData: Partial<ApiSchedule> = {
+      // Format the data according to the API requirements
+      const updateData = {
         schedule_name: formData.title,
-        schedule_type: formData.schedule_type,
         description: formData.description,
         start_date: startDateUTC.toISOString(),
         end_date: endDateUTC.toISOString(),
-        buildingId: selectedBuildings, // This will be empty array if selectedBuildings is empty
+        cycle_id: formData.cycle_id,
+        schedule_status: formData.schedule_status,
+        buildingDetailIds: formData.buildingDetailIds,
       };
 
-      // Log the data being sent to the API
       console.log('Updating event with data:', updateData);
 
-      updateScheduleMutation.mutate({ id: selectedEvent.id, data: updateData });
+      updateScheduleMutation.mutate({ id: selectedEvent.id, data: updateData as any });
     },
-    [selectedEvent, updateScheduleMutation, selectedBuildings]
+    [selectedEvent, updateScheduleMutation]
   );
 
   // Thêm hàm xử lý chuyển hướng đến trang ScheduleJob
@@ -544,6 +574,17 @@ const Calendar: React.FC = () => {
         return prev.filter(id => id !== buildingId);
       } else {
         return [...prev, buildingId];
+      }
+    });
+  }, []);
+
+  // Handle building detail selection
+  const handleBuildingDetailSelect = useCallback((buildingDetailId: string) => {
+    setSelectedBuildingDetails(prev => {
+      if (prev.includes(buildingDetailId)) {
+        return prev.filter(id => id !== buildingDetailId);
+      } else {
+        return [...prev, buildingDetailId];
       }
     });
   }, []);
@@ -976,21 +1017,23 @@ const Calendar: React.FC = () => {
         onViewScheduleJob={handleViewScheduleJob}
         initialFormData={initialFormData}
         buildings={buildings}
-        selectedBuildings={selectedBuildings}
-        onBuildingSelect={handleBuildingSelect}
-        onSetSelectedBuildings={setSelectedBuildings}
+        buildingDetails={buildingDetails}
+        selectedBuildingDetails={selectedBuildingDetails}
+        onBuildingDetailSelect={handleBuildingDetailSelect}
+        onSetSelectedBuildingDetails={setSelectedBuildingDetails}
+        maintenanceCycles={maintenanceCycles}
         onUpdateStatus={(id, status) =>
           updateScheduleMutation.mutate({ id, data: { status } as any })
         }
       />
 
-      <BuildingSelectionModal
+      <BuildingDetailSelectionModal
         isOpen={showBuildingModal}
-        selectedEvent={selectedEvent}
-        buildings={buildings}
-        selectedBuildings={selectedBuildings}
         onClose={() => setShowBuildingModal(false)}
-        onBuildingSelect={handleBuildingSelect}
+        buildingDetails={buildingDetails}
+        selectedBuildingDetails={selectedBuildingDetails}
+        onBuildingDetailSelect={handleBuildingDetailSelect}
+        selectedEvent={selectedEvent}
       />
     </div>
   );
