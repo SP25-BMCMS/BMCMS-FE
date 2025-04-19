@@ -202,13 +202,13 @@ const StaffManagement: React.FC = () => {
       key: 'action',
       title: 'Action',
       render: item => (
-        <div className="relative">
+        <div className="relative staff-action-cell">
           <DropdownMenu
             onViewDetail={() => handleViewDetail(item)}
             onChangeStatus={() => handleOpenDeptPosModal(item)}
             onRemove={() => console.log('Remove clicked', item)}
             changeStatusTitle="Change Department"
-            className="right-0 origin-top-right"
+            className="right-0 origin-top-right dropdown-fix"
           />
         </div>
       ),

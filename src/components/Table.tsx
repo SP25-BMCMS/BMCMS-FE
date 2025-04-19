@@ -78,11 +78,6 @@ const Table = <T extends {}>({
         <td
           key={`${keyExtractor(item)}-${column.key}`}
           className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"
-          style={{
-            width: column.width,
-            position: column.key === 'action' ? 'relative' : undefined,
-            zIndex: column.key === 'action' ? 10 : undefined,
-          }}
         >
           {column.render ? (
             <ContentWrapper>{column.render(item, index)}</ContentWrapper>
@@ -105,11 +100,6 @@ const Table = <T extends {}>({
         <td
           key={`${keyExtractor(item)}-${column.key}`}
           className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"
-          style={{
-            width: column.width,
-            position: column.key === 'action' ? 'relative' : undefined,
-            zIndex: column.key === 'action' ? 10 : undefined,
-          }}
         >
           {column.render ? (
             <ContentWrapper>{column.render(item, index)}</ContentWrapper>

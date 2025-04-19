@@ -159,13 +159,6 @@ const CrackManagement: React.FC = () => {
       width: '60px',
     },
     {
-      key: 'id',
-      title: 'Crack ID',
-      render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.id.substring(0, 8)}...</div>
-      ),
-    },
-    {
       key: 'reportDescription',
       title: 'Report Description',
       render: item => (
@@ -245,11 +238,14 @@ const CrackManagement: React.FC = () => {
         const hideChangeStatus = ['InProgress', 'resolved', 'Reviewing'].includes(item.status);
 
         return (
-          <DropdownMenu
-            onViewDetail={() => navigate(`/crack/detail/${item.id}`)}
-            onChangeStatus={hideChangeStatus ? undefined : () => handleStatusUpdate(item)}
-            onRemove={() => console.log('Remove', item)}
-          />
+          <div className="dropdown-container relative">
+            <DropdownMenu
+              onViewDetail={() => navigate(`/crack/detail/${item.id}`)}
+              onChangeStatus={hideChangeStatus ? undefined : () => handleStatusUpdate(item)}
+              onRemove={() => console.log('Remove', item)}
+              className="dropdown-fix"
+            />
+          </div>
         );
       },
       width: '80px',
