@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getBuildingDetail } from '@/services/building';
 import { getCrackRecordsByBuildingDetailId, CrackRecord } from '@/services/crackRecord';
+import { getMaintenanceHistoryByBuildingId, MaintenanceHistory } from '@/services/maintenanceHistory';
 import Table, { Column } from '@/components/Table';
 import { motion } from 'framer-motion';
 import {
@@ -19,15 +20,68 @@ import {
   Ruler,
   TextIcon,
   AlertCircle,
+  WrenchIcon,
+  DollarSign,
+  Calendar as CalendarIcon,
+  Tv,
+  Cpu,
+  ToyBrick,
+  Cog,
 } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import { toast } from 'react-hot-toast';
+
+// Define device interface
+interface Device {
+  device_id: string;
+  name: string;
+  type: string;
+  manufacturer: string;
+  model: string;
+  buildingDetailId: string;
+  contract_id: string | null;
+}
+
+// Update BuildingDetailResponse interface
+interface BuildingDetailResponseData {
+  buildingDetailId: string;
+  buildingId: string;
+  name: string;
+  total_apartments: number;
+  createdAt: string;
+  updatedAt: string;
+  building: {
+    buildingId: string;
+    name: string;
+    description: string;
+    numberFloor: number;
+    imageCover: string;
+    areaId: string;
+    manager_id?: string;
+    Status: string;
+    construction_date: string;
+    completion_date: string;
+    Warranty_date?: string;
+    createdAt: string;
+    updatedAt: string;
+    area: {
+      areaId: string;
+      name: string;
+      description: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  };
+  device?: Device[];
+}
 
 const BuildingDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [maintenanceCurrentPage, setMaintenanceCurrentPage] = useState<number>(1);
+  const [maintenanceItemsPerPage, setMaintenanceItemsPerPage] = useState<number>(10);
 
   // Fetch building detail
   const {
@@ -52,9 +106,25 @@ const BuildingDetail: React.FC = () => {
     enabled: !!id,
   });
 
-  const buildingDetail = buildingDetailData?.data;
+  // Fetch maintenance history
+  const {
+    data: maintenanceHistoryData,
+    isLoading: isLoadingMaintenanceHistory,
+    error: maintenanceHistoryError,
+  } = useQuery({
+    queryKey: ['maintenanceHistory', buildingDetailData?.data?.building?.buildingId, maintenanceCurrentPage, maintenanceItemsPerPage],
+    queryFn: () => getMaintenanceHistoryByBuildingId(
+      buildingDetailData?.data?.building?.buildingId || '', 
+      { page: maintenanceCurrentPage, limit: maintenanceItemsPerPage }
+    ),
+    enabled: !!buildingDetailData?.data?.building?.buildingId,
+  });
+
+  const buildingDetail = buildingDetailData?.data as BuildingDetailResponseData;
   const crackRecords = crackRecordsData?.data || [];
   const pagination = crackRecordsData?.pagination;
+  const maintenanceHistory = maintenanceHistoryData?.data || [];
+  const maintenancePagination = maintenanceHistoryData?.meta;
 
   // Loading animation
   const loadingVariants = {
@@ -95,6 +165,14 @@ const BuildingDetail: React.FC = () => {
     } catch (error) {
       return 'Invalid date';
     }
+  };
+
+  const formatCurrency = (amount: string | undefined) => {
+    if (!amount) return 'N/A';
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(Number(amount));
   };
 
   const getStatusLabel = (status: string) => {
@@ -154,6 +232,123 @@ const BuildingDetail: React.FC = () => {
     },
   ];
 
+  // Define columns for device table
+  const deviceColumns: Column<Device>[] = [
+    {
+      key: 'index',
+      title: 'No',
+      render: (_, index) => (
+        <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
+      ),
+      width: '60px',
+    },
+    {
+      key: 'name',
+      title: 'Device Name',
+      render: item => (
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+          {getDeviceIcon(item.type)}
+          {item.name}
+        </div>
+      ),
+    },
+    {
+      key: 'type',
+      title: 'Type',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {item.type}
+        </div>
+      ),
+    },
+    {
+      key: 'manufacturer',
+      title: 'Manufacturer',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {item.manufacturer}
+        </div>
+      ),
+    },
+    {
+      key: 'model',
+      title: 'Model',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {item.model}
+        </div>
+      ),
+    },
+  ];
+
+  // Define columns for maintenance history table
+  const maintenanceColumns: Column<MaintenanceHistory>[] = [
+    {
+      key: 'index',
+      title: 'No',
+      render: (_, index) => (
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {(maintenanceCurrentPage - 1) * maintenanceItemsPerPage + index + 1}
+        </div>
+      ),
+      width: '60px',
+    },
+    {
+      key: 'device',
+      title: 'Device',
+      render: item => (
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+          <Tv className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+          {item.device.name} ({item.device.type})
+        </div>
+      ),
+    },
+    {
+      key: 'date_performed',
+      title: 'Maintenance Date',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+          <CalendarIcon className="h-3.5 w-3.5 mr-1.5 text-green-500" />
+          {formatDate(item.date_performed)}
+        </div>
+      ),
+    },
+    {
+      key: 'description',
+      title: 'Description',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+          <WrenchIcon className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
+          {item.description}
+        </div>
+      ),
+    },
+    {
+      key: 'cost',
+      title: 'Cost',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+          <DollarSign className="h-3.5 w-3.5 mr-1.5 text-yellow-500" />
+          {formatCurrency(item.cost)}
+        </div>
+      ),
+    },
+  ];
+
+  // Helper function to get icon based on device type
+  const getDeviceIcon = (type: string) => {
+    switch (type.toUpperCase()) {
+      case 'HVAC':
+        return <Tv className="h-3.5 w-3.5 mr-1.5 text-blue-500" />;
+      case 'ELECTRICAL':
+        return <Cpu className="h-3.5 w-3.5 mr-1.5 text-yellow-500" />;
+      case 'PLUMBING':
+        return <ToyBrick className="h-3.5 w-3.5 mr-1.5 text-green-500" />;
+      default:
+        return <Cog className="h-3.5 w-3.5 mr-1.5 text-gray-500" />;
+    }
+  };
+
   if (isLoadingBuildingDetail) {
     return <LoadingIndicator />;
   }
@@ -176,6 +371,10 @@ const BuildingDetail: React.FC = () => {
 
   if (crackRecordsError) {
     toast.error(`Error loading crack records: ${crackRecordsError.message || 'Unknown error'}`);
+  }
+
+  if (maintenanceHistoryError) {
+    toast.error(`Error loading maintenance history: ${maintenanceHistoryError.message || 'Unknown error'}`);
   }
 
   // Get status color class
@@ -327,6 +526,83 @@ const BuildingDetail: React.FC = () => {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Device Table Section */}
+        {buildingDetail.device && buildingDetail.device.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
+              <Cpu className="h-5 w-5 mr-2 text-blue-500" />
+              Building Devices ({buildingDetail.device.length})
+            </h2>
+
+            <Table<Device>
+              data={buildingDetail.device}
+              columns={deviceColumns}
+              keyExtractor={item => item.device_id}
+              isLoading={false}
+              emptyText="No devices found for this building"
+              tableClassName="w-full"
+              className="w-full"
+            />
+          </div>
+        )}
+
+        {/* Maintenance History Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
+            <WrenchIcon className="h-5 w-5 mr-2 text-blue-500" />
+            Maintenance History
+          </h2>
+
+          {isLoadingMaintenanceHistory ? (
+            <LoadingIndicator />
+          ) : maintenanceHistoryError ? (
+            <div className="text-center py-8">
+              <p className="text-red-500">Error loading maintenance history</p>
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
+                There was a problem fetching maintenance history for this building.
+              </p>
+            </div>
+          ) : maintenanceHistory.length === 0 ? (
+            <div className="text-center py-8 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
+              <WrenchIcon className="h-12 w-12 mx-auto mb-3 text-gray-400 dark:text-gray-500" />
+              <p className="text-gray-500 dark:text-gray-400">
+                No maintenance history found for this building.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                  <ArrowUpDown className="h-4 w-4 mr-1.5" />
+                  Showing {maintenanceHistory.length} maintenance records
+                </p>
+              </div>
+
+              <Table<MaintenanceHistory>
+                data={maintenanceHistory}
+                columns={maintenanceColumns}
+                keyExtractor={item => item.maintenance_id}
+                isLoading={isLoadingMaintenanceHistory}
+                emptyText="No maintenance history found"
+                tableClassName="w-full"
+                className="w-full"
+              />
+
+              {maintenancePagination && (
+                <Pagination
+                  currentPage={maintenanceCurrentPage}
+                  totalPages={maintenancePagination.totalPages}
+                  onPageChange={setMaintenanceCurrentPage}
+                  totalItems={maintenancePagination.total}
+                  itemsPerPage={maintenanceItemsPerPage}
+                  onLimitChange={setMaintenanceItemsPerPage}
+                  className="mt-4"
+                />
+              )}
+            </>
+          )}
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
