@@ -16,6 +16,7 @@ import {
   FaCheck,
 } from 'react-icons/fa';
 import SimpleInspectionModal from '@/components/TaskManager/SimpleInspectionModal';
+import InspectionDetails from '@/components/TaskManager/InspectionDetails';
 
 const TaskDetail: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -31,7 +32,7 @@ const TaskDetail: React.FC = () => {
     refetchOnWindowFocus: false,
   });
 
-  // Fetch inspections for selected assignment only
+  // Fetch inspections for selected assignment only when modal is open
   const {
     data: inspections,
     isLoading: isLoadingInspections,
@@ -377,6 +378,11 @@ const TaskDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Inspection Details Section */}
+      {task.taskAssignments && task.taskAssignments.length > 0 && (
+        <InspectionDetails taskAssignments={task.taskAssignments} />
+      )}
 
       {/* Simple Inspection Modal */}
       {selectedAssignmentId && selectedAssignment && (
