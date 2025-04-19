@@ -9,6 +9,7 @@ import UpdateMaterialModal from './UpdateMaterialModal';
 import UpdateUnitPriceModal from './UpdateUnitPriceModal';
 import UpdateStockQuantityModal from './UpdateStockQuantityModal';
 import UpdateStatusModal from './UpdateStatusModal';
+import { DollarSign, Box, RefreshCw, Calendar, Edit, Tag, FileText, Info } from 'lucide-react';
 
 interface MaterialDetailModalProps {
   isOpen: boolean;
@@ -79,6 +80,24 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
     },
   });
 
+  // Format price to VND
+  const formatPrice = (price: string) => {
+    if (!price) return '0 VND';
+
+    try {
+      const numericPrice = parseInt(price);
+      if (isNaN(numericPrice)) return '0 VND';
+
+      return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        maximumFractionDigits: 0,
+      }).format(numericPrice);
+    } catch (error) {
+      return '0 VND';
+    }
+  };
+
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -108,27 +127,23 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    Basic Information
+                  <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2 flex items-center">
+                    <Tag className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" /> Basic
+                    Information
                   </h2>
                   <dl className="space-y-4">
+                    <div></div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Material ID
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
+                        <Tag className="w-4 h-4 mr-2 text-green-500" /> Name
                       </dt>
-                      <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                        {material.material_id}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         {material.name}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Description
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
+                        <FileText className="w-4 h-4 mr-2 text-orange-500" /> Description
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         {material.description}
@@ -138,75 +153,84 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
                 </div>
 
                 <div>
-                  <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    Additional Information
+                  <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2 flex items-center">
+                    <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" /> Additional
+                    Information
                   </h2>
                   <dl className="space-y-4">
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Unit Price
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
+                        <DollarSign className="w-4 h-4 mr-2 text-green-500" /> Unit Price
                       </dt>
-                      <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                        ${parseFloat(material.unit_price).toFixed(2)}
+                      <dd className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
+                        <span className="bg-green-50 dark:bg-green-900 px-2 py-1 rounded text-green-700 dark:text-green-300">
+                          {formatPrice(material.unit_price)}
+                        </span>
                         <button
                           onClick={() => setIsUnitPriceModalOpen(true)}
-                          className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200"
                         >
-                          Edit
+                          <Edit className="w-4 h-4" />
                         </button>
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Stock Quantity
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
+                        <Box className="w-4 h-4 mr-2 text-blue-500" /> Stock Quantity
                       </dt>
-                      <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                        {material.stock_quantity}
+                      <dd className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
+                        <span
+                          className={`px-2 py-1 rounded ${
+                            material.stock_quantity > 10
+                              ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                              : material.stock_quantity > 0
+                                ? 'bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300'
+                                : 'bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300'
+                          }`}
+                        >
+                          {material.stock_quantity} units
+                        </span>
                         <button
                           onClick={() => setIsStockQuantityModalOpen(true)}
-                          className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200"
                         >
-                          Edit
+                          <Edit className="w-4 h-4" />
                         </button>
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Status
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
+                        <RefreshCw className="w-4 h-4 mr-2 text-purple-500" /> Status
                       </dt>
-                      <dd className="mt-1">
+                      <dd className="mt-1 flex items-center">
                         <span
                           className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full
-                                                        ${
-                                                          material.status === 'ACTIVE'
-                                                            ? ACTIVE
-                                                            : INACTIVE
-                                                        }`}
+                            ${material.status === 'ACTIVE' ? ACTIVE : INACTIVE}`}
                         >
                           {material.status}
                         </span>
                         <button
                           onClick={() => setIsStatusModalOpen(true)}
-                          className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200"
                         >
-                          Edit
+                          <Edit className="w-4 h-4" />
                         </button>
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Created At
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
+                        <Calendar className="w-4 h-4 mr-2 text-amber-500" /> Created At
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                        {new Date(material.created_at).toLocaleString()}
+                        {new Date(material.created_at).toLocaleString('vi-VN')}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Updated At
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
+                        <Calendar className="w-4 h-4 mr-2 text-indigo-500" /> Updated At
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                        {new Date(material.updated_at).toLocaleString()}
+                        {new Date(material.updated_at).toLocaleString('vi-VN')}
                       </dd>
                     </div>
                   </dl>
@@ -216,9 +240,9 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
               <div className="mt-6 flex justify-end space-x-4">
                 <button
                   onClick={() => setIsUpdateModalOpen(true)}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center"
                 >
-                  Edit Material
+                  <Edit className="w-4 h-4 mr-2" /> Edit Material
                 </button>
                 <button
                   onClick={onClose}

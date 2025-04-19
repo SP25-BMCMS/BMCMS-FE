@@ -53,7 +53,7 @@ const MaterialManagement: React.FC = () => {
     { value: 'ACTIVE', label: 'Active' },
     { value: 'INACTIVE', label: 'Inactive' },
   ];
-  
+
   const priceRangeOptions = [
     { value: 'all', label: 'Tất cả giá' },
     { value: '0-100000', label: 'Dưới 100,000 VND' },
@@ -83,10 +83,10 @@ const MaterialManagement: React.FC = () => {
   // Function to filter materials by price range
   const filterByPriceRange = (materials: Material[]) => {
     if (selectedPriceRange === 'all') return materials;
-    
+
     return materials.filter(material => {
       const price = parseInt(material.unit_price);
-      
+
       switch (selectedPriceRange) {
         case '0-100000':
           return price < 100000;
@@ -202,7 +202,7 @@ const MaterialManagement: React.FC = () => {
     setSelectedStatus(value);
     setCurrentPage(1);
   };
-  
+
   const handlePriceRangeChange = (value: string) => {
     setSelectedPriceRange(value);
     setCurrentPage(1);
@@ -381,7 +381,8 @@ const MaterialManagement: React.FC = () => {
 
           {/* Total Materials */}
           <div className="text-sm text-gray-600 dark:text-gray-300">
-            Total Materials: {filteredMaterials.length || 0} / {materialsData?.data?.pagination?.total || 0}
+            Total Materials: {filteredMaterials.length || 0} /{' '}
+            {materialsData?.data?.pagination?.total || 0}
           </div>
         </div>
       </div>

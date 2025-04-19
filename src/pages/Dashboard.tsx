@@ -108,29 +108,37 @@ const Dashboard: React.FC = () => {
     { name: 'Low', value: dashboardData.crackStats?.cracksBySeverity?.low || 0 },
     { name: 'Medium', value: dashboardData.crackStats?.cracksBySeverity?.medium || 0 },
     { name: 'High', value: dashboardData.crackStats?.cracksBySeverity?.high || 0 },
-    { name: 'Critical', value: dashboardData.crackStats?.cracksBySeverity?.critical || 0 }
+    { name: 'Critical', value: dashboardData.crackStats?.cracksBySeverity?.critical || 0 },
   ].filter(item => item.value > 0);
 
   // Custom label cho biểu đồ tròn
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    name,
+  }: any) => {
     if (percent <= 0.05) return null;
-    
+
     const RADIAN = Math.PI / 180;
     const radius = outerRadius * 1.2;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="#fff" 
-        textAnchor={x > cx ? 'start' : 'end'} 
+      <text
+        x={x}
+        y={y}
+        fill="#fff"
+        textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
         className="text-sm font-medium"
-        style={{ 
+        style={{
           filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.5))',
-          textShadow: '1px 1px 1px rgba(0,0,0,0.5)'
+          textShadow: '1px 1px 1px rgba(0,0,0,0.5)',
         }}
       >
         {`${name}: ${(percent * 100).toFixed(0)}%`}
@@ -222,9 +230,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-transform duration-300 hover:transform hover:scale-105">
           <div className="flex justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Total Cracks
-              </p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Cracks</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {dashboardData.crackStats?.cracksByStatus?.total || '0'}
               </p>
@@ -304,9 +310,11 @@ const Dashboard: React.FC = () => {
                   minAngle={15}
                   paddingAngle={4}
                 >
-                  {taskStatusData.filter(item => item.count > 0).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getStatusColor(entry.status)} />
-                  ))}
+                  {taskStatusData
+                    .filter(item => item.count > 0)
+                    .map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={getStatusColor(entry.status)} />
+                    ))}
                 </Pie>
                 <Tooltip formatter={value => [`${value} tasks`, 'Count']} />
                 <Legend />
@@ -337,12 +345,17 @@ const Dashboard: React.FC = () => {
                 >
                   {crackSeverityData.map((entry, index) => {
                     const COLORS = {
-                      Low: "#00C49F",
-                      Medium: "#FFBB28",
-                      High: "#FF8042",
-                      Critical: "#FF0000"
+                      Low: '#00C49F',
+                      Medium: '#FFBB28',
+                      High: '#FF8042',
+                      Critical: '#FF0000',
                     };
-                    return <Cell key={`cell-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />;
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[entry.name as keyof typeof COLORS]}
+                      />
+                    );
                   })}
                 </Pie>
                 <Tooltip formatter={value => [`${value} cracks`, 'Count']} />
@@ -436,7 +449,8 @@ const Dashboard: React.FC = () => {
                   </td>
                 </tr>
               ))}
-              {(!dashboardData.taskStats?.recentTasks || dashboardData.taskStats?.recentTasks.length === 0) && (
+              {(!dashboardData.taskStats?.recentTasks ||
+                dashboardData.taskStats?.recentTasks.length === 0) && (
                 <tr>
                   <td
                     colSpan={4}

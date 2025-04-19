@@ -458,7 +458,7 @@ const DetailCrack: React.FC = () => {
                   <p className="text-sm text-gray-500 dark:text-gray-400">Verified By</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
                     {getVerifierName()}
-                    </p>
+                  </p>
                 </div>
 
                 <div>
