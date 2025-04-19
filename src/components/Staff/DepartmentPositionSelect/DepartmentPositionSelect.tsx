@@ -7,6 +7,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 interface Department {
   departmentId: string;
   departmentName: string;
+  area?: string;
+  description?: string;
 }
 
 interface Position {
@@ -31,6 +33,32 @@ const positionNameMap: Record<number, string> = {
 // Get position name from code
 const getPositionName = (positionNameValue: number): string => {
   return positionNameMap[positionNameValue] || `Position ${positionNameValue}`;
+};
+
+// Format department display name
+const formatDepartmentName = (departments: Department[], dept: Department): string => {
+  let displayName = dept.departmentName;
+
+  // Always include area if it exists
+  if (dept.area) {
+    displayName += ` - ${dept.area}`;
+  } else {
+    // If no area but there are departments with the same name, add "(No Area)" for clarity
+    const duplicateNames = departments.filter(
+      d => d.departmentName === dept.departmentName && d.departmentId !== dept.departmentId
+    );
+
+    if (duplicateNames.length > 0) {
+      displayName += ' (No Area)';
+    }
+  }
+
+  // Add description if available
+  if (dept.description) {
+    displayName += ` (${dept.description})`;
+  }
+
+  return displayName;
 };
 
 interface DepartmentPositionSelectProps {
@@ -67,6 +95,15 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
           import.meta.env.VITE_VIEW_DEPARTMENT_LIST
         );
         console.log('Departments API Response:', departmentsResponse.data);
+
+        // Log the first department to see its structure
+        if (
+          departmentsResponse.data &&
+          departmentsResponse.data.data &&
+          departmentsResponse.data.data.length > 0
+        ) {
+          console.log('Sample department structure:', departmentsResponse.data.data[0]);
+        }
 
         if (
           departmentsResponse.data &&
@@ -202,7 +239,7 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
               <option value="">-- Select Department --</option>
               {departments.map(dept => (
                 <option key={dept.departmentId} value={dept.departmentId}>
-                  {dept.departmentName}
+                  {formatDepartmentName(departments, dept)}
                 </option>
               ))}
             </select>
