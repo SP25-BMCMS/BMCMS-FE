@@ -526,3 +526,31 @@ export interface WorkLogListParams {
   search?: string;
   status?: string;
 }
+
+//MAINTENANCE CYCLE
+export interface MaintenanceCycle {
+  cycle_id: string;
+  frequency: string;
+  basis: string;
+  device_type: string;
+}
+
+export interface MaintenanceCycleResponse {
+  statusCode: number;
+  message: string;
+  data: MaintenanceCycle[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface MaintenanceCycleParams {
+  page?: number;
+  limit?: number;
+  frequency?: string;
+  basis?: string;
+  device_type?: string;
+}

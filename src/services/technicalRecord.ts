@@ -58,15 +58,10 @@ export const getAllTechnicalRecords = async (
 };
 
 // Get technical record by record ID
-export const getTechnicalRecordById = async (
-  recordId: string
-): Promise<TechnicalRecord> => {
+export const getTechnicalRecordById = async (recordId: string): Promise<TechnicalRecord> => {
   try {
-    const url = import.meta.env.VITE_GET_TECHNICAL_RECORD_BY_ID.replace(
-      '{id}',
-      recordId
-    );
-    
+    const url = import.meta.env.VITE_GET_TECHNICAL_RECORD_BY_ID.replace('{id}', recordId);
+
     const response = await apiInstance.get<{ data: TechnicalRecord }>(url);
     return response.data.data;
   } catch (error) {
@@ -83,7 +78,7 @@ export const getTechnicalRecordsByBuildingDetailId = async (
   if (!buildingDetailId) {
     return [];
   }
-  
+
   try {
     // Get technical records directly using the list API with the buildingDetailId as a parameter
     const allParams = { ...params, buildingDetailId };
@@ -91,7 +86,7 @@ export const getTechnicalRecordsByBuildingDetailId = async (
       import.meta.env.VITE_GET_TECHNICAL_RECORD_LIST,
       { params: allParams }
     );
-    
+
     return response.data.data;
   } catch (error) {
     console.error('Error fetching technical records for building detail:', error);
@@ -107,7 +102,7 @@ export const getTechnicalRecordsByBuildingId = async (
   if (!buildingId) {
     return [];
   }
-  
+
   try {
     // Get technical records directly using the list API with the buildingId as a parameter
     const allParams = { ...params, buildingId };
@@ -115,10 +110,10 @@ export const getTechnicalRecordsByBuildingId = async (
       import.meta.env.VITE_GET_TECHNICAL_RECORD_LIST,
       { params: allParams }
     );
-    
+
     return response.data.data;
   } catch (error) {
     console.error('Error fetching technical records for building:', error);
     throw error;
   }
-}; 
+};

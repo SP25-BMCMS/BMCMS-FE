@@ -3,7 +3,10 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getBuildingDetail } from '@/services/building';
 import { getCrackRecordsByBuildingDetailId, CrackRecord } from '@/services/crackRecord';
-import { getMaintenanceHistoryByBuildingId, MaintenanceHistory } from '@/services/maintenanceHistory';
+import {
+  getMaintenanceHistoryByBuildingId,
+  MaintenanceHistory,
+} from '@/services/maintenanceHistory';
 import Table, { Column } from '@/components/Table';
 import { motion } from 'framer-motion';
 import {
@@ -112,11 +115,17 @@ const BuildingDetail: React.FC = () => {
     isLoading: isLoadingMaintenanceHistory,
     error: maintenanceHistoryError,
   } = useQuery({
-    queryKey: ['maintenanceHistory', buildingDetailData?.data?.building?.buildingId, maintenanceCurrentPage, maintenanceItemsPerPage],
-    queryFn: () => getMaintenanceHistoryByBuildingId(
-      buildingDetailData?.data?.building?.buildingId || '', 
-      { page: maintenanceCurrentPage, limit: maintenanceItemsPerPage }
-    ),
+    queryKey: [
+      'maintenanceHistory',
+      buildingDetailData?.data?.building?.buildingId,
+      maintenanceCurrentPage,
+      maintenanceItemsPerPage,
+    ],
+    queryFn: () =>
+      getMaintenanceHistoryByBuildingId(buildingDetailData?.data?.building?.buildingId || '', {
+        page: maintenanceCurrentPage,
+        limit: maintenanceItemsPerPage,
+      }),
     enabled: !!buildingDetailData?.data?.building?.buildingId,
   });
 
@@ -255,29 +264,19 @@ const BuildingDetail: React.FC = () => {
     {
       key: 'type',
       title: 'Type',
-      render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {item.type}
-        </div>
-      ),
+      render: item => <div className="text-sm text-gray-500 dark:text-gray-400">{item.type}</div>,
     },
     {
       key: 'manufacturer',
       title: 'Manufacturer',
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {item.manufacturer}
-        </div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.manufacturer}</div>
       ),
     },
     {
       key: 'model',
       title: 'Model',
-      render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {item.model}
-        </div>
-      ),
+      render: item => <div className="text-sm text-gray-500 dark:text-gray-400">{item.model}</div>,
     },
   ];
 
@@ -374,7 +373,9 @@ const BuildingDetail: React.FC = () => {
   }
 
   if (maintenanceHistoryError) {
-    toast.error(`Error loading maintenance history: ${maintenanceHistoryError.message || 'Unknown error'}`);
+    toast.error(
+      `Error loading maintenance history: ${maintenanceHistoryError.message || 'Unknown error'}`
+    );
   }
 
   // Get status color class

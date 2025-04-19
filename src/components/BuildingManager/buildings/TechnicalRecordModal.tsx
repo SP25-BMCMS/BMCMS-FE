@@ -89,7 +89,7 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   // Format date
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
-    
+
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('en-US', {
@@ -137,7 +137,12 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Technical Records - ${buildingName}`} size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Technical Records - ${buildingName}`}
+      size="lg"
+    >
       {!buildingId ? (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -306,4 +311,4 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   );
 };
 
-export default TechnicalRecordModal; 
+export default TechnicalRecordModal;

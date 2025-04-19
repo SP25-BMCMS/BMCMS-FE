@@ -23,6 +23,7 @@ import MaterialDetail from '@/pages/MaterialDetail';
 import { useAuth } from '@/hooks/useAuth';
 import WorkLog from '@/pages/WorkLog';
 import Dashboard from '@/pages/Dashboard';
+import MaintenanceCycleManagement from '@/pages/MaintenanceCycle';
 
 interface RoleBasedRouteProps {
   children: React.ReactNode;
@@ -145,6 +146,14 @@ function AppRoutes() {
             element={
               <RoleBasedRoute allowedRoles={['Manager']}>
                 <Calendar />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/maintenance-cycles"
+            element={
+              <RoleBasedRoute allowedRoles={['Manager']}>
+                <MaintenanceCycleManagement />
               </RoleBasedRoute>
             }
           />

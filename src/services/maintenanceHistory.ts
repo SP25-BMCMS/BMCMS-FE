@@ -47,11 +47,11 @@ export const getMaintenanceHistoryByBuildingId = async (
       '{buildingId}',
       buildingId
     );
-    
+
     const response = await apiInstance.get<MaintenanceHistoryResponse>(url, { params });
     return response.data;
   } catch (error) {
     console.error('Error fetching maintenance history:', error);
     throw error;
   }
-}; 
+};

@@ -58,4 +58,4 @@ const BuildingDetailLayout = () => {
   );
 };
 
-export default BuildingDetailLayout; 
+export default BuildingDetailLayout;

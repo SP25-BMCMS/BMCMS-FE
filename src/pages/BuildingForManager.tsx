@@ -135,7 +135,10 @@ const BuildingForManager: React.FC = () => {
     setSelectedBuildingForTechnicalRecord({
       id: building.buildingId,
       name: building.name,
-      detailId: building.buildingDetails && building.buildingDetails.length > 0 ? building.buildingDetails[0].buildingDetailId : null
+      detailId:
+        building.buildingDetails && building.buildingDetails.length > 0
+          ? building.buildingDetails[0].buildingDetailId
+          : null,
     });
     setIsTechnicalRecordModalOpen(true);
   };
