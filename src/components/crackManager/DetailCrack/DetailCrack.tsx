@@ -451,11 +451,6 @@ const DetailCrack: React.FC = () => {
                   <p className="text-sm text-gray-500 dark:text-gray-400">Reported By</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
                     {getReporterName()}
-                    {crack.reportedBy && typeof crack.reportedBy === 'object' && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                        (ID: {crack.reportedBy.userId.substring(0, 8)}...)
-                      </span>
-                    )}
                   </p>
                 </div>
 
@@ -463,11 +458,6 @@ const DetailCrack: React.FC = () => {
                   <p className="text-sm text-gray-500 dark:text-gray-400">Verified By</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
                     {getVerifierName()}
-                    {crack.verifiedBy && typeof crack.verifiedBy === 'object' && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                        (ID: {crack.verifiedBy.userId.substring(0, 8)}...)
-                      </span>
-                    )}
                   </p>
                 </div>
 
