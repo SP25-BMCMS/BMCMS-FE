@@ -8,6 +8,7 @@ import {
   InspectionResponse,
 } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getStaffDetail } from '@/services/staffs';
 
 export interface CreateTaskRequest {
   description: string;
@@ -45,6 +46,62 @@ const getTaskAssignmentsByTaskId = async (taskId: string): Promise<TaskAssignmen
       taskId
     );
     const { data } = await apiInstance.get<TaskAssignmentResponse>(endpoint);
+
+    // Fetch staff details for each assignment
+    if (data && data.data && data.data.taskAssignments && data.data.taskAssignments.length > 0) {
+      try {
+        // Get unique employee IDs
+        const employeeIds = [
+          ...new Set(data.data.taskAssignments.map(assignment => assignment.employee_id)),
+        ];
+        console.log('Employee IDs to fetch:', employeeIds);
+
+        // Make parallel requests to get all staff details
+        const staffDetailsPromises = employeeIds.map(employeeId =>
+          getStaffDetail(employeeId)
+            .then(response => ({
+              employeeId,
+              username: response.data.username,
+              success: true,
+            }))
+            .catch(error => {
+              console.error(`Error fetching staff details for ${employeeId}:`, error);
+              return {
+                employeeId,
+                username: employeeId.substring(0, 8),
+                success: false,
+              };
+            })
+        );
+
+        const staffDetails = await Promise.all(staffDetailsPromises);
+        console.log('Staff details results:', staffDetails);
+
+        // Create a map of employee IDs to usernames
+        const employeeMap = staffDetails.reduce(
+          (acc, detail) => {
+            acc[detail.employeeId] = detail.success
+              ? detail.username
+              : detail.employeeId.substring(0, 8);
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+
+        // Add employee names to assignments
+        data.data.taskAssignments = data.data.taskAssignments.map(assignment => ({
+          ...assignment,
+          employee_name:
+            employeeMap[assignment.employee_id] || assignment.employee_id.substring(0, 8),
+        }));
+
+        console.log('Assignments with employee names:', data.data.taskAssignments);
+      } catch (error) {
+        console.warn('Error adding staff names to assignments:', error);
+        // Continue with the original response if staff details can't be fetched
+      }
+    }
+
     return data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Failed to fetch task assignments');

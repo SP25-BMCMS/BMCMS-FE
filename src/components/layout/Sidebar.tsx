@@ -9,6 +9,7 @@ import {
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiLogoutBoxRLine,
+  RiSettings4Line,
 } from 'react-icons/ri';
 import { IoIosArrowDown } from 'react-icons/io';
 import { FaRegBuilding } from 'react-icons/fa';
@@ -50,6 +51,12 @@ export const sidebarItems = [
     title: 'Material Management',
     path: '/materials',
     icon: <FaBoxes />,
+    roles: ['Manager'],
+  },
+  {
+    title: 'Maintenance Cycles',
+    path: '/maintenance-cycles',
+    icon: <RiSettings4Line />,
     roles: ['Manager'],
   },
   {

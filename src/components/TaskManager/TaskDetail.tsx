@@ -16,6 +16,7 @@ import {
   FaCheck,
 } from 'react-icons/fa';
 import SimpleInspectionModal from '@/components/TaskManager/SimpleInspectionModal';
+import InspectionDetails from '@/components/TaskManager/InspectionDetails';
 
 const TaskDetail: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -31,7 +32,7 @@ const TaskDetail: React.FC = () => {
     refetchOnWindowFocus: false,
   });
 
-  // Fetch inspections for selected assignment only
+  // Fetch inspections for selected assignment only when modal is open
   const {
     data: inspections,
     isLoading: isLoadingInspections,
@@ -119,6 +120,11 @@ const TaskDetail: React.FC = () => {
 
   const selectedAssignment = findSelectedAssignment();
 
+  // Helper function to display staff name or ID
+  const displayStaffName = assignment => {
+    return assignment.employee_name || assignment.employee_id.substring(0, 8);
+  };
+
   return (
     <div className="p-6 w-full bg-gray-50 dark:bg-gray-800 min-h-screen">
       {/* Header with back button */}
@@ -149,7 +155,7 @@ const TaskDetail: React.FC = () => {
             className="px-3 py-1 rounded-full text-sm font-medium"
             style={{
               backgroundColor:
-                task.status === 'Resolved'
+                task.status === 'Completed'
                   ? STATUS_COLORS.RESOLVED.BG
                   : task.status === 'In Progress'
                     ? STATUS_COLORS.IN_PROGRESS.BG
@@ -157,7 +163,7 @@ const TaskDetail: React.FC = () => {
                       ? STATUS_COLORS.INACTIVE.BG
                       : STATUS_COLORS.REVIEWING.BG,
               color:
-                task.status === 'Resolved'
+                task.status === 'Completed'
                   ? STATUS_COLORS.RESOLVED.TEXT
                   : task.status === 'In Progress'
                     ? STATUS_COLORS.IN_PROGRESS.TEXT
@@ -166,7 +172,7 @@ const TaskDetail: React.FC = () => {
                       : STATUS_COLORS.REVIEWING.TEXT,
               border: '1px solid',
               borderColor:
-                task.status === 'Resolved'
+                task.status === 'Completed'
                   ? STATUS_COLORS.RESOLVED.BORDER
                   : task.status === 'In Progress'
                     ? STATUS_COLORS.IN_PROGRESS.BORDER
@@ -225,7 +231,7 @@ const TaskDetail: React.FC = () => {
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
-                    <span>ID: {assignment.employee_id.substring(0, 8)}</span>
+                    <span>{displayStaffName(assignment)}</span>
                   </div>
                   <div className="flex items-center">
                     <FaCalendarAlt className="mr-1" />
@@ -270,7 +276,7 @@ const TaskDetail: React.FC = () => {
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
-                    <span>ID: {assignment.employee_id.substring(0, 8)}</span>
+                    <span>{displayStaffName(assignment)}</span>
                   </div>
                   <div className="flex items-center">
                     <FaCalendarAlt className="mr-1" />
@@ -315,7 +321,7 @@ const TaskDetail: React.FC = () => {
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
-                    <span>ID: {assignment.employee_id.substring(0, 8)}</span>
+                    <span>{displayStaffName(assignment)}</span>
                   </div>
                   <div className="flex items-center">
                     <FaCalendarAlt className="mr-1" />
@@ -360,7 +366,7 @@ const TaskDetail: React.FC = () => {
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
-                    <span>ID: {assignment.employee_id.substring(0, 8)}</span>
+                    <span>{displayStaffName(assignment)}</span>
                   </div>
                   <div className="flex items-center">
                     <FaCalendarAlt className="mr-1" />
@@ -377,6 +383,11 @@ const TaskDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Inspection Details Section */}
+      {task.taskAssignments && task.taskAssignments.length > 0 && (
+        <InspectionDetails taskAssignments={task.taskAssignments} />
+      )}
 
       {/* Simple Inspection Modal */}
       {selectedAssignmentId && selectedAssignment && (

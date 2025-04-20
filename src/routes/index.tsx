@@ -13,6 +13,7 @@ import BuildingDetail from '@/pages/BuildingDetail';
 import CrackManagement from '@/pages/CrackManagement';
 import DetailCrack from '@/components/crackManager/DetailCrack/DetailCrack';
 import DetailLayout from '@/layouts/DetailLayout';
+import BuildingDetailLayout from '@/layouts/BuildingDetailLayout';
 import TaskManagement from '@/pages/TaskManagement';
 import TaskDetail from '@/components/TaskManager/TaskDetail';
 import Calendar from '@/pages/Calendar';
@@ -22,6 +23,7 @@ import MaterialDetail from '@/pages/MaterialDetail';
 import { useAuth } from '@/hooks/useAuth';
 import WorkLog from '@/pages/WorkLog';
 import Dashboard from '@/pages/Dashboard';
+import MaintenanceCycleManagement from '@/pages/MaintenanceCycle';
 
 interface RoleBasedRouteProps {
   children: React.ReactNode;
@@ -147,6 +149,18 @@ function AppRoutes() {
               </RoleBasedRoute>
             }
           />
+          <Route
+            path="/maintenance-cycles"
+            element={
+              <RoleBasedRoute allowedRoles={['Manager']}>
+                <MaintenanceCycleManagement />
+              </RoleBasedRoute>
+            }
+          />
+        </Route>
+
+        {/* Sử dụng BuildingDetailLayout cho BuildingDetail */}
+        <Route element={<BuildingDetailLayout />}>
           <Route
             path="/buildingdetails/:id"
             element={

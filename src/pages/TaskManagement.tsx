@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 import { STATUS_COLORS } from '@/constants/colors';
 import { useNavigate } from 'react-router-dom';
 import ChangeStatusModal from '@/components/TaskManager/ChangeStatusModal';
+import { FaTools, FaCalendarAlt } from 'react-icons/fa';
 
 interface TasksCacheData {
   data: TaskResponse[];
@@ -32,13 +33,14 @@ const TaskManagement: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
   const [modalType, setModalType] = useState<'task' | 'crack'>('task');
   const [currentCrackStatus, setCurrentCrackStatus] = useState<string>('');
+  const [taskType, setTaskType] = useState<'crack' | 'schedule'>('crack');
   const navigate = useNavigate();
 
   const queryClient = useQueryClient();
 
   // Fetch tasks with React Query
   const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
-    queryKey: ['tasks', currentPage, itemsPerPage, searchTerm, selectedStatus],
+    queryKey: ['tasks', currentPage, itemsPerPage, searchTerm, selectedStatus, taskType],
     queryFn: async () => {
       const params: Record<string, string | number | undefined> = {
         page: currentPage,
@@ -47,6 +49,30 @@ const TaskManagement: React.FC = () => {
         ...(selectedStatus !== 'all' && { status: selectedStatus }),
       };
       const response = await tasksApi.getTasks(params);
+      
+      // Lọc dữ liệu dựa trên loại task
+      if (response.data && Array.isArray(response.data)) {
+        const filteredData = response.data.filter(task => {
+          if (taskType === 'crack') {
+            // Hiển thị các task có crack_id
+            return !!task.crack_id;
+          } else {
+            // Hiển thị các task không có crack_id (schedule tasks)
+            return !task.crack_id;
+          }
+        });
+        
+        return {
+          ...response,
+          data: filteredData,
+          pagination: {
+            ...response.pagination,
+            total: filteredData.length,
+            totalPages: Math.ceil(filteredData.length / itemsPerPage)
+          }
+        };
+      }
+      
       return response;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -161,6 +187,12 @@ const TaskManagement: React.FC = () => {
     exportPdfMutation.mutate(taskId);
   };
 
+  // Toggle task type between crack and schedule
+  const toggleTaskType = () => {
+    setTaskType(prev => (prev === 'crack' ? 'schedule' : 'crack'));
+    setCurrentPage(1); // Reset to first page when switching views
+  };
+
   // Loading animation
   const loadingVariants = {
     rotate: 360,
@@ -217,72 +249,89 @@ const TaskManagement: React.FC = () => {
         </div>
       ),
     },
-    {
-      key: 'crack_id',
-      title: 'Crack ID',
-      render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {item.crack_id ? item.crack_id.substring(0, 8) : '-'}
-        </div>
-      ),
-    },
-    {
-      key: 'crack_status',
-      title: 'Crack Status',
-      render: item => {
-        if (!item.crackInfo || !item.crackInfo.isSuccess || !item.crackInfo.data.length) {
-          return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>;
-        }
+    // Hiển thị cột Crack ID chỉ khi đang xem các task liên quan đến crack
+    ...(taskType === 'crack' 
+      ? [
+          {
+            key: 'crack_id',
+            title: 'Crack ID',
+            render: item => (
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {item.crack_id ? item.crack_id.substring(0, 8) : '-'}
+              </div>
+            ),
+          },
+          {
+            key: 'crack_status',
+            title: 'Crack Status',
+            render: item => {
+              if (!item.crackInfo || !item.crackInfo.isSuccess || !item.crackInfo.data.length) {
+                return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>;
+              }
 
-        const crackStatus = item.crackInfo.data[0].status;
-        let bgColor = '';
-        let textColor = '';
-        let borderColor = '';
+              const crackStatus = item.crackInfo.data[0].status;
+              let bgColor = '';
+              let textColor = '';
+              let borderColor = '';
 
-        switch (crackStatus) {
-          case 'Reviewing':
-            bgColor = STATUS_COLORS.REVIEWING.BG;
-            textColor = STATUS_COLORS.REVIEWING.TEXT;
-            borderColor = STATUS_COLORS.REVIEWING.BORDER;
-            break;
-          case 'Pending':
-            bgColor = STATUS_COLORS.PENDING.BG;
-            textColor = STATUS_COLORS.PENDING.TEXT;
-            borderColor = STATUS_COLORS.PENDING.BORDER;
-            break;
-          case 'InProgress':
-            bgColor = STATUS_COLORS.IN_PROGRESS.BG;
-            textColor = STATUS_COLORS.IN_PROGRESS.TEXT;
-            borderColor = STATUS_COLORS.IN_PROGRESS.BORDER;
-            break;
-          // @ts-ignore
-          case 'Completed':
-            bgColor = STATUS_COLORS.RESOLVED.BG;
-            textColor = STATUS_COLORS.RESOLVED.TEXT;
-            borderColor = STATUS_COLORS.RESOLVED.BORDER;
-            break;
-          default:
-            bgColor = 'rgba(128, 128, 128, 0.35)';
-            textColor = '#808080';
-            borderColor = '#808080';
-        }
+              switch (crackStatus) {
+                case 'Reviewing':
+                  bgColor = STATUS_COLORS.REVIEWING.BG;
+                  textColor = STATUS_COLORS.REVIEWING.TEXT;
+                  borderColor = STATUS_COLORS.REVIEWING.BORDER;
+                  break;
+                case 'Pending':
+                  bgColor = STATUS_COLORS.PENDING.BG;
+                  textColor = STATUS_COLORS.PENDING.TEXT;
+                  borderColor = STATUS_COLORS.PENDING.BORDER;
+                  break;
+                case 'InProgress':
+                  bgColor = STATUS_COLORS.IN_PROGRESS.BG;
+                  textColor = STATUS_COLORS.IN_PROGRESS.TEXT;
+                  borderColor = STATUS_COLORS.IN_PROGRESS.BORDER;
+                  break;
+                // @ts-ignore
+                case 'Completed':
+                  bgColor = STATUS_COLORS.RESOLVED.BG;
+                  textColor = STATUS_COLORS.RESOLVED.TEXT;
+                  borderColor = STATUS_COLORS.RESOLVED.BORDER;
+                  break;
+                default:
+                  bgColor = 'rgba(128, 128, 128, 0.35)';
+                  textColor = '#808080';
+                  borderColor = '#808080';
+              }
 
-        return (
-          <span
-            className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80"
-            style={{
-              backgroundColor: bgColor,
-              color: textColor,
-              borderColor: borderColor,
-              border: '1px solid',
-            }}
-            onClick={() => item.crack_id && handleCrackStatusChange(item)}
-          >
-            {crackStatus}
-          </span>
-        );
-      },
-    },
+              return (
+                <span
+                  className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80"
+                  style={{
+                    backgroundColor: bgColor,
+                    color: textColor,
+                    borderColor: borderColor,
+                    border: '1px solid',
+                  }}
+                  onClick={() => item.crack_id && handleCrackStatusChange(item)}
+                >
+                  {crackStatus}
+                </span>
+              );
+            },
+          },
+        ]
+      : [
+          // Hiển thị cột Schedule Job ID khi đang xem các task bảo trì định kỳ
+          {
+            key: 'schedule_job_id',
+            title: 'Schedule Job ID',
+            render: item => (
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {item.schedule_job_id ? item.schedule_job_id.substring(0, 8) : '-'}
+              </div>
+            ),
+          },
+        ]
+    ),
     {
       key: 'created_at',
       title: 'Created Date',
@@ -351,18 +400,53 @@ const TaskManagement: React.FC = () => {
           className="w-[20rem] max-w-xs"
         />
 
-        <FilterDropdown
-          options={filterOptions}
-          onSelect={handleFilterChange}
-          selectedValue={selectedStatus}
-        />
+        <div className="flex space-x-4 items-center">
+          {/* Task Type Toggle Button */}
+          <button
+            onClick={toggleTaskType}
+            className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+              taskType === 'crack'
+                ? 'bg-red-500 text-white'
+                : 'bg-blue-500 text-white'
+            }`}
+          >
+            {taskType === 'crack' ? (
+              <>
+                <FaTools className="mr-2" />
+                Crack Repair Tasks
+              </>
+            ) : (
+              <>
+                <FaCalendarAlt className="mr-2" />
+                Scheduled Maintenance
+              </>
+            )}
+          </button>
 
-        <AddButton
-          label="Add Task"
-          icon={<MdOutlineAddTask />}
-          className="w-[154px]"
-          onClick={() => console.log('Add Task clicked')}
-        />
+          <FilterDropdown
+            options={filterOptions}
+            onSelect={handleFilterChange}
+            selectedValue={selectedStatus}
+          />
+
+          <AddButton
+            label="Add Task"
+            icon={<MdOutlineAddTask />}
+            className="w-[154px]"
+            onClick={() => console.log('Add Task clicked')}
+          />
+        </div>
+      </div>
+
+      <div className="ml-[90px] mb-4">
+        <h1 className="text-xl font-bold">
+          {taskType === 'crack' ? 'Crack Repair Tasks' : 'Scheduled Maintenance Tasks'}
+        </h1>
+        <p className="text-sm text-gray-500">
+          {taskType === 'crack' 
+            ? 'Displaying tasks for building crack repairs' 
+            : 'Displaying tasks for scheduled maintenance activities'}
+        </p>
       </div>
 
       {isLoadingTasks ? (
