@@ -115,4 +115,4 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
   );
 };
 
-export default BuildingDetailSelectionModal; 
+export default BuildingDetailSelectionModal;

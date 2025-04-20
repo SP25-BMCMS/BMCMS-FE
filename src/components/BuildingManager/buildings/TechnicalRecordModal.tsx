@@ -109,7 +109,7 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
     queryKey: ['technicalRecordsByBuilding', buildingId],
     queryFn: async () => {
       if (!buildingId) return [];
-      
+
       const url = import.meta.env.VITE_GET_TECHNICAL_RECORD_BY_BUILDING_ID.replace(
         '{buildingId}',
         buildingId
@@ -125,7 +125,7 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
     queryKey: ['devices', buildingDetailId],
     queryFn: async () => {
       if (!buildingDetailId) return { data: [] };
-      
+
       const url = import.meta.env.VITE_GET_DEVICE_BY_BUILDING_DETAIL_ID.replace(
         '{buildingDetailId}',
         buildingDetailId
@@ -139,10 +139,10 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
   // Filter out devices that already have technical records
   const availableDevices = useMemo(() => {
     if (!devices?.data || !existingRecords) return [];
-    
+
     // Get all device IDs that already have technical records
     const usedDeviceIds = new Set(existingRecords.map(record => record.device_id));
-    
+
     // Filter devices that don't have technical records yet
     return devices.data.filter(device => !usedDeviceIds.has(device.device_id));
   }, [devices, existingRecords]);
@@ -166,14 +166,14 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
         e.target.value = '';
         return;
       }
-      
+
       // Check file size (10MB = 10 * 1024 * 1024 bytes)
       if (selectedFile.size > 10 * 1024 * 1024) {
         toast.error('File size should not exceed 10MB');
         e.target.value = '';
         return;
       }
-      
+
       setFile(selectedFile);
     }
   };
@@ -206,29 +206,29 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!deviceId) {
       toast.error('Please select a device');
       return;
     }
-    
+
     if (!fileType) {
       toast.error('Please select a file type');
       return;
     }
-    
+
     if (!file) {
       toast.error('Please select a file to upload');
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     const formData = new FormData();
     formData.append('device_id', deviceId);
     formData.append('file_type', fileType);
     formData.append('recordFile', file);
-    
+
     createTechnicalRecord.mutate(formData);
   };
 
@@ -243,11 +243,11 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
         ) : availableDevices.length > 0 ? (
           <select
             value={deviceId}
-            onChange={(e) => setDeviceId(e.target.value)}
+            onChange={e => setDeviceId(e.target.value)}
             className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
           >
             <option value="">Select a device</option>
-            {availableDevices.map((device) => (
+            {availableDevices.map(device => (
               <option key={device.device_id} value={device.device_id}>
                 {device.name} ({device.type})
               </option>
@@ -255,35 +255,38 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
           </select>
         ) : (
           <div className="text-sm text-red-500 py-2 bg-red-50 dark:bg-red-900/20 px-3 rounded-md">
-            All devices in this building already have technical records. You can only upload one technical record per device.
+            All devices in this building already have technical records. You can only upload one
+            technical record per device.
           </div>
         )}
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Document Type <span className="text-red-500">*</span>
         </label>
         <select
           value={fileType}
-          onChange={(e) => setFileType(e.target.value)}
+          onChange={e => setFileType(e.target.value)}
           className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
           disabled={availableDevices.length === 0}
         >
           <option value="">Select document type</option>
-          {fileTypeOptions.map((option) => (
+          {fileTypeOptions.map(option => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
         </select>
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           File Upload <span className="text-red-500">*</span>
         </label>
-        <div className={`border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 ${availableDevices.length === 0 ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div
+          className={`border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 ${availableDevices.length === 0 ? 'opacity-50 pointer-events-none' : ''}`}
+        >
           <div className="space-y-2 text-center">
             {file ? (
               <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
@@ -321,15 +324,13 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
                   </label>
                   <p className="pl-1">or drag and drop</p>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  PDF only, up to 10MB
-                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">PDF only, up to 10MB</p>
               </>
             )}
           </div>
         </div>
       </div>
-      
+
       <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button
           type="button"
@@ -341,7 +342,9 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
         </button>
         <button
           type="submit"
-          disabled={isSubmitting || !deviceId || !fileType || !file || availableDevices.length === 0}
+          disabled={
+            isSubmitting || !deviceId || !fileType || !file || availableDevices.length === 0
+          }
           className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none ${
             isSubmitting || !deviceId || !fileType || !file || availableDevices.length === 0
               ? 'opacity-70 cursor-not-allowed'
@@ -382,7 +385,7 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   buildingName,
 }) => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  
+
   // Function to fetch technical records by building ID using the new API endpoint
   const fetchTechnicalRecordsByBuildingId = async (buildingId: string) => {
     try {
@@ -397,14 +400,14 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
       throw error;
     }
   };
-  
+
   // Get technical records for the building
   const {
     data: technicalRecords,
     isLoading,
     isError,
     error,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['technicalRecordsByBuilding', buildingId],
     queryFn: () => fetchTechnicalRecordsByBuildingId(buildingId),
@@ -444,13 +447,13 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   const extractFilename = (path: string) => {
     // Try to extract filename from URL or path
     if (!path) return 'Unnamed Document';
-    
+
     // Check if it contains a slash and get the part after the last slash
     if (path.includes('/')) {
       const parts = path.split('/');
       return parts[parts.length - 1];
     }
-    
+
     return path;
   };
 
@@ -458,12 +461,12 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   const handleOpenUploadModal = () => {
     setIsUploadModalOpen(true);
   };
-  
+
   // Close upload modal
   const handleCloseUploadModal = () => {
     setIsUploadModalOpen(false);
   };
-  
+
   // Handle successful upload
   const handleUploadSuccess = () => {
     handleCloseUploadModal();

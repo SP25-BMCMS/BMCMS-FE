@@ -120,6 +120,11 @@ const TaskDetail: React.FC = () => {
 
   const selectedAssignment = findSelectedAssignment();
 
+  // Helper function to display staff name or ID
+  const displayStaffName = assignment => {
+    return assignment.employee_name || assignment.employee_id.substring(0, 8);
+  };
+
   return (
     <div className="p-6 w-full bg-gray-50 dark:bg-gray-800 min-h-screen">
       {/* Header with back button */}
@@ -226,7 +231,7 @@ const TaskDetail: React.FC = () => {
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
-                    <span>ID: {assignment.employee_id.substring(0, 8)}</span>
+                    <span>{displayStaffName(assignment)}</span>
                   </div>
                   <div className="flex items-center">
                     <FaCalendarAlt className="mr-1" />
@@ -271,7 +276,7 @@ const TaskDetail: React.FC = () => {
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
-                    <span>ID: {assignment.employee_id.substring(0, 8)}</span>
+                    <span>{displayStaffName(assignment)}</span>
                   </div>
                   <div className="flex items-center">
                     <FaCalendarAlt className="mr-1" />
@@ -316,7 +321,7 @@ const TaskDetail: React.FC = () => {
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
-                    <span>ID: {assignment.employee_id.substring(0, 8)}</span>
+                    <span>{displayStaffName(assignment)}</span>
                   </div>
                   <div className="flex items-center">
                     <FaCalendarAlt className="mr-1" />
@@ -361,7 +366,7 @@ const TaskDetail: React.FC = () => {
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
-                    <span>ID: {assignment.employee_id.substring(0, 8)}</span>
+                    <span>{displayStaffName(assignment)}</span>
                   </div>
                   <div className="flex items-center">
                     <FaCalendarAlt className="mr-1" />

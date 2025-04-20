@@ -402,6 +402,7 @@ export interface TaskAssignment {
   assignment_id: string;
   task_id: string;
   employee_id: string;
+  employee_name?: string;
   description: string;
   status: 'Confirmed' | 'Reassigned' | 'InFixing' | 'Fixed';
   created_at: string;
@@ -475,11 +476,18 @@ export interface Inspection {
   inspection_id: string;
   task_assignment_id: string;
   inspected_by: string;
+  inspected_by_user?: {
+    userId: string;
+    username: string;
+  };
   image_urls: string[];
   description: string;
   created_at: string;
   updated_at: string;
   total_cost: string;
+  confirmed_by: string | null;
+  isprivateasset: boolean;
+  report_status: 'NoPending' | 'Pending' | 'Rejected' | 'Approved';
 }
 
 export interface InspectionResponse {

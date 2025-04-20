@@ -15,12 +15,7 @@ import EventModal from '@/components/calendar/EventModal';
 import { TaskEvent, ApiSchedule } from '@/types/calendar';
 import Table from '@/components/Table';
 import Pagination from '@/components/Pagination';
-import {
-  Calendar as CalendarIcon,
-  List,
-  Eye,
-  Clock,
-} from 'lucide-react';
+import { Calendar as CalendarIcon, List, Eye, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { STATUS_COLORS } from '@/constants/colors';
 import buildingDetailsApi, { BuildingDetail } from '@/services/buildingDetails';

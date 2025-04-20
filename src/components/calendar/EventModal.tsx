@@ -273,7 +273,9 @@ const EventModal: React.FC<EventModalProps> = ({
               {selectedBuildingDetails.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {selectedBuildingDetails.map(buildingDetailId => {
-                    const buildingDetail = buildingDetails.find(b => b.buildingDetailId === buildingDetailId);
+                    const buildingDetail = buildingDetails.find(
+                      b => b.buildingDetailId === buildingDetailId
+                    );
                     return buildingDetail ? (
                       <div
                         key={buildingDetailId}
