@@ -12,6 +12,7 @@ export interface TaskEvent {
   schedule_type?: string;
   buildingId?: string[];
   schedule_job?: ScheduleJob[];
+  cycle_id?: string;
 }
 
 export interface ScheduleJob {

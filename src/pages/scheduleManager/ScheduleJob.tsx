@@ -1,4 +1,5 @@
 import TaskModal from '@/components/calendar/TaskModal';
+import CreateScheduleJobModal from '@/components/calendar/CreateScheduleJobModal';
 import Pagination from '@/components/Pagination';
 import scheduleJobsApi, {
   type ScheduleJob,
@@ -22,6 +23,7 @@ import {
   RiCheckboxCircleLine,
   RiCloseCircleLine,
   RiAlertLine,
+  RiAddLine,
 } from 'react-icons/ri';
 import { useNavigate, useParams } from 'react-router-dom';
 import { STATUS_COLORS } from '@/constants/colors';
@@ -33,6 +35,7 @@ const ScheduleJob: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showCreateJobModal, setShowCreateJobModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState<ScheduleJob | null>(null);
 
   // Fetch schedule details
@@ -169,6 +172,10 @@ const ScheduleJob: React.FC = () => {
     setShowTaskModal(true);
   };
 
+  const handleOpenCreateJobModal = () => {
+    setShowCreateJobModal(true);
+  };
+
   if (isScheduleLoading || isJobsLoading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen gap-4">
@@ -284,8 +291,17 @@ const ScheduleJob: React.FC = () => {
               <RiBuilding2Line className="text-blue-500 mr-2 w-5 h-5" />
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Schedule Jobs</h2>
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-md shadow-sm">
-              Showing {scheduleJobs.length} of {totalItems} jobs
+            <div className="flex items-center space-x-3">
+              <div className="text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-md shadow-sm">
+                Showing {scheduleJobs.length} of {totalItems} jobs
+              </div>
+              <button
+                onClick={handleOpenCreateJobModal}
+                className="flex items-center space-x-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm"
+              >
+                <RiAddLine className="w-4 h-4" />
+                <span>New Job</span>
+              </button>
             </div>
           </div>
         </div>
@@ -299,9 +315,16 @@ const ScheduleJob: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                 No schedule jobs found
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 max-w-md">
+              <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
                 There are no jobs associated with this schedule yet or they may have been cancelled.
               </p>
+              <button
+                onClick={handleOpenCreateJobModal}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              >
+                <RiAddLine className="w-5 h-5" />
+                <span>Create First Job</span>
+              </button>
             </div>
           </div>
         ) : (
@@ -434,6 +457,7 @@ const ScheduleJob: React.FC = () => {
         )}
       </div>
 
+      {/* Task Modal */}
       <TaskModal
         isOpen={showTaskModal}
         onClose={() => {
@@ -442,6 +466,15 @@ const ScheduleJob: React.FC = () => {
         }}
         scheduleJob={selectedJob}
       />
+
+      {/* Create Schedule Job Modal */}
+      {scheduleId && (
+        <CreateScheduleJobModal
+          isOpen={showCreateJobModal}
+          onClose={() => setShowCreateJobModal(false)}
+          scheduleId={scheduleId}
+        />
+      )}
     </div>
   );
 };

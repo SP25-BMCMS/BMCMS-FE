@@ -6,6 +6,7 @@ import {
   TagIcon,
   XMarkIcon,
   CogIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import { vi } from 'date-fns/locale';
 import React, { useEffect, useState } from 'react';
@@ -38,7 +39,7 @@ interface EventModalProps {
   onUpdate: (formData: FormData) => void;
   onDelete: (id: string) => void;
   onViewScheduleJob: () => void;
-  onUpdateStatus: (id: string, status: 'pending' | 'in_progress' | 'completed') => void;
+  onUpdateStatus: (id: string, status: string) => void;
   initialFormData: Partial<TaskEvent>;
   buildings: Array<{
     buildingId: string;
@@ -96,6 +97,20 @@ const EventModal: React.FC<EventModalProps> = ({
         schedule_status: 'InProgress',
       });
     } else if (selectedEvent) {
+      // Map event status to API status format
+      let scheduleStatus: 'Pending' | 'InProgress' | 'Completed' | 'Cancel' = 'InProgress';
+      
+      if (selectedEvent.status === 'pending') {
+        scheduleStatus = 'Pending';
+      } else if (selectedEvent.status === 'in_progress') {
+        scheduleStatus = 'InProgress';
+      } else if (selectedEvent.status === 'completed') {
+        scheduleStatus = 'Completed';
+      }
+      
+      // Get cycle ID from existing data if available
+      const cycleId = selectedEvent.cycle_id || '';
+      
       setFormData({
         title: selectedEvent.title || '',
         description: selectedEvent.description || '',
@@ -103,25 +118,35 @@ const EventModal: React.FC<EventModalProps> = ({
         start_date: selectedEvent.start ? new Date(selectedEvent.start) : new Date(),
         end_date: selectedEvent.end ? new Date(selectedEvent.end) : new Date(),
         buildingDetailIds: selectedBuildingDetails,
-        cycle_id: '',
-        schedule_status: 'InProgress',
+        cycle_id: cycleId,
+        schedule_status: scheduleStatus,
       });
+      
       // Set selectedBuildingDetails directly
       onSetSelectedBuildingDetails(selectedBuildingDetails || []);
     }
-  }, [isCreateMode, initialFormData, selectedEvent]);
+  }, [isCreateMode, initialFormData, selectedEvent, selectedBuildingDetails, onSetSelectedBuildingDetails]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prepare data for API submission
     const submitData = {
       ...formData,
       buildingDetailIds: selectedBuildingDetails,
     };
 
+    // For edit mode, ensure we're passing the schedule_name field correctly
+    const finalData = {
+      ...submitData,
+      // Map title to schedule_name for the API
+      schedule_name: submitData.title,
+    };
+
     if (isCreateMode) {
-      onSave(submitData);
+      onSave(finalData);
     } else {
-      onUpdate(submitData);
+      onUpdate(finalData);
     }
   };
 
@@ -131,6 +156,13 @@ const EventModal: React.FC<EventModalProps> = ({
       setShowDeleteConfirm(false);
     }
   };
+
+  const statusOptions = [
+    { value: 'Pending', label: 'Pending' },
+    { value: 'InProgress', label: 'In Progress' },
+    { value: 'Completed', label: 'Completed' },
+    { value: 'Cancel', label: 'Cancel' },
+  ];
 
   if (!isOpen) return null;
 
@@ -246,11 +278,31 @@ const EventModal: React.FC<EventModalProps> = ({
                 onChange={e => setFormData(prev => ({ ...prev, cycle_id: e.target.value }))}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 aria-label="Maintenance Cycle"
+                required
               >
                 <option value="">Select a maintenance cycle</option>
                 {maintenanceCycles.map(cycle => (
                   <option key={cycle.cycle_id} value={cycle.cycle_id}>
                     {cycle.device_type} - {cycle.frequency} ({cycle.basis})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <CheckCircleIcon className="w-4 h-4 inline-block mr-2" />
+                Status
+              </label>
+              <select
+                value={formData.schedule_status}
+                onChange={e => setFormData(prev => ({ ...prev, schedule_status: e.target.value as 'Pending' | 'InProgress' | 'Completed' | 'Cancel' }))}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                aria-label="Schedule status"
+              >
+                {statusOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
