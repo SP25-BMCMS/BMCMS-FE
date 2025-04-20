@@ -155,7 +155,7 @@ const TaskDetail: React.FC = () => {
             className="px-3 py-1 rounded-full text-sm font-medium"
             style={{
               backgroundColor:
-                task.status === 'Resolved'
+                task.status === 'Completed'
                   ? STATUS_COLORS.RESOLVED.BG
                   : task.status === 'In Progress'
                     ? STATUS_COLORS.IN_PROGRESS.BG
@@ -163,7 +163,7 @@ const TaskDetail: React.FC = () => {
                       ? STATUS_COLORS.INACTIVE.BG
                       : STATUS_COLORS.REVIEWING.BG,
               color:
-                task.status === 'Resolved'
+                task.status === 'Completed'
                   ? STATUS_COLORS.RESOLVED.TEXT
                   : task.status === 'In Progress'
                     ? STATUS_COLORS.IN_PROGRESS.TEXT
@@ -172,7 +172,7 @@ const TaskDetail: React.FC = () => {
                       : STATUS_COLORS.REVIEWING.TEXT,
               border: '1px solid',
               borderColor:
-                task.status === 'Resolved'
+                task.status === 'Completed'
                   ? STATUS_COLORS.RESOLVED.BORDER
                   : task.status === 'In Progress'
                     ? STATUS_COLORS.IN_PROGRESS.BORDER
