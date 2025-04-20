@@ -1,27 +1,73 @@
 import axios from 'axios';
 
 export interface DashboardSummary {
-  pendingTasksCount: number;
-  completedTasksCount: number;
-  inProgressTasksCount: number;
-  buildingsCount: number;
-  scheduleJobsCount: number;
-  staffCount: number;
-  recentTasks: {
-    task_id: string;
-    description: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
-  }[];
-  taskStatusDistribution: {
-    status: string;
-    count: number;
-  }[];
-  scheduleDistribution: {
-    month: string;
-    count: number;
-  }[];
+  taskStats: {
+    tasksByStatus: {
+      pending: number;
+      inProgress: number;
+      completed: number;
+      assigned: number;
+      total: number;
+    };
+    assignmentsByStatus: {
+      pending: number;
+      confirmed: number;
+      verified: number;
+      unverified: number;
+      total: number;
+    };
+    costStatistics: {
+      totalCost: number;
+      estimatedCost: number;
+      currency: string;
+    };
+    recentTasks: {
+      task_id: string;
+      description: string;
+      status: string;
+      created_at: string;
+      updated_at: string;
+      crack_id?: string;
+      schedule_job_id?: string;
+      taskAssignments?: any[];
+      workLogs?: any[];
+      feedbacks?: any[];
+      crackInfo?: any;
+    }[];
+  };
+  crackStats: {
+    cracksByStatus: {
+      pending: number;
+      inProgress: number;
+      completed: number;
+      rejected: number;
+      total: number;
+    };
+    cracksBySeverity: {
+      low: number;
+      medium: number;
+      high: number;
+      critical: number;
+    };
+    recentCracks: any[];
+  };
+  staffStats: {
+    totalStaff: number;
+    staffByDepartment: Record<string, number>;
+    staffList: {
+      userId: string;
+      username: string;
+      department: string;
+      position: string;
+    }[];
+  };
+  feedbackStats: {
+    totalFeedbacks: number;
+    averageRating: number;
+    ratingCount: number;
+    recentFeedbacks: any[];
+  };
+  lastUpdated: string;
 }
 
 const getDashboardSummary = async (): Promise<DashboardSummary> => {

@@ -39,6 +39,7 @@ const MaterialManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUnitPriceModalOpen, setIsUnitPriceModalOpen] = useState(false);
   const [isStockQuantityModalOpen, setIsStockQuantityModalOpen] = useState(false);
@@ -51,6 +52,14 @@ const MaterialManagement: React.FC = () => {
     { value: 'all', label: 'All Status' },
     { value: 'ACTIVE', label: 'Active' },
     { value: 'INACTIVE', label: 'Inactive' },
+  ];
+
+  const priceRangeOptions = [
+    { value: 'all', label: 'Tất cả giá' },
+    { value: '0-100000', label: 'Dưới 100,000 VND' },
+    { value: '100000-500000', label: 'Từ 100,000 - 500,000 VND' },
+    { value: '500000-1000000', label: 'Từ 500,000 - 1,000,000 VND' },
+    { value: '1000000+', label: 'Trên 1,000,000 VND' },
   ];
 
   // Build query params
@@ -71,6 +80,28 @@ const MaterialManagement: React.FC = () => {
     return params;
   };
 
+  // Function to filter materials by price range
+  const filterByPriceRange = (materials: Material[]) => {
+    if (selectedPriceRange === 'all') return materials;
+
+    return materials.filter(material => {
+      const price = parseInt(material.unit_price);
+
+      switch (selectedPriceRange) {
+        case '0-100000':
+          return price < 100000;
+        case '100000-500000':
+          return price >= 100000 && price < 500000;
+        case '500000-1000000':
+          return price >= 500000 && price < 1000000;
+        case '1000000+':
+          return price >= 1000000;
+        default:
+          return true;
+      }
+    });
+  };
+
   // Fetch materials using React Query
   const {
     data: materialsData,
@@ -89,6 +120,9 @@ const MaterialManagement: React.FC = () => {
     refetchOnReconnect: false,
     retry: false,
   });
+
+  // Apply client-side filtering for price ranges
+  const filteredMaterials = materialsData ? filterByPriceRange(materialsData.data.data) : [];
 
   // Create material mutation
   const createMaterialMutation = useMutation({
@@ -169,6 +203,11 @@ const MaterialManagement: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const handlePriceRangeChange = (value: string) => {
+    setSelectedPriceRange(value);
+    setCurrentPage(1);
+  };
+
   const handleCreateMaterial = (data: CreateMaterialData) => {
     createMaterialMutation.mutate(data);
   };
@@ -242,7 +281,11 @@ const MaterialManagement: React.FC = () => {
     {
       key: 'unit_price',
       title: 'Unit Price',
-      render: (item: Material) => `$${parseFloat(item.unit_price).toFixed(2)}`,
+      render: (item: Material) => {
+        // Format giá tiền VND với dấu phân cách hàng nghìn
+        const formattedPrice = parseInt(item.unit_price).toLocaleString('vi-VN');
+        return `${formattedPrice} VND`;
+      },
       width: 'w-32',
     },
     {
@@ -299,6 +342,13 @@ const MaterialManagement: React.FC = () => {
 
           <div className="flex space-x-4">
             <FilterDropdown
+              options={priceRangeOptions}
+              onSelect={handlePriceRangeChange}
+              buttonClassName="w-[220px]"
+              selectedValue={selectedPriceRange}
+              label="Giá tiền"
+            />
+            <FilterDropdown
               options={statusOptions}
               onSelect={handleStatusChange}
               buttonClassName="w-[160px]"
@@ -331,13 +381,14 @@ const MaterialManagement: React.FC = () => {
 
           {/* Total Materials */}
           <div className="text-sm text-gray-600 dark:text-gray-300">
-            Total Materials: {materialsData?.data?.pagination?.total || 0}
+            Total Materials: {filteredMaterials.length || 0} /{' '}
+            {materialsData?.data?.pagination?.total || 0}
           </div>
         </div>
       </div>
 
       <Table<Material>
-        data={materialsData?.data?.data || []}
+        data={filteredMaterials}
         columns={columns}
         keyExtractor={item => item.material_id || Math.random().toString()}
         className="w-[95%] mx-auto"

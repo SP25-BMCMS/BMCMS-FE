@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Building2, MapPin } from 'lucide-react';
+import { Eye, Building2, MapPin, FileText } from 'lucide-react';
 import Table, { Column } from '@/components/Table';
 import { BuildingResponse } from '@/types';
 import apiInstance from '@/lib/axios';
 import { toast } from 'react-hot-toast';
 import { STATUS_COLORS } from '@/constants/colors';
-import ThemeToggle from '@/components/ThemeToggle';
 import Pagination from '@/components/Pagination';
 import SearchInput from '@/components/SearchInput';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+import TechnicalRecordModal from '@/components/BuildingManager/buildings/TechnicalRecordModal';
 
 interface BuildingWithArea extends BuildingResponse {
   area?: {
@@ -20,13 +20,21 @@ interface BuildingWithArea extends BuildingResponse {
     createdAt: string;
     updatedAt: string;
   };
+  buildingDetails?: Array<{
+    buildingDetailId: string;
+    buildingId: string;
+    name: string;
+    total_apartments: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
 }
 
 interface BuildingManagerResponse {
   statusCode: number;
   message: string;
   data: BuildingWithArea[];
-  pagination?: {
+  meta?: {
     total: number;
     page: number;
     limit: number;
@@ -43,6 +51,12 @@ const BuildingForManager: React.FC = () => {
     itemsPerPage: 10,
   });
   const navigate = useNavigate();
+  const [isTechnicalRecordModalOpen, setIsTechnicalRecordModalOpen] = useState(false);
+  const [selectedBuildingForTechnicalRecord, setSelectedBuildingForTechnicalRecord] = useState<{
+    id: string;
+    name: string;
+    detailId: string | null;
+  } | null>(null);
 
   // Function to fetch buildings data
   const fetchBuildingsData = async ({ pageParam = 1 }) => {
@@ -69,11 +83,11 @@ const BuildingForManager: React.FC = () => {
   const buildingsData = data as BuildingManagerResponse | undefined;
 
   React.useEffect(() => {
-    if (buildingsData?.pagination) {
+    if (buildingsData?.meta) {
       setPagination(prev => ({
         ...prev,
-        totalPages: buildingsData.pagination?.totalPages || 1,
-        totalItems: buildingsData.pagination?.total || 0,
+        totalPages: buildingsData.meta?.totalPages || 1,
+        totalItems: buildingsData.meta?.total || 0,
       }));
     }
   }, [buildingsData]);
@@ -105,8 +119,28 @@ const BuildingForManager: React.FC = () => {
     refetch();
   };
 
-  const handleViewDetail = (buildingId: string) => {
-    navigate(import.meta.env.VITE_VIEW_BUILDING_DETAIL.replace('{id}', buildingId));
+  const handleViewDetail = (building: BuildingWithArea) => {
+    // Check if the building has details
+    if (building.buildingDetails && building.buildingDetails.length > 0) {
+      // Navigate using the first buildingDetailId
+      const buildingDetailId = building.buildingDetails[0].buildingDetailId;
+      navigate(`/buildingdetails/${buildingDetailId}`);
+    } else {
+      // If no building details, show a toast message
+      toast.error('No building details available for this building');
+    }
+  };
+
+  const handleOpenTechnicalRecordModal = (building: BuildingWithArea) => {
+    setSelectedBuildingForTechnicalRecord({
+      id: building.buildingId,
+      name: building.name,
+      detailId:
+        building.buildingDetails && building.buildingDetails.length > 0
+          ? building.buildingDetails[0].buildingDetailId
+          : null,
+    });
+    setIsTechnicalRecordModalOpen(true);
   };
 
   const getStatusStyle = (status: string) => {
@@ -223,20 +257,30 @@ const BuildingForManager: React.FC = () => {
       key: 'actions',
       title: 'Action',
       render: item => (
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-2">
           <button
             onClick={e => {
               e.stopPropagation();
-              handleViewDetail(item.buildingId);
+              handleViewDetail(item);
             }}
             className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
             title="View Details"
           >
             <Eye size={16} />
           </button>
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              handleOpenTechnicalRecordModal(item);
+            }}
+            className="p-2 bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 rounded-md hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+            title="Technical Records"
+          >
+            <FileText size={16} />
+          </button>
         </div>
       ),
-      width: '80px',
+      width: '120px',
     },
   ];
 
@@ -248,6 +292,7 @@ const BuildingForManager: React.FC = () => {
             placeholder="Search by building name"
             value={searchQuery}
             onChange={handleSearch}
+            onSearch={handleSearchSubmit}
             className="w-[20rem] max-w-xs"
           />
         </div>
@@ -263,7 +308,7 @@ const BuildingForManager: React.FC = () => {
             keyExtractor={item => item.buildingId}
             isLoading={isLoading}
             emptyText="No buildings found"
-            onRowClick={item => handleViewDetail(item.buildingId)}
+            onRowClick={item => handleViewDetail(item)}
             animated={true}
             tableClassName="w-full"
             className="w-[95%] mx-auto"
@@ -281,6 +326,17 @@ const BuildingForManager: React.FC = () => {
             />
           )}
         </>
+      )}
+
+      {/* Technical Record Modal */}
+      {selectedBuildingForTechnicalRecord && (
+        <TechnicalRecordModal
+          isOpen={isTechnicalRecordModalOpen}
+          onClose={() => setIsTechnicalRecordModalOpen(false)}
+          buildingId={selectedBuildingForTechnicalRecord.id}
+          buildingDetailId={selectedBuildingForTechnicalRecord.detailId}
+          buildingName={selectedBuildingForTechnicalRecord.name}
+        />
       )}
     </div>
   );

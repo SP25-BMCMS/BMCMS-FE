@@ -9,6 +9,7 @@ interface DropdownMenuProps {
   changeStatusTitle?: string;
   viewDetailDisabled?: boolean;
   showExportPdf?: boolean;
+  className?: string;
 }
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({
@@ -19,6 +20,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
   changeStatusTitle = 'Change Status',
   viewDetailDisabled = false,
   showExportPdf = false,
+  className = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -63,13 +65,15 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="fixed right-0 mt-2 w-44 bg-white border border-gray-300 shadow-lg rounded-md z-50 mr-[3.5rem]">
+        <div
+          className={`absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-lg rounded-md z-[100] ${className}`}
+        >
           <button
             onClick={handleViewDetail}
             className={`flex items-center w-full px-4 py-2 ${
               viewDetailDisabled
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-700 hover:bg-gray-100'
+                ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                : 'text-blue-700 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
             disabled={viewDetailDisabled}
             title={viewDetailDisabled ? 'Không khả dụng với tòa nhà đang xây dựng' : 'Xem chi tiết'}
@@ -85,7 +89,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
                 onExportPdf();
                 setIsOpen(false);
               }}
-              className="flex items-center w-full px-4 py-2 text-green-600 hover:bg-gray-100"
+              className="flex items-center w-full px-4 py-2 text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <RiFileDownloadLine className="mr-2" /> Export PDF
             </button>
@@ -98,7 +102,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
                 onChangeStatus();
                 setIsOpen(false);
               }}
-              className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
+              className="flex items-center w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <RiFilterLine className="mr-2" /> {changeStatusTitle}
             </button>
@@ -111,7 +115,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
                 onRemove();
                 setIsOpen(false);
               }}
-              className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100"
+              className="flex items-center w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <RiDeleteBinLine className="mr-2" /> Remove
             </button>

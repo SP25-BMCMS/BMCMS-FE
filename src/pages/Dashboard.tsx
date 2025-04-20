@@ -67,7 +67,7 @@ const Dashboard: React.FC = () => {
     Pending: '#FFBB28',
     InProgress: '#0088FE',
     Completed: '#00C49F',
-    Cancelled: '#FF8042',
+    Assigned: '#FF8042',
     default: '#8884d8',
   };
 
@@ -95,15 +95,59 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  // Mock data until we get real data from API
-  const mockTaskStatusDistribution = [
-    { status: 'Pending', count: dashboardData.pendingTasksCount || 8 },
-    { status: 'InProgress', count: dashboardData.inProgressTasksCount || 12 },
-    { status: 'Completed', count: dashboardData.completedTasksCount || 20 },
-    { status: 'Cancelled', count: 4 },
+  // Tạo dữ liệu cho biểu đồ từ API thực tế
+  const taskStatusData = [
+    { status: 'Pending', count: dashboardData.taskStats?.tasksByStatus?.pending || 0 },
+    { status: 'InProgress', count: dashboardData.taskStats?.tasksByStatus?.inProgress || 0 },
+    { status: 'Completed', count: dashboardData.taskStats?.tasksByStatus?.completed || 0 },
+    { status: 'Assigned', count: dashboardData.taskStats?.tasksByStatus?.assigned || 0 },
   ];
 
-  const mockScheduleDistribution = [
+  // Dữ liệu về mức độ nghiêm trọng của vết nứt
+  const crackSeverityData = [
+    { name: 'Low', value: dashboardData.crackStats?.cracksBySeverity?.low || 0 },
+    { name: 'Medium', value: dashboardData.crackStats?.cracksBySeverity?.medium || 0 },
+    { name: 'High', value: dashboardData.crackStats?.cracksBySeverity?.high || 0 },
+    { name: 'Critical', value: dashboardData.crackStats?.cracksBySeverity?.critical || 0 },
+  ].filter(item => item.value > 0);
+
+  // Custom label cho biểu đồ tròn
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    name,
+  }: any) => {
+    if (percent <= 0.05) return null;
+
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius * 1.2;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#fff"
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+        className="text-sm font-medium"
+        style={{
+          filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.5))',
+          textShadow: '1px 1px 1px rgba(0,0,0,0.5)',
+        }}
+      >
+        {`${name}: ${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
+  // Tạo dữ liệu phân bố lịch trình theo tháng từ dữ liệu mẫu
+  const scheduleDistribution = [
     { month: 'Jan', count: 5 },
     { month: 'Feb', count: 8 },
     { month: 'Mar', count: 12 },
@@ -126,7 +170,7 @@ const Dashboard: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Tasks Pending</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                {dashboardData.pendingTasksCount || '0'}
+                {dashboardData.taskStats?.tasksByStatus?.pending || '0'}
               </p>
             </div>
             <div className="h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center">
@@ -148,7 +192,7 @@ const Dashboard: React.FC = () => {
                 Tasks Completed
               </p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                {dashboardData.completedTasksCount || '0'}
+                {dashboardData.taskStats?.tasksByStatus?.completed || '0'}
               </p>
             </div>
             <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
@@ -168,7 +212,7 @@ const Dashboard: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">In Progress</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                {dashboardData.inProgressTasksCount || '0'}
+                {dashboardData.taskStats?.tasksByStatus?.inProgress || '0'}
               </p>
             </div>
             <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
@@ -182,15 +226,13 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Total Buildings */}
+        {/* Total Cracks */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-transform duration-300 hover:transform hover:scale-105">
           <div className="flex justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Total Buildings
-              </p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Cracks</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                {dashboardData.buildingsCount || '0'}
+                {dashboardData.crackStats?.cracksByStatus?.total || '0'}
               </p>
             </div>
             <div className="h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
@@ -210,7 +252,7 @@ const Dashboard: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Schedule Jobs</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                {dashboardData.scheduleJobsCount || '0'}
+                {dashboardData.taskStats?.tasksByStatus?.total || '0'}
               </p>
             </div>
             <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
@@ -230,7 +272,7 @@ const Dashboard: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Staff</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                {dashboardData.staffCount || '0'}
+                {dashboardData.staffStats?.totalStaff || '0'}
               </p>
             </div>
             <div className="h-12 w-12 rounded-full bg-pink-100 dark:bg-pink-900 flex items-center justify-center">
@@ -256,19 +298,23 @@ const Dashboard: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={mockTaskStatusDistribution}
+                  data={taskStatusData.filter(item => item.count > 0)}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  labelLine={{ stroke: '#888', strokeWidth: 1, strokeDasharray: '2 2' }}
+                  label={renderCustomizedLabel}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="count"
                   nameKey="status"
+                  minAngle={15}
+                  paddingAngle={4}
                 >
-                  {mockTaskStatusDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getStatusColor(entry.status)} />
-                  ))}
+                  {taskStatusData
+                    .filter(item => item.count > 0)
+                    .map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={getStatusColor(entry.status)} />
+                    ))}
                 </Pie>
                 <Tooltip formatter={value => [`${value} tasks`, 'Count']} />
                 <Legend />
@@ -277,29 +323,71 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Schedule Distribution Chart */}
+        {/* Crack Severity Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Monthly Schedule Distribution
+            Crack Severity Distribution
           </h2>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mockScheduleDistribution}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="month" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#1F2937',
-                    border: 'none',
-                    borderRadius: '4px',
-                    color: '#F3F4F6',
-                  }}
-                />
-                <Bar dataKey="count" name="Schedules" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-              </BarChart>
+              <PieChart>
+                <Pie
+                  data={crackSeverityData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={{ stroke: '#888', strokeWidth: 1, strokeDasharray: '2 2' }}
+                  label={renderCustomizedLabel}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  minAngle={15}
+                  paddingAngle={4}
+                >
+                  {crackSeverityData.map((entry, index) => {
+                    const COLORS = {
+                      Low: '#00C49F',
+                      Medium: '#FFBB28',
+                      High: '#FF8042',
+                      Critical: '#FF0000',
+                    };
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[entry.name as keyof typeof COLORS]}
+                      />
+                    );
+                  })}
+                </Pie>
+                <Tooltip formatter={value => [`${value} cracks`, 'Count']} />
+                <Legend />
+              </PieChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </div>
+
+      {/* Schedule Distribution Chart */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Monthly Schedule Distribution
+        </h2>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={scheduleDistribution}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey="month" stroke="#9CA3AF" />
+              <YAxis stroke="#9CA3AF" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1F2937',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: '#F3F4F6',
+                }}
+              />
+              <Bar dataKey="count" name="Schedules" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
@@ -327,7 +415,7 @@ const Dashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {(dashboardData.recentTasks || []).slice(0, 5).map(task => (
+              {(dashboardData.taskStats?.recentTasks || []).slice(0, 5).map(task => (
                 <tr key={task.task_id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
@@ -345,7 +433,9 @@ const Dashboard: React.FC = () => {
                           ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                           : task.status === 'InProgress'
                             ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                            : task.status === 'Assigned'
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                              : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
                       }`}
                     >
                       {task.status}
@@ -359,7 +449,8 @@ const Dashboard: React.FC = () => {
                   </td>
                 </tr>
               ))}
-              {(!dashboardData.recentTasks || dashboardData.recentTasks.length === 0) && (
+              {(!dashboardData.taskStats?.recentTasks ||
+                dashboardData.taskStats?.recentTasks.length === 0) && (
                 <tr>
                   <td
                     colSpan={4}

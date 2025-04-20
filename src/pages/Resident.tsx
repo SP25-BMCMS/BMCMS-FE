@@ -67,27 +67,37 @@ const Resident: React.FC = () => {
       userId: string;
       newStatus: 'Active' | 'Inactive';
     }) => {
-      await updateResidentStatus(userId, newStatus);
-      return { userId, newStatus };
+      try {
+        const result = await updateResidentStatus(userId, newStatus);
+        return { userId, newStatus, result };
+      } catch (error: any) {
+        // Lấy thông báo lỗi cụ thể từ API (nếu có)
+        const errorMessage = error.response?.data?.message || 'Failed to update resident status';
+        throw new Error(errorMessage);
+      }
     },
     onMutate: async ({ userId, newStatus }) => {
       await queryClient.cancelQueries({ queryKey: ['residents'] });
       const previousResidents = queryClient.getQueryData(['residents']);
-      queryClient.setQueryData(['residents'], (old: ResidentsResponse) => ({
-        ...old,
-        data: old.data.map((resident: Residents) =>
-          resident.userId === userId ? { ...resident, accountStatus: newStatus } : resident
-        ),
-      }));
+      queryClient.setQueryData(['residents'], (old: any) => {
+        if (!old || !old.data) return old;
+        return {
+          ...old,
+          data: old.data.map((resident: Residents) =>
+            resident.userId === userId ? { ...resident, accountStatus: newStatus } : resident
+          ),
+        };
+      });
       return { previousResidents };
     },
-    onError: (err, variables, context) => {
+    onError: (error: any, variables, context) => {
       if (context?.previousResidents) {
         queryClient.setQueryData(['residents'], context.previousResidents);
       }
-      toast.error('Failed to update resident status!');
+      toast.error(error.message || 'Failed to update resident status!');
     },
-    onSettled: () => {
+    onSuccess: data => {
+      toast.success(`Resident status updated to ${data.newStatus} successfully!`);
       queryClient.invalidateQueries({ queryKey: ['residents'] });
     },
   });
@@ -266,9 +276,9 @@ const Resident: React.FC = () => {
     },
   ];
 
-  const handleAddResident = async (residentData: Omit<Residents, 'userId'>) => {
-    await addResident(residentData);
-  };
+  // const handleAddResident = async (residentData: Omit<Residents, 'userId'>) => {
+  //   await addResident(residentData);
+  // };
 
   const loadingVariants = {
     rotate: 360,
@@ -294,8 +304,16 @@ const Resident: React.FC = () => {
     setIsViewDetailOpen(true);
   };
 
-  if (isLoadingResidents && (!residentsResponse?.data || residentsResponse.data.length === 0)) {
+  if (isLoadingResidents) {
     return <LoadingIndicator />;
+  }
+
+  if (!residentsResponse?.data || residentsResponse.data.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-gray-700 dark:text-gray-300">No residents found.</p>
+      </div>
+    );
   }
 
   return (
@@ -339,12 +357,12 @@ const Resident: React.FC = () => {
         />
       </div>
 
-      <AddResident
+      {/* <AddResident
         isOpen={isModalOpen}
         onClose={closeModal}
         onAdd={handleAddResident}
         isLoading={isAdding}
-      />
+      /> */}
       <ConfirmStatusChangeModal
         isOpen={isStatusChangeModalOpen}
         onClose={() => setIsStatusChangeModalOpen(false)}

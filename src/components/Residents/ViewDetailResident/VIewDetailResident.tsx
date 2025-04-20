@@ -29,6 +29,13 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   const [error, setError] = useState<string | null>(null);
   const [isAddApartmentOpen, setIsAddApartmentOpen] = useState<boolean>(false);
 
+  // Debug: console log when component renders with resident
+  useEffect(() => {
+    if (isOpen && resident) {
+      console.log('ViewDetailResident mở với resident:', resident);
+    }
+  }, [isOpen, resident]);
+
   // Reset state when modal closes or resident changes
   useEffect(() => {
     if (!isOpen) {
@@ -39,6 +46,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
       // Reset apartments when resident changes
       setApartments([]);
       setError(null);
+      console.log('Trạng thái tài khoản:', resident.accountStatus);
 
       // Only fetch if resident is active
       if (resident.accountStatus === 'Active') {
@@ -56,22 +64,32 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   };
 
   const fetchResidentApartments = async () => {
-    if (!resident) return;
+    if (!resident) {
+      console.error('Không thể lấy thông tin căn hộ: resident là null');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
     try {
+      console.log('Đang gọi API getResidentApartments với userId:', resident.userId);
       const response = await getResidentApartments(resident.userId);
-      if (response.isSuccess && response.data) {
+      console.log('API response:', response);
+
+      if (response && response.isSuccess && Array.isArray(response.data)) {
+        console.log('Tìm thấy căn hộ:', response.data.length);
         setApartments(response.data);
       } else {
-        setError(response.message || 'Failed to load resident apartments');
-        toast.error(response.message || 'Failed to load resident apartments');
+        const errorMsg = response?.message || 'Không thể tải thông tin căn hộ';
+        console.error('Lỗi khi lấy danh sách căn hộ:', errorMsg);
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (error: any) {
-      console.error('Error fetching resident apartments:', error);
-      setError(error.message || 'An error occurred');
-      toast.error(error.message || 'Could not load resident apartments');
+      console.error('Lỗi khi gọi API getResidentApartments:', error);
+      const errorMessage = error.message || 'Đã xảy ra lỗi khi tải thông tin căn hộ';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -79,6 +97,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
 
   // Handle custom close function to ensure state is reset
   const handleClose = () => {
+    console.log('Đóng modal');
     setApartments([]);
     setError(null);
     onClose();
@@ -93,6 +112,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
         day: 'numeric',
       });
     } catch (error) {
+      console.error('Lỗi khi định dạng ngày:', error);
       return dateString;
     }
   };
@@ -114,11 +134,13 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   };
 
   if (!resident) {
+    console.log('Không hiển thị modal vì resident là null');
     return null;
   }
 
   // Show warning for inactive residents
   const isInactive = resident.accountStatus !== 'Active';
+  console.log('Trạng thái tài khoản hiện tại:', resident.accountStatus, 'isInactive:', isInactive);
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Resident Details" size="lg">
@@ -149,9 +171,10 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
             Close
           </button>
         </div>
-      ) : isLoading ? ( // Remove apartments.length check to always show loading spinner when isLoading is true
+      ) : isLoading ? (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+          <span className="ml-3">Đang tải dữ liệu...</span>
         </div>
       ) : (
         <div className="space-y-6">
@@ -220,17 +243,6 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                     </p>
                   </div>
                 </div>
-
-                <div className="flex items-center">
-                  <UserCheck className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">User ID</p>
-                    <p className="text-gray-900 dark:text-white text-xs md:text-sm">
-                      {resident.userId}
-                    </p>
-                  </div>
-                </div>
-
                 <div className="flex items-center">
                   <CalendarDays className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
                   <div>
@@ -288,7 +300,9 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                       </p>
                       <p className="text-gray-900 dark:text-white">
                         {[
-                          ...new Set(apartments.map(apt => apt.buildingDetails.building.name)),
+                          ...new Set(
+                            apartments.map(apt => apt.buildingDetails?.building?.name || 'Unknown')
+                          ),
                         ].join(', ')}
                       </p>
                     </div>
@@ -300,7 +314,11 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Areas</p>
                       <p className="text-gray-900 dark:text-white">
                         {[
-                          ...new Set(apartments.map(apt => apt.buildingDetails.building.area.name)),
+                          ...new Set(
+                            apartments.map(
+                              apt => apt.buildingDetails?.building?.area?.name || 'Unknown'
+                            )
+                          ),
                         ].join(', ')}
                       </p>
                     </div>
@@ -322,51 +340,67 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
               </h3>
 
               <div className="grid grid-cols-1 gap-4">
-                {apartments.map(apartment => (
-                  <div
-                    key={apartment.apartmentId}
-                    className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
-                        <img
-                          src={
-                            apartment.buildingDetails.building.imageCover ||
-                            'https://via.placeholder.com/64?text=No+Image'
-                          }
-                          alt={apartment.buildingDetails.building.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                {apartments.map(apartment => {
+                  // Kiểm tra xem apartment và các thuộc tính con có tồn tại không
+                  const buildingName =
+                    apartment?.buildingDetails?.building?.name || 'Unknown Building';
+                  const buildingDetailName = apartment?.buildingDetails?.name || '';
+                  const areaName =
+                    apartment?.buildingDetails?.building?.area?.name || 'Unknown Area';
+                  const buildingDescription =
+                    apartment?.buildingDetails?.building?.description || '';
+                  const buildingFloors = apartment?.buildingDetails?.building?.numberFloor || 0;
+                  const buildingStatus = apartment?.buildingDetails?.building?.Status || 'Unknown';
+                  const buildingImage =
+                    apartment?.buildingDetails?.building?.imageCover ||
+                    'https://via.placeholder.com/64?text=No+Image';
 
-                      <div className="ml-4 flex-1">
-                        <h4 className="text-base font-semibold text-gray-900 dark:text-white flex items-center">
-                          <span>Apartment {apartment.apartmentName}</span>
-                          <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                            {apartment.buildingDetails.building.Status}
-                          </span>
-                        </h4>
+                  return (
+                    <div
+                      key={apartment.apartmentId}
+                      className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
+                          <img
+                            src={buildingImage}
+                            alt={buildingName}
+                            className="w-full h-full object-cover"
+                            onError={e => {
+                              // Fallback khi ảnh lỗi
+                              (e.target as HTMLImageElement).src =
+                                'https://via.placeholder.com/64?text=No+Image';
+                            }}
+                          />
+                        </div>
 
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-medium">Building:</span>{' '}
-                          {apartment.buildingDetails.building.name} (
-                          {apartment.buildingDetails.name})
-                        </p>
+                        <div className="ml-4 flex-1">
+                          <h4 className="text-base font-semibold text-gray-900 dark:text-white flex items-center">
+                            <span>Apartment {apartment.apartmentName}</span>
+                            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                              {buildingStatus}
+                            </span>
+                          </h4>
 
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          <span className="font-medium">Area:</span>{' '}
-                          {apartment.buildingDetails.building.area.name}
-                        </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <span className="font-medium">Building:</span> {buildingName}{' '}
+                            {buildingDetailName ? `(${buildingDetailName})` : ''}
+                          </p>
 
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          <span className="font-medium">Building Info:</span>{' '}
-                          {apartment.buildingDetails.building.description} •{' '}
-                          {apartment.buildingDetails.building.numberFloor} floors
-                        </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <span className="font-medium">Area:</span> {areaName}
+                          </p>
+
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            <span className="font-medium">Building Info:</span>{' '}
+                            {buildingDescription}{' '}
+                            {buildingFloors > 0 ? `• ${buildingFloors} floors` : ''}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
