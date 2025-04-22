@@ -1,97 +1,115 @@
-import React, { useEffect, useState } from 'react';
-import { Dialog } from '@headlessui/react';
-import { XMarkIcon, CalendarDaysIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
-import apiInstance from '@/lib/axios';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
-import scheduleJobsApi from '@/services/scheduleJobs';
-import authApi from '@/services/auth';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import apiInstance from '@/lib/axios'
+import authApi from '@/services/auth'
+import { BuildingOfficeIcon, CalendarDaysIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { useEffect, useState } from 'react'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { toast } from 'react-hot-toast'
 
 interface CreateScheduleJobModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  scheduleId: string;
+  isOpen: boolean
+  onClose: () => void
+  scheduleId: string
+  onSubmit?: (data: {
+    schedule_id: string
+    run_date: string
+    buildingDetailId: string
+  }) => Promise<void>
 }
 
 interface Building {
-  buildingId: string;
-  name: string;
+  buildingId: string
+  name: string
+  numberFloor: number
+  area: {
+    areaId: string
+    name: string
+  }
   buildingDetails: {
-    buildingDetailId: string;
-    name: string;
-  }[];
+    buildingDetailId: string
+    name: string
+    total_apartments: number
+  }[]
 }
 
 const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
   isOpen,
   onClose,
   scheduleId,
+  onSubmit,
 }) => {
-  const queryClient = useQueryClient();
-  const [selectedBuildingDetail, setSelectedBuildingDetail] = useState<string>('');
-  const [runDate, setRunDate] = useState<Date | null>(new Date());
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const queryClient = useQueryClient()
+  const [selectedBuildingDetail, setSelectedBuildingDetail] = useState<string>('')
+  const [runDate, setRunDate] = useState<Date | null>(new Date())
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   // Get current user (manager)
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: authApi.getCurrentUser,
     enabled: isOpen,
-  });
+  })
 
   // Fetch buildings managed by the current manager
   const { data: buildingsData, isLoading: buildingsLoading } = useQuery({
     queryKey: ['managerBuildings', currentUser?.userId],
     queryFn: async () => {
-      if (!currentUser?.userId) return { data: [] };
+      if (!currentUser?.userId) return { data: [] }
       const url = import.meta.env.VITE_VIEW_BUILDING_LIST_FOR_MANAGER.replace(
         '{managerId}',
         currentUser.userId
-      );
-      const response = await apiInstance.get(url);
-      return response.data;
+      )
+      const response = await apiInstance.get(url)
+      return response.data
     },
     enabled: isOpen && !!currentUser?.userId,
-  });
+  })
 
   // Create schedule job mutation
   const createScheduleJobMutation = useMutation({
     mutationFn: async (data: {
-      schedule_id: string;
-      run_date: string;
-      buildingDetailId: string;
+      schedule_id: string
+      run_date: string
+      buildingDetailId: string
     }) => {
       return await apiInstance.post(import.meta.env.VITE_CREATE_SCHEDULE_JOB, {
         ...data,
         status: 'Pending',
         inspectionId: null,
-      });
+      })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] });
-      toast.success('Schedule job created successfully');
-      onClose();
+      queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
+      toast.success('Schedule job created successfully')
+      onClose()
     },
     onError: (error: any) => {
-      console.error('Error creating schedule job:', error);
-      toast.error(error.response?.data?.message || 'Failed to create schedule job');
-      setIsSubmitting(false);
+      console.error('Error creating schedule job:', error)
+      toast.error(error.response?.data?.message || 'Failed to create schedule job')
+      setIsSubmitting(false)
     },
-  });
+  })
 
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setSelectedBuildingDetail('');
-      setRunDate(new Date());
+      setSelectedBuildingDetail('')
+      setRunDate(new Date())
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Create flattened list of buildings with their details
-  const buildingOptions: { buildingId: string; buildingName: string; buildingDetailId: string; detailName: string }[] = [];
-  
+  const buildingOptions: {
+    buildingId: string
+    buildingName: string
+    buildingDetailId: string
+    detailName: string
+    totalApartments: number
+    numberFloor: number
+    areaName: string
+  }[] = []
+
   if (buildingsData?.data) {
     buildingsData.data.forEach((building: Building) => {
       if (building.buildingDetails && building.buildingDetails.length > 0) {
@@ -101,44 +119,55 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
             buildingName: building.name,
             buildingDetailId: detail.buildingDetailId,
             detailName: detail.name,
-          });
-        });
+            totalApartments: detail.total_apartments || 0,
+            numberFloor: building.numberFloor,
+            areaName: building.area.name
+          })
+        })
       }
-    });
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!scheduleId) {
-      toast.error('No schedule selected');
-      return;
+      toast.error('No schedule selected')
+      return
     }
 
     if (!selectedBuildingDetail) {
-      toast.error('Please select a building');
-      return;
+      toast.error('Please select a building')
+      return
     }
 
     if (!runDate) {
-      toast.error('Please select a run date');
-      return;
+      toast.error('Please select a run date')
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
-      await createScheduleJobMutation.mutateAsync({
+      const submitData = {
         schedule_id: scheduleId,
         run_date: runDate.toISOString(),
         buildingDetailId: selectedBuildingDetail,
-      });
-    } catch (error) {
-      // Error handled in mutation
-    }
-  };
+      }
 
-  if (!isOpen) return null;
+      if (onSubmit) {
+        await onSubmit(submitData)
+      } else {
+        await createScheduleJobMutation.mutateAsync(submitData)
+      }
+    } catch (error) {
+      // Error handled in mutation or onSubmit
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
@@ -151,6 +180,7 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200 transition-colors"
+            title="Close modal"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -165,8 +195,8 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
           ) : (
             <>
               <div>
-                <label 
-                  htmlFor="buildingDetail" 
+                <label
+                  htmlFor="buildingDetail"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Building
@@ -198,9 +228,23 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
                 )}
               </div>
 
+              {selectedBuildingDetail && (
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-md text-sm">
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)?.buildingName} - {buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)?.detailName}
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)?.totalApartments} apartments • {buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)?.numberFloor} floors
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Area: {buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)?.areaName}
+                  </p>
+                </div>
+              )}
+
               <div>
-                <label 
-                  htmlFor="runDate" 
+                <label
+                  htmlFor="runDate"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Run Date
@@ -209,7 +253,7 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
                   selected={runDate}
                   onChange={(date: Date | null) => {
                     if (date) {
-                      setRunDate(date);
+                      setRunDate(date)
                     }
                   }}
                   showTimeSelect
@@ -251,7 +295,7 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CreateScheduleJobModal; 
+export default CreateScheduleJobModal 
