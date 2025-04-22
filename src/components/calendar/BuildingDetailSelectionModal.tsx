@@ -94,6 +94,11 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
     setSearchQuery('')
   }, [])
 
+  const handleDone = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    onClose()
+  }, [onClose])
+
   if (!isOpen) return null
 
   return (
@@ -256,10 +261,7 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
 
         <div className="mt-5 flex justify-end pt-3 border-t border-gray-200 dark:border-gray-700">
           <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onClose()
-            }}
+            onClick={handleDone}
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-700 focus:outline-none"
           >
             Done

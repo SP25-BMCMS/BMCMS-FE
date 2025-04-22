@@ -79,7 +79,7 @@ const EventModal: React.FC<EventModalProps> = ({
     end_date: new Date(),
     buildingDetailIds: [],
     cycle_id: '',
-    schedule_status: 'InProgress',
+    schedule_status: 'Pending',
   })
   const [showBuildingModal, setShowBuildingModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -89,12 +89,12 @@ const EventModal: React.FC<EventModalProps> = ({
       setFormData({
         title: initialFormData.title || '',
         description: initialFormData.description || '',
-        schedule_type: initialFormData.schedule_type || 'Daily',
+        schedule_type: 'Daily',
         start_date: initialFormData.start ? new Date(initialFormData.start) : new Date(),
         end_date: initialFormData.end ? new Date(initialFormData.end) : new Date(),
         buildingDetailIds: selectedBuildingDetails,
         cycle_id: initialFormData.cycle_id || '',
-        schedule_status: 'InProgress',
+        schedule_status: 'Pending',
       })
     } else if (selectedEvent) {
       // Map event status to API status format
@@ -112,6 +112,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
       // Get cycle ID from existing data if available
       const cycleId = selectedEvent.cycle_id || ''
+      console.log('Selected Event Cycle ID:', cycleId) // Debug log
 
       setFormData({
         title: selectedEvent.title || '',
@@ -129,7 +130,7 @@ const EventModal: React.FC<EventModalProps> = ({
         onSetSelectedBuildingDetails(selectedEvent.buildingDetailIds)
       }
     }
-  }, [isCreateMode, initialFormData, selectedEvent, isOpen, onSetSelectedBuildingDetails])
+  }, [isCreateMode, initialFormData, selectedEvent, isOpen, onSetSelectedBuildingDetails, maintenanceCycles])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -178,7 +179,59 @@ const EventModal: React.FC<EventModalProps> = ({
     setShowBuildingModal(true)
   }
 
+  // Add effect to sync form data with selected building details
+  useEffect(() => {
+    // Only update form data if we're not in create mode and we have a selected event
+    if (!isCreateMode && selectedEvent) {
+      setFormData(prev => ({
+        ...prev,
+        buildingDetailIds: selectedBuildingDetails,
+      }))
+    }
+  }, [selectedBuildingDetails, isCreateMode, selectedEvent])
+
+  // Add function to get cycle label
+  const getCycleLabel = (cycleId: string) => {
+    console.log('Getting cycle label for:', cycleId)
+    console.log('Available cycles:', maintenanceCycles)
+
+    // Extract data array from the response if needed
+    const cyclesArray = Array.isArray(maintenanceCycles)
+      ? maintenanceCycles
+      : (maintenanceCycles?.data || [])
+
+    // Ensure cyclesArray is an array and cycleId exists
+    if (!Array.isArray(cyclesArray) || !cycleId || cycleId.trim() === '') {
+      console.log('Invalid maintenance cycles or cycle ID')
+      return ''
+    }
+
+    try {
+      const cycle = cyclesArray.find(c => c.cycle_id === cycleId)
+      console.log('Found cycle:', cycle)
+      return cycle ? `${cycle.device_type} - ${cycle.frequency} (${cycle.basis})` : ''
+    } catch (error) {
+      console.error('Error getting cycle label:', error)
+      return ''
+    }
+  }
+
   if (!isOpen) return null
+
+  console.log('Rendering Modal - Form Data:', formData)
+  console.log('Rendering Modal - Maintenance Cycles:', maintenanceCycles)
+
+  // Extract data array from the response if needed
+  const cyclesArray = Array.isArray(maintenanceCycles)
+    ? maintenanceCycles
+    : (maintenanceCycles?.data || [])
+
+  // Get current cycle for display
+  const currentCycle = Array.isArray(cyclesArray) && formData.cycle_id && formData.cycle_id.trim() !== ''
+    ? cyclesArray.find(c => c.cycle_id === formData.cycle_id)
+    : null
+
+  console.log('Current Cycle:', currentCycle) // Debug log
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50" onClick={onClose}>
@@ -218,24 +271,26 @@ const EventModal: React.FC<EventModalProps> = ({
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <TagIcon className="w-4 h-4 inline-block mr-2" />
-                Schedule Type
-              </label>
-              <select
-                value={formData.schedule_type}
-                onChange={e => setFormData(prev => ({ ...prev, schedule_type: e.target.value }))}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                aria-label="Schedule type"
-              >
-                <option value="Daily">Daily</option>
-                <option value="Weekly">Weekly</option>
-                <option value="Monthly">Monthly</option>
-                <option value="Yearly">Yearly</option>
-                <option value="Specific">Specific</option>
-              </select>
-            </div>
+            {!isCreateMode && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <TagIcon className="w-4 h-4 inline-block mr-2" />
+                  Schedule Type
+                </label>
+                <select
+                  value={formData.schedule_type}
+                  onChange={e => setFormData(prev => ({ ...prev, schedule_type: e.target.value }))}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  aria-label="Schedule type"
+                >
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Yearly">Yearly</option>
+                  <option value="Specific">Specific</option>
+                </select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -288,39 +343,49 @@ const EventModal: React.FC<EventModalProps> = ({
                 Maintenance Cycle
               </label>
               <select
-                value={formData.cycle_id}
+                value={formData.cycle_id || ''}
                 onChange={e => setFormData(prev => ({ ...prev, cycle_id: e.target.value }))}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 aria-label="Maintenance Cycle"
                 required
               >
                 <option value="">Select a maintenance cycle</option>
-                {maintenanceCycles.map(cycle => (
-                  <option key={cycle.cycle_id} value={cycle.cycle_id}>
+                {Array.isArray(cyclesArray) && cyclesArray.map(cycle => (
+                  <option
+                    key={cycle.cycle_id}
+                    value={cycle.cycle_id}
+                  >
                     {cycle.device_type} - {cycle.frequency} ({cycle.basis})
                   </option>
                 ))}
               </select>
+              {!isCreateMode && formData.cycle_id && formData.cycle_id.trim() !== '' && (
+                <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Current cycle: {getCycleLabel(formData.cycle_id)}
+                </div>
+              )}
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <CheckCircleIcon className="w-4 h-4 inline-block mr-2" />
-                Status
-              </label>
-              <select
-                value={formData.schedule_status}
-                onChange={e => setFormData(prev => ({ ...prev, schedule_status: e.target.value as 'Pending' | 'InProgress' | 'Completed' | 'Cancel' }))}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                aria-label="Schedule status"
-              >
-                {statusOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {!isCreateMode && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <CheckCircleIcon className="w-4 h-4 inline-block mr-2" />
+                  Status
+                </label>
+                <select
+                  value={formData.schedule_status}
+                  onChange={e => setFormData(prev => ({ ...prev, schedule_status: e.target.value as 'Pending' | 'InProgress' | 'Completed' | 'Cancel' }))}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  aria-label="Schedule status"
+                >
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="md:col-span-2 space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -340,13 +405,13 @@ const EventModal: React.FC<EventModalProps> = ({
 
               {selectedBuildingDetails.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedBuildingDetails.map(buildingDetailId => {
+                  {selectedBuildingDetails.map((buildingDetailId, index) => {
                     const buildingDetail = buildingDetails.find(
                       b => b.buildingDetailId === buildingDetailId
                     )
                     return buildingDetail ? (
                       <div
-                        key={buildingDetailId}
+                        key={`${buildingDetailId}-${index}`}
                         className="flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full"
                       >
                         <span>{buildingDetail.name}</span>

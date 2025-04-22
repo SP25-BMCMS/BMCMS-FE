@@ -458,23 +458,41 @@ const ScheduleJob: React.FC = () => {
                       <td className="px-6 py-4 overflow-visible">
                         {job.buildingDetail?.device && job.buildingDetail.device.length > 0 ? (
                           <div className="flex flex-col gap-2">
-                            {job.buildingDetail.device.slice(0, 2).map(device => (
-                              <div key={device.device_id} className="relative">
-                                <button
-                                  onClick={() => toggleDeviceDetails(device.device_id)}
-                                  onMouseEnter={(e) => handleDeviceHover(e, device)}
-                                  onMouseLeave={handleDeviceLeave}
-                                  className="text-xs px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-300 rounded-full transition-colors flex items-center"
-                                >
-                                  {device.name}
-                                </button>
-                              </div>
-                            ))}
-                            {job.buildingDetail.device.length > 2 && (
-                              <div className="text-xs text-gray-500">
-                                +{job.buildingDetail.device.length - 2} more devices
-                              </div>
-                            )}
+                            {(() => {
+                              const matchingDevices = job.buildingDetail.device.filter(device => device.type === cycleData?.device_type)
+                              if (matchingDevices.length === 0) {
+                                return (
+                                  <div className="relative">
+                                    <button
+                                      className="text-xs px-2 py-1 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/30 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full transition-colors flex items-center"
+                                    >
+                                      Other
+                                    </button>
+                                  </div>
+                                )
+                              }
+                              return (
+                                <>
+                                  {matchingDevices.slice(0, 2).map(device => (
+                                    <div key={device.device_id} className="relative">
+                                      <button
+                                        onClick={() => toggleDeviceDetails(device.device_id)}
+                                        onMouseEnter={(e) => handleDeviceHover(e, device)}
+                                        onMouseLeave={handleDeviceLeave}
+                                        className="text-xs px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-300 rounded-full transition-colors flex items-center"
+                                      >
+                                        {device.name}
+                                      </button>
+                                    </div>
+                                  ))}
+                                  {matchingDevices.length > 2 && (
+                                    <div className="text-xs text-gray-500">
+                                      +{matchingDevices.length - 2} more devices
+                                    </div>
+                                  )}
+                                </>
+                              )
+                            })()}
                           </div>
                         ) : (
                           <span className="text-xs text-gray-500 italic">No equipment assigned</span>
