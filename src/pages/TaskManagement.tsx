@@ -470,13 +470,15 @@ const TaskManagement: React.FC = () => {
       key: 'action',
       title: 'Action',
       render: item => (
-        <DropdownMenu
-          onViewDetail={() => navigate(`/task-detail/${item.task_id}`)}
-          onChangeStatus={() => handleTaskStatusChange(item)}
-          onRemove={() => console.log('Remove', item)}
-          showExportPdf={item.status === 'Completed'}
-          onExportPdf={() => handleExportPdf(item.task_id)}
-        />
+        <div onClick={e => e.stopPropagation()}>
+          <DropdownMenu
+            onViewDetail={() => navigate(`/task-detail/${item.task_id}`)}
+            onChangeStatus={() => handleTaskStatusChange(item)}
+            onRemove={() => console.log('Remove', item)}
+            showExportPdf={item.status === 'Completed'}
+            onExportPdf={() => handleExportPdf(item.task_id)}
+          />
+        </div>
       ),
       width: '80px',
     },

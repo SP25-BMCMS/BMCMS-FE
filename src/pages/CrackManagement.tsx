@@ -233,24 +233,15 @@ const CrackManagement: React.FC = () => {
     {
       key: 'action',
       title: 'Action',
-      render: (item, index) => {
-        // Check if the status is one where we don't want to show Change Status
-        const hideChangeStatus = ['InProgress', 'resolved', 'Reviewing'].includes(item.status)
-
-        // Check if this is one of the last few items in the table
-        const isNearBottom = index >= (cracksData?.cracks.length || 0) - 3
-
-        return (
-          <div className="dropdown-container relative">
-            <DropdownMenu
-              onViewDetail={() => navigate(`/crack/detail/${item.id}`)}
-              onChangeStatus={hideChangeStatus ? undefined : () => handleStatusUpdate(item)}
-              onRemove={() => console.log('Remove', item)}
-              className={`absolute right-0 z-50 ${isNearBottom ? 'bottom-0' : 'top-0'}`}
-            />
-          </div>
-        )
-      },
+      render: (item) => (
+        <div onClick={e => e.stopPropagation()}>
+          <DropdownMenu
+            onViewDetail={() => navigate(`/crack/detail/${item.id}`)}
+            onChangeStatus={['InProgress', 'resolved', 'Reviewing'].includes(item.status) ? undefined : () => handleStatusUpdate(item)}
+            onRemove={() => console.log('Remove', item)}
+          />
+        </div>
+      ),
       width: '80px',
     },
   ]

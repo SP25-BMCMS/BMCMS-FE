@@ -107,6 +107,24 @@ export interface StaffData {
   role: string
   dateOfBirth: string
   gender: string
+  userDetails?: {
+    positionId: string
+    departmentId: string
+    staffStatus: string
+    image?: string
+    position?: {
+      positionId: string
+      positionName: string
+      description: string
+    }
+    department?: {
+      departmentId: string
+      departmentName: string
+      description: string
+      area: string
+    }
+  }
+  accountStatus: string
 }
 
 export interface StaffDetailResponse {
@@ -150,6 +168,23 @@ export type Staff = {
   dateOfBirth: string
   gender: string
   createdDate: string
+  userDetails?: {
+    positionId: string
+    departmentId: string
+    staffStatus: string
+    image?: string
+    position?: {
+      positionId: string
+      positionName: string
+      description: string
+    }
+    department?: {
+      departmentId: string
+      departmentName: string
+      description: string
+      area: string
+    }
+  }
 }
 
 //building
@@ -318,6 +353,7 @@ export interface TaskResponse {
   updated_at: string
   crack_id: string
   schedule_job_id: string
+  title?: string
   crackInfo?: {
     isSuccess: boolean
     message: string
@@ -348,6 +384,30 @@ export interface TaskResponse {
         updatedAt: string
       }[]
     }[]
+  }
+  schedulesjobInfo?: {
+    isSuccess: boolean
+    message: string
+    data: {
+      schedule_job_id: string
+      schedule_id: string
+      status: string
+      run_date: string
+      buildingDetail?: {
+        buildingDetailId: string
+        name: string
+        building?: {
+          buildingId: string
+          name: string
+        }
+      }
+      schedule?: {
+        schedule_name: string
+        cycle?: {
+          device_type: string
+        }
+      }
+    }
   }
 }
 

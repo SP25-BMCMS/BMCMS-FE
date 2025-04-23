@@ -14,10 +14,18 @@ import DepartmentPositionModal from '@/components/Staff/DepartmentPositionModal'
 import ViewDetailStaff from '@/components/Staff/ViewDetailStaff';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
+import Pagination from '@/components/Pagination';
+import FilterDropdown from '@/components/FilterDropdown';
 
 interface StaffResponse {
   isSuccess: boolean;
   data: StaffData[];
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 const StaffManagement: React.FC = () => {
@@ -25,15 +33,38 @@ const StaffManagement: React.FC = () => {
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false);
   const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedRole, setSelectedRole] = useState<string>('all');
 
   const queryClient = useQueryClient();
 
+  // Define role filter options
+  const roleOptions = [
+    { value: 'all', label: 'All Roles' },
+    { value: 'Staff', label: 'Staff' },
+    { value: 'Manager', label: 'Manager' },
+    { value: 'Admin', label: 'Admin' },
+  ];
+
   // Fetch staff with React Query
   const { data: staffResponse, isLoading: isLoadingStaff } = useQuery<StaffResponse>({
-    queryKey: ['staff', searchTerm],
+    queryKey: ['staff', searchTerm, currentPage, itemsPerPage, selectedRole],
     queryFn: async () => {
+      // In a real implementation, you would pass page, limit, and role to your API
       const response = await getAllStaff();
-      return response;
+
+      // If the API doesn't support pagination, you can implement it client-side
+      // This is a simplified example
+      return {
+        ...response,
+        pagination: response.pagination || {
+          total: response.data.length,
+          page: currentPage,
+          limit: itemsPerPage,
+          totalPages: Math.ceil(response.data.length / itemsPerPage)
+        }
+      };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -44,7 +75,7 @@ const StaffManagement: React.FC = () => {
   });
 
   // Format staff data
-  const staffList =
+  const allStaffList =
     staffResponse?.data.map((staff: StaffData) => ({
       id: staff.userId,
       name: staff.username,
@@ -54,6 +85,7 @@ const StaffManagement: React.FC = () => {
       dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
       gender: staff.gender,
       createdDate: new Date().toLocaleDateString(),
+      userDetails: staff.userDetails,
     })) || [];
 
   const {
@@ -76,6 +108,20 @@ const StaffManagement: React.FC = () => {
   const handleOpenDeptPosModal = (staff: Staff) => {
     setSelectedStaff(staff);
     setIsDeptPosModalOpen(true);
+  };
+
+  const handleRoleChange = (role: string) => {
+    setSelectedRole(role);
+    setCurrentPage(1); // Reset to first page when changing filter
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleLimitChange = (limit: number) => {
+    setItemsPerPage(limit);
+    setCurrentPage(1); // Reset to first page when changing items per page
   };
 
   // Update staff mutation
@@ -126,7 +172,9 @@ const StaffManagement: React.FC = () => {
       key: 'index',
       title: 'No',
       render: (_, index) => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {(currentPage - 1) * itemsPerPage + index + 1}
+        </div>
       ),
       width: '60px',
     },
@@ -170,6 +218,15 @@ const StaffManagement: React.FC = () => {
       },
     },
     {
+      key: 'department',
+      title: 'Department',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {item.userDetails?.department?.departmentName || '-'}
+        </div>
+      ),
+    },
+    {
       key: 'Gender',
       title: 'Gender',
       render: item => (
@@ -192,23 +249,15 @@ const StaffManagement: React.FC = () => {
       ),
     },
     {
-      key: 'createdDate',
-      title: 'Created Date',
-      render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
-      ),
-    },
-    {
       key: 'action',
       title: 'Action',
       render: item => (
-        <div className="relative staff-action-cell">
+        <div onClick={e => e.stopPropagation()}>
           <DropdownMenu
             onViewDetail={() => handleViewDetail(item)}
             onChangeStatus={() => handleOpenDeptPosModal(item)}
             onRemove={() => console.log('Remove clicked', item)}
             changeStatusTitle="Change Department"
-            className="right-0 origin-top-right dropdown-fix"
           />
         </div>
       ),
@@ -216,12 +265,22 @@ const StaffManagement: React.FC = () => {
     },
   ];
 
-  // Lọc danh sách nhân viên dựa trên từ khóa tìm kiếm
-  const filteredStaff = staffList.filter(
+  // Lọc danh sách nhân viên dựa trên từ khóa tìm kiếm và role
+  const filteredStaffList = allStaffList.filter(
     staff =>
-      staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.id.toLowerCase().includes(searchTerm.toLowerCase())
+      (staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        staff.id.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (selectedRole === 'all' || staff.role === selectedRole)
   );
+
+  // Apply pagination to filtered staff
+  const paginatedStaff = filteredStaffList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredStaffList.length / itemsPerPage);
 
   // Loading animation
   const loadingVariants = {
@@ -243,7 +302,7 @@ const StaffManagement: React.FC = () => {
     </div>
   );
 
-  if (isLoadingStaff && staffList.length === 0) {
+  if (isLoadingStaff && allStaffList.length === 0) {
     return <LoadingIndicator />;
   }
 
@@ -259,11 +318,20 @@ const StaffManagement: React.FC = () => {
           className="w-[20rem] max-w-xs"
         />
 
-        <AddButton label="Add Staff" icon={<FiUserPlus />} onClick={openModal} />
+        <div className="flex items-center space-x-4">
+          <FilterDropdown
+            options={roleOptions}
+            onSelect={handleRoleChange}
+            selectedValue={selectedRole}
+            label="Filter by Role"
+            buttonClassName="w-[150px]"
+          />
+          <AddButton label="Add Staff" icon={<FiUserPlus />} onClick={openModal} />
+        </div>
       </div>
 
       <Table<Staff>
-        data={filteredStaff}
+        data={paginatedStaff}
         columns={columns}
         keyExtractor={item => item.id}
         onRowClick={item => console.log('Row clicked:', item)}
@@ -272,6 +340,18 @@ const StaffManagement: React.FC = () => {
         isLoading={isLoadingStaff}
         emptyText="Không tìm thấy dữ liệu nhân viên"
       />
+
+      <div className="w-[95%] mx-auto mt-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={filteredStaffList.length}
+          itemsPerPage={itemsPerPage}
+          onLimitChange={handleLimitChange}
+          limitOptions={[5, 10, 20, 50]}
+        />
+      </div>
 
       <AddStaff
         isOpen={isModalOpen}
