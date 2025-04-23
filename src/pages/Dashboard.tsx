@@ -83,7 +83,7 @@ const Dashboard: React.FC = () => {
     return (
       <div className="bg-red-100 text-red-700 p-8 rounded-lg text-center max-w-md mx-auto mt-12">
         <FaExclamationCircle className="text-5xl mx-auto mb-4" />
-        <p className="font-semibold text-xl mb-2">Lỗi kết nối</p>
+        <p className="font-semibold text-xl mb-2">Connection Error</p>
         <p className="mb-4">{errorMessage || 'Không thể tải dữ liệu bảng điều khiển'}</p>
         <button
           onClick={() => navigate('/login')}

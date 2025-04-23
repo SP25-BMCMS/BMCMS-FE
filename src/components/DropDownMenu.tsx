@@ -76,11 +76,11 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
                 : 'text-blue-700 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
             disabled={viewDetailDisabled}
-            title={viewDetailDisabled ? 'Không khả dụng với tòa nhà đang xây dựng' : 'Xem chi tiết'}
+            title={viewDetailDisabled ? 'Not available for buildings under construction' : 'View details'}
           >
             <RiEyeLine className="mr-2" />
             View Detail
-            {viewDetailDisabled && <span className="ml-1 text-xs">(Không khả dụng)</span>}
+            {viewDetailDisabled && <span className="ml-1 text-xs">(Not available)</span>}
           </button>
 
           {showExportPdf && onExportPdf && (

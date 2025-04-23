@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import Modal from './Modal';
-import { getBuildingDetail } from '@/services/building';
-import { toast } from 'react-hot-toast';
-import { Building, MapPin, Calendar, Home, Layers, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react'
+import Modal from './Modal'
+import { getBuildingDetail } from '@/services/building'
+import { toast } from 'react-hot-toast'
+import { Building, MapPin, Calendar, Home, Layers, ArrowRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 interface ViewBuildingDetailProps {
-  isOpen: boolean;
-  onClose: () => void;
-  buildingDetailId: string | null;
-  buildingDetailOptions?: any[];
-  onChangeDetail?: (buildingDetailId: string) => void;
+  isOpen: boolean
+  onClose: () => void
+  buildingDetailId: string | null
+  buildingDetailOptions?: any[]
+  onChangeDetail?: (buildingDetailId: string) => void
 }
 
 const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
@@ -20,42 +20,42 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
   buildingDetailOptions = [],
   onChangeDetail,
 }) => {
-  const [buildingDetail, setBuildingDetail] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [buildingDetail, setBuildingDetail] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Reset state when modal closes or buildingDetailId changes
   useEffect(() => {
-    setBuildingDetail(null);
-    setError(null);
+    setBuildingDetail(null)
+    setError(null)
 
     // Chỉ fetch khi modal mở và có buildingDetailId
     if (isOpen && buildingDetailId) {
-      fetchBuildingDetail();
+      fetchBuildingDetail()
     }
-  }, [isOpen, buildingDetailId]);
+  }, [isOpen, buildingDetailId])
 
   const fetchBuildingDetail = async () => {
-    if (!buildingDetailId) return;
+    if (!buildingDetailId) return
 
-    setIsLoading(true);
+    setIsLoading(true)
 
     try {
-      const response = await getBuildingDetail(buildingDetailId);
+      const response = await getBuildingDetail(buildingDetailId)
       if (response.data) {
-        setBuildingDetail(response.data);
+        setBuildingDetail(response.data)
       } else {
-        setError('Không thể tải thông tin chi tiết tòa nhà');
-        toast.error('Không thể tải thông tin chi tiết tòa nhà');
+        setError('An error occurred')
+        toast.error('An error occurred')
       }
     } catch (error: any) {
-      console.error('Error fetching building detail:', error);
-      setError(error.message || 'Đã xảy ra lỗi');
-      toast.error(error.message || 'Không thể tải thông tin chi tiết tòa nhà');
+      console.error('Error fetching building detail:', error)
+      setError(error.message || 'An error occurred')
+      toast.error(error.message || 'An error occurred')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -64,22 +64,22 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-      });
+      })
     } catch (error) {
-      return dateString;
+      return dateString
     }
-  };
+  }
 
   // Define building status styles
   const getStatusStyle = (status: string) => {
     if (status === 'operational') {
-      return 'bg-green-500 text-white';
+      return 'bg-green-500 text-white'
     }
-    return 'bg-amber-500 text-white';
-  };
+    return 'bg-amber-500 text-white'
+  }
 
   if (!buildingDetailId) {
-    return null;
+    return null
   }
 
   // Animation variants
@@ -91,7 +91,7 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
         staggerChildren: 0.1,
       },
     },
-  };
+  }
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -100,7 +100,7 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
       opacity: 1,
       transition: { type: 'spring', stiffness: 100 },
     },
-  };
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Chi tiết tòa nhà" size="xl">
@@ -131,7 +131,7 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Không thể tải thông tin
+            An error occurred
           </h3>
           <p className="text-gray-600 dark:text-gray-400">{error}</p>
         </motion.div>
@@ -365,7 +365,7 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
         </motion.div>
       ) : null}
     </Modal>
-  );
-};
+  )
+}
 
-export default ViewBuildingDetail;
+export default ViewBuildingDetail
