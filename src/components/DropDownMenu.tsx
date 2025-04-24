@@ -45,25 +45,25 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
       const menuWidth = 220; // Chiều rộng menu đã tăng lên
       const itemHeight = 44; // Chiều cao trung bình mỗi menu item
       const menuHeight = getItemCount() * itemHeight;
-      
+
       // Kiểm tra xem có đủ không gian phía dưới không
       const spaceBelow = windowHeight - rect.bottom;
       const needToShowAbove = spaceBelow < menuHeight;
-      
+
       // Kiểm tra không gian bên phải
       const rightEdge = rect.right;
       const spaceOnRight = window.innerWidth - rightEdge;
       const alignLeft = spaceOnRight < menuWidth;
-      
+
       setShowAbove(needToShowAbove);
-      
+
       setMenuPosition({
-        top: needToShowAbove 
+        top: needToShowAbove
           ? rect.top - menuHeight + window.scrollY
           : rect.bottom + window.scrollY,
         left: alignLeft
           ? rect.right - menuWidth + window.scrollX
-          : Math.max(rect.left - 20, 5) + window.scrollX // Giữ menu luôn nằm trong màn hình, lùi vào 20px
+          : Math.max(rect.left - 20, 5) + window.scrollX, // Giữ menu luôn nằm trong màn hình, lùi vào 20px
       });
     }
   };
@@ -80,9 +80,9 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isOpen &&
-        menuRef.current && 
+        menuRef.current &&
         !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current && 
+        buttonRef.current &&
         !buttonRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
@@ -130,74 +130,79 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
       </button>
 
       {/* Dropdown menu - rendered in portal to avoid scroll container issues */}
-      {isOpen && createPortal(
-        <div
-          ref={menuRef}
-          className={`fixed bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-lg rounded-md z-[9999] ${className}`}
-          style={{ 
-            top: `${menuPosition.top}px`, 
-            left: `${menuPosition.left}px`,
-            width: '220px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-          }}
-        >
-          <div className="py-1 max-h-[calc(100vh-20px)] overflow-auto">
-            <button
-              onClick={handleViewDetail}
-              className={`flex items-center w-full px-4 py-2 ${
-                viewDetailDisabled
-                  ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                  : 'text-blue-700 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-              disabled={viewDetailDisabled}
-              title={viewDetailDisabled ? 'Not available for buildings under construction' : 'View details'}
-            >
-              <RiEyeLine className="mr-2" />
-              View Detail
-              {viewDetailDisabled && <span className="ml-1 text-xs">(Not available)</span>}
-            </button>
-
-            {showExportPdf && onExportPdf && (
+      {isOpen &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className={`fixed bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-lg rounded-md z-[9999] ${className}`}
+            style={{
+              top: `${menuPosition.top}px`,
+              left: `${menuPosition.left}px`,
+              width: '220px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            }}
+          >
+            <div className="py-1 max-h-[calc(100vh-20px)] overflow-auto">
               <button
-                onClick={() => {
-                  onExportPdf();
-                  setIsOpen(false);
-                }}
-                className="flex items-center w-full px-4 py-2 text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={handleViewDetail}
+                className={`flex items-center w-full px-4 py-2 ${
+                  viewDetailDisabled
+                    ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                    : 'text-blue-700 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                disabled={viewDetailDisabled}
+                title={
+                  viewDetailDisabled
+                    ? 'Not available for buildings under construction'
+                    : 'View details'
+                }
               >
-                <RiFileDownloadLine className="mr-2" /> Export PDF
+                <RiEyeLine className="mr-2" />
+                View Detail
+                {viewDetailDisabled && <span className="ml-1 text-xs">(Not available)</span>}
               </button>
-            )}
 
-            {/* Only show Change Status button if onChangeStatus is provided */}
-            {onChangeStatus && (
-              <button
-                onClick={() => {
-                  onChangeStatus();
-                  setIsOpen(false);
-                }}
-                className="flex items-center w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <RiFilterLine className="mr-2" /> {changeStatusTitle}
-              </button>
-            )}
+              {showExportPdf && onExportPdf && (
+                <button
+                  onClick={() => {
+                    onExportPdf();
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center w-full px-4 py-2 text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <RiFileDownloadLine className="mr-2" /> Export PDF
+                </button>
+              )}
 
-            {/* Only show Remove button if onRemove is provided */}
-            {onRemove && (
-              <button
-                onClick={() => {
-                  onRemove();
-                  setIsOpen(false);
-                }}
-                className="flex items-center w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <RiDeleteBinLine className="mr-2" /> Remove
-              </button>
-            )}
-          </div>
-        </div>,
-        document.body
-      )}
+              {/* Only show Change Status button if onChangeStatus is provided */}
+              {onChangeStatus && (
+                <button
+                  onClick={() => {
+                    onChangeStatus();
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <RiFilterLine className="mr-2" /> {changeStatusTitle}
+                </button>
+              )}
+
+              {/* Only show Remove button if onRemove is provided */}
+              {onRemove && (
+                <button
+                  onClick={() => {
+                    onRemove();
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <RiDeleteBinLine className="mr-2" /> Remove
+                </button>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

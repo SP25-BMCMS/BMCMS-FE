@@ -1,102 +1,102 @@
-import React, { useEffect, useState } from 'react'
-import { Dialog } from '@headlessui/react'
-import { XMarkIcon, UserIcon, ClipboardIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
-import { ScheduleJob } from '@/services/scheduleJobs'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import apiInstance from '@/lib/axios'
-import { toast } from 'react-hot-toast'
+import React, { useEffect, useState } from 'react';
+import { Dialog } from '@headlessui/react';
+import { XMarkIcon, UserIcon, ClipboardIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ScheduleJob } from '@/services/scheduleJobs';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import apiInstance from '@/lib/axios';
+import { toast } from 'react-hot-toast';
 
 interface TaskModalProps {
-  isOpen: boolean
-  onClose: () => void
-  scheduleJob: ScheduleJob | null
+  isOpen: boolean;
+  onClose: () => void;
+  scheduleJob: ScheduleJob | null;
 }
 
 interface Staff {
-  userId: string
-  username: string
-  email: string
-  role: string
-  accountStatus: string
+  userId: string;
+  username: string;
+  email: string;
+  role: string;
+  accountStatus: string;
   userDetails?: {
-    positionId: string
-    departmentId: string
+    positionId: string;
+    departmentId: string;
     position: {
-      positionId: string
-      positionName: string
-    }
+      positionId: string;
+      positionName: string;
+    };
     department: {
-      departmentId: string
-      departmentName: string
-      area: string
-    }
-  }
+      departmentId: string;
+      departmentName: string;
+      area: string;
+    };
+  };
 }
 
 interface Task {
-  task_id: string
-  description: string
-  status: string
-  created_at: string
-  updated_at: string
-  crack_id: string
-  schedule_job_id: string
+  task_id: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  crack_id: string;
+  schedule_job_id: string;
   taskAssignments: {
-    assignment_id: string
-    task_id: string
-    employee_id: string
-    description: string
-    status: string
-    created_at: string
-    updated_at: string
-  }[]
-  workLogs: any[]
-  feedbacks: any[]
-  crackInfo: any
+    assignment_id: string;
+    task_id: string;
+    employee_id: string;
+    description: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+  }[];
+  workLogs: any[];
+  feedbacks: any[];
+  crackInfo: any;
 }
 
 interface TasksResponse {
-  statusCode: number
-  message: string
-  data: Task[]
+  statusCode: number;
+  message: string;
+  data: Task[];
   pagination: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  }
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) => {
-  const queryClient = useQueryClient()
-  const [selectedStaffId, setSelectedStaffId] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const queryClient = useQueryClient();
+  const [selectedStaffId, setSelectedStaffId] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Fetch staff list
   const { data: staffData, isLoading: staffLoading } = useQuery({
     queryKey: ['staff'],
     queryFn: async () => {
-      const response = await apiInstance.get(import.meta.env.VITE_VIEW_STAFF_LIST)
-      return response.data
+      const response = await apiInstance.get(import.meta.env.VITE_VIEW_STAFF_LIST);
+      return response.data;
     },
     enabled: isOpen,
-  })
+  });
 
   // Fetch all tasks and filter to find if a task exists for this schedule job
   const { data: tasksData, isLoading: tasksLoading } = useQuery<TasksResponse>({
     queryKey: ['tasks', scheduleJob?.schedule_job_id],
     queryFn: async () => {
-      const response = await apiInstance.get(import.meta.env.VITE_VIEW_TASK_LIST)
-      return response.data
+      const response = await apiInstance.get(import.meta.env.VITE_VIEW_TASK_LIST);
+      return response.data;
     },
     enabled: isOpen && !!scheduleJob?.schedule_job_id,
-  })
+  });
 
   // Find existing task for this schedule job
   const existingTask = tasksData?.data?.find(
     task => task.schedule_job_id === scheduleJob?.schedule_job_id
-  )
+  );
 
   // Create task mutation
   const createTaskMutation = useMutation({
@@ -105,96 +105,96 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
       staffId,
       description,
     }: {
-      scheduleJobId: string
-      staffId: string
-      description: string
+      scheduleJobId: string;
+      staffId: string;
+      description: string;
     }) => {
       const url = import.meta.env.VITE_CREATE_SCHEDULE_JOB_TASK.replace(
         '{scheduleJobId}',
         scheduleJobId
-      ).replace('{staffId}', staffId)
+      ).replace('{staffId}', staffId);
 
-      return await apiInstance.post(url, { description })
+      return await apiInstance.post(url, { description });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      toast.success('Task created successfully')
-      setIsSubmitting(false)
-      onClose()
+      queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      toast.success('Task created successfully');
+      setIsSubmitting(false);
+      onClose();
     },
     onError: (error: any) => {
-      console.error('Error creating task:', error)
-      toast.error(error.response?.data?.message || 'Failed to create task')
-      setIsSubmitting(false)
+      console.error('Error creating task:', error);
+      toast.error(error.response?.data?.message || 'Failed to create task');
+      setIsSubmitting(false);
     },
     onSettled: () => {
-      setIsSubmitting(false)
-    }
-  })
+      setIsSubmitting(false);
+    },
+  });
 
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setSelectedStaffId('')
-      setDescription('')
+      setSelectedStaffId('');
+      setDescription('');
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   // Filter staff with Leader position
   const leaderStaff =
     staffData?.data?.filter(
       (staff: Staff) =>
         staff.userDetails?.position?.positionName === 'Leader' && staff.accountStatus === 'Active'
-    ) || []
+    ) || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!scheduleJob) {
-      toast.error('No schedule job selected')
-      return
+      toast.error('No schedule job selected');
+      return;
     }
 
     if (!selectedStaffId) {
-      toast.error('Please select a staff member')
-      return
+      toast.error('Please select a staff member');
+      return;
     }
 
     if (!description.trim()) {
-      toast.error('Please enter a description')
-      return
+      toast.error('Please enter a description');
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       await createTaskMutation.mutateAsync({
         scheduleJobId: scheduleJob.schedule_job_id,
         staffId: selectedStaffId,
         description,
-      })
+      });
     } catch (error) {
       // Error handled in mutation
     }
-  }
+  };
 
   // Format date for display
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString('vi-VN', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
-    })
-  }
+    });
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   // Loading state
-  const isLoading = staffLoading || tasksLoading
+  const isLoading = staffLoading || tasksLoading;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
@@ -230,7 +230,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                   </h3>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Building: {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
+                      Building:{' '}
+                      {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
                       {scheduleJob?.buildingDetail?.building && (
                         <span className="ml-1 text-gray-500 dark:text-gray-400">
                           ({scheduleJob.buildingDetail.building.name})
@@ -260,10 +261,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                       <span className="text-sm text-gray-500 dark:text-gray-400">Status:</span>
                       <div className="col-span-2">
                         <span
-                          className={`text-sm font-medium px-2 py-0.5 rounded-full text-center inline-block ${existingTask.status === 'Completed'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                            }`}
+                          className={`text-sm font-medium px-2 py-0.5 rounded-full text-center inline-block ${
+                            existingTask.status === 'Completed'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                          }`}
                         >
                           {existingTask.status}
                         </span>
@@ -315,10 +317,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                               </span>
                               <div className="col-span-2">
                                 <span
-                                  className={`text-sm font-medium px-2 py-0.5 rounded-full text-center inline-block ${assignment.status === 'Fixed'
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                    }`}
+                                  className={`text-sm font-medium px-2 py-0.5 rounded-full text-center inline-block ${
+                                    assignment.status === 'Fixed'
+                                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                      : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                  }`}
                                 >
                                   {assignment.status}
                                 </span>
@@ -369,7 +372,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
               </h3>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Building: {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
+                  Building:{' '}
+                  {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
                   {scheduleJob?.buildingDetail?.building && (
                     <span className="ml-1 text-gray-500 dark:text-gray-400">
                       ({scheduleJob.buildingDetail.building.name})
@@ -483,7 +487,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TaskModal
+export default TaskModal;

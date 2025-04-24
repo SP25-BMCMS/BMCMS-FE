@@ -1,18 +1,19 @@
-import React, { useState } from 'react'
-import { RiNotification3Line, RiNotification3Fill, RiCheckLine } from 'react-icons/ri'
-import { useNotificationStream } from '@/hooks/useNotificationStream'
+import React, { useState } from 'react';
+import { RiNotification3Line, RiNotification3Fill, RiCheckLine } from 'react-icons/ri';
+import { useNotificationStream } from '@/hooks/useNotificationStream';
 
 const NotificationButton = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead, clearAll } = useNotificationStream()
+  const [isOpen, setIsOpen] = useState(false);
+  const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead, clearAll } =
+    useNotificationStream();
 
   const handleNotificationClick = (notification: { id: string }) => {
-    markAsRead(notification.id)
-  }
+    markAsRead(notification.id);
+  };
 
   const handleMarkAllAsRead = () => {
-    markAllAsRead()
-  }
+    markAllAsRead();
+  };
 
   return (
     <div className="relative">
@@ -37,9 +38,7 @@ const NotificationButton = () => {
         <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Notifications
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
               <div className="flex items-center space-x-2">
                 {notifications.length > 0 && unreadCount > 0 && (
                   <button
@@ -56,36 +55,39 @@ const NotificationButton = () => {
 
           <div className="max-h-96 overflow-y-auto">
             {isLoading ? (
-              <div className="p-4 text-center text-gray-500">
-                Loading...
-              </div>
+              <div className="p-4 text-center text-gray-500">Loading...</div>
             ) : notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No notifications
-              </div>
+              <div className="p-4 text-center text-gray-500">No notifications</div>
             ) : (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                {notifications.map((notification) => (
+                {notifications.map(notification => (
                   <div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`p-4 cursor-pointer transition-colors ${notification.isRead
-                      ? 'bg-gray-50 dark:bg-gray-700/50'
-                      : 'bg-blue-50 dark:bg-blue-900/10'
-                      } hover:bg-gray-100 dark:hover:bg-gray-700`}
+                    className={`p-4 cursor-pointer transition-colors ${
+                      notification.isRead
+                        ? 'bg-gray-50 dark:bg-gray-700/50'
+                        : 'bg-blue-50 dark:bg-blue-900/10'
+                    } hover:bg-gray-100 dark:hover:bg-gray-700`}
                   >
                     <div className="flex items-start">
                       <div className="flex-1">
-                        <p className={`text-sm font-medium ${notification.isRead
-                          ? 'text-gray-600 dark:text-gray-300'
-                          : 'text-blue-900 dark:text-blue-100'
-                          }`}>
+                        <p
+                          className={`text-sm font-medium ${
+                            notification.isRead
+                              ? 'text-gray-600 dark:text-gray-300'
+                              : 'text-blue-900 dark:text-blue-100'
+                          }`}
+                        >
                           {notification.title}
                         </p>
-                        <p className={`mt-1 text-sm ${notification.isRead
-                          ? 'text-gray-500 dark:text-gray-400'
-                          : 'text-blue-800 dark:text-blue-200'
-                          }`}>
+                        <p
+                          className={`mt-1 text-sm ${
+                            notification.isRead
+                              ? 'text-gray-500 dark:text-gray-400'
+                              : 'text-blue-800 dark:text-blue-200'
+                          }`}
+                        >
                           {notification.content}
                         </p>
                         <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
@@ -94,7 +96,7 @@ const NotificationButton = () => {
                             month: 'long',
                             year: 'numeric',
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
                           })}
                         </p>
                       </div>
@@ -112,7 +114,7 @@ const NotificationButton = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default NotificationButton 
+export default NotificationButton;

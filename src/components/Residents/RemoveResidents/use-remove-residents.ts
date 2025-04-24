@@ -1,49 +1,49 @@
-import { useState } from 'react'
-import { Residents } from '@/types'
-import toast from 'react-hot-toast'
+import { useState } from 'react';
+import { Residents } from '@/types';
+import toast from 'react-hot-toast';
 
 interface UseRemoveResidentProps {
-  onRemoveSuccess?: (removedResidentId: string) => void
+  onRemoveSuccess?: (removedResidentId: string) => void;
 }
 
 export const useRemoveResident = ({ onRemoveSuccess }: UseRemoveResidentProps) => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [residentToRemove, setResidentToRemove] = useState<Residents | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [residentToRemove, setResidentToRemove] = useState<Residents | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const openModal = (resident: Residents) => {
-    setResidentToRemove(resident)
-    setIsModalOpen(true)
-  }
+    setResidentToRemove(resident);
+    setIsModalOpen(true);
+  };
 
   const closeModal = () => {
-    setIsModalOpen(false)
-    setResidentToRemove(null)
-  }
+    setIsModalOpen(false);
+    setResidentToRemove(null);
+  };
 
   const removeResident = async () => {
-    if (!residentToRemove) return
+    if (!residentToRemove) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // Giả lập API call để xóa resident
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Gọi callback khi xóa thành công
       if (onRemoveSuccess) {
-        onRemoveSuccess(residentToRemove.id)
+        onRemoveSuccess(residentToRemove.id);
       }
 
-      toast.success('Resident removed successfully!')
-      closeModal()
+      toast.success('Resident removed successfully!');
+      closeModal();
     } catch (error) {
-      toast.error('Failed to remove resident!')
-      console.error('Error removing resident:', error)
+      toast.error('Failed to remove resident!');
+      console.error('Error removing resident:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return {
     isModalOpen,
@@ -52,5 +52,5 @@ export const useRemoveResident = ({ onRemoveSuccess }: UseRemoveResidentProps) =
     openModal,
     closeModal,
     removeResident,
-  }
-}
+  };
+};

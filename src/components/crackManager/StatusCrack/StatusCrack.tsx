@@ -6,16 +6,18 @@ import { StaffData, StaffDetailResponse } from '@/types';
 import { toast } from 'react-hot-toast';
 import { getStaffDetail } from '@/services/staffs';
 
-interface StaffWithPosition extends StaffData {
+interface StaffWithPosition extends Omit<StaffData, 'userDetails'> {
   userDetails?: {
     positionId: string;
     departmentId: string;
-    position: {
+    staffStatus?: string;
+    image?: string;
+    position?: {
       positionId: string;
       positionName: string;
       description: string;
     };
-    department: {
+    department?: {
       departmentId: string;
       departmentName: string;
       description: string;

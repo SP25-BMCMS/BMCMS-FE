@@ -106,7 +106,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
       description: formData.description,
       unit_price: formData.unitPrice.toString(),
       stock_quantity: formData.stockQuantity,
-      status: formData.status,
     };
     onSubmit(materialData as any);
   };

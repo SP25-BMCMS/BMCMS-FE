@@ -62,8 +62,8 @@ const StaffManagement: React.FC = () => {
           total: response.data.length,
           page: currentPage,
           limit: itemsPerPage,
-          totalPages: Math.ceil(response.data.length / itemsPerPage)
-        }
+          totalPages: Math.ceil(response.data.length / itemsPerPage),
+        },
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

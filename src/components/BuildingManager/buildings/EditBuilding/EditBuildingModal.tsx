@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { updateBuilding, getBuildingById } from '@/services/building';
 import { getAreaList } from '@/services/areas';
 import { getAllStaff } from '@/services/staff';
-import { Area, StaffData, BuildingResponse } from '@/types';
+import { Area, StaffData } from '@/types';
 import toast from 'react-hot-toast';
-import { Loader2, UserIcon, ShieldCheck } from 'lucide-react';
+import { Loader2, UserIcon } from 'lucide-react';
 
 interface EditBuildingModalProps {
   isOpen: boolean;
@@ -33,7 +33,6 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
     manager_id: '',
     construction_date: new Date().toLocaleDateString('en-CA'),
     completion_date: new Date().toLocaleDateString('en-CA'),
-    Warranty_date: '',
     status: 'operational',
   });
 
@@ -61,10 +60,6 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
             ? new Date(building.completion_date).toLocaleDateString('en-CA')
             : new Date().toLocaleDateString('en-CA');
 
-          const formattedWarrantyDate = building.Warranty_date
-            ? new Date(building.Warranty_date).toLocaleDateString('en-CA')
-            : '';
-
           setFormData({
             buildingId: building.buildingId,
             name: building.name || '',
@@ -75,7 +70,6 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
             manager_id: building.manager_id || '',
             construction_date: formattedConstructionDate,
             completion_date: formattedCompletionDate,
-            Warranty_date: formattedWarrantyDate,
             status: building.Status.toLowerCase() as 'operational' | 'under_construction',
           });
         }
@@ -98,7 +92,6 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
         ...prev,
         completion_date: 'dd/mm/yyyy',
         manager_id: '', // Reset manager_id when under construction
-        Warranty_date: '', // Reset warranty date when under construction
       }));
     }
   }, [formData.status]);
@@ -143,7 +136,6 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
           status: value,
           completion_date: 'dd/mm/yyyy',
           manager_id: '', // Clear manager when status is under construction
-          Warranty_date: '', // Clear warranty date when status is under construction
         }));
       } else {
         setFormData(prev => ({
@@ -187,10 +179,6 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
       newErrors.completion_date = 'Completion date is required for operational buildings';
     }
 
-    if (formData.status === 'operational' && !formData.Warranty_date) {
-      newErrors.Warranty_date = 'Warranty date is required for operational buildings';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -214,9 +202,6 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
         status: formData.status as 'operational' | 'under_construction',
         ...(formData.status === 'operational' && formData.manager_id
           ? { manager_id: formData.manager_id }
-          : {}),
-        ...(formData.status === 'operational' && formData.Warranty_date
-          ? { Warranty_date: formData.Warranty_date }
           : {}),
       };
 
@@ -458,32 +443,6 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                   </p>
                 )}
               </div>
-
-              {/* Warranty Date - Only shows for operational buildings */}
-              {formData.status === 'operational' && (
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
-                    <ShieldCheck className="w-4 h-4 mr-1.5 text-green-500" />
-                    Warranty Date
-                  </label>
-                  <input
-                    type="date"
-                    name="Warranty_date"
-                    value={formData.Warranty_date}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                      errors.Warranty_date
-                        ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                        : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                    }`}
-                  />
-                  {errors.Warranty_date && (
-                    <p className="text-red-500 dark:text-red-400 text-xs mt-1">
-                      {errors.Warranty_date}
-                    </p>
-                  )}
-                </div>
-              )}
 
               {/* Manager Selection - Only shows for operational buildings */}
               {formData.status === 'operational' && (

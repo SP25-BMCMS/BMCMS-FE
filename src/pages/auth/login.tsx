@@ -1,37 +1,37 @@
-import React, { useState } from 'react'
-import useToast from '@/hooks/use-toash'
-import '../auth/login.css'
-import loginImage from '../../image/login-screen.png'
-import authApi from '@/services/auth'
-import ThemeToggle from '@/components/ThemeToggle'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import useToast from '@/hooks/use-toash';
+import '../auth/login.css';
+import loginImage from '../../image/login-screen.png';
+import authApi from '@/services/auth';
+import ThemeToggle from '@/components/ThemeToggle';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const toast = useToast()
-  const navigate = useNavigate()
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const toast = useToast();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
 
     try {
-      const response = await authApi.signIn(username, password)
+      const response = await authApi.signIn(username, password);
 
       // Lưu token vào localStorage
-      localStorage.setItem('bmcms_token', response.accessToken)
-      localStorage.setItem('bmcms_refresh_token', response.refreshToken)
+      localStorage.setItem('bmcms_token', response.accessToken);
+      localStorage.setItem('bmcms_refresh_token', response.refreshToken);
 
-      toast.success('Login successful')
-      navigate('/dashboard')
+      toast.success('Login successful');
+      navigate('/dashboard');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Login failed'
-      setError(errorMessage)
-      toast.error(errorMessage) // Show error toast
+      const errorMessage = error.response?.data?.message || 'Login failed';
+      setError(errorMessage);
+      toast.error(errorMessage); // Show error toast
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex flex-col animation-bg justify-center bg-gradient-to-r from-[#94EBFF] via-[#D3F5FF] to-white dark:from-gray-900 dark:via-blue-900 dark:to-gray-900">
@@ -117,7 +117,7 @@ const Login = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
