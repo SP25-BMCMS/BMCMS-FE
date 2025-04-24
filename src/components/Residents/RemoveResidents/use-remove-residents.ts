@@ -35,10 +35,10 @@ export const useRemoveResident = ({ onRemoveSuccess }: UseRemoveResidentProps) =
         onRemoveSuccess(residentToRemove.id);
       }
 
-      toast.success('Xóa khách hàng thành công!');
+      toast.success('Resident removed successfully!');
       closeModal();
     } catch (error) {
-      toast.error('Có lỗi xảy ra khi xóa khách hàng!');
+      toast.error('Failed to remove resident!');
       console.error('Error removing resident:', error);
     } finally {
       setIsLoading(false);

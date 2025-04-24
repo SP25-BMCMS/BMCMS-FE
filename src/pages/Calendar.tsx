@@ -23,6 +23,8 @@ import { getMaintenanceCycles } from '@/services/maintenanceCycle';
 import apiInstance from '@/lib/axios';
 import { MaintenanceCycle } from '@/types';
 import BuildingDetailSelectionModal from '@/components/calendar/BuildingDetailSelectionModal';
+import CreateAutoScheduleModal from '@/components/calendar/CreateAutoScheduleModal';
+import { RiAddLine } from 'react-icons/ri';
 
 const Calendar: React.FC = () => {
   const queryClient = useQueryClient();
@@ -48,10 +50,11 @@ const Calendar: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<'calendar' | 'table'>('calendar');
+  const [viewMode, setViewMode] = useState<'calendar' | 'table'>('table');
   const [deletedScheduleIds, setDeletedScheduleIds] = useState<{ [key: string]: number }>({});
   const deletionTimersRef = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
   const [buildingDetails, setBuildingDetails] = useState<BuildingDetail[]>([]);
+  const [showCreateAutoScheduleModal, setShowCreateAutoScheduleModal] = useState(false);
 
   // Fetch current user for manager ID
   const { data: currentUser } = useQuery({
@@ -84,11 +87,15 @@ const Calendar: React.FC = () => {
   });
 
   // Fetch maintenance cycles
-  const { data: maintenanceCycles = [] } = useQuery({
+  const { data: maintenanceCyclesData } = useQuery({
     queryKey: ['maintenanceCycles'],
     queryFn: async () => {
-      const response = await getMaintenanceCycles();
-      return response.data || [];
+      const response = await getMaintenanceCycles({
+        page: 1,
+        limit: 99999,
+      });
+      console.log('Maintenance Cycles Response:', response); // Debug log
+      return response.data || []; // Extract the data array from the response
     },
   });
 
@@ -127,9 +134,9 @@ const Calendar: React.FC = () => {
             );
             // Count only non-cancelled jobs
             const activeJobs = response.data.filter(job => job.status.toLowerCase() !== 'cancel');
-            // Use Set to count unique buildings
-            const uniqueBuildingIds = new Set(activeJobs.map(job => job.building_id));
-            buildingCountsBySchedule[schedule.schedule_id] = uniqueBuildingIds.size;
+            // Use Set to count unique building details
+            const uniqueBuildingDetailIds = new Set(activeJobs.map(job => job.buildingDetailId));
+            buildingCountsBySchedule[schedule.schedule_id] = uniqueBuildingDetailIds.size;
           } catch (error) {
             console.error(`Error fetching jobs for schedule ${schedule.schedule_id}:`, error);
             buildingCountsBySchedule[schedule.schedule_id] = 0;
@@ -271,10 +278,11 @@ const Calendar: React.FC = () => {
           return true;
         })
         .map((schedule: any) => {
-          const buildingIds =
+          // Get all buildingDetailIds from schedule_job entries that aren't cancelled
+          const buildingDetailIds =
             schedule.schedule_job
               ?.filter(job => job.status !== 'Cancel')
-              .map(job => job.building_id) || [];
+              .map(job => job.buildingDetailId) || [];
 
           // Determine the status color based on schedule_job status
           let backgroundColor = STATUS_COLORS.IN_PROGRESS.BORDER; // Default blue
@@ -306,7 +314,7 @@ const Calendar: React.FC = () => {
                   ? 'completed'
                   : 'pending',
             description: schedule.description,
-            buildingId: buildingIds,
+            buildingDetailIds: buildingDetailIds,
             backgroundColor: backgroundColor,
             borderColor: backgroundColor,
             textColor: '#ffffff',
@@ -318,22 +326,32 @@ const Calendar: React.FC = () => {
   }, [schedulesData, deletedScheduleIds]);
 
   // Xử lý khi click vào sự kiện
-  const handleEventClick = useCallback((clickInfo: EventClickArg) => {
-    const event = clickInfo.event;
-    setSelectedEvent({
-      id: event.id,
-      title: event.title,
-      start: event.start || '',
-      end: event.end || '',
-      allDay: event.allDay,
-      status: event.extendedProps.status,
-      description: event.extendedProps.description,
-      priority: event.extendedProps.priority,
-      buildingId: event.extendedProps.buildingId || [],
-    });
-    setIsCreateMode(false);
-    setIsModalOpen(true);
-  }, []);
+  const handleEventClick = useCallback(
+    (clickInfo: EventClickArg) => {
+      const event = clickInfo.event;
+      // Get schedule data from the original data source
+      const scheduleData = schedulesData?.data?.find(schedule => schedule.schedule_id === event.id);
+
+      console.log('Schedule Data:', scheduleData); // Debug log
+
+      setSelectedEvent({
+        id: event.id,
+        title: event.title,
+        start: event.start || '',
+        end: event.end || '',
+        allDay: event.allDay,
+        status: event.extendedProps.status,
+        description: event.extendedProps.description,
+        priority: event.extendedProps.priority,
+        buildingDetailIds: event.extendedProps.buildingDetailIds || [],
+        cycle_id: scheduleData?.cycle_id || '', // Add cycle_id from the original schedule data
+        schedule_type: scheduleData?.schedule_type || 'Daily',
+      });
+      setIsCreateMode(false);
+      setIsModalOpen(true);
+    },
+    [schedulesData]
+  );
 
   // Xử lý khi chọn một ngày/khoảng thời gian trên lịch
   const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
@@ -456,25 +474,21 @@ const Calendar: React.FC = () => {
   // Hiển thị nội dung sự kiện tùy chỉnh
   const renderEventContent = useCallback(
     (eventContent: EventContentArg) => {
-      // Get building names for this event
-      const buildingIds = eventContent.event.extendedProps.buildingId || [];
+      // Get building detail IDs for this event
+      const buildingDetailIds = eventContent.event.extendedProps.buildingDetailIds || [];
 
-      // Lọc ra các building ID duy nhất
-      const uniqueBuildingIds = [...new Set(buildingIds)] as string[];
+      // Filter out duplicate building detail IDs
+      const uniqueBuildingDetailIds = [...new Set(buildingDetailIds)];
 
-      const buildingNames = uniqueBuildingIds
-        .map(id => {
-          const building = buildings.find(b => b.buildingId === id);
-          return building ? building.name : 'Unknown Building';
-        })
-        .join(', ');
+      // Count unique building details
+      const buildingCount = uniqueBuildingDetailIds.length;
 
       return (
         <div className="fc-event-content flex flex-col p-1 max-h-full overflow-hidden">
           <div className="font-semibold text-white truncate">{eventContent.event.title}</div>
-          {buildingNames && (
-            <div className="text-xs text-white/70 mt-1 truncate" title={buildingNames}>
-              Buildings: {buildingNames}
+          {buildingCount > 0 && (
+            <div className="text-xs text-white/70 mt-1 truncate">
+              {buildingCount} {buildingCount === 1 ? 'Building' : 'Buildings'}
             </div>
           )}
           {eventContent.event.extendedProps.description && (
@@ -488,7 +502,7 @@ const Calendar: React.FC = () => {
         </div>
       );
     },
-    [buildings]
+    [buildingDetails]
   );
 
   // Xử lý đóng modal
@@ -608,66 +622,82 @@ const Calendar: React.FC = () => {
   const paginationInfo = viewMode === 'table' && schedulesData ? schedulesData.pagination : null;
   const totalPages = paginationInfo ? paginationInfo.totalPages : 1;
 
+  const handleCreateAutoSchedule = async (data: {
+    schedule_name: string;
+    description: string;
+    cycle_id: string;
+    buildingDetailIds: string[];
+    start_date: string;
+  }) => {
+    try {
+      const response = await apiInstance.post('/schedules/auto-maintenance', data);
+      if (response.status === 200) {
+        toast.success('Schedule created successfully');
+        setShowCreateAutoScheduleModal(false);
+        queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      }
+    } catch (error) {
+      toast.error('Failed to create schedule');
+      console.error('Error creating schedule:', error);
+    }
+  };
+
   return (
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Schedule Management</h1>
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-4 mr-4">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <span
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: STATUS_COLORS.IN_PROGRESS.BORDER }}
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">In Progress</span>
+              <span className="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">In Progress</span>
             </div>
             <div className="flex items-center">
-              <span
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: STATUS_COLORS.ACTIVE.BORDER }}
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">Completed</span>
+              <span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Completed</span>
             </div>
             <div className="flex items-center">
-              <span
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: STATUS_COLORS.INACTIVE.BORDER }}
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">Cancel</span>
+              <span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Cancel</span>
             </div>
             <div className="flex items-center">
-              <span
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: STATUS_COLORS.PENDING.BORDER }}
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">Pending</span>
+              <span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Pending</span>
             </div>
           </div>
 
           <div className="flex rounded-md shadow-sm overflow-hidden">
             <button
-              onClick={() => setViewMode('calendar')}
-              className={`px-4 py-2 flex items-center gap-2 ${
-                viewMode === 'calendar'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-              }`}
-            >
-              <CalendarIcon size={16} />
-              <span>Calendar</span>
-            </button>
-            <button
               onClick={() => setViewMode('table')}
-              className={`px-4 py-2 flex items-center gap-2 ${
+              className={`px-4 py-2 flex items-center gap-2 transition-colors ${
                 viewMode === 'table'
                   ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
               <List size={16} />
               <span>Table</span>
             </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`px-4 py-2 flex items-center gap-2 transition-colors ${
+                viewMode === 'calendar'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              <CalendarIcon size={16} />
+              <span>Calendar</span>
+            </button>
           </div>
+
+          <button
+            onClick={() => setShowCreateAutoScheduleModal(true)}
+            className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2 transition-colors"
+          >
+            <RiAddLine className="w-5 h-5" />
+            <span>Create Schedule</span>
+          </button>
         </div>
       </div>
 
@@ -712,7 +742,6 @@ const Calendar: React.FC = () => {
             eventDisplay="block"
             displayEventEnd={true}
             eventDidMount={info => {
-              // Add tooltip to event
               const tooltip = document.createElement('div');
               tooltip.className = 'fc-tooltip';
               tooltip.innerHTML = `
@@ -768,28 +797,27 @@ const Calendar: React.FC = () => {
 
                       if (item.schedule_status === 'InProgress') {
                         statusStyles = {
-                          backgroundColor: STATUS_COLORS.IN_PROGRESS.BG,
-                          color: STATUS_COLORS.IN_PROGRESS.TEXT,
-                          border: `1px solid ${STATUS_COLORS.IN_PROGRESS.BORDER}`,
+                          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                          color: '#3B82F6',
+                          border: '1px solid #3B82F6',
                         };
                       } else if (item.schedule_status === 'Completed') {
                         statusStyles = {
-                          backgroundColor: STATUS_COLORS.ACTIVE.BG,
-                          color: STATUS_COLORS.ACTIVE.TEXT,
-                          border: `1px solid ${STATUS_COLORS.ACTIVE.BORDER}`,
+                          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                          color: '#22C55E',
+                          border: '1px solid #22C55E',
                         };
                       } else if (item.schedule_status === 'Cancel') {
                         statusStyles = {
-                          backgroundColor: STATUS_COLORS.INACTIVE.BG,
-                          color: STATUS_COLORS.INACTIVE.TEXT,
-                          border: `1px solid ${STATUS_COLORS.INACTIVE.BORDER}`,
+                          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                          color: '#EF4444',
+                          border: '1px solid #EF4444',
                         };
                       } else {
-                        // Default for pending
                         statusStyles = {
-                          backgroundColor: STATUS_COLORS.PENDING.BG,
-                          color: STATUS_COLORS.PENDING.TEXT,
-                          border: `1px solid ${STATUS_COLORS.PENDING.BORDER}`,
+                          backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                          color: '#EAB308',
+                          border: '1px solid #EAB308',
                         };
                       }
 
@@ -807,7 +835,6 @@ const Calendar: React.FC = () => {
                     key: 'buildings',
                     title: 'Buildings',
                     render: item => {
-                      // Use the building counts from our query instead of the buildings array
                       const buildingCounts = scheduleJobsQuery.data || {};
                       const buildingCount = buildingCounts[item.schedule_id] || 0;
 
@@ -828,7 +855,7 @@ const Calendar: React.FC = () => {
                             e.stopPropagation();
                             navigate(`/schedule-job/${item.schedule_id}`);
                           }}
-                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                           title="View Schedule Details"
                         >
                           <Eye size={18} />
@@ -872,6 +899,12 @@ const Calendar: React.FC = () => {
             font-size: 0.875rem;
             line-height: 1.25rem;
             overflow: hidden;
+            transition: all 0.2s ease;
+          }
+
+          .fc-event:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
 
           .fc-event-content {
@@ -889,6 +922,7 @@ const Calendar: React.FC = () => {
             font-size: 0.875rem;
             max-width: 200px;
             white-space: normal;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
 
           .dark .fc-tooltip {
@@ -912,6 +946,7 @@ const Calendar: React.FC = () => {
           .fc-daygrid-more-link {
             margin-top: 2px;
             font-size: 0.75rem;
+            color: #3B82F6;
           }
           
           /* Fix dark mode issues */
@@ -936,6 +971,7 @@ const Calendar: React.FC = () => {
             background: transparent !important;
             border: 1px solid #d1d5db !important;
             color: #4b5563 !important;
+            transition: all 0.2s ease !important;
           }
 
           .fc-prev-button:hover, .fc-next-button:hover {
@@ -1016,7 +1052,7 @@ const Calendar: React.FC = () => {
         selectedBuildingDetails={selectedBuildingDetails}
         onBuildingDetailSelect={handleBuildingDetailSelect}
         onSetSelectedBuildingDetails={setSelectedBuildingDetails}
-        maintenanceCycles={maintenanceCycles}
+        maintenanceCycles={maintenanceCyclesData || []}
         onUpdateStatus={(id, status) =>
           updateScheduleMutation.mutate({ id, data: { status } as any })
         }
@@ -1029,6 +1065,13 @@ const Calendar: React.FC = () => {
         selectedBuildingDetails={selectedBuildingDetails}
         onBuildingDetailSelect={handleBuildingDetailSelect}
         selectedEvent={selectedEvent}
+      />
+
+      <CreateAutoScheduleModal
+        isOpen={showCreateAutoScheduleModal}
+        onClose={() => setShowCreateAutoScheduleModal(false)}
+        buildingDetails={buildingDetails}
+        onSubmit={handleCreateAutoSchedule}
       />
     </div>
   );

@@ -43,7 +43,7 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({
   // Generate default description based on status
   useEffect(() => {
     if (crackStatus === 'Resolved') {
-      setCrackDescription('Vết nứt đã được xử lý thành công.');
+      setCrackDescription('Crack has been successfully processed.');
     } else if (crackStatus === 'Cancelled') {
       setCrackDescription('Hủy bỏ việc xử lý vết nứt.');
     }

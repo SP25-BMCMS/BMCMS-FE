@@ -4,13 +4,14 @@ export interface TaskEvent {
   start: Date | string;
   end?: Date | string;
   allDay?: boolean;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancel' | 'inprogress';
   description?: string;
   assignedTo?: string;
   location?: string;
   priority?: 'low' | 'medium' | 'high';
   schedule_type?: string;
   buildingId?: string[];
+  buildingDetailIds?: string[];
   schedule_job?: ScheduleJob[];
   cycle_id?: string;
 }

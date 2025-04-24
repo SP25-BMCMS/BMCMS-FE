@@ -120,11 +120,15 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
       queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       toast.success('Task created successfully');
+      setIsSubmitting(false);
       onClose();
     },
     onError: (error: any) => {
       console.error('Error creating task:', error);
       toast.error(error.response?.data?.message || 'Failed to create task');
+      setIsSubmitting(false);
+    },
+    onSettled: () => {
       setIsSubmitting(false);
     },
   });
@@ -200,7 +204,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
             <ClipboardIcon className="w-5 h-5 mr-2" />
             {existingTask ? 'Task Details' : 'Create Task'}
           </h2>
-          <button onClick={onClose} className="text-white hover:text-gray-200">
+          <button onClick={onClose} className="text-white hover:text-gray-200" title="Close">
             <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
@@ -226,7 +230,13 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                   </h3>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Building: {scheduleJob?.building?.name || 'N/A'}
+                      Building:{' '}
+                      {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
+                      {scheduleJob?.buildingDetail?.building && (
+                        <span className="ml-1 text-gray-500 dark:text-gray-400">
+                          ({scheduleJob.buildingDetail.building.name})
+                        </span>
+                      )}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       Schedule: {scheduleJob?.schedule?.schedule_name || 'N/A'}
@@ -362,7 +372,13 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
               </h3>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Building: {scheduleJob?.building?.name || 'N/A'}
+                  Building:{' '}
+                  {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
+                  {scheduleJob?.buildingDetail?.building && (
+                    <span className="ml-1 text-gray-500 dark:text-gray-400">
+                      ({scheduleJob.buildingDetail.building.name})
+                    </span>
+                  )}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Schedule: {scheduleJob?.schedule?.schedule_name || 'N/A'}
@@ -447,17 +463,24 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 disabled={isSubmitting || leaderStaff.length === 0}
               >
-                {isSubmitting ? 'Creating...' : 'Create Task'}
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Creating...
+                  </>
+                ) : (
+                  'Create Task'
+                )}
               </button>
             </div>
           </form>

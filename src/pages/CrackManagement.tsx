@@ -233,21 +233,19 @@ const CrackManagement: React.FC = () => {
     {
       key: 'action',
       title: 'Action',
-      render: item => {
-        // Check if the status is one where we don't want to show Change Status
-        const hideChangeStatus = ['InProgress', 'resolved', 'Reviewing'].includes(item.status);
-
-        return (
-          <div className="dropdown-container relative">
-            <DropdownMenu
-              onViewDetail={() => navigate(`/crack/detail/${item.id}`)}
-              onChangeStatus={hideChangeStatus ? undefined : () => handleStatusUpdate(item)}
-              onRemove={() => console.log('Remove', item)}
-              className="dropdown-fix"
-            />
-          </div>
-        );
-      },
+      render: item => (
+        <div onClick={e => e.stopPropagation()}>
+          <DropdownMenu
+            onViewDetail={() => navigate(`/crack/detail/${item.id}`)}
+            onChangeStatus={
+              ['InProgress', 'resolved', 'Reviewing'].includes(item.status)
+                ? undefined
+                : () => handleStatusUpdate(item)
+            }
+            onRemove={() => console.log('Remove', item)}
+          />
+        </div>
+      ),
       width: '80px',
     },
   ];

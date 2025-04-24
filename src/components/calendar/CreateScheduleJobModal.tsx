@@ -1,26 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { Dialog } from '@headlessui/react';
-import { XMarkIcon, CalendarDaysIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import apiInstance from '@/lib/axios';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
-import scheduleJobsApi from '@/services/scheduleJobs';
 import authApi from '@/services/auth';
+import { BuildingOfficeIcon, CalendarDaysIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { toast } from 'react-hot-toast';
 
 interface CreateScheduleJobModalProps {
   isOpen: boolean;
   onClose: () => void;
   scheduleId: string;
+  onSubmit?: (data: {
+    schedule_id: string;
+    run_date: string;
+    buildingDetailId: string;
+  }) => Promise<void>;
 }
 
 interface Building {
   buildingId: string;
   name: string;
+  numberFloor: number;
+  area: {
+    areaId: string;
+    name: string;
+  };
   buildingDetails: {
     buildingDetailId: string;
     name: string;
+    total_apartments: number;
   }[];
 }
 
@@ -28,6 +37,7 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
   isOpen,
   onClose,
   scheduleId,
+  onSubmit,
 }) => {
   const queryClient = useQueryClient();
   const [selectedBuildingDetail, setSelectedBuildingDetail] = useState<string>('');
@@ -90,8 +100,16 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
   }, [isOpen]);
 
   // Create flattened list of buildings with their details
-  const buildingOptions: { buildingId: string; buildingName: string; buildingDetailId: string; detailName: string }[] = [];
-  
+  const buildingOptions: {
+    buildingId: string;
+    buildingName: string;
+    buildingDetailId: string;
+    detailName: string;
+    totalApartments: number;
+    numberFloor: number;
+    areaName: string;
+  }[] = [];
+
   if (buildingsData?.data) {
     buildingsData.data.forEach((building: Building) => {
       if (building.buildingDetails && building.buildingDetails.length > 0) {
@@ -101,6 +119,9 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
             buildingName: building.name,
             buildingDetailId: detail.buildingDetailId,
             detailName: detail.name,
+            totalApartments: detail.total_apartments || 0,
+            numberFloor: building.numberFloor,
+            areaName: building.area.name,
           });
         });
       }
@@ -128,13 +149,21 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      await createScheduleJobMutation.mutateAsync({
+      const submitData = {
         schedule_id: scheduleId,
         run_date: runDate.toISOString(),
         buildingDetailId: selectedBuildingDetail,
-      });
+      };
+
+      if (onSubmit) {
+        await onSubmit(submitData);
+      } else {
+        await createScheduleJobMutation.mutateAsync(submitData);
+      }
     } catch (error) {
-      // Error handled in mutation
+      // Error handled in mutation or onSubmit
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -151,6 +180,7 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200 transition-colors"
+            title="Close modal"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -165,8 +195,8 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
           ) : (
             <>
               <div>
-                <label 
-                  htmlFor="buildingDetail" 
+                <label
+                  htmlFor="buildingDetail"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Building
@@ -176,12 +206,12 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
                     <select
                       id="buildingDetail"
                       value={selectedBuildingDetail}
-                      onChange={(e) => setSelectedBuildingDetail(e.target.value)}
+                      onChange={e => setSelectedBuildingDetail(e.target.value)}
                       className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2.5 dark:text-white"
                       required
                     >
                       <option value="">Select a building</option>
-                      {buildingOptions.map((option) => (
+                      {buildingOptions.map(option => (
                         <option key={option.buildingDetailId} value={option.buildingDetailId}>
                           {option.buildingName} - {option.detailName}
                         </option>
@@ -198,9 +228,44 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
                 )}
               </div>
 
+              {selectedBuildingDetail && (
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-md text-sm">
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {
+                      buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)
+                        ?.buildingName
+                    }{' '}
+                    -{' '}
+                    {
+                      buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)
+                        ?.detailName
+                    }
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {
+                      buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)
+                        ?.totalApartments
+                    }{' '}
+                    apartments •{' '}
+                    {
+                      buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)
+                        ?.numberFloor
+                    }{' '}
+                    floors
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Area:{' '}
+                    {
+                      buildingOptions.find(opt => opt.buildingDetailId === selectedBuildingDetail)
+                        ?.areaName
+                    }
+                  </p>
+                </div>
+              )}
+
               <div>
-                <label 
-                  htmlFor="runDate" 
+                <label
+                  htmlFor="runDate"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Run Date
@@ -230,14 +295,35 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !selectedBuildingDetail || !runDate || buildingOptions.length === 0}
+                  disabled={
+                    isSubmitting ||
+                    !selectedBuildingDetail ||
+                    !runDate ||
+                    buildingOptions.length === 0
+                  }
                   className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Creating...
                     </>
@@ -254,4 +340,4 @@ const CreateScheduleJobModal: React.FC<CreateScheduleJobModalProps> = ({
   );
 };
 
-export default CreateScheduleJobModal; 
+export default CreateScheduleJobModal;

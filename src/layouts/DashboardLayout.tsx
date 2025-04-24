@@ -4,6 +4,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layout/Sidebar';
 import { sidebarItems } from '@/components/layout/Sidebar'; // Import sidebarItems để lấy tiêu đề động
 import ThemeToggle from '@/components/ThemeToggle';
+import NotificationButton from '@/components/notifications/NotificationButton';
 
 const DashboardLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -46,12 +47,15 @@ const DashboardLayout = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-6 transition-all duration-300">
-        {/* Tiêu đề và Theme Toggle */}
+        {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white text-[50px]">
-            {currentTitle}
-          </h1>
-          <ThemeToggle />
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{currentTitle}</h1>
+
+          {/* Header Actions */}
+          <div className="flex items-center space-x-4">
+            <NotificationButton />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Outlet để render các trang con */}

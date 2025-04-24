@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 import { STATUS_COLORS } from '@/constants/colors';
 import { useNavigate } from 'react-router-dom';
 import ChangeStatusModal from '@/components/TaskManager/ChangeStatusModal';
-import { FaTools, FaCalendarAlt } from 'react-icons/fa';
+import { FaTools, FaCalendarAlt, FaBuilding } from 'react-icons/fa';
 
 interface TasksCacheData {
   data: TaskResponse[];
@@ -49,7 +49,7 @@ const TaskManagement: React.FC = () => {
         ...(selectedStatus !== 'all' && { status: selectedStatus }),
       };
       const response = await tasksApi.getTasks(params);
-      
+
       // Lọc dữ liệu dựa trên loại task
       if (response.data && Array.isArray(response.data)) {
         const filteredData = response.data.filter(task => {
@@ -61,18 +61,18 @@ const TaskManagement: React.FC = () => {
             return !task.crack_id;
           }
         });
-        
+
         return {
           ...response,
           data: filteredData,
           pagination: {
             ...response.pagination,
             total: filteredData.length,
-            totalPages: Math.ceil(filteredData.length / itemsPerPage)
-          }
+            totalPages: Math.ceil(filteredData.length / itemsPerPage),
+          },
         };
       }
-      
+
       return response;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -232,35 +232,66 @@ const TaskManagement: React.FC = () => {
       width: '60px',
     },
     {
-      key: 'task_id',
-      title: 'Task ID',
+      key: 'title',
+      title: 'Title',
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {item.task_id.substring(0, 8)}
-        </div>
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</div>
       ),
     },
     {
       key: 'description',
       title: 'Description',
       render: item => (
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          {item.description}
-        </div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.description}</div>
       ),
     },
-    // Hiển thị cột Crack ID chỉ khi đang xem các task liên quan đến crack
-    ...(taskType === 'crack' 
-      ? [
-          {
-            key: 'crack_id',
-            title: 'Crack ID',
-            render: item => (
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {item.crack_id ? item.crack_id.substring(0, 8) : '-'}
+    {
+      key: 'building',
+      title: 'Building',
+      render: item => {
+        let buildingInfo = null;
+
+        if (taskType === 'crack' && item.crackInfo?.isSuccess && item.crackInfo.data.length > 0) {
+          // Lấy thông tin tòa nhà từ crack report
+          const crackData = item.crackInfo.data[0];
+          const buildingDetailId = crackData.buildingDetailId;
+          const position = crackData.position;
+
+          buildingInfo = (
+            <div className="flex items-center">
+              <FaBuilding className="text-blue-500 mr-1" />
+              <div>
+                <div className="font-medium">{buildingDetailId?.substring(0, 8)}</div>
+                <div className="text-xs">{position}</div>
               </div>
-            ),
-          },
+            </div>
+          );
+        } else if (taskType === 'schedule' && item.schedulesjobInfo?.isSuccess) {
+          // Lấy thông tin tòa nhà từ schedule job
+          const scheduleData = item.schedulesjobInfo.data;
+          if (scheduleData.buildingDetail) {
+            const buildingDetail = scheduleData.buildingDetail;
+            const buildingName = buildingDetail.building?.name || '';
+            const buildingDetailName = buildingDetail.name || '';
+
+            buildingInfo = (
+              <div className="flex items-center">
+                <FaBuilding className="text-green-500 mr-1" />
+                <div>
+                  <div className="font-medium">{buildingName}</div>
+                  <div className="text-xs">{buildingDetailName}</div>
+                </div>
+              </div>
+            );
+          }
+        }
+
+        return buildingInfo || <div className="text-sm text-gray-400">-</div>;
+      },
+    },
+    // Hiển thị cột Crack ID chỉ khi đang xem các task liên quan đến crack
+    ...(taskType === 'crack'
+      ? [
           {
             key: 'crack_status',
             title: 'Crack Status',
@@ -320,18 +351,88 @@ const TaskManagement: React.FC = () => {
           },
         ]
       : [
-          // Hiển thị cột Schedule Job ID khi đang xem các task bảo trì định kỳ
+          // Hiển thị thông tin lịch trình khi đang xem các task bảo trì định kỳ
           {
-            key: 'schedule_job_id',
-            title: 'Schedule Job ID',
-            render: item => (
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {item.schedule_job_id ? item.schedule_job_id.substring(0, 8) : '-'}
-              </div>
-            ),
+            key: 'schedule_info',
+            title: 'Schedule Info',
+            render: item => {
+              if (!item.schedulesjobInfo?.isSuccess) {
+                return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>;
+              }
+
+              const scheduleData = item.schedulesjobInfo.data;
+              const scheduleName = scheduleData.schedule?.schedule_name || '';
+              const deviceType = scheduleData.schedule?.cycle?.device_type || '';
+              const runDate = scheduleData.run_date
+                ? new Date(scheduleData.run_date).toLocaleDateString()
+                : 'N/A';
+
+              return (
+                <div className="text-sm">
+                  <div className="font-medium text-gray-700 dark:text-gray-300">{scheduleName}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {deviceType} - {runDate}
+                  </div>
+                </div>
+              );
+            },
           },
-        ]
-    ),
+          {
+            key: 'schedule_status',
+            title: 'Schedule Status',
+            render: item => {
+              if (!item.schedulesjobInfo?.isSuccess) {
+                return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>;
+              }
+
+              const scheduleStatus = item.schedulesjobInfo.data?.status || '';
+              let bgColor = '';
+              let textColor = '';
+              let borderColor = '';
+
+              switch (scheduleStatus) {
+                case 'Pending':
+                  bgColor = STATUS_COLORS.PENDING.BG;
+                  textColor = STATUS_COLORS.PENDING.TEXT;
+                  borderColor = STATUS_COLORS.PENDING.BORDER;
+                  break;
+                case 'InProgress':
+                  bgColor = STATUS_COLORS.IN_PROGRESS.BG;
+                  textColor = STATUS_COLORS.IN_PROGRESS.TEXT;
+                  borderColor = STATUS_COLORS.IN_PROGRESS.BORDER;
+                  break;
+                case 'Completed':
+                  bgColor = STATUS_COLORS.RESOLVED.BG;
+                  textColor = STATUS_COLORS.RESOLVED.TEXT;
+                  borderColor = STATUS_COLORS.RESOLVED.BORDER;
+                  break;
+                case 'Cancel':
+                  bgColor = 'rgba(128, 128, 128, 0.35)';
+                  textColor = '#808080';
+                  borderColor = '#808080';
+                  break;
+                default:
+                  bgColor = 'rgba(128, 128, 128, 0.35)';
+                  textColor = '#808080';
+                  borderColor = '#808080';
+              }
+
+              return (
+                <span
+                  className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                  style={{
+                    backgroundColor: bgColor,
+                    color: textColor,
+                    borderColor: borderColor,
+                    border: '1px solid',
+                  }}
+                >
+                  {scheduleStatus}
+                </span>
+              );
+            },
+          },
+        ]),
     {
       key: 'created_at',
       title: 'Created Date',
@@ -363,13 +464,15 @@ const TaskManagement: React.FC = () => {
       key: 'action',
       title: 'Action',
       render: item => (
-        <DropdownMenu
-          onViewDetail={() => navigate(`/task-detail/${item.task_id}`)}
-          onChangeStatus={() => handleTaskStatusChange(item)}
-          onRemove={() => console.log('Remove', item)}
-          showExportPdf={item.status === 'Completed'}
-          onExportPdf={() => handleExportPdf(item.task_id)}
-        />
+        <div onClick={e => e.stopPropagation()}>
+          <DropdownMenu
+            onViewDetail={() => navigate(`/task-detail/${item.task_id}`)}
+            onChangeStatus={() => handleTaskStatusChange(item)}
+            onRemove={() => console.log('Remove', item)}
+            showExportPdf={item.status === 'Completed'}
+            onExportPdf={() => handleExportPdf(item.task_id)}
+          />
+        </div>
       ),
       width: '80px',
     },
@@ -391,7 +494,7 @@ const TaskManagement: React.FC = () => {
     <div className="w-full mt-[60px]">
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
         <SearchInput
-          placeholder="Search by ID"
+          placeholder="Search by name"
           value={searchTerm}
           onChange={e => {
             setSearchTerm(e.target.value);
@@ -405,9 +508,7 @@ const TaskManagement: React.FC = () => {
           <button
             onClick={toggleTaskType}
             className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-              taskType === 'crack'
-                ? 'bg-red-500 text-white'
-                : 'bg-blue-500 text-white'
+              taskType === 'crack' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
             }`}
           >
             {taskType === 'crack' ? (
@@ -443,8 +544,8 @@ const TaskManagement: React.FC = () => {
           {taskType === 'crack' ? 'Crack Repair Tasks' : 'Scheduled Maintenance Tasks'}
         </h1>
         <p className="text-sm text-gray-500">
-          {taskType === 'crack' 
-            ? 'Displaying tasks for building crack repairs' 
+          {taskType === 'crack'
+            ? 'Displaying tasks for building crack repairs'
             : 'Displaying tasks for scheduled maintenance activities'}
         </p>
       </div>
@@ -457,7 +558,7 @@ const TaskManagement: React.FC = () => {
             data={tasksData?.data || []}
             columns={columns}
             keyExtractor={item => item.task_id}
-            onRowClick={item => console.log('Row clicked:', item)}
+            onRowClick={item => navigate(`/task-detail/${item.task_id}`)}
             className="w-[95%] mx-auto"
             tableClassName="w-full"
           />

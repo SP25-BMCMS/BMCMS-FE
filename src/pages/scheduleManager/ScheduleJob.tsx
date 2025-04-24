@@ -1,10 +1,12 @@
 import TaskModal from '@/components/calendar/TaskModal';
 import CreateScheduleJobModal from '@/components/calendar/CreateScheduleJobModal';
+import UpdateStatusModal from '@/components/calendar/UpdateStatusModal';
 import Pagination from '@/components/Pagination';
 import scheduleJobsApi, {
   type ScheduleJob,
   UpdateScheduleJobRequest,
   useSendMaintenanceEmail,
+  CreateScheduleJobRequest,
 } from '@/services/scheduleJobs';
 import schedulesApi, { Schedule as ScheduleType } from '@/services/schedules';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -24,9 +26,12 @@ import {
   RiCloseCircleLine,
   RiAlertLine,
   RiAddLine,
+  RiSettings3Line,
 } from 'react-icons/ri';
 import { useNavigate, useParams } from 'react-router-dom';
 import { STATUS_COLORS } from '@/constants/colors';
+import { getMaintenanceCycles } from '@/services/maintenanceCycle';
+import { createPortal } from 'react-dom';
 
 const ScheduleJob: React.FC = () => {
   const { scheduleId } = useParams<{ scheduleId: string }>();
@@ -36,7 +41,12 @@ const ScheduleJob: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showCreateJobModal, setShowCreateJobModal] = useState(false);
+  const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState<ScheduleJob | null>(null);
+  const [expandedDeviceId, setExpandedDeviceId] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [currentDevice, setCurrentDevice] = useState<any>(null);
 
   // Fetch schedule details
   const { data: schedule, isLoading: isScheduleLoading } = useQuery({
@@ -46,8 +56,20 @@ const ScheduleJob: React.FC = () => {
     select: response => response.data as ScheduleType & { schedule_type?: string },
   });
 
+  // Fetch cycle details
+  const { data: cycleData } = useQuery({
+    queryKey: ['cycle', schedule?.cycle_id],
+    queryFn: () => getMaintenanceCycles(),
+    enabled: !!schedule?.cycle_id,
+    select: response => response.data.find(cycle => cycle.cycle_id === schedule?.cycle_id),
+  });
+
   // Fetch schedule jobs with pagination
-  const { data: scheduleJobsData, isLoading: isJobsLoading } = useQuery({
+  const {
+    data: scheduleJobsData,
+    isLoading: isJobsLoading,
+    refetch: refetchJobs,
+  } = useQuery({
     queryKey: ['scheduleJobs', scheduleId, currentPage, itemsPerPage],
     queryFn: () =>
       scheduleJobsApi.fetchScheduleJobsByScheduleId(scheduleId!, {
@@ -57,6 +79,20 @@ const ScheduleJob: React.FC = () => {
     enabled: !!scheduleId,
   });
 
+  // Create schedule job mutation
+  const createJobMutation = useMutation({
+    mutationFn: (data: CreateScheduleJobRequest) => scheduleJobsApi.createScheduleJob(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] });
+      toast.success('Schedule job created successfully');
+      setShowCreateJobModal(false);
+      refetchJobs();
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to create schedule job');
+    },
+  });
+
   // Update schedule job mutation
   const updateJobMutation = useMutation({
     mutationFn: ({ jobId, data }: { jobId: string; data: UpdateScheduleJobRequest }) =>
@@ -64,6 +100,9 @@ const ScheduleJob: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] });
       toast.success('Schedule job updated successfully');
+      setShowUpdateStatusModal(false);
+      setSelectedJob(null);
+      refetchJobs();
     },
     onError: () => {
       toast.error('Failed to update schedule job');
@@ -73,11 +112,27 @@ const ScheduleJob: React.FC = () => {
   // Send maintenance email mutation
   const sendEmailMutation = useSendMaintenanceEmail();
 
-  const handleEditJob = async (job: ScheduleJob) => {
+  const handleCreateJob = async (data: CreateScheduleJobRequest) => {
+    try {
+      await createJobMutation.mutateAsync(data);
+    } catch (error) {
+      console.error('Error creating schedule job:', error);
+    }
+  };
+
+  const handleEditJob = (job: ScheduleJob) => {
+    setSelectedJob(job);
+    setShowUpdateStatusModal(true);
+  };
+
+  const handleUpdateStatus = async (
+    jobId: string,
+    status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel'
+  ) => {
     try {
       await updateJobMutation.mutateAsync({
-        jobId: job.schedule_job_id,
-        data: { status: 'InProgress' },
+        jobId,
+        data: { status },
       });
     } catch (error) {
       console.error('Error updating schedule job:', error);
@@ -98,12 +153,12 @@ const ScheduleJob: React.FC = () => {
     }
   };
 
-  const handleSendEmail = async (job: ScheduleJob) => {
+  const handleSendEmail = async (jobId: string) => {
     try {
-      await sendEmailMutation.mutateAsync(job.schedule_job_id);
+      await sendEmailMutation.mutateAsync(jobId);
       toast.success('Maintenance email sent successfully');
+      refetchJobs();
     } catch (error) {
-      console.error('Error sending maintenance email:', error);
       toast.error('Failed to send maintenance email');
     }
   };
@@ -176,6 +231,27 @@ const ScheduleJob: React.FC = () => {
     setShowCreateJobModal(true);
   };
 
+  // Toggle device details visibility
+  const toggleDeviceDetails = (deviceId: string) => {
+    if (expandedDeviceId === deviceId) {
+      setExpandedDeviceId(null);
+    } else {
+      setExpandedDeviceId(deviceId);
+    }
+  };
+
+  const handleDeviceHover = (event: React.MouseEvent, device: any) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipPosition({ x: rect.left, y: rect.top });
+    setCurrentDevice(device);
+    setShowTooltip(true);
+  };
+
+  const handleDeviceLeave = () => {
+    setShowTooltip(false);
+    setCurrentDevice(null);
+  };
+
   if (isScheduleLoading || isJobsLoading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen gap-4">
@@ -210,7 +286,7 @@ const ScheduleJob: React.FC = () => {
             {/* Header Banner with Status */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 px-6 py-4 border-b border-blue-700">
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-white">Schedule Details</h1>
+                <h1 className="text-2xl font-bold text-white">{schedule.schedule_name}</h1>
                 <div
                   className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${statusInfo.className}`}
                 >
@@ -222,19 +298,17 @@ const ScheduleJob: React.FC = () => {
             {/* Schedule Info */}
             <div className="p-6">
               <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
-                {/* Left Column */}
+                {/* Left Column - Schedule Information */}
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {schedule.schedule_name}
-                  </h2>
-                  <div className="flex flex-wrap gap-4 mt-4">
+                  <div className="flex flex-wrap gap-4 mb-4">
                     <div className="flex items-center text-gray-600 dark:text-gray-300">
                       <RiCalendarCheckLine className="mr-2 text-blue-500" />
                       <span>
-                        {formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}
+                        Schedule Period: {formatDate(schedule.start_date)} -{' '}
+                        {formatDate(schedule.end_date)}
                       </span>
                     </div>
-                    {schedule.schedule_type !== undefined && (
+                    {schedule.schedule_type && (
                       <div className="flex items-center text-gray-600 dark:text-gray-300">
                         <RiTimeLine className="mr-2 text-purple-500" />
                         <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300 rounded-full text-xs">
@@ -254,27 +328,41 @@ const ScheduleJob: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Right Column */}
+                {/* Right Column - Schedule Statistics */}
                 <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md shadow-sm">
                   <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                    Details
+                    Schedule Overview
                   </h3>
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="text-gray-500 dark:text-gray-400">Schedule ID:</div>
-                    <div className="font-mono text-gray-700 dark:text-gray-300">{scheduleId}</div>
-
-                    <div className="text-gray-500 dark:text-gray-400">Created At:</div>
+                    <div className="text-gray-500 dark:text-gray-400">Maintenance Cycle:</div>
                     <div className="text-gray-700 dark:text-gray-300">
-                      {formatDate(schedule.created_at)}
-                    </div>
-
-                    <div className="text-gray-500 dark:text-gray-400">Updated At:</div>
-                    <div className="text-gray-700 dark:text-gray-300">
-                      {formatDate(schedule.updated_at)}
+                      {cycleData ? (
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center">
+                            <RiSettings3Line className="mr-2 text-blue-500" />
+                            {cycleData.device_type}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 ml-4">
+                            {cycleData.frequency} ({cycleData.basis})
+                          </div>
+                        </div>
+                      ) : (
+                        'N/A'
+                      )}
                     </div>
 
                     <div className="text-gray-500 dark:text-gray-400">Total Jobs:</div>
                     <div className="text-gray-700 dark:text-gray-300">{totalItems}</div>
+
+                    <div className="text-gray-500 dark:text-gray-400">Created:</div>
+                    <div className="text-gray-700 dark:text-gray-300">
+                      {formatDate(schedule.created_at)}
+                    </div>
+
+                    <div className="text-gray-500 dark:text-gray-400">Last Updated:</div>
+                    <div className="text-gray-700 dark:text-gray-300">
+                      {formatDate(schedule.updated_at)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -289,7 +377,9 @@ const ScheduleJob: React.FC = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <RiBuilding2Line className="text-blue-500 mr-2 w-5 h-5" />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Schedule Jobs</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Maintenance Jobs
+              </h2>
             </div>
             <div className="flex items-center space-x-3">
               <div className="text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-md shadow-sm">
@@ -313,10 +403,11 @@ const ScheduleJob: React.FC = () => {
                 <RiInformationLine className="w-full h-full" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No schedule jobs found
+                No maintenance jobs found
               </h3>
               <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
-                There are no jobs associated with this schedule yet or they may have been cancelled.
+                There are no jobs associated with this schedule yet. Click below to create your
+                first maintenance job.
               </p>
               <button
                 onClick={handleOpenCreateJobModal}
@@ -333,16 +424,16 @@ const ScheduleJob: React.FC = () => {
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Building
+                    Location Details
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Equipment
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Run Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Created At
+                    Schedule
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Actions
@@ -357,35 +448,91 @@ const ScheduleJob: React.FC = () => {
                       key={job.schedule_job_id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-blue-100 dark:bg-blue-800 text-blue-500 rounded-lg">
                             <RiBuilding2Line className="w-5 h-5" />
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {job.building?.name || 'Unknown Building'}
+                              {job.buildingDetail?.building?.name} - {job.buildingDetail?.name}
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {job.building?.area?.name || 'Unknown Area'}
+                              {job.buildingDetail?.building?.area?.name}
+                            </div>
+                            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                              {job.buildingDetail?.total_apartments} apartments •{' '}
+                              {job.buildingDetail?.building?.numberFloor} floors
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 overflow-visible">
+                        {job.buildingDetail?.device && job.buildingDetail.device.length > 0 ? (
+                          <div className="flex flex-col gap-2">
+                            {(() => {
+                              const matchingDevices = job.buildingDetail.device.filter(
+                                device => device.type === cycleData?.device_type
+                              );
+                              if (matchingDevices.length === 0) {
+                                return (
+                                  <div className="relative">
+                                    <button className="text-xs px-2 py-1 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/30 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full transition-colors flex items-center">
+                                      Other
+                                    </button>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <>
+                                  {matchingDevices.slice(0, 2).map(device => (
+                                    <div key={device.device_id} className="relative">
+                                      <button
+                                        onClick={() => toggleDeviceDetails(device.device_id)}
+                                        onMouseEnter={e => handleDeviceHover(e, device)}
+                                        onMouseLeave={handleDeviceLeave}
+                                        className="text-xs px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-300 rounded-full transition-colors flex items-center"
+                                      >
+                                        {device.name}
+                                      </button>
+                                    </div>
+                                  ))}
+                                  {matchingDevices.length > 2 && (
+                                    <div className="text-xs text-gray-500">
+                                      +{matchingDevices.length - 2} more devices
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-500 italic">
+                            No equipment assigned
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium inline-flex items-center ${statusInfo.className}`}
                         >
                           {statusInfo.icon} {job.status}
                         </span>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Updated: {formatDate(job.updated_at)}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                        {formatDate(job.run_date)}
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 dark:text-white">
+                          Run Date: {formatDate(job.run_date)}
+                        </div>
+                        {job.start_date && job.end_date && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Period: {formatDate(job.start_date)} - {formatDate(job.end_date)}
+                          </div>
+                        )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {formatDate(job.created_at)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-4">
                         <div className="flex space-x-2">
                           {job.status.toLowerCase() !== 'cancel' &&
                             job.status.toLowerCase() !== 'completed' && (
@@ -393,7 +540,7 @@ const ScheduleJob: React.FC = () => {
                                 <button
                                   onClick={() => handleEditJob(job)}
                                   className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
-                                  title="Mark as In Progress"
+                                  title="Update Status"
                                 >
                                   <RiEditLine className="w-5 h-5" />
                                 </button>
@@ -405,7 +552,7 @@ const ScheduleJob: React.FC = () => {
                                   <RiDeleteBinLine className="w-5 h-5" />
                                 </button>
                                 <button
-                                  onClick={() => handleSendEmail(job)}
+                                  onClick={() => handleSendEmail(job.schedule_job_id)}
                                   disabled={sendEmailMutation.isPending}
                                   className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded-full hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   title="Send Maintenance Email"
@@ -457,7 +604,7 @@ const ScheduleJob: React.FC = () => {
         )}
       </div>
 
-      {/* Task Modal */}
+      {/* Modals */}
       <TaskModal
         isOpen={showTaskModal}
         onClose={() => {
@@ -467,14 +614,50 @@ const ScheduleJob: React.FC = () => {
         scheduleJob={selectedJob}
       />
 
-      {/* Create Schedule Job Modal */}
-      {scheduleId && (
-        <CreateScheduleJobModal
-          isOpen={showCreateJobModal}
-          onClose={() => setShowCreateJobModal(false)}
-          scheduleId={scheduleId}
-        />
-      )}
+      <CreateScheduleJobModal
+        isOpen={showCreateJobModal}
+        onClose={() => setShowCreateJobModal(false)}
+        scheduleId={scheduleId}
+      />
+
+      <UpdateStatusModal
+        isOpen={showUpdateStatusModal}
+        onClose={() => {
+          setShowUpdateStatusModal(false);
+          setSelectedJob(null);
+        }}
+        job={selectedJob}
+        onUpdateStatus={handleUpdateStatus}
+      />
+
+      {showTooltip &&
+        currentDevice &&
+        createPortal(
+          <div
+            className="fixed z-[100] bg-white dark:bg-gray-800 rounded-md shadow-lg p-3 min-w-[200px] max-w-[300px] text-xs border border-gray-200 dark:border-gray-700 max-h-[200px] overflow-y-auto"
+            style={{
+              top: `${tooltipPosition.y}px`,
+              left: `${tooltipPosition.x}px`,
+              transform: 'translateY(-100%)',
+            }}
+          >
+            <h4 className="font-medium mb-2 text-gray-800 dark:text-gray-200">
+              {currentDevice.name}
+            </h4>
+            <div className="space-y-1 text-gray-600 dark:text-gray-400">
+              <p>
+                <span className="font-medium">Type:</span> {currentDevice.type}
+              </p>
+              <p>
+                <span className="font-medium">Manufacturer:</span> {currentDevice.manufacturer}
+              </p>
+              <p>
+                <span className="font-medium">Model:</span> {currentDevice.model}
+              </p>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

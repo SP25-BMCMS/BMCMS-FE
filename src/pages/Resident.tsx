@@ -328,10 +328,6 @@ const Resident: React.FC = () => {
             onChange={e => setSearchTerm(e.target.value)}
             className="w-[30rem] max-w-xs"
           />
-
-          <div className="flex gap-4">
-            <AddButton label="Add User" icon={<FiUserPlus />} onClick={openModal} />
-          </div>
         </div>
       </div>
 

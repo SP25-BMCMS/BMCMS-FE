@@ -112,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
     localStorage.removeItem('bmcms_token');
     localStorage.removeItem('bmcms_refresh_token');
     localStorage.removeItem('bmcms_user');
-    toast.success('Đăng xuất thành công');
+    toast.success('Logout successful');
     navigate('/');
   };
 

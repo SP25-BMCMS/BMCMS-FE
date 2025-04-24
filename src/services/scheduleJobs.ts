@@ -32,6 +32,16 @@ export interface LocationDetail {
   updatedAt: string;
 }
 
+export interface Device {
+  device_id: string;
+  name: string;
+  type: string;
+  manufacturer: string;
+  model: string;
+  buildingDetailId: string;
+  contract_id?: string | null;
+}
+
 export interface BuildingDetail {
   buildingDetailId: string;
   buildingId: string;
@@ -40,6 +50,7 @@ export interface BuildingDetail {
   createdAt: string;
   updatedAt: string;
   locationDetails: LocationDetail[];
+  device?: Device[];
 }
 
 export interface Building {
@@ -61,13 +72,20 @@ export interface Building {
 export interface ScheduleJob {
   schedule_job_id: string;
   schedule_id: string;
-  building_id: string;
-  status: 'Pending' | 'InProgress' | 'Completed';
+  building_id?: string;
+  buildingDetailId?: string;
+  status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel';
   run_date: string;
+  start_date?: string;
+  end_date?: string;
   created_at: string;
   updated_at: string;
-  schedule: Schedule;
-  building: Building;
+  schedule?: Schedule;
+  building?: Building;
+  buildingDetail?: BuildingDetail & {
+    building?: Building;
+  };
+  inspection_id?: string | null;
 }
 
 export interface ScheduleJobResponse {
