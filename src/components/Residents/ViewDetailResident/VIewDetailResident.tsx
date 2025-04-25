@@ -28,6 +28,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isAddApartmentOpen, setIsAddApartmentOpen] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'info' | 'apartments'>('info');
 
   // Debug: console log when component renders with resident
   useEffect(() => {
@@ -39,11 +40,10 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   // Reset state when modal closes or resident changes
   useEffect(() => {
     if (!isOpen) {
-      // Reset state when modal is closed
       setApartments([]);
       setError(null);
+      setActiveTab('info');
     } else if (resident) {
-      // Reset apartments when resident changes
       setApartments([]);
       setError(null);
       console.log('Trạng thái tài khoản:', resident.accountStatus);
@@ -53,13 +53,14 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
         fetchResidentApartments();
       }
     }
-  }, [isOpen, resident?.userId]); // Add resident.userId as dependency to detect changes
+  }, [isOpen, resident?.userId]);
 
   // Handle adding apartment success
   const handleAddApartmentSuccess = () => {
     // Refresh apartments list
     if (resident && resident.accountStatus === 'Active') {
       fetchResidentApartments();
+      setActiveTab('apartments');
     }
   };
 
@@ -145,14 +146,14 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Resident Details" size="lg">
       {isInactive ? (
-        <div className="text-center py-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-500 mb-4">
-            <AlertTriangle className="h-8 w-8" />
+        <div className="text-center py-6">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-500 mb-3">
+            <AlertTriangle className="h-6 w-6" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <h3 className="text-base font-medium text-gray-900 dark:text-white mb-2">
             Account Inactive
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-sm mx-auto">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 max-w-sm mx-auto">
             This resident account is currently inactive. Details are only available for active
             accounts.
           </p>
@@ -166,7 +167,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
           </div>
           <button
             onClick={handleClose}
-            className="mt-6 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none transition-colors"
+            className="mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none transition-colors"
           >
             Close
           </button>
@@ -177,251 +178,304 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
           <span className="ml-3">Đang tải dữ liệu...</span>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div>
           {/* Header with basic info */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="w-24 h-24 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-4xl font-bold uppercase">
+          <div className="flex items-center space-x-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
+            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-xl font-bold uppercase flex-shrink-0">
               {resident.username.charAt(0)}
             </div>
 
-            <div className="flex-1 text-center sm:text-left">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white truncate">
                 {resident.username}
               </h2>
 
-              <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 mt-1">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getGenderStyle(resident.gender)}`}
+                  className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getGenderStyle(resident.gender)}`}
                 >
                   {resident.gender}
                 </span>
-
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(resident.accountStatus)}`}
+                  className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${getStatusStyle(resident.accountStatus)}`}
                 >
                   {resident.accountStatus}
                 </span>
               </div>
+            </div>
 
-              <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                <div className="flex justify-center sm:justify-start items-center mt-1">
-                  <Mail className="h-4 w-4 mr-2" />
-                  {resident.email}
-                </div>
-                <div className="flex justify-center sm:justify-start items-center mt-1">
-                  <Phone className="h-4 w-4 mr-2" />
-                  {resident.phone}
-                </div>
+            <div className="hidden sm:flex flex-col text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center">
+                <Mail className="h-3.5 w-3.5 mr-1" />
+                {resident.email}
+              </div>
+              <div className="flex items-center mt-1">
+                <Phone className="h-3.5 w-3.5 mr-1" />
+                {resident.phone}
               </div>
             </div>
           </div>
 
-          {/* Personal Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-600">
-                Personal Information
-              </h3>
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                activeTab === 'info'
+                  ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+              onClick={() => setActiveTab('info')}
+            >
+              Personal Info
+            </button>
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                activeTab === 'apartments'
+                  ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+              onClick={() => setActiveTab('apartments')}
+            >
+              Apartments ({apartments.length})
+            </button>
+          </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <User className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</p>
-                    <p className="text-gray-900 dark:text-white">{resident.gender}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <CalendarDays className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Date of Birth
-                    </p>
-                    <p className="text-gray-900 dark:text-white">
-                      {formatDate(resident.dateOfBirth)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <CalendarDays className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Created Date
-                    </p>
-                    <p className="text-gray-900 dark:text-white">{resident.createdDate}</p>
-                  </div>
-                </div>
-              </div>
+          {/* Mobile only contact info */}
+          <div className="sm:hidden mb-4 text-sm text-gray-600 dark:text-gray-400 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center">
+              <Mail className="h-3.5 w-3.5 mr-1" />
+              {resident.email}
             </div>
-
-            {/* Property Summary */}
-            <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-600">
-                Property Summary
-              </h3>
-              {resident?.accountStatus === 'Active' && (
-                <button
-                  onClick={() => setIsAddApartmentOpen(true)}
-                  className="flex items-center p-1.5 rounded-md text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  title="Assign a new apartment to this resident"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Apartment
-                </button>
-              )}
-              {error ? (
-                <div className="text-center py-4 text-red-500 dark:text-red-400">
-                  <p>{error}</p>
-                </div>
-              ) : isLoading ? (
-                <div className="flex justify-center py-4">
-                  <div className="animate-spin h-6 w-6 border-2 border-blue-500 rounded-full border-t-transparent"></div>
-                </div>
-              ) : apartments.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Home className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Total Apartments
-                      </p>
-                      <p className="text-gray-900 dark:text-white">
-                        <span className="text-2xl font-bold">{apartments.length}</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center">
-                    <Building className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Buildings
-                      </p>
-                      <p className="text-gray-900 dark:text-white">
-                        {[
-                          ...new Set(
-                            apartments.map(apt => apt.buildingDetails?.building?.name || 'Unknown')
-                          ),
-                        ].join(', ')}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center">
-                    <MapPin className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Areas</p>
-                      <p className="text-gray-900 dark:text-white">
-                        {[
-                          ...new Set(
-                            apartments.map(
-                              apt => apt.buildingDetails?.building?.area?.name || 'Unknown'
-                            )
-                          ),
-                        ].join(', ')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                  No apartments assigned to this resident.
-                </div>
-              )}
+            <div className="flex items-center mt-1">
+              <Phone className="h-3.5 w-3.5 mr-1" />
+              {resident.phone}
             </div>
           </div>
 
-          {/* Apartments List - Only show if there are apartments */}
-          {apartments.length > 0 && (
-            <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-600">
-                Apartment Details
-              </h3>
+          {/* Tab Content */}
+          <div className="overflow-y-auto max-h-[calc(80vh-230px)] pr-1">
+            {activeTab === 'info' && (
+              <div className="space-y-4">
+                {/* Personal Information */}
+                <div className="bg-white dark:bg-gray-700 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-600">
+                    Personal Information
+                  </h3>
 
-              <div className="grid grid-cols-1 gap-4">
-                {apartments.map(apartment => {
-                  // Kiểm tra xem apartment và các thuộc tính con có tồn tại không
-                  const buildingName =
-                    apartment?.buildingDetails?.building?.name || 'Unknown Building';
-                  const buildingDetailName = apartment?.buildingDetails?.name || '';
-                  const areaName =
-                    apartment?.buildingDetails?.building?.area?.name || 'Unknown Area';
-                  const buildingDescription =
-                    apartment?.buildingDetails?.building?.description || '';
-                  const buildingFloors = apartment?.buildingDetails?.building?.numberFloor || 0;
-                  const buildingStatus = apartment?.buildingDetails?.building?.Status || 'Unknown';
-                  const buildingImage =
-                    apartment?.buildingDetails?.building?.imageCover ||
-                    'https://via.placeholder.com/64?text=No+Image';
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex items-center">
+                      <User className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                          Gender
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-white">{resident.gender}</p>
+                      </div>
+                    </div>
 
-                  return (
-                    <div
-                      key={apartment.apartmentId}
-                      className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                    >
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
-                          <img
-                            src={buildingImage}
-                            alt={buildingName}
-                            className="w-full h-full object-cover"
-                            onError={e => {
-                              // Fallback khi ảnh lỗi
-                              (e.target as HTMLImageElement).src =
-                                'https://via.placeholder.com/64?text=No+Image';
-                            }}
-                          />
+                    <div className="flex items-center">
+                      <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                          Date of Birth
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-white">
+                          {formatDate(resident.dateOfBirth)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                          Created Date
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-white">
+                          {resident.createdDate}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Property Summary */}
+                <div className="bg-white dark:bg-gray-700 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
+                  <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 dark:border-gray-600">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                      Property Summary
+                    </h3>
+                    {resident?.accountStatus === 'Active' && (
+                      <button
+                        onClick={() => setIsAddApartmentOpen(true)}
+                        className="flex items-center p-1 rounded-md text-xs font-medium text-blue-600 hover:text-blue-700 focus:outline-none"
+                      >
+                        <Plus className="h-3.5 w-3.5 mr-1" />
+                        Add
+                      </button>
+                    )}
+                  </div>
+
+                  {error ? (
+                    <div className="text-center py-3 text-red-500 dark:text-red-400 text-sm">
+                      <p>{error}</p>
+                    </div>
+                  ) : isLoading ? (
+                    <div className="flex justify-center py-3">
+                      <div className="animate-spin h-5 w-5 border-2 border-blue-500 rounded-full border-t-transparent"></div>
+                    </div>
+                  ) : apartments.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <Home className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            Total Apartments
+                          </p>
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            <span className="font-bold">{apartments.length}</span>
+                          </p>
                         </div>
+                      </div>
 
-                        <div className="ml-4 flex-1">
-                          <h4 className="text-base font-semibold text-gray-900 dark:text-white flex items-center">
-                            <span>Apartment {apartment.apartmentName}</span>
-                            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                              {buildingStatus}
-                            </span>
-                          </h4>
-
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            <span className="font-medium">Building:</span> {buildingName}{' '}
-                            {buildingDetailName ? `(${buildingDetailName})` : ''}
+                      <div className="flex items-center">
+                        <Building className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            Buildings
                           </p>
-
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            <span className="font-medium">Area:</span> {areaName}
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            {[
+                              ...new Set(
+                                apartments.map(
+                                  apt => apt.buildingDetails?.building?.name || 'Unknown'
+                                )
+                              ),
+                            ].join(', ')}
                           </p>
+                        </div>
+                      </div>
 
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            <span className="font-medium">Building Info:</span>{' '}
-                            {buildingDescription}{' '}
-                            {buildingFloors > 0 ? `• ${buildingFloors} floors` : ''}
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            Areas
+                          </p>
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            {[
+                              ...new Set(
+                                apartments.map(
+                                  apt => apt.buildingDetails?.building?.area?.name || 'Unknown'
+                                )
+                              ),
+                            ].join(', ')}
                           </p>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+                  ) : (
+                    <div className="text-center py-3 text-gray-500 dark:text-gray-400 text-sm">
+                      No apartments assigned.
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {activeTab === 'apartments' && (
+              <div>
+                {apartments.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
+                    <Home className="h-10 w-10 mb-2 text-gray-400" />
+                    <p className="text-sm">No apartments assigned to this resident.</p>
+                    <button
+                      onClick={() => setIsAddApartmentOpen(true)}
+                      className="mt-3 flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none"
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      Add First Apartment
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center mb-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {apartments.length} apartment(s) found
+                      </p>
+                      <button
+                        onClick={() => setIsAddApartmentOpen(true)}
+                        className="flex items-center px-2 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 focus:outline-none"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add New
+                      </button>
+                    </div>
+
+                    {apartments.map(apartment => {
+                      const buildingName =
+                        apartment?.buildingDetails?.building?.name || 'Unknown Building';
+                      const buildingDetailName = apartment?.buildingDetails?.name || '';
+                      const areaName =
+                        apartment?.buildingDetails?.building?.area?.name || 'Unknown Area';
+                      const buildingDescription =
+                        apartment?.buildingDetails?.building?.description || '';
+                      const buildingFloors = apartment?.buildingDetails?.building?.numberFloor || 0;
+                      const buildingStatus =
+                        apartment?.buildingDetails?.building?.Status || 'Unknown';
+                      const buildingImage =
+                        apartment?.buildingDetails?.building?.imageCover ||
+                        'https://via.placeholder.com/40?text=No+Image';
+
+                      return (
+                        <div
+                          key={apartment.apartmentId}
+                          className="p-2 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0 w-10 h-10 rounded-md overflow-hidden">
+                              <img
+                                src={buildingImage}
+                                alt={buildingName}
+                                className="w-full h-full object-cover"
+                                onError={e => {
+                                  (e.target as HTMLImageElement).src =
+                                    'https://via.placeholder.com/40?text=No+Image';
+                                }}
+                              />
+                            </div>
+
+                            <div className="ml-3 flex-1 min-w-0">
+                              <h4 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center truncate">
+                                <span>Apartment {apartment.apartmentName}</span>
+                                <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                  {buildingStatus}
+                                </span>
+                              </h4>
+
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                <span className="font-medium">Building:</span> {buildingName}{' '}
+                                {buildingDetailName ? `(${buildingDetailName})` : ''}
+                              </p>
+
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                <span className="font-medium">Area:</span> {areaName}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Footer buttons */}
-          <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-            <div>
-              {apartments.length === 0 && resident?.accountStatus === 'Active' && (
-                <button
-                  onClick={() => setIsAddApartmentOpen(true)}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Apartment
-                </button>
-              )}
-            </div>
+          <div className="flex justify-end pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={handleClose}
-              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
-              title="Assign the first apartment to this resident"
+              className="px-4 py-1.5 bg-gray-200 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none transition-colors"
             >
               Close
             </button>

@@ -276,10 +276,6 @@ const Resident: React.FC = () => {
     },
   ];
 
-  // const handleAddResident = async (residentData: Omit<Residents, 'userId'>) => {
-  //   await addResident(residentData);
-  // };
-
   const loadingVariants = {
     rotate: 360,
     transition: {
@@ -317,32 +313,32 @@ const Resident: React.FC = () => {
   }
 
   return (
-    <div className="w-full mt-[60px]">
+    <div className="w-full mt-[30px] md:mt-[60px] px-3 sm:px-4 md:px-6 lg:px-8">
       <Toaster position="top-right" />
 
-      <div className="flex flex-col gap-4 mb-4 ml-[90px] mr-[132px]">
-        <div className="flex justify-between items-center">
-          <SearchInput
-            placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-[30rem] max-w-xs"
-          />
-        </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+        <SearchInput
+          placeholder="Search by name, email or phone"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="w-full md:w-[20rem] max-w-full md:max-w-xs"
+        />
       </div>
 
-      <Table<Residents>
-        data={residentsResponse?.data || []}
-        columns={columns}
-        keyExtractor={item => item.userId}
-        onRowClick={item => console.log('Row clicked:', item)}
-        className="w-[95%] mx-auto"
-        tableClassName="w-full"
-        isLoading={isLoadingResidents}
-        emptyText="Không tìm thấy dữ liệu"
-      />
+      <div className="w-full overflow-x-auto">
+        <Table<Residents>
+          data={residentsResponse?.data || []}
+          columns={columns}
+          keyExtractor={item => item.userId}
+          onRowClick={item => console.log('Row clicked:', item)}
+          className="w-full"
+          tableClassName="w-full min-w-[750px]"
+          isLoading={isLoadingResidents}
+          emptyText="Không tìm thấy dữ liệu"
+        />
+      </div>
 
-      <div className="w-[95%] mx-auto">
+      <div className="w-full mt-4">
         <Pagination
           currentPage={currentPage}
           totalPages={residentsResponse?.pagination.totalPages || 1}

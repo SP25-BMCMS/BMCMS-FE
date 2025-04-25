@@ -15,6 +15,7 @@ import { STATUS_COLORS } from '@/constants/colors';
 import { useNavigate } from 'react-router-dom';
 import ChangeStatusModal from '@/components/TaskManager/ChangeStatusModal';
 import { FaTools, FaCalendarAlt, FaBuilding } from 'react-icons/fa';
+import Tooltip from '@/components/Tooltip';
 
 interface TasksCacheData {
   data: TaskResponse[];
@@ -204,12 +205,12 @@ const TaskManagement: React.FC = () => {
   };
 
   const LoadingIndicator = () => (
-    <div className="flex flex-col justify-center items-center h-64">
+    <div className="flex flex-col justify-center items-center h-48 md:h-56 lg:h-64">
       <motion.div
         animate={loadingVariants}
-        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
+        className="w-10 h-10 md:w-12 md:h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-3 md:mb-4"
       />
-      <p className="text-gray-700 dark:text-gray-300">Loading tasks data...</p>
+      <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">Loading tasks data...</p>
     </div>
   );
 
@@ -229,21 +230,35 @@ const TaskManagement: React.FC = () => {
           {(currentPage - 1) * itemsPerPage + index + 1}
         </div>
       ),
-      width: '60px',
+      width: '40px sm:50px md:60px',
     },
     {
       key: 'title',
       title: 'Title',
       render: item => (
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</div>
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 max-w-[140px] xs:max-w-[180px] sm:max-w-full truncate">
+          {item.title}
+        </div>
       ),
     },
     {
       key: 'description',
       title: 'Description',
-      render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.description}</div>
-      ),
+      render: item => {
+        // Only show tooltip if description is longer than 100 characters
+        const shortDescription = item.description?.substring(0, 100) || '';
+        const needsTooltip = (item.description?.length || 0) > 100;
+
+        return (
+          <Tooltip content={item.description || ''} position="bottom">
+            <div className="text-sm text-gray-500 dark:text-gray-400 max-w-[100px] xs:max-w-[150px] sm:max-w-[200px] truncate">
+              {shortDescription}
+              {needsTooltip ? '...' : ''}
+            </div>
+          </Tooltip>
+        );
+      },
+      width: '150px sm:200px md:250px',
     },
     {
       key: 'building',
@@ -491,8 +506,9 @@ const TaskManagement: React.FC = () => {
   };
 
   return (
-    <div className="w-full mt-[60px]">
-      <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
+    <div className="w-full mt-5 md:mt-6 lg:mt-[30px] xl:mt-[60px] px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8">
+      {/* Header Section - Made responsive */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 md:mb-4 gap-2 sm:gap-3 md:gap-4">
         <SearchInput
           placeholder="Search by name"
           value={searchTerm}
@@ -500,26 +516,28 @@ const TaskManagement: React.FC = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="w-[20rem] max-w-xs"
+          className="w-full md:w-[16rem] lg:w-[20rem] max-w-full"
         />
 
-        <div className="flex space-x-4 items-center">
+        <div className="flex flex-wrap gap-2 sm:gap-3 w-full md:w-auto justify-start md:justify-end mt-2 md:mt-0">
           {/* Task Type Toggle Button */}
           <button
             onClick={toggleTaskType}
-            className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+            className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm md:text-base rounded-lg transition-colors ${
               taskType === 'crack' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
             }`}
           >
             {taskType === 'crack' ? (
               <>
-                <FaTools className="mr-2" />
-                Crack Repair Tasks
+                <FaTools className="mr-1 md:mr-2" />
+                <span className="hidden xs:inline">Crack Repair</span>
+                <span className="xs:hidden">Repairs</span>
               </>
             ) : (
               <>
-                <FaCalendarAlt className="mr-2" />
-                Scheduled Maintenance
+                <FaCalendarAlt className="mr-1 md:mr-2" />
+                <span className="hidden xs:inline">Scheduled Maintenance</span>
+                <span className="xs:hidden">Maintenance</span>
               </>
             )}
           </button>
@@ -533,17 +551,18 @@ const TaskManagement: React.FC = () => {
           <AddButton
             label="Add Task"
             icon={<MdOutlineAddTask />}
-            className="w-[154px]"
+            className="w-auto text-xs sm:text-sm md:text-base px-2 sm:px-3 py-1.5 sm:py-2"
             onClick={() => console.log('Add Task clicked')}
           />
         </div>
       </div>
 
-      <div className="ml-[90px] mb-4">
-        <h1 className="text-xl font-bold">
+      {/* Title Section */}
+      <div className="mb-3 md:mb-4">
+        <h1 className="text-base sm:text-lg md:text-xl font-bold">
           {taskType === 'crack' ? 'Crack Repair Tasks' : 'Scheduled Maintenance Tasks'}
         </h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-xs md:text-sm text-gray-500">
           {taskType === 'crack'
             ? 'Displaying tasks for building crack repairs'
             : 'Displaying tasks for scheduled maintenance activities'}
@@ -554,14 +573,16 @@ const TaskManagement: React.FC = () => {
         <LoadingIndicator />
       ) : (
         <>
-          <Table<TaskResponse>
-            data={tasksData?.data || []}
-            columns={columns}
-            keyExtractor={item => item.task_id}
-            onRowClick={item => navigate(`/task-detail/${item.task_id}`)}
-            className="w-[95%] mx-auto"
-            tableClassName="w-full"
-          />
+          <div className="w-full overflow-x-auto rounded-lg shadow-sm border border-gray-100 dark:border-gray-800">
+            <Table<TaskResponse>
+              data={tasksData?.data || []}
+              columns={columns}
+              keyExtractor={item => item.task_id}
+              onRowClick={item => navigate(`/task-detail/${item.task_id}`)}
+              className="w-full"
+              tableClassName="w-full min-w-[640px] sm:min-w-[750px]"
+            />
+          </div>
 
           <Pagination
             currentPage={currentPage}
@@ -570,7 +591,7 @@ const TaskManagement: React.FC = () => {
             totalItems={tasksData?.pagination.total || 0}
             itemsPerPage={itemsPerPage}
             onLimitChange={handleLimitChange}
-            className="w-[95%] mx-auto mt-4"
+            className="w-full mt-3 md:mt-4"
           />
         </>
       )}

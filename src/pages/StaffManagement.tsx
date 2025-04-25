@@ -312,7 +312,7 @@ const StaffManagement: React.FC = () => {
 
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
         <SearchInput
-          placeholder="Tìm kiếm theo tên hoặc ID"
+          placeholder="Search by name or ID"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="w-[20rem] max-w-xs"

@@ -290,47 +290,51 @@ const Building: React.FC = () => {
   );
 
   return (
-    <div className="w-full mt-[60px]">
-      <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
+    <div className="w-full mt-[30px] md:mt-[60px] px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
         <SearchInput
           placeholder="Search by building name or description"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          className="w-[20rem] max-w-xs"
+          className="w-full md:w-[20rem] max-w-full md:max-w-xs"
         />
 
-        <FilterDropdown
-          options={filterOptions}
-          selectedValue={selectedStatus}
-          onSelect={setSelectedStatus}
-        />
+        <div className="flex flex-wrap gap-3 w-full md:w-auto justify-start md:justify-end">
+          <FilterDropdown
+            options={filterOptions}
+            selectedValue={selectedStatus}
+            onSelect={setSelectedStatus}
+          />
 
-        <AddButton
-          label="Add Area"
-          className="w-[154px]"
-          icon={<PiMapPinAreaBold />}
-          onClick={() => setIsAddAreaModalOpen(true)}
-        />
-        <AddButton
-          label="Add Building"
-          icon={<FaRegBuilding />}
-          className="w-[154px]"
-          onClick={() => setIsAddBuildingModalOpen(true)}
-        />
+          <AddButton
+            label="Add Area"
+            className="w-auto md:w-[120px] lg:w-[154px]"
+            icon={<PiMapPinAreaBold />}
+            onClick={() => setIsAddAreaModalOpen(true)}
+          />
+          <AddButton
+            label="Add Building"
+            icon={<FaRegBuilding />}
+            className="w-auto md:w-[120px] lg:w-[154px]"
+            onClick={() => setIsAddBuildingModalOpen(true)}
+          />
+        </div>
       </div>
 
       {isLoadingBuildings ? (
         <LoadingIndicator />
       ) : (
         <>
-          <Table<BuildingResponse>
-            data={buildingsData?.data || []}
-            columns={columns}
-            keyExtractor={item => item.buildingId}
-            onRowClick={item => console.log('Row clicked:', item)}
-            className="w-[95%] mx-auto"
-            tableClassName="w-full"
-          />
+          <div className="w-full overflow-x-auto">
+            <Table<BuildingResponse>
+              data={buildingsData?.data || []}
+              columns={columns}
+              keyExtractor={item => item.buildingId}
+              onRowClick={item => console.log('Row clicked:', item)}
+              className="w-full"
+              tableClassName="w-full min-w-[750px]"
+            />
+          </div>
 
           <Pagination
             currentPage={currentPage}
@@ -339,7 +343,7 @@ const Building: React.FC = () => {
             totalItems={buildingsData?.pagination.total || 0}
             itemsPerPage={itemsPerPage}
             onLimitChange={setItemsPerPage}
-            className="w-[95%] mx-auto mt-4"
+            className="w-full mt-4"
           />
         </>
       )}
