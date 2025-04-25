@@ -190,6 +190,15 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
 
     setIsLoading(true);
     try {
+      // Convert dates to ISO 8601 format for API
+      const construction_date_iso = formData.construction_date && formData.construction_date !== 'dd/mm/yyyy' 
+        ? new Date(formData.construction_date).toISOString() 
+        : null;
+        
+      const completion_date_iso = formData.status === 'operational' && formData.completion_date && formData.completion_date !== 'dd/mm/yyyy'
+        ? new Date(formData.completion_date).toISOString()
+        : null;
+
       const buildingData = {
         buildingId: formData.buildingId,
         name: formData.name,
@@ -197,8 +206,8 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
         numberFloor: formData.numberFloor,
         imageCover: formData.imageCover,
         areaId: formData.areaId,
-        construction_date: formData.construction_date,
-        completion_date: formData.completion_date,
+        construction_date: construction_date_iso,
+        completion_date: completion_date_iso,
         status: formData.status as 'operational' | 'under_construction',
         ...(formData.status === 'operational' && formData.manager_id
           ? { manager_id: formData.manager_id }
