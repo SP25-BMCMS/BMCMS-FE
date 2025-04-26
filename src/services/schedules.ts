@@ -35,6 +35,35 @@ export interface Schedule {
   }>
 }
 
+// Interface for generated schedule
+export interface GeneratedSchedule {
+  schedule_id: string
+  schedule_name: string
+  device_type: string
+  start_date: string
+  end_date: string
+  jobs_count: number
+  auto_create_tasks: boolean
+}
+
+// Interface for generate schedules response
+export interface GenerateSchedulesResponse {
+  isSuccess: boolean
+  message: string
+  data: {
+    createdSchedules: Array<{
+      schedule_id: string
+      schedule_name: string
+      device_type: string
+      start_date: string
+      end_date: string
+      jobs_count: number
+      auto_create_tasks: boolean
+    }>
+  }
+}
+
+// Interface for cycle config
 export interface CycleConfig {
   cycle_id: string
   duration_days: number
@@ -42,6 +71,7 @@ export interface CycleConfig {
   start_date: string
 }
 
+// Interface for generate schedules request
 export interface GenerateSchedulesRequest {
   cycle_configs: CycleConfig[]
   buildingDetails: string[]
@@ -106,12 +136,19 @@ const schedulesApi = {
     return response.data
   },
 
-  generateSchedules: async (data: GenerateSchedulesRequest) => {
-    const response = await apiInstance.post<{ statusCode: number; message: string }>(
-      '/schedules/generate-schedules',
-      data
-    )
-    return response.data
+  generateSchedules: async (data: GenerateSchedulesRequest): Promise<GenerateSchedulesResponse> => {
+    try {
+      const response = await apiInstance.post<GenerateSchedulesResponse>(
+        import.meta.env.VITE_GENERATE_SCHEDULES_API,
+        data
+      )
+      // Log the response for debugging
+      console.log('Generate schedules response:', response)
+      return response.data
+    } catch (error) {
+      console.error('Error generating schedules:', error)
+      throw error
+    }
   },
 }
 

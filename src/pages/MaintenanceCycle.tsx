@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Settings, Trash2, Edit, Plus, AlertTriangle, X, Calendar } from 'lucide-react'
-import Table, { Column } from '@/components/Table'
-import Pagination from '@/components/Pagination'
-import { MaintenanceCycle } from '@/types'
-import { getMaintenanceCycles, deleteMaintenanceCycle } from '@/services/maintenanceCycle'
-import buildingDetailsApi from '@/services/buildingDetails'
-import { toast } from 'react-hot-toast'
-import { motion } from 'framer-motion'
-import MaintenanceCycleFilter from '@/components/MaintenanceCycle/MaintenanceCycleFilter'
 import AddButton from '@/components/AddButton'
 import MaintenanceCycleModal from '@/components/MaintenanceCycle/AddMaintenanceCycle/MaintenanceCycleModal'
 import GenerateScheduleModal from '@/components/MaintenanceCycle/GenerateScheduleModal'
-import { format } from 'date-fns'
+import MaintenanceCycleFilter from '@/components/MaintenanceCycle/MaintenanceCycleFilter'
+import Pagination from '@/components/Pagination'
+import Table, { Column } from '@/components/Table'
+import buildingDetailsApi from '@/services/buildingDetails'
+import { deleteMaintenanceCycle, getMaintenanceCycles } from '@/services/maintenanceCycle'
 import schedulesApi, { CycleConfig } from '@/services/schedules'
+import { MaintenanceCycle } from '@/types'
+import { useQuery } from '@tanstack/react-query'
+import { format } from 'date-fns'
+import { motion } from 'framer-motion'
+import { AlertTriangle, Calendar, Edit, Plus, Settings, Trash2, X } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
 
 // Delete Confirmation Modal Component
 const DeleteConfirmationModal = ({
@@ -149,7 +149,18 @@ const MaintenanceCycleManagement: React.FC = () => {
   // Fetch building details
   const { data: buildingDetails, isLoading: isLoadingBuildings } = useQuery({
     queryKey: ['buildingDetails'],
-    queryFn: () => buildingDetailsApi.getBuildingDetailsForManager('current'), // Replace with actual manager ID
+    queryFn: () => {
+      const userStr = localStorage.getItem('bmcms_user')
+      const user = userStr ? JSON.parse(userStr) : null
+      const userId = user?.userId
+
+      if (!userId) {
+        throw new Error('User ID not found')
+      }
+
+      return buildingDetailsApi.getBuildingDetailsForManager(userId)
+    },
+    enabled: !!localStorage.getItem('bmcms_user'), // Only run query if user exists
   })
 
   // Update pagination when data changes

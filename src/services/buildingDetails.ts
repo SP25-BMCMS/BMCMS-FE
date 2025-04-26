@@ -44,32 +44,37 @@ const buildingDetailsApi = {
   // Get buildings with details for a specific manager
   getBuildingDetailsForManager: async (managerId: string) => {
     try {
-      const url = import.meta.env.VITE_VIEW_BUILDING_LIST_FOR_MANAGER.replace(
+      const url = `${import.meta.env.VITE_VIEW_BUILDING_LIST_FOR_MANAGER.replace(
         '{managerId}',
         managerId
-      )
+      )}`
       const response = await apiInstance.get<BuildingDetailsResponse>(url, {
         params: {
           pageSize: 9999
         }
       })
 
-      // Extract all building details from the response
-      const buildingDetails: BuildingDetail[] = []
+      // Check if response is successful
+      if (response.data.statusCode === 200 || response.data.statusCode === 201) {
+        // Extract all building details from the response
+        const buildingDetails: BuildingDetail[] = []
 
-      // Only process buildings that have buildingDetails
-      response.data.data
-        .filter(building => building.buildingDetails && building.buildingDetails.length > 0)
-        .forEach(building => {
-          building.buildingDetails.forEach(detail => {
-            buildingDetails.push({
-              ...detail,
-              building: building // Add building info to each detail
+        // Only process buildings that have buildingDetails
+        response.data.data
+          .filter(building => building.buildingDetails && building.buildingDetails.length > 0)
+          .forEach(building => {
+            building.buildingDetails.forEach(detail => {
+              buildingDetails.push({
+                ...detail,
+                building: building // Add building info to each detail
+              })
             })
           })
-        })
 
-      return buildingDetails
+        return buildingDetails
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch building details')
+      }
     } catch (error) {
       console.error('Error fetching building details for manager:', error)
       throw error

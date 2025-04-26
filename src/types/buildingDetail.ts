@@ -82,3 +82,22 @@ export interface BuildingDetailListParams {
   search?: string
   buildingId?: string
 }
+
+// Response interface for building details
+export interface BuildingDetailsResponse {
+  statusCode: number
+  message: string
+  data: Array<{
+    buildingId: string
+    name: string
+    description: string
+    numberFloor: number
+    Status: string
+    area: {
+      areaId: string
+      name: string
+      description: string
+    }
+    buildingDetails: BuildingDetail[]
+  }>
+}

@@ -112,13 +112,22 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                 buildingDetails: selectedBuildingDetails,
             })
 
-            if (response.statusCode === 200) {
-                toast.success('Schedules generated successfully')
+            // Check if response has createdSchedules
+            if (response && response.data && response.data.createdSchedules && response.data.createdSchedules.length > 0) {
+                // Reset selections
+                setSelectedCycles([])
+                setSelectedBuildingDetails([])
+                // Close modal first
                 onClose()
+                // Then show success message
+                toast.success(response.message || 'Schedules generated successfully')
             } else {
-                throw new Error(response.message || 'Failed to generate schedules')
+                // Handle case where response doesn't have expected structure
+                toast.error(response.message || 'Failed to generate schedules')
+                console.error('Invalid response structure:', response)
             }
         } catch (error) {
+            // Handle network errors or other exceptions
             toast.error('Failed to generate schedules')
             console.error('Error generating schedules:', error)
         }
@@ -304,8 +313,8 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${selectedBuildingDetails.includes(buildingDetail.buildingDetailId)
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-gray-200 hover:border-blue-300'
+                                                ? 'border-blue-500 bg-blue-50'
+                                                : 'border-gray-200 hover:border-blue-300'
                                                 }`}
                                             onClick={() => handleBuildingDetailSelect(buildingDetail.buildingDetailId)}
                                             role="button"
@@ -336,8 +345,8 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                                         <p className="text-sm text-gray-500">
                                                             <span className="font-medium">Status:</span>{' '}
                                                             <span className={`px-2 py-0.5 rounded-full text-xs ${buildingDetail.building?.Status === 'operational'
-                                                                    ? 'bg-green-100 text-green-800'
-                                                                    : 'bg-gray-100 text-gray-800'
+                                                                ? 'bg-green-100 text-green-800'
+                                                                : 'bg-gray-100 text-gray-800'
                                                                 }`}>
                                                                 {buildingDetail.building?.Status || 'N/A'}
                                                             </span>
