@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Settings, Trash2, Edit, Plus, AlertTriangle, X } from 'lucide-react';
-import Table, { Column } from '@/components/Table';
-import Pagination from '@/components/Pagination';
-import { MaintenanceCycle } from '@/types';
-import { getMaintenanceCycles, deleteMaintenanceCycle } from '@/services/maintenanceCycle';
-import { toast } from 'react-hot-toast';
-import { motion } from 'framer-motion';
-import MaintenanceCycleFilter from '@/components/MaintenanceCycle/MaintenanceCycleFilter';
-import AddButton from '@/components/AddButton';
-import MaintenanceCycleModal from '@/components/MaintenanceCycle/AddMaintenanceCycle/MaintenanceCycleModal';
+import React, { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Settings, Trash2, Edit, Plus, AlertTriangle, X, Calendar } from 'lucide-react'
+import Table, { Column } from '@/components/Table'
+import Pagination from '@/components/Pagination'
+import { MaintenanceCycle } from '@/types'
+import { getMaintenanceCycles, deleteMaintenanceCycle } from '@/services/maintenanceCycle'
+import buildingDetailsApi from '@/services/buildingDetails'
+import { toast } from 'react-hot-toast'
+import { motion } from 'framer-motion'
+import MaintenanceCycleFilter from '@/components/MaintenanceCycle/MaintenanceCycleFilter'
+import AddButton from '@/components/AddButton'
+import MaintenanceCycleModal from '@/components/MaintenanceCycle/AddMaintenanceCycle/MaintenanceCycleModal'
+import GenerateScheduleModal from '@/components/MaintenanceCycle/GenerateScheduleModal'
+import { format } from 'date-fns'
+import schedulesApi, { CycleConfig } from '@/services/schedules'
 
 // Delete Confirmation Modal Component
 const DeleteConfirmationModal = ({
@@ -18,12 +22,12 @@ const DeleteConfirmationModal = ({
   onConfirm,
   cycleName,
 }: {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  cycleName: string;
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: () => void
+  cycleName: string
 }) => {
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -67,8 +71,8 @@ const DeleteConfirmationModal = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 const MaintenanceCycleManagement: React.FC = () => {
   // State for pagination
@@ -77,39 +81,44 @@ const MaintenanceCycleManagement: React.FC = () => {
     totalPages: 1,
     totalItems: 0,
     itemsPerPage: 10,
-  });
+  })
 
   // Filter states
-  const [frequencyFilter, setFrequencyFilter] = useState('');
-  const [basisFilter, setBasisFilter] = useState('');
-  const [deviceTypeFilter, setDeviceTypeFilter] = useState('');
-  const [isFilterApplied, setIsFilterApplied] = useState(false);
+  const [frequencyFilter, setFrequencyFilter] = useState('')
+  const [basisFilter, setBasisFilter] = useState('')
+  const [deviceTypeFilter, setDeviceTypeFilter] = useState('')
+  const [isFilterApplied, setIsFilterApplied] = useState(false)
 
   // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedCycle, setSelectedCycle] = useState<MaintenanceCycle | undefined>(undefined);
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [selectedCycle, setSelectedCycle] = useState<MaintenanceCycle | undefined>(undefined)
 
   // Delete confirmation modal states
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [cycleToDelete, setCycleToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [cycleToDelete, setCycleToDelete] = useState<{ id: string; name: string } | null>(null)
+
+  // Generate Schedule modal states
+  const [isGenerateScheduleModalOpen, setIsGenerateScheduleModalOpen] = useState(false)
+  const [selectedCycles, setSelectedCycles] = useState<CycleConfig[]>([])
+  const [selectedBuildingDetails, setSelectedBuildingDetails] = useState<string[]>([])
 
   // Apply filters
   const handleFilterApply = () => {
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
-    setIsFilterApplied(true);
-    refetch();
-  };
+    setPagination(prev => ({ ...prev, currentPage: 1 }))
+    setIsFilterApplied(true)
+    refetch()
+  }
 
   // Reset filters
   const handleFilterReset = () => {
-    setFrequencyFilter('');
-    setBasisFilter('');
-    setDeviceTypeFilter('');
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
-    setIsFilterApplied(false);
-    refetch();
-  };
+    setFrequencyFilter('')
+    setBasisFilter('')
+    setDeviceTypeFilter('')
+    setPagination(prev => ({ ...prev, currentPage: 1 }))
+    setIsFilterApplied(false)
+    refetch()
+  }
 
   // Use React Query for data fetching
   const {
@@ -135,7 +144,13 @@ const MaintenanceCycleManagement: React.FC = () => {
         basis: basisFilter || undefined,
         device_type: deviceTypeFilter || undefined,
       }),
-  });
+  })
+
+  // Fetch building details
+  const { data: buildingDetails, isLoading: isLoadingBuildings } = useQuery({
+    queryKey: ['buildingDetails'],
+    queryFn: () => buildingDetailsApi.getBuildingDetailsForManager('current'), // Replace with actual manager ID
+  })
 
   // Update pagination when data changes
   useEffect(() => {
@@ -144,17 +159,17 @@ const MaintenanceCycleManagement: React.FC = () => {
         ...prev,
         totalPages: maintenanceCyclesData.pagination.totalPages || 1,
         totalItems: maintenanceCyclesData.pagination.total || 0,
-      }));
+      }))
     }
-  }, [maintenanceCyclesData]);
+  }, [maintenanceCyclesData])
 
   // Handle page change
   const handlePageChange = (page: number) => {
     setPagination(prev => ({
       ...prev,
       currentPage: page,
-    }));
-  };
+    }))
+  }
 
   // Handle items per page change
   const handleLimitChange = (limit: number) => {
@@ -162,64 +177,154 @@ const MaintenanceCycleManagement: React.FC = () => {
       ...prev,
       currentPage: 1,
       itemsPerPage: limit,
-    }));
-  };
+    }))
+  }
 
   // Open delete confirmation modal
   const openDeleteModal = (cycle: MaintenanceCycle) => {
     setCycleToDelete({
       id: cycle.cycle_id,
       name: `${cycle.device_type} (${cycle.frequency})`,
-    });
-    setIsDeleteModalOpen(true);
-  };
+    })
+    setIsDeleteModalOpen(true)
+  }
 
   // Close delete confirmation modal
   const closeDeleteModal = () => {
-    setIsDeleteModalOpen(false);
-    setCycleToDelete(null);
-  };
+    setIsDeleteModalOpen(false)
+    setCycleToDelete(null)
+  }
 
   // Delete maintenance cycle
   const handleDeleteCycle = async () => {
-    if (!cycleToDelete) return;
+    if (!cycleToDelete) return
 
     try {
-      await deleteMaintenanceCycle(cycleToDelete.id);
-      toast.success('Maintenance cycle deleted successfully');
-      closeDeleteModal();
-      refetch();
+      await deleteMaintenanceCycle(cycleToDelete.id)
+      toast.success('Maintenance cycle deleted successfully')
+      closeDeleteModal()
+      refetch()
     } catch (error) {
-      toast.error('Failed to delete maintenance cycle');
-      console.error('Error deleting maintenance cycle:', error);
+      toast.error('Failed to delete maintenance cycle')
+      console.error('Error deleting maintenance cycle:', error)
     }
-  };
+  }
 
   // Edit maintenance cycle
   const handleEditCycle = (cycle: MaintenanceCycle) => {
-    setSelectedCycle(cycle);
-    setIsEditMode(true);
-    setIsModalOpen(true);
-  };
+    setSelectedCycle(cycle)
+    setIsEditMode(true)
+    setIsModalOpen(true)
+  }
 
   // Open create cycle modal
   const handleCreateCycle = () => {
-    setSelectedCycle(undefined);
-    setIsEditMode(false);
-    setIsModalOpen(true);
-  };
+    setSelectedCycle(undefined)
+    setIsEditMode(false)
+    setIsModalOpen(true)
+  }
 
   // Close modal and refresh data if needed
   const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedCycle(undefined);
-    setIsEditMode(false);
-  };
+    setIsModalOpen(false)
+    setSelectedCycle(undefined)
+    setIsEditMode(false)
+  }
 
   // Handle successful creation or update
   const handleCycleCreated = () => {
-    refetch();
-  };
+    refetch()
+  }
+
+  const handleOpenGenerateScheduleModal = () => {
+    setIsGenerateScheduleModalOpen(true)
+  }
+
+  const handleCloseGenerateScheduleModal = () => {
+    setIsGenerateScheduleModalOpen(false)
+    setSelectedCycles([])
+    setSelectedBuildingDetails([])
+  }
+
+  const handleCycleSelect = (cycle: MaintenanceCycle) => {
+    setSelectedCycles(prev => {
+      const exists = prev.find(c => c.cycle_id === cycle.cycle_id)
+      if (exists) {
+        return prev.filter(c => c.cycle_id !== cycle.cycle_id)
+      }
+      return [
+        ...prev,
+        {
+          cycle_id: cycle.cycle_id,
+          duration_days: 1,
+          auto_create_tasks: true,
+          start_date: format(new Date(), 'yyyy-MM-dd'),
+        },
+      ]
+    })
+  }
+
+  const handleDurationChange = (cycleId: string, duration: number) => {
+    setSelectedCycles(prev =>
+      prev.map(c =>
+        c.cycle_id === cycleId ? { ...c, duration_days: duration } : c
+      )
+    )
+  }
+
+  const handleStartDateChange = (cycleId: string, date: string) => {
+    setSelectedCycles(prev =>
+      prev.map(c =>
+        c.cycle_id === cycleId ? { ...c, start_date: date } : c
+      )
+    )
+  }
+
+  const handleAutoCreateChange = (cycleId: string, checked: boolean) => {
+    setSelectedCycles(prev =>
+      prev.map(c =>
+        c.cycle_id === cycleId ? { ...c, auto_create_tasks: checked } : c
+      )
+    )
+  }
+
+  const handleBuildingDetailSelect = (buildingDetailId: string) => {
+    setSelectedBuildingDetails(prev => {
+      if (prev.includes(buildingDetailId)) {
+        return prev.filter(id => id !== buildingDetailId)
+      }
+      return [...prev, buildingDetailId]
+    })
+  }
+
+  const handleGenerateSchedule = async () => {
+    if (selectedCycles.length === 0) {
+      toast.error('Please select at least one maintenance cycle')
+      return
+    }
+
+    if (selectedBuildingDetails.length === 0) {
+      toast.error('Please select at least one building detail')
+      return
+    }
+
+    try {
+      const response = await schedulesApi.generateSchedules({
+        cycle_configs: selectedCycles,
+        buildingDetails: selectedBuildingDetails,
+      })
+
+      if (response.statusCode === 200) {
+        toast.success('Schedules generated successfully')
+        handleCloseGenerateScheduleModal()
+      } else {
+        throw new Error(response.message || 'Failed to generate schedules')
+      }
+    } catch (error) {
+      toast.error('Failed to generate schedules')
+      console.error('Error generating schedules:', error)
+    }
+  }
 
   // Table columns definition
   const columns: Column<MaintenanceCycle>[] = [
@@ -248,9 +353,9 @@ const MaintenanceCycleManagement: React.FC = () => {
       title: 'Basis',
       render: item => {
         // Format the basis string to be more readable
-        const formattedBasis = item.basis.replace(/([A-Z])/g, ' $1').trim();
+        const formattedBasis = item.basis.replace(/([A-Z])/g, ' $1').trim()
 
-        return <div className="text-sm text-gray-700 dark:text-gray-300">{formattedBasis}</div>;
+        return <div className="text-sm text-gray-700 dark:text-gray-300">{formattedBasis}</div>
       },
     },
     {
@@ -267,8 +372,8 @@ const MaintenanceCycleManagement: React.FC = () => {
         <div className="flex justify-center gap-2">
           <button
             onClick={e => {
-              e.stopPropagation();
-              handleEditCycle(item);
+              e.stopPropagation()
+              handleEditCycle(item)
             }}
             className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
             title="Edit Cycle"
@@ -277,8 +382,8 @@ const MaintenanceCycleManagement: React.FC = () => {
           </button>
           <button
             onClick={e => {
-              e.stopPropagation();
-              openDeleteModal(item);
+              e.stopPropagation()
+              openDeleteModal(item)
             }}
             className="p-2 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-md hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
             title="Delete Cycle"
@@ -289,7 +394,7 @@ const MaintenanceCycleManagement: React.FC = () => {
       ),
       width: '120px',
     },
-  ];
+  ]
 
   // Loading animation
   const loadingVariants = {
@@ -299,7 +404,7 @@ const MaintenanceCycleManagement: React.FC = () => {
       repeat: Infinity,
       ease: 'linear',
     },
-  };
+  }
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -309,12 +414,18 @@ const MaintenanceCycleManagement: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading maintenance cycles...</p>
     </div>
-  );
+  )
 
   return (
     <div className="w-full mt-[60px]">
       <div className="w-[95%] mx-auto mb-4">
-        <div className="flex justify-end mb-6">
+        <div className="flex justify-end mb-6 gap-3">
+          <AddButton
+            onClick={handleOpenGenerateScheduleModal}
+            label="Generate Schedule"
+            icon={<Calendar />}
+            className="w-auto"
+          />
           <AddButton
             onClick={handleCreateCycle}
             label="Create Cycle"
@@ -379,6 +490,12 @@ const MaintenanceCycleManagement: React.FC = () => {
         cycleData={selectedCycle}
       />
 
+      {/* Generate Schedule Modal */}
+      <GenerateScheduleModal
+        isOpen={isGenerateScheduleModalOpen}
+        onClose={handleCloseGenerateScheduleModal}
+      />
+
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
@@ -387,7 +504,7 @@ const MaintenanceCycleManagement: React.FC = () => {
         cycleName={cycleToDelete?.name || ''}
       />
     </div>
-  );
-};
+  )
+}
 
-export default MaintenanceCycleManagement;
+export default MaintenanceCycleManagement

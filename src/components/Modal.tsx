@@ -1,40 +1,55 @@
-import React, { ReactNode } from 'react';
+import React from 'react'
+import { X } from 'lucide-react'
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: ReactNode;
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: React.ReactNode
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  showBackdrop?: boolean
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
-  if (!isOpen) return null;
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = 'md',
+  showBackdrop = true,
+}) => {
+  if (!isOpen) return null
+
+  const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-4xl',
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
-      <div className="relative w-auto max-w-3xl mx-auto my-6">
-        {/* Modal content */}
-        <div className="relative flex flex-col w-full bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
-          {/* Header */}
-          <div className="flex items-start justify-between p-5 border-b border-solid rounded-t border-blueGray-200">
-            <h3 className="text-3xl font-semibold">{title}</h3>
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {showBackdrop && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
+      )}
+      <div className="flex min-h-full items-center justify-center p-4 text-center">
+        <div
+          className={`relative w-full transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all ${sizeClasses[size]}`}
+        >
+          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+            <h3 className="text-lg font-medium text-gray-900">{title}</h3>
             <button
-              className="float-right p-1 ml-auto text-3xl font-semibold leading-none text-black bg-transparent border-0 outline-none opacity-5 focus:outline-none"
               onClick={onClose}
+              className="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
             >
-              ×
+              <X className="h-6 w-6" />
             </button>
           </div>
-
-          {/* Body */}
-          <div className="relative flex-auto p-6">{children}</div>
+          {children}
         </div>
       </div>
-
-      {/* Backdrop */}
-      <div className="fixed inset-0 z-40 bg-black opacity-25" onClick={onClose}></div>
     </div>
-  );
-};
+  )
+}
 
-export default Modal;
+export default Modal
