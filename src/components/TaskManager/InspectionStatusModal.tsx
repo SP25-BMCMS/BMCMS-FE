@@ -5,6 +5,10 @@ import { Inspection } from '@/types';
 import toast from 'react-hot-toast';
 import { FaThumbsUp, FaThumbsDown, FaTimes } from 'react-icons/fa';
 import { STATUS_COLORS } from '@/constants/colors';
+import { useAuth } from '@/hooks/useAuth'; // Import auth hook to get current user
+
+// Type for report status
+type ReportStatus = 'NoPending' | 'Pending' | 'Rejected' | 'Approved';
 
 interface InspectionStatusModalProps {
   isOpen: boolean;
@@ -18,23 +22,34 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
   inspection,
 }) => {
   const queryClient = useQueryClient();
+  const { user } = useAuth(); // Get current user from auth context
+  
+  // Use 'Approved' for display but keep 'NoPending' for API
   const [selectedStatus, setSelectedStatus] = useState<'NoPending' | 'Rejected'>(
     inspection.report_status === 'Pending' || inspection.report_status === 'Rejected'
       ? 'Rejected'
       : 'NoPending'
   );
+  const [reason, setReason] = useState<string>('');
 
   // Mutation for updating inspection status
   const updateStatusMutation = useMutation({
     mutationFn: ({
       inspectionId,
       status,
+      userId,
+      reason,
     }: {
       inspectionId: string;
       status: 'NoPending' | 'Rejected';
-    }) => inspectionsApi.updateInspectionReportStatus(inspectionId, status),
+      userId: string;
+      reason: string;
+    }) => inspectionsApi.updateInspectionReportStatus(inspectionId, status, userId, reason),
     onSuccess: () => {
-      toast.success('Inspection status updated successfully');
+      const successMessage = selectedStatus === 'NoPending' 
+        ? 'Inspection approved successfully' 
+        : 'Inspection rejected successfully';
+      toast.success(successMessage);
       // Invalidate inspections query to refresh data
       queryClient.invalidateQueries({ queryKey: ['inspections'] });
       onClose();
@@ -46,14 +61,21 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
   });
 
   const handleSubmit = () => {
+    if (!user?.userId) {
+      toast.error('User information is missing. Please login again.');
+      return;
+    }
+
     updateStatusMutation.mutate({
       inspectionId: inspection.inspection_id,
       status: selectedStatus,
+      userId: user.userId,
+      reason: reason,
     });
   };
 
   // Display a more user-friendly status text
-  const getDisplayStatus = (status: string) => {
+  const getDisplayStatus = (status: ReportStatus | string): string => {
     switch (status) {
       case 'NoPending':
         return 'Approved';
@@ -68,11 +90,12 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
     }
   };
 
-  // Console log to debug colors
-  console.log('STATUS_COLORS.RESOLVED:', STATUS_COLORS.RESOLVED);
-  console.log('STATUS_COLORS.INACTIVE:', STATUS_COLORS.INACTIVE);
-
   if (!isOpen) return null;
+
+  // Display value for the current status
+  const currentDisplayStatus = getDisplayStatus(inspection.report_status);
+  // Display value for the selected status (for buttons, labels, etc.)
+  const displaySelectedStatus = selectedStatus === 'NoPending' ? 'Approved' : 'Rejected';
 
   return (
     <>
@@ -102,26 +125,26 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               Current Status:{' '}
-              <span className="font-medium">{getDisplayStatus(inspection.report_status)}</span>
+              <span className="font-medium">{currentDisplayStatus}</span>
             </p>
 
             <div className="flex flex-col space-y-3 mt-4">
-              {/* Approve Button with explicit style values */}
+              {/* Approve Button using STATUS_COLORS */}
               <button
                 className="flex items-center justify-center p-3 rounded-lg transition-colors"
                 style={{
                   backgroundColor:
                     selectedStatus === 'NoPending'
-                      ? 'rgba(80, 241, 134, 0.35)' // STATUS_COLORS.RESOLVED.BG
+                      ? STATUS_COLORS.RESOLVED.BG
                       : 'rgba(229, 231, 235, var(--tw-bg-opacity))',
                   color:
                     selectedStatus === 'NoPending'
-                      ? '#50F186' // STATUS_COLORS.RESOLVED.TEXT
+                      ? STATUS_COLORS.RESOLVED.TEXT
                       : 'rgba(55, 65, 81, var(--tw-text-opacity))',
                   borderWidth: selectedStatus === 'NoPending' ? '1px' : '0px',
                   borderColor:
                     selectedStatus === 'NoPending'
-                      ? '#50F186' // STATUS_COLORS.RESOLVED.BORDER
+                      ? STATUS_COLORS.RESOLVED.BORDER
                       : 'transparent',
                 }}
                 onClick={() => setSelectedStatus('NoPending')}
@@ -130,22 +153,22 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
                 Approve
               </button>
 
-              {/* Reject Button with explicit style values */}
+              {/* Reject Button using STATUS_COLORS */}
               <button
                 className="flex items-center justify-center p-3 rounded-lg transition-colors"
                 style={{
                   backgroundColor:
                     selectedStatus === 'Rejected'
-                      ? 'rgba(248, 8, 8, 0.3)' // STATUS_COLORS.INACTIVE.BG
+                      ? STATUS_COLORS.INACTIVE.BG
                       : 'rgba(229, 231, 235, var(--tw-bg-opacity))',
                   color:
                     selectedStatus === 'Rejected'
-                      ? '#ff0000' // STATUS_COLORS.INACTIVE.TEXT
+                      ? STATUS_COLORS.INACTIVE.TEXT
                       : 'rgba(55, 65, 81, var(--tw-text-opacity))',
                   borderWidth: selectedStatus === 'Rejected' ? '1px' : '0px',
                   borderColor:
                     selectedStatus === 'Rejected'
-                      ? '#f80808' // STATUS_COLORS.INACTIVE.BORDER
+                      ? STATUS_COLORS.INACTIVE.BORDER
                       : 'transparent',
                 }}
                 onClick={() => setSelectedStatus('Rejected')}
@@ -153,6 +176,41 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
                 <FaThumbsDown className="mr-2" />
                 Reject
               </button>
+            </div>
+
+            {/* Selected status indicator */}
+            <div className="mt-3 text-sm text-center">
+              <span className="font-medium">Selected action:</span>{' '}
+              <span 
+                className="px-2 py-1 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: selectedStatus === 'NoPending' ? STATUS_COLORS.RESOLVED.BG : STATUS_COLORS.INACTIVE.BG,
+                  color: selectedStatus === 'NoPending' ? STATUS_COLORS.RESOLVED.TEXT : STATUS_COLORS.INACTIVE.TEXT,
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  borderColor: selectedStatus === 'NoPending' ? STATUS_COLORS.RESOLVED.BORDER : STATUS_COLORS.INACTIVE.BORDER,
+                }}
+              >
+                {displaySelectedStatus}
+              </span>
+            </div>
+
+            {/* Reason field */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Reason {selectedStatus === 'Rejected' && <span className="text-red-500">*</span>}
+              </label>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder={selectedStatus === 'Rejected' ? "Please provide a reason for rejection" : "Optional notes for approval"}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                rows={3}
+                required={selectedStatus === 'Rejected'}
+              />
+              {selectedStatus === 'Rejected' && !reason && (
+                <p className="mt-1 text-xs text-red-500">Reason is required for rejection</p>
+              )}
             </div>
           </div>
 
@@ -168,22 +226,24 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
               style={{
                 backgroundColor:
                   selectedStatus === 'NoPending'
-                    ? 'rgba(80, 241, 134, 0.35)' // STATUS_COLORS.RESOLVED.BG
-                    : 'rgba(248, 8, 8, 0.3)', // STATUS_COLORS.INACTIVE.BG
+                    ? STATUS_COLORS.RESOLVED.BG
+                    : STATUS_COLORS.INACTIVE.BG,
                 color:
                   selectedStatus === 'NoPending'
-                    ? '#50F186' // STATUS_COLORS.RESOLVED.TEXT
-                    : '#ff0000', // STATUS_COLORS.INACTIVE.TEXT
+                    ? STATUS_COLORS.RESOLVED.TEXT
+                    : STATUS_COLORS.INACTIVE.TEXT,
                 borderWidth: '1px',
                 borderColor:
                   selectedStatus === 'NoPending'
-                    ? '#50F186' // STATUS_COLORS.RESOLVED.BORDER
-                    : '#f80808', // STATUS_COLORS.INACTIVE.BORDER
+                    ? STATUS_COLORS.RESOLVED.BORDER
+                    : STATUS_COLORS.INACTIVE.BORDER,
               }}
               onClick={handleSubmit}
-              disabled={updateStatusMutation.isPending}
+              disabled={updateStatusMutation.isPending || (selectedStatus === 'Rejected' && !reason)}
             >
-              {updateStatusMutation.isPending ? 'Updating...' : 'Update Status'}
+              {updateStatusMutation.isPending 
+                ? 'Updating...' 
+                : `${displaySelectedStatus} Inspection`}
             </button>
           </div>
         </div>

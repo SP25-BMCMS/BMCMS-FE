@@ -108,27 +108,34 @@ const getInspectionsByAssignmentId = async (assignmentId: string): Promise<Inspe
 };
 
 /**
- * Update the report status of an inspection
+ * Update the report status of an inspection for managers
  * @param inspectionId - The inspection ID
- * @param reportStatus - The new report status
+ * @param reportStatus - The new report status ('NoPending' for Approved or 'Rejected')
+ * @param userId - The user ID of the manager making the change
+ * @param reason - Optional reason for the status change
  * @returns Promise with the updated inspection
  */
 const updateInspectionReportStatus = async (
   inspectionId: string,
-  reportStatus: 'NoPending' | 'Pending' | 'Rejected'
+  reportStatus: 'NoPending' | 'Rejected',
+  userId: string,
+  reason: string = ''
 ): Promise<any> => {
   try {
     console.log(`Updating inspection ${inspectionId} status to ${reportStatus}`);
-    const endpoint = import.meta.env.VITE_CHANGE_STATUS_INSPECTION_ID.replace(
-      '{inspection_id}',
-      inspectionId
-    );
+    const endpoint = import.meta.env.VITE_CHANGE_STATUS_FOR_MANAGER;
 
-    // Use the proper payload format as required by the API
-    const payload = { report_status: reportStatus === 'NoPending' ? 'Approved' : reportStatus };
+    // Use the proper payload format for the new API
+    const payload = { 
+      inspection_id: inspectionId,
+      report_status: reportStatus,
+      userId: userId,
+      reason: reason
+    };
+    
     console.log('Sending payload:', payload);
 
-    const { data } = await apiInstance.patch(endpoint, payload);
+    const { data } = await apiInstance.put(endpoint, payload);
     console.log('Update status response:', data);
     return data;
   } catch (error: any) {

@@ -547,13 +547,6 @@ const TaskManagement: React.FC = () => {
             onSelect={handleFilterChange}
             selectedValue={selectedStatus}
           />
-
-          <AddButton
-            label="Add Task"
-            icon={<MdOutlineAddTask />}
-            className="w-auto text-xs sm:text-sm md:text-base px-2 sm:px-3 py-1.5 sm:py-2"
-            onClick={() => console.log('Add Task clicked')}
-          />
         </div>
       </div>
 

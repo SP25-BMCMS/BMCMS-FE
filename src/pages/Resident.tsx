@@ -269,7 +269,7 @@ const Resident: React.FC = () => {
         <DropdownMenu
           onViewDetail={() => handleViewDetail(item)}
           onChangeStatus={() => openStatusChangeModal(item)}
-          onRemove={() => openRemoveModal(item)}
+          // onRemove={() => openRemoveModal(item)}
         />
       ),
       width: '80px',
@@ -334,7 +334,7 @@ const Resident: React.FC = () => {
           className="w-full"
           tableClassName="w-full min-w-[750px]"
           isLoading={isLoadingResidents}
-          emptyText="Không tìm thấy dữ liệu"
+          emptyText="cannot find data"
         />
       </div>
 
@@ -361,13 +361,13 @@ const Resident: React.FC = () => {
         onConfirm={handleChangeStatus}
         resident={residentToChangeStatus}
       />
-      <RemoveResident
+      {/* <RemoveResident
         isOpen={isRemoveModalOpen}
         onClose={closeRemoveModal}
         onConfirm={removeResident}
         isLoading={isRemoving}
         resident={residentToRemove}
-      />
+      /> */}
       <ViewDetailResident
         isOpen={isViewDetailOpen}
         onClose={() => setIsViewDetailOpen(false)}
