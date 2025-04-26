@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import tasksApi from '@/services/tasks';
+import { getAllStaff } from '@/services/staff';
 import { motion } from 'framer-motion';
 import { FORMAT_DATE_TIME } from '@/utils/helpers';
 import { STATUS_COLORS } from '@/constants/colors';
@@ -14,20 +15,106 @@ import {
   FaExchangeAlt,
   FaTools,
   FaCheck,
+  FaFileAlt,
+  FaMapMarkerAlt,
 } from 'react-icons/fa';
 import SimpleInspectionModal from '@/components/TaskManager/SimpleInspectionModal';
 import InspectionDetails from '@/components/TaskManager/InspectionDetails';
+import { StaffData, TaskAssignment, TaskResponse } from '@/types';
+
+// Extended task data interface that includes both task assignment and crack info
+interface ExtendedTaskData {
+  task_id: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  crack_id?: string;
+  schedule_job_id?: string;
+  taskAssignments: TaskAssignment[];
+  // Include crackInfo from TaskResponse type
+  crackInfo?: TaskResponse['crackInfo'];
+}
 
 const TaskDetail: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
+
+  // Fetch all staff data to map IDs to names
+  const { data: staffData } = useQuery({
+    queryKey: ['staff'],
+    queryFn: async () => {
+      const response = await getAllStaff();
+      return response.data || [];
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  // Create a map of staff IDs to names
+  const staffNameMap = React.useMemo(() => {
+    const map: { [key: string]: string } = {};
+    if (staffData) {
+      staffData.forEach((staff: StaffData) => {
+        map[staff.userId] = staff.username;
+      });
+    }
+    return map;
+  }, [staffData]);
 
   // Fetch task details and assignments
   const { data: taskData, isLoading } = useQuery({
     queryKey: ['taskAssignments', taskId],
-    queryFn: () => tasksApi.getTaskAssignmentsByTaskId(taskId || ''),
-    enabled: !!taskId,
+    queryFn: async () => {
+      const response = await tasksApi.getTaskAssignmentsByTaskId(taskId || '');
+
+      // Also fetch the task details to get crack info if needed
+      if (response.data?.crack_id) {
+        try {
+          // Fetch task with crack info from the tasks API
+          const taskResponse = await tasksApi.getTasks({ search: response.data.task_id });
+          if (taskResponse.data && taskResponse.data.length > 0) {
+            const taskWithCrackInfo = taskResponse.data.find(
+              t => t.task_id === response.data.task_id
+            );
+            if (taskWithCrackInfo) {
+              // Merge the crack info with the task assignments data
+              return {
+                ...response,
+                data: {
+                  ...response.data,
+                  crackInfo: taskWithCrackInfo.crackInfo,
+                  taskAssignments: response.data.taskAssignments.map(assignment => ({
+                    ...assignment,
+                    employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
+                  })),
+                },
+              };
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching task with crack info:', error);
+        }
+      }
+
+      // If no crack info or error, return the original response with employee names
+      if (response.data && response.data.taskAssignments) {
+        return {
+          ...response,
+          data: {
+            ...response.data,
+            taskAssignments: response.data.taskAssignments.map(assignment => ({
+              ...assignment,
+              employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
+            })),
+          },
+        };
+      }
+
+      return response;
+    },
+    enabled: !!taskId && Object.keys(staffNameMap).length > 0,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
@@ -41,20 +128,47 @@ const TaskDetail: React.FC = () => {
     queryKey: ['inspections', selectedAssignmentId],
     queryFn: async () => {
       try {
-        console.log('Fetching inspections for ID:', selectedAssignmentId);
         const response = await tasksApi.getInspectionsByAssignmentId(selectedAssignmentId || '');
-        console.log('Inspections response:', response);
+
+        // Enhance inspection data with staff names
+        if (response.data && response.data.length > 0) {
+          return {
+            ...response,
+            data: response.data.map(inspection => ({
+              ...inspection,
+              inspected_by_user: {
+                userId: inspection.inspected_by,
+                username: staffNameMap[inspection.inspected_by] || 'Unknown Staff',
+              },
+              confirmed_by_user: inspection.confirmed_by
+                ? {
+                    userId: inspection.confirmed_by,
+                    username: staffNameMap[inspection.confirmed_by] || 'Unknown Staff',
+                  }
+                : null,
+            })),
+          };
+        }
+
         return response;
       } catch (error) {
         console.error('Error fetching inspections:', error);
         throw error;
       }
     },
-    enabled: !!selectedAssignmentId,
+    enabled: !!selectedAssignmentId && Object.keys(staffNameMap).length > 0,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 1,
   });
+
+  // Get crack information
+  const hasCrackInfo =
+    taskData?.data?.crack_id &&
+    (taskData?.data as ExtendedTaskData)?.crackInfo?.isSuccess &&
+    (taskData?.data as ExtendedTaskData)?.crackInfo?.data?.length > 0;
+
+  const crackInfo = hasCrackInfo ? (taskData?.data as ExtendedTaskData)?.crackInfo?.data[0] : null;
 
   if (isLoading) {
     return (
@@ -78,7 +192,7 @@ const TaskDetail: React.FC = () => {
     );
   }
 
-  const task = taskData.data;
+  const task = taskData.data as ExtendedTaskData;
 
   // Group assignments by status
   const assignmentsByStatus = {
@@ -120,9 +234,14 @@ const TaskDetail: React.FC = () => {
 
   const selectedAssignment = findSelectedAssignment();
 
-  // Helper function to display staff name or ID
+  // Helper function to display staff name
   const displayStaffName = assignment => {
-    return assignment.employee_name || assignment.employee_id.substring(0, 8);
+    return assignment.employee_name || 'Staff Member';
+  };
+
+  // Format assignment identifier
+  const formatAssignmentNumber = (index: number) => {
+    return `#${index + 1}`;
   };
 
   return (
@@ -146,9 +265,9 @@ const TaskDetail: React.FC = () => {
               <FaClipboardList className="mr-2 text-blue-500" />
               <h2 className="text-xl font-semibold dark:text-white">{task.description}</h2>
             </div>
-            <div className="flex items-center text-gray-600 dark:text-gray-300 text-sm">
-              <span className="mr-4">ID: {task.task_id}</span>
-              {task.crack_id && <span>Crack ID: {task.crack_id}</span>}
+            <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+              <FaFileAlt className="mr-1" />
+              <span>Task Reference: {task.task_id.substring(0, 8)}</span>
             </div>
           </div>
           <span
@@ -185,7 +304,7 @@ const TaskDetail: React.FC = () => {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div className="flex items-center">
             <FaCalendarAlt className="mr-2 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">
@@ -198,6 +317,34 @@ const TaskDetail: React.FC = () => {
               Updated: {FORMAT_DATE_TIME(task.updated_at)}
             </span>
           </div>
+
+          {/* Add user information if this is a crack repair task */}
+          {crackInfo && (
+            <>
+              <div className="flex items-center">
+                <FaUser className="mr-2 text-gray-500" />
+                <span className="text-gray-700 dark:text-gray-300">
+                  Reported by: {crackInfo.reportedBy?.username || 'Unknown User'}
+                </span>
+              </div>
+              {crackInfo.verifiedBy && (
+                <div className="flex items-center">
+                  <FaCheckCircle className="mr-2 text-gray-500" />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    Verified by: {crackInfo.verifiedBy?.username || 'Unknown User'}
+                  </span>
+                </div>
+              )}
+              {crackInfo.position && (
+                <div className="flex items-center">
+                  <FaMapMarkerAlt className="mr-2 text-gray-500" />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    Location: {crackInfo.position}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
@@ -215,7 +362,7 @@ const TaskDetail: React.FC = () => {
             </h3>
           </div>
           <div className="p-2 overflow-y-auto max-h-[70vh]">
-            {assignmentsByStatus.Confirmed.map(assignment => (
+            {assignmentsByStatus.Confirmed.map((assignment, index) => (
               <div
                 key={assignment.assignment_id}
                 className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
@@ -224,10 +371,13 @@ const TaskDetail: React.FC = () => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">
-                    {assignment.description}
+                    Assignment {formatAssignmentNumber(index)}
                   </h4>
                   {getStatusIcon(assignment.status)}
                 </div>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+                  {assignment.description}
+                </p>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
@@ -242,7 +392,7 @@ const TaskDetail: React.FC = () => {
             ))}
             {assignmentsByStatus.Confirmed.length === 0 && (
               <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                No assignment yet
+                No assignments in this status
               </div>
             )}
           </div>
@@ -260,7 +410,7 @@ const TaskDetail: React.FC = () => {
             </h3>
           </div>
           <div className="p-2 overflow-y-auto max-h-[70vh]">
-            {assignmentsByStatus.Reassigned.map(assignment => (
+            {assignmentsByStatus.Reassigned.map((assignment, index) => (
               <div
                 key={assignment.assignment_id}
                 className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
@@ -269,10 +419,13 @@ const TaskDetail: React.FC = () => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">
-                    {assignment.description}
+                    Assignment {formatAssignmentNumber(index)}
                   </h4>
                   {getStatusIcon(assignment.status)}
                 </div>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+                  {assignment.description}
+                </p>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
@@ -287,7 +440,7 @@ const TaskDetail: React.FC = () => {
             ))}
             {assignmentsByStatus.Reassigned.length === 0 && (
               <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                Không có phân công nào
+                No assignments in this status
               </div>
             )}
           </div>
@@ -305,7 +458,7 @@ const TaskDetail: React.FC = () => {
             </h3>
           </div>
           <div className="p-2 overflow-y-auto max-h-[70vh]">
-            {assignmentsByStatus.InFixing.map(assignment => (
+            {assignmentsByStatus.InFixing.map((assignment, index) => (
               <div
                 key={assignment.assignment_id}
                 className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
@@ -314,10 +467,13 @@ const TaskDetail: React.FC = () => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">
-                    {assignment.description}
+                    Assignment {formatAssignmentNumber(index)}
                   </h4>
                   {getStatusIcon(assignment.status)}
                 </div>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+                  {assignment.description}
+                </p>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
@@ -332,7 +488,7 @@ const TaskDetail: React.FC = () => {
             ))}
             {assignmentsByStatus.InFixing.length === 0 && (
               <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                Không có phân công nào
+                No assignments in this status
               </div>
             )}
           </div>
@@ -350,7 +506,7 @@ const TaskDetail: React.FC = () => {
             </h3>
           </div>
           <div className="p-2 overflow-y-auto max-h-[70vh]">
-            {assignmentsByStatus.Fixed.map(assignment => (
+            {assignmentsByStatus.Fixed.map((assignment, index) => (
               <div
                 key={assignment.assignment_id}
                 className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
@@ -359,10 +515,13 @@ const TaskDetail: React.FC = () => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">
-                    {assignment.description}
+                    Assignment {formatAssignmentNumber(index)}
                   </h4>
                   {getStatusIcon(assignment.status)}
                 </div>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+                  {assignment.description}
+                </p>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center mb-1">
                     <FaUser className="mr-1" />
@@ -377,7 +536,7 @@ const TaskDetail: React.FC = () => {
             ))}
             {assignmentsByStatus.Fixed.length === 0 && (
               <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                Không có phân công nào
+                No assignments in this status
               </div>
             )}
           </div>

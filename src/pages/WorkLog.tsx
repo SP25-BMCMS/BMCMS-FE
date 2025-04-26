@@ -12,6 +12,7 @@ import {
   FaTools,
   FaSearch,
 } from 'react-icons/fa';
+import { Tooltip } from '@/components/Tooltip';
 
 const statusIcons: Record<string, JSX.Element> = {
   EXECUTE_CRACKS: <FaTools className="text-blue-500" />,
@@ -180,19 +181,22 @@ const WorkLogPage: React.FC = () => {
                           <div className="font-medium text-gray-900 dark:text-white">
                             {worklog.title}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                            {worklog.description}
-                          </div>
+                          <Tooltip content={worklog.description} position="bottom">
+                            <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                              {worklog.description}
+                            </div>
+                          </Tooltip>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">
-                        {worklog.task.description}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        ID: {worklog.task_id.substring(0, 8)}...
-                      </div>
+                      <Tooltip content={worklog.task.description} position="top">
+                        <div className="text-sm text-gray-900 dark:text-white max-w-[350px] truncate">
+                          {worklog.task.description.includes(' - ') 
+                            ? worklog.task.description.split(' - ')[0] + ' - ' + worklog.task.description.split(' - ')[1]?.split('.')[0]
+                            : worklog.task.description.split('.')[0] + '.'}
+                        </div>
+                      </Tooltip>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -207,7 +211,12 @@ const WorkLogPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       <div className="flex items-center">
                         <FaCalendarAlt className="mr-2 text-gray-400" />
-                        {formatDate(worklog.created_at)}
+                        <Tooltip content={`Created: ${formatDate(worklog.created_at)}`} position="left">
+                          <div className="flex flex-col">
+                            <span className="font-medium">{formatDate(worklog.created_at).split(',')[0]}</span>
+                            <span className="text-xs">{formatDate(worklog.created_at).split(',')[1]?.trim()}</span>
+                          </div>
+                        </Tooltip>
                       </div>
                     </td>
                   </tr>

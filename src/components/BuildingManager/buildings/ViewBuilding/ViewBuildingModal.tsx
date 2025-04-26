@@ -991,14 +991,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
           <motion.div
             className="flex justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"
             variants={itemVariants}
-          >
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-            >
-              Close
-            </button>
-          </motion.div>
+          ></motion.div>
         </motion.div>
       ) : null}
     </Modal>

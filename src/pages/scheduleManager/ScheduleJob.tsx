@@ -1,17 +1,17 @@
-import TaskModal from '@/components/calendar/TaskModal';
-import CreateScheduleJobModal from '@/components/calendar/CreateScheduleJobModal';
-import UpdateStatusModal from '@/components/calendar/UpdateStatusModal';
-import Pagination from '@/components/Pagination';
+import TaskModal from '@/components/calendar/TaskModal'
+import CreateScheduleJobModal from '@/components/calendar/CreateScheduleJobModal'
+import UpdateStatusModal from '@/components/calendar/UpdateStatusModal'
+import Pagination from '@/components/Pagination'
 import scheduleJobsApi, {
   type ScheduleJob,
   UpdateScheduleJobRequest,
   useSendMaintenanceEmail,
   CreateScheduleJobRequest,
-} from '@/services/scheduleJobs';
-import schedulesApi, { Schedule as ScheduleType } from '@/services/schedules';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
-import { toast } from 'react-hot-toast';
+} from '@/services/scheduleJobs'
+import schedulesApi, { Schedule as ScheduleType } from '@/services/schedules'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import { toast } from 'react-hot-toast'
 import {
   RiArrowLeftLine,
   RiDeleteBinLine,
@@ -27,26 +27,28 @@ import {
   RiAlertLine,
   RiAddLine,
   RiSettings3Line,
-} from 'react-icons/ri';
-import { useNavigate, useParams } from 'react-router-dom';
-import { STATUS_COLORS } from '@/constants/colors';
-import { getMaintenanceCycles } from '@/services/maintenanceCycle';
-import { createPortal } from 'react-dom';
+} from 'react-icons/ri'
+import { useNavigate, useParams } from 'react-router-dom'
+import { STATUS_COLORS } from '@/constants/colors'
+import { getMaintenanceCycles } from '@/services/maintenanceCycle'
+import { createPortal } from 'react-dom'
+import ConfirmModal from '@/components/ConfirmModal'
 
 const ScheduleJob: React.FC = () => {
-  const { scheduleId } = useParams<{ scheduleId: string }>();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [showTaskModal, setShowTaskModal] = useState(false);
-  const [showCreateJobModal, setShowCreateJobModal] = useState(false);
-  const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<ScheduleJob | null>(null);
-  const [expandedDeviceId, setExpandedDeviceId] = useState<string | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [currentDevice, setCurrentDevice] = useState<any>(null);
+  const { scheduleId } = useParams<{ scheduleId: string }>()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [showTaskModal, setShowTaskModal] = useState(false)
+  const [showCreateJobModal, setShowCreateJobModal] = useState(false)
+  const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false)
+  const [selectedJob, setSelectedJob] = useState<ScheduleJob | null>(null)
+  const [expandedDeviceId, setExpandedDeviceId] = useState<string | null>(null)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [currentDevice, setCurrentDevice] = useState<any>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Fetch schedule details
   const { data: schedule, isLoading: isScheduleLoading } = useQuery({
@@ -54,7 +56,7 @@ const ScheduleJob: React.FC = () => {
     queryFn: () => schedulesApi.getScheduleById(scheduleId!),
     enabled: !!scheduleId,
     select: response => response.data as ScheduleType & { schedule_type?: string },
-  });
+  })
 
   // Fetch cycle details
   const { data: cycleData } = useQuery({
@@ -62,7 +64,7 @@ const ScheduleJob: React.FC = () => {
     queryFn: () => getMaintenanceCycles(),
     enabled: !!schedule?.cycle_id,
     select: response => response.data.find(cycle => cycle.cycle_id === schedule?.cycle_id),
-  });
+  })
 
   // Fetch schedule jobs with pagination
   const {
@@ -77,53 +79,53 @@ const ScheduleJob: React.FC = () => {
         limit: itemsPerPage,
       }),
     enabled: !!scheduleId,
-  });
+  })
 
   // Create schedule job mutation
   const createJobMutation = useMutation({
     mutationFn: (data: CreateScheduleJobRequest) => scheduleJobsApi.createScheduleJob(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] });
-      toast.success('Schedule job created successfully');
-      setShowCreateJobModal(false);
-      refetchJobs();
+      queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
+      toast.success('Schedule job created successfully')
+      setShowCreateJobModal(false)
+      refetchJobs()
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to create schedule job');
+      toast.error(error.response?.data?.message || 'Failed to create schedule job')
     },
-  });
+  })
 
   // Update schedule job mutation
   const updateJobMutation = useMutation({
     mutationFn: ({ jobId, data }: { jobId: string; data: UpdateScheduleJobRequest }) =>
       scheduleJobsApi.updateScheduleJob(jobId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] });
-      toast.success('Schedule job updated successfully');
-      setShowUpdateStatusModal(false);
-      setSelectedJob(null);
-      refetchJobs();
+      queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
+      toast.success('Schedule job updated successfully')
+      setShowUpdateStatusModal(false)
+      setSelectedJob(null)
+      refetchJobs()
     },
     onError: () => {
-      toast.error('Failed to update schedule job');
+      toast.error('Failed to update schedule job')
     },
-  });
+  })
 
   // Send maintenance email mutation
-  const sendEmailMutation = useSendMaintenanceEmail();
+  const sendEmailMutation = useSendMaintenanceEmail()
 
   const handleCreateJob = async (data: CreateScheduleJobRequest) => {
     try {
-      await createJobMutation.mutateAsync(data);
+      await createJobMutation.mutateAsync(data)
     } catch (error) {
-      console.error('Error creating schedule job:', error);
+      console.error('Error creating schedule job:', error)
     }
-  };
+  }
 
   const handleEditJob = (job: ScheduleJob) => {
-    setSelectedJob(job);
-    setShowUpdateStatusModal(true);
-  };
+    setSelectedJob(job)
+    setShowUpdateStatusModal(true)
+  }
 
   const handleUpdateStatus = async (
     jobId: string,
@@ -133,35 +135,42 @@ const ScheduleJob: React.FC = () => {
       await updateJobMutation.mutateAsync({
         jobId,
         data: { status },
-      });
+      })
     } catch (error) {
-      console.error('Error updating schedule job:', error);
+      console.error('Error updating schedule job:', error)
     }
-  };
+  }
 
   const handleDeleteJob = async (jobId: string) => {
-    if (confirm('Are you sure you want to cancel this schedule job?')) {
+    setSelectedJob(scheduleJobsData?.data.find(job => job.schedule_job_id === jobId) || null)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (selectedJob) {
       try {
         await updateJobMutation.mutateAsync({
-          jobId,
+          jobId: selectedJob.schedule_job_id,
           data: { status: 'Cancel' },
-        });
-        toast.success('Schedule job cancelled successfully');
+        })
+        toast.success('Schedule job cancelled successfully')
+        setShowDeleteConfirm(false)
+        setSelectedJob(null)
       } catch (error) {
-        console.error('Error cancelling schedule job:', error);
+        console.error('Error cancelling schedule job:', error)
       }
     }
-  };
+  }
 
   const handleSendEmail = async (jobId: string) => {
     try {
-      await sendEmailMutation.mutateAsync(jobId);
-      toast.success('Maintenance email sent successfully');
-      refetchJobs();
+      await sendEmailMutation.mutateAsync(jobId)
+      toast.success('Maintenance email sent successfully')
+      refetchJobs()
     } catch (error) {
-      toast.error('Failed to send maintenance email');
+      toast.error('Failed to send maintenance email')
     }
-  };
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
@@ -170,87 +179,87 @@ const ScheduleJob: React.FC = () => {
           className:
             'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border border-yellow-300',
           icon: <RiAlertLine className="mr-1" />,
-        };
+        }
       case 'inprogress':
         return {
           className:
             'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border border-blue-300',
           icon: <RiTimeLine className="mr-1" />,
-        };
+        }
       case 'completed':
         return {
           className:
             'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-300',
           icon: <RiCheckboxCircleLine className="mr-1" />,
-        };
+        }
       case 'cancel':
         return {
           className:
             'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border border-red-300',
           icon: <RiCloseCircleLine className="mr-1" />,
-        };
+        }
       default:
         return {
           className:
             'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border border-gray-300',
           icon: <RiInformationLine className="mr-1" />,
-        };
+        }
     }
-  };
+  }
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return 'N/A'
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    });
-  };
+    })
+  }
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+    setCurrentPage(page)
+  }
 
   const handleLimitChange = (limit: number) => {
-    setItemsPerPage(limit);
-    setCurrentPage(1);
-  };
+    setItemsPerPage(limit)
+    setCurrentPage(1)
+  }
 
   const handleReturn = () => {
-    navigate('/calendar');
-  };
+    navigate('/calendar')
+  }
 
   const handleCreateTask = (job: ScheduleJob) => {
-    setSelectedJob(job);
-    setShowTaskModal(true);
-  };
+    setSelectedJob(job)
+    setShowTaskModal(true)
+  }
 
   const handleOpenCreateJobModal = () => {
-    setShowCreateJobModal(true);
-  };
+    setShowCreateJobModal(true)
+  }
 
   // Toggle device details visibility
   const toggleDeviceDetails = (deviceId: string) => {
     if (expandedDeviceId === deviceId) {
-      setExpandedDeviceId(null);
+      setExpandedDeviceId(null)
     } else {
-      setExpandedDeviceId(deviceId);
+      setExpandedDeviceId(deviceId)
     }
-  };
+  }
 
   const handleDeviceHover = (event: React.MouseEvent, device: any) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    setTooltipPosition({ x: rect.left, y: rect.top });
-    setCurrentDevice(device);
-    setShowTooltip(true);
-  };
+    const rect = event.currentTarget.getBoundingClientRect()
+    setTooltipPosition({ x: rect.left, y: rect.top })
+    setCurrentDevice(device)
+    setShowTooltip(true)
+  }
 
   const handleDeviceLeave = () => {
-    setShowTooltip(false);
-    setCurrentDevice(null);
-  };
+    setShowTooltip(false)
+    setCurrentDevice(null)
+  }
 
   if (isScheduleLoading || isJobsLoading) {
     return (
@@ -258,16 +267,16 @@ const ScheduleJob: React.FC = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         <p className="text-gray-600 dark:text-gray-300">Loading schedule details...</p>
       </div>
-    );
+    )
   }
 
-  const scheduleJobs = scheduleJobsData?.data || [];
-  const totalItems = scheduleJobsData?.pagination.total || 0;
-  const totalPages = scheduleJobsData?.pagination.totalPages || 1;
+  const scheduleJobs = scheduleJobsData?.data || []
+  const totalItems = scheduleJobsData?.pagination.total || 0
+  const totalPages = scheduleJobsData?.pagination.totalPages || 1
 
   // Get status for schedule and display appropriate color/icon
-  const scheduleStatus = schedule?.schedule_status || 'Pending';
-  const statusInfo = getStatusBadge(scheduleStatus);
+  const scheduleStatus = schedule?.schedule_status || 'Pending'
+  const statusInfo = getStatusBadge(scheduleStatus)
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -442,7 +451,7 @@ const ScheduleJob: React.FC = () => {
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {scheduleJobs.map(job => {
-                  const statusInfo = getStatusBadge(job.status);
+                  const statusInfo = getStatusBadge(job.status)
                   return (
                     <tr
                       key={job.schedule_job_id}
@@ -473,7 +482,7 @@ const ScheduleJob: React.FC = () => {
                             {(() => {
                               const matchingDevices = job.buildingDetail.device.filter(
                                 device => device.type === cycleData?.device_type
-                              );
+                              )
                               if (matchingDevices.length === 0) {
                                 return (
                                   <div className="relative">
@@ -481,7 +490,7 @@ const ScheduleJob: React.FC = () => {
                                       Other
                                     </button>
                                   </div>
-                                );
+                                )
                               }
                               return (
                                 <>
@@ -503,7 +512,7 @@ const ScheduleJob: React.FC = () => {
                                     </div>
                                   )}
                                 </>
-                              );
+                              )
                             })()}
                           </div>
                         ) : (
@@ -581,7 +590,7 @@ const ScheduleJob: React.FC = () => {
                         </div>
                       </td>
                     </tr>
-                  );
+                  )
                 })}
               </tbody>
             </table>
@@ -608,8 +617,8 @@ const ScheduleJob: React.FC = () => {
       <TaskModal
         isOpen={showTaskModal}
         onClose={() => {
-          setShowTaskModal(false);
-          setSelectedJob(null);
+          setShowTaskModal(false)
+          setSelectedJob(null)
         }}
         scheduleJob={selectedJob}
       />
@@ -623,11 +632,22 @@ const ScheduleJob: React.FC = () => {
       <UpdateStatusModal
         isOpen={showUpdateStatusModal}
         onClose={() => {
-          setShowUpdateStatusModal(false);
-          setSelectedJob(null);
+          setShowUpdateStatusModal(false)
+          setSelectedJob(null)
         }}
         job={selectedJob}
         onUpdateStatus={handleUpdateStatus}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Cancel Schedule Job"
+        message="Are you sure you want to cancel this schedule job? This action cannot be undone."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirm(false)
+          setSelectedJob(null)
+        }}
       />
 
       {showTooltip &&
@@ -659,7 +679,7 @@ const ScheduleJob: React.FC = () => {
           document.body
         )}
     </div>
-  );
-};
+  )
+}
 
-export default ScheduleJob;
+export default ScheduleJob

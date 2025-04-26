@@ -55,11 +55,11 @@ const MaterialManagement: React.FC = () => {
   ];
 
   const priceRangeOptions = [
-    { value: 'all', label: 'Tất cả giá' },
-    { value: '0-100000', label: 'Dưới 100,000 VND' },
-    { value: '100000-500000', label: 'Từ 100,000 - 500,000 VND' },
-    { value: '500000-1000000', label: 'Từ 500,000 - 1,000,000 VND' },
-    { value: '1000000+', label: 'Trên 1,000,000 VND' },
+    { value: 'all', label: 'All Price' },
+    { value: '0-100000', label: 'Under 100,000 VND' },
+    { value: '100000-500000', label: 'From 100,000 - 500,000 VND' },
+    { value: '500000-1000000', label: 'From 500,000 - 1,000,000 VND' },
+    { value: '1000000+', label: 'Above 1,000,000 VND' },
   ];
 
   // Build query params
@@ -344,9 +344,9 @@ const MaterialManagement: React.FC = () => {
             <FilterDropdown
               options={priceRangeOptions}
               onSelect={handlePriceRangeChange}
-              buttonClassName="w-[220px]"
+              buttonClassName="w-[300px]"
               selectedValue={selectedPriceRange}
-              label="Giá tiền"
+              label="Price"
             />
             <FilterDropdown
               options={statusOptions}

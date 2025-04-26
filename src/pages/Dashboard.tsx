@@ -9,6 +9,13 @@ import {
   FaUsers,
   FaEllipsisV,
   FaExclamationCircle,
+  FaCheckCircle,
+  FaClock,
+  FaUser,
+  FaRegFileAlt,
+  FaCalendarDay,
+  FaHistory,
+  FaTag,
 } from 'react-icons/fa';
 import {
   BarChart,
@@ -24,10 +31,25 @@ import {
   LineChart,
   Line,
   CartesianGrid,
+  TooltipProps,
 } from 'recharts';
 import dashboardService, { DashboardSummary } from '@/services/dashboard';
 import { FORMAT_DATE_TIME } from '@/utils/format';
 import { useNavigate } from 'react-router-dom';
+import { Tooltip as UITooltip } from '@/components/Tooltip';
+
+// Custom tooltip component for Recharts
+const CustomTooltip = ({ active, payload, label, valueLabel = 'Count' }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-gray-800 text-white p-2 rounded-md shadow-md border border-gray-700 text-sm">
+        <p className="font-medium">{`${payload[0].name || label}: ${payload[0].value}`}</p>
+        <p className="text-xs text-gray-300">{valueLabel}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -179,7 +201,10 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full">
-              <div className="h-1 bg-yellow-500 rounded-full" style={{ width: '40%' }}></div>
+              <div
+                className="h-1 bg-yellow-500 rounded-full"
+                style={{ width: dashboardData.taskStats?.tasksByStatus?.pending ? '40%' : '0%' }}
+              ></div>
             </div>
           </div>
         </div>
@@ -201,7 +226,10 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full">
-              <div className="h-1 bg-green-500 rounded-full" style={{ width: '70%' }}></div>
+              <div
+                className="h-1 bg-green-500 rounded-full"
+                style={{ width: dashboardData.taskStats?.tasksByStatus?.completed ? '70%' : '0%' }}
+              ></div>
             </div>
           </div>
         </div>
@@ -221,7 +249,10 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full">
-              <div className="h-1 bg-blue-500 rounded-full" style={{ width: '50%' }}></div>
+              <div
+                className="h-1 bg-blue-500 rounded-full"
+                style={{ width: dashboardData.taskStats?.tasksByStatus?.inProgress ? '50%' : '0%' }}
+              ></div>
             </div>
           </div>
         </div>
@@ -241,7 +272,10 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full">
-              <div className="h-1 bg-indigo-500 rounded-full" style={{ width: '85%' }}></div>
+              <div
+                className="h-1 bg-indigo-500 rounded-full"
+                style={{ width: dashboardData.crackStats?.cracksByStatus?.total ? '85%' : '0%' }}
+              ></div>
             </div>
           </div>
         </div>
@@ -261,7 +295,10 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full">
-              <div className="h-1 bg-purple-500 rounded-full" style={{ width: '60%' }}></div>
+              <div
+                className="h-1 bg-purple-500 rounded-full"
+                style={{ width: dashboardData.taskStats?.tasksByStatus?.total ? '60%' : '0%' }}
+              ></div>
             </div>
           </div>
         </div>
@@ -281,7 +318,10 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full">
-              <div className="h-1 bg-pink-500 rounded-full" style={{ width: '75%' }}></div>
+              <div
+                className="h-1 bg-pink-500 rounded-full"
+                style={{ width: dashboardData.staffStats?.totalStaff ? '75%' : '0%' }}
+              ></div>
             </div>
           </div>
         </div>
@@ -316,7 +356,7 @@ const Dashboard: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={getStatusColor(entry.status)} />
                     ))}
                 </Pie>
-                <Tooltip formatter={value => [`${value} tasks`, 'Count']} />
+                <Tooltip content={<CustomTooltip valueLabel="tasks" />} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -358,7 +398,7 @@ const Dashboard: React.FC = () => {
                     );
                   })}
                 </Pie>
-                <Tooltip formatter={value => [`${value} cracks`, 'Count']} />
+                <Tooltip content={<CustomTooltip valueLabel="cracks" />} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -377,14 +417,7 @@ const Dashboard: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="month" stroke="#9CA3AF" />
               <YAxis stroke="#9CA3AF" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: '#F3F4F6',
-                }}
-              />
+              <Tooltip content={<CustomTooltip valueLabel="schedules" />} />
               <Bar dataKey="count" name="Schedules" fill="#3B82F6" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -394,58 +427,120 @@ const Dashboard: React.FC = () => {
       {/* Recent Tasks */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Tasks</h2>
+          <div className="flex items-center space-x-2">
+            <FaRegFileAlt className="text-blue-500 dark:text-blue-400" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Tasks</h2>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Task
+                  <div className="flex items-center space-x-1">
+                    <FaRegFileAlt className="text-gray-400" />
+                    <span>Task</span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Status
+                  <div className="flex items-center space-x-1">
+                    <FaTag className="text-gray-400" />
+                    <span>Status</span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Created
+                  <div className="flex items-center space-x-1">
+                    <FaCalendarDay className="text-gray-400" />
+                    <span>Created</span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Updated
+                  <div className="flex items-center space-x-1">
+                    <FaHistory className="text-gray-400" />
+                    <span>Updated</span>
+                  </div>
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {(dashboardData.taskStats?.recentTasks || []).slice(0, 5).map(task => (
                 <tr key={task.task_id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
-                      {task.description}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      ID: {task.task_id.substring(0, 8)}...
-                    </div>
+                  <td className="px-6 py-4">
+                    <UITooltip content={task.description} position="top">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 mr-3">
+                          <FaRegFileAlt className="text-blue-500 dark:text-blue-400 text-lg" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white max-w-[250px] truncate">
+                            {(task as any).title || task.description.split('.')[0]}
+                          </div>
+                        </div>
+                      </div>
+                    </UITooltip>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                      ${
-                        task.status === 'Completed'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                          : task.status === 'InProgress'
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                            : task.status === 'Assigned'
-                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                              : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
-                      }`}
+                  <td className="px-6 py-4">
+                    <UITooltip content={`Status: ${task.status}`} position="right">
+                      {task.status === 'Completed' ? (
+                        <div className="flex items-center">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            <FaCheckCircle className="mr-1" />
+                            Completed
+                          </span>
+                        </div>
+                      ) : task.status === 'InProgress' ? (
+                        <div className="flex items-center">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                            <FaSpinner className="mr-1 animate-spin" />
+                            In Progress
+                          </span>
+                        </div>
+                      ) : task.status === 'Assigned' ? (
+                        <div className="flex items-center">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                            <FaUser className="mr-1" />
+                            Assigned
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                            <FaClock className="mr-1" />
+                            Pending
+                          </span>
+                        </div>
+                      )}
+                    </UITooltip>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                    <UITooltip
+                      content={`Created: ${FORMAT_DATE_TIME(task.created_at)}`}
+                      position="left"
                     >
-                      {task.status}
-                    </span>
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {FORMAT_DATE_TIME(task.created_at).split(',')[0]}
+                        </span>
+                        <span className="text-xs">
+                          {FORMAT_DATE_TIME(task.created_at).split(',')[1]?.trim()}
+                        </span>
+                      </div>
+                    </UITooltip>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {FORMAT_DATE_TIME(task.created_at)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {FORMAT_DATE_TIME(task.updated_at)}
+                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                    <UITooltip
+                      content={`Last updated: ${FORMAT_DATE_TIME(task.updated_at)}`}
+                      position="left"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {FORMAT_DATE_TIME(task.updated_at).split(',')[0]}
+                        </span>
+                        <span className="text-xs">
+                          {FORMAT_DATE_TIME(task.updated_at).split(',')[1]?.trim()}
+                        </span>
+                      </div>
+                    </UITooltip>
                   </td>
                 </tr>
               ))}

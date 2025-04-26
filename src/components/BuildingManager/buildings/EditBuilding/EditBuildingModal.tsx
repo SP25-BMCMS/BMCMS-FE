@@ -190,6 +190,15 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
 
     setIsLoading(true);
     try {
+      // Convert dates to ISO 8601 format for API
+      const construction_date_iso = formData.construction_date && formData.construction_date !== 'dd/mm/yyyy' 
+        ? new Date(formData.construction_date).toISOString() 
+        : null;
+        
+      const completion_date_iso = formData.status === 'operational' && formData.completion_date && formData.completion_date !== 'dd/mm/yyyy'
+        ? new Date(formData.completion_date).toISOString()
+        : null;
+
       const buildingData = {
         buildingId: formData.buildingId,
         name: formData.name,
@@ -197,8 +206,8 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
         numberFloor: formData.numberFloor,
         imageCover: formData.imageCover,
         areaId: formData.areaId,
-        construction_date: formData.construction_date,
-        completion_date: formData.completion_date,
+        construction_date: construction_date_iso,
+        completion_date: completion_date_iso,
         status: formData.status as 'operational' | 'under_construction',
         ...(formData.status === 'operational' && formData.manager_id
           ? { manager_id: formData.manager_id }
@@ -221,12 +230,14 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-full max-w-[800px] shadow-2xl">
-        <div className="flex justify-between items-center mb-6">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 w-full max-w-[800px] shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Edit Building</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">
+              Edit Building
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
               Update building information below
             </p>
           </div>
@@ -234,7 +245,12 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-5 h-5 sm:w-6 sm:h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -246,8 +262,8 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
         </div>
 
         {isLoadingData ? (
-          <div className="flex justify-center items-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <div className="flex justify-center items-center p-4 sm:p-8">
+            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-blue-500" />
             <span className="ml-2 text-gray-600 dark:text-gray-300">Loading building data...</span>
           </div>
         ) : (
@@ -256,11 +272,11 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               e.preventDefault();
               handleSubmit();
             }}
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
           >
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {/* Building Name */}
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Building Name
                 </label>
@@ -270,7 +286,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Enter building name"
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                     errors.name
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
                       : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
@@ -282,7 +298,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               </div>
 
               {/* Number of Floors */}
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Number of Floors
                 </label>
@@ -292,7 +308,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                   value={formData.numberFloor}
                   onChange={handleChange}
                   min="1"
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
                     errors.numberFloor
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
                       : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
@@ -306,7 +322,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               </div>
 
               {/* Image URL */}
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Image (URL)
                 </label>
@@ -316,7 +332,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                   value={formData.imageCover}
                   onChange={handleChange}
                   placeholder="Enter image URL"
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                     errors.imageCover
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
                       : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
@@ -328,7 +344,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               </div>
 
               {/* Area Selection */}
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Area
                 </label>
@@ -336,7 +352,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                   name="areaId"
                   value={formData.areaId}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
                     errors.areaId
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
                       : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
@@ -355,7 +371,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               </div>
 
               {/* Construction Date */}
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Construction Date
                 </label>
@@ -364,7 +380,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                   name="construction_date"
                   value={formData.construction_date}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
                     errors.construction_date
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
                       : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
@@ -378,7 +394,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               </div>
 
               {/* Status */}
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Status
                 </label>
@@ -392,7 +408,9 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                       onChange={handleChange}
                       className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                     />
-                    <span className="ml-2 text-gray-700 dark:text-gray-300">Operational</span>
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      Operational
+                    </span>
                   </label>
                   <label className="inline-flex items-center">
                     <input
@@ -403,7 +421,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                       onChange={handleChange}
                       className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                     />
-                    <span className="ml-2 text-gray-700 dark:text-gray-300">
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                       Under construction
                     </span>
                   </label>
@@ -411,7 +429,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               </div>
 
               {/* Completion Date */}
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Completion Date
                 </label>
@@ -420,7 +438,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                     type="text"
                     name="completion_date"
                     value={formData.completion_date}
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm 
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm 
                             bg-gray-50 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
                     disabled
                   />
@@ -430,7 +448,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                     name="completion_date"
                     value={formData.completion_date}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
                       errors.completion_date
                         ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
                         : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
@@ -446,7 +464,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
 
               {/* Manager Selection - Only shows for operational buildings */}
               {formData.status === 'operational' && (
-                <div className="space-y-2 col-span-2">
+                <div className="space-y-1 sm:space-y-2 col-span-1 sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                     <UserIcon className="w-4 h-4 mr-1.5 text-blue-500" />
                     Building Manager
@@ -455,7 +473,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                     name="manager_id"
                     value={formData.manager_id}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:text-gray-100"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:text-gray-100"
                   >
                     <option value="">Select a manager</option>
                     {staff
@@ -473,7 +491,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               )}
 
               {/* Description - Full Width */}
-              <div className="col-span-2 space-y-2">
+              <div className="col-span-1 sm:col-span-2 space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Description
                 </label>
@@ -482,12 +500,12 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Enter building description"
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                     errors.description
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
                       : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                   }`}
-                  rows={4}
+                  rows={3}
                 />
                 {errors.description && (
                   <p className="text-red-500 dark:text-red-400 text-xs mt-1">
@@ -498,18 +516,18 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
             </div>
 
             {/* Buttons */}
-            <div className="flex justify-end space-x-3 mt-8">
+            <div className="flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-gray-600 transition-colors"
+                className="px-4 sm:px-6 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-gray-600 transition-colors text-sm"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
               >
                 {isLoading ? (
                   <span className="flex items-center">
