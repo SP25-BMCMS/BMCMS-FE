@@ -70,6 +70,43 @@ export interface DashboardSummary {
   lastUpdated: string;
 }
 
+export interface Feedback {
+  feedback_id: string;
+  task_id: string;
+  feedback_by: string;
+  comments: string;
+  rating: number;
+  created_at: string;
+  updated_at: string;
+  status: string;
+  task?: {
+    task_id: string;
+    title: string;
+    description: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    crack_id?: string;
+    schedule_job_id?: string;
+  };
+  user?: {
+    userId: string;
+    username: string;
+  };
+}
+
+export interface FeedbacksResponse {
+  isSuccess: boolean;
+  message: string;
+  data: Feedback[];
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 const getDashboardSummary = async (): Promise<DashboardSummary> => {
   try {
     const token = localStorage.getItem('bmcms_token');
@@ -94,6 +131,35 @@ const getDashboardSummary = async (): Promise<DashboardSummary> => {
   }
 };
 
+const getFeedbacks = async (params?: { page?: number; limit?: number; search?: string }): Promise<FeedbacksResponse> => {
+  try {
+    const token = localStorage.getItem('bmcms_token');
+
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_SECRET}${import.meta.env.VITE_GET_ALL_FEEDBACK}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        params: {
+          ...params,
+          include: 'task,user',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching feedbacks:', error);
+    throw error;
+  }
+};
+
 export default {
   getDashboardSummary,
+  getFeedbacks,
 };
