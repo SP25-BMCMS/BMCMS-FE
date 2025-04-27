@@ -236,29 +236,32 @@ const TaskManagement: React.FC = () => {
       key: 'title',
       title: 'Title',
       render: item => (
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 max-w-[140px] xs:max-w-[180px] sm:max-w-full truncate">
-          {item.title}
-        </div>
+        <Tooltip content={item.title || ''} position="bottom">
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 max-w-[120px] xs:max-w-[140px] sm:max-w-[180px] md:max-w-[220px] truncate">
+            {item.title}
+          </div>
+        </Tooltip>
       ),
+      width: '120px xs:140px sm:180px md:220px',
     },
     {
       key: 'description',
       title: 'Description',
       render: item => {
-        // Only show tooltip if description is longer than 100 characters
-        const shortDescription = item.description?.substring(0, 100) || '';
-        const needsTooltip = (item.description?.length || 0) > 100;
+        // Only show tooltip if description is longer than 60 characters
+        const shortDescription = item.description?.substring(0, 60) || '';
+        const needsTooltip = (item.description?.length || 0) > 60;
 
         return (
           <Tooltip content={item.description || ''} position="bottom">
-            <div className="text-sm text-gray-500 dark:text-gray-400 max-w-[100px] xs:max-w-[150px] sm:max-w-[200px] truncate">
+            <div className="text-sm text-gray-500 dark:text-gray-400 max-w-[80px] xs:max-w-[120px] sm:max-w-[160px] md:max-w-[180px] truncate">
               {shortDescription}
               {needsTooltip ? '...' : ''}
             </div>
           </Tooltip>
         );
       },
-      width: '150px sm:200px md:250px',
+      width: '80px xs:120px sm:160px md:180px',
     },
     {
       key: 'building',
@@ -274,10 +277,10 @@ const TaskManagement: React.FC = () => {
 
           buildingInfo = (
             <div className="flex items-center">
-              <FaBuilding className="text-blue-500 mr-1" />
-              <div>
-                <div className="font-medium">{buildingDetailId?.substring(0, 8)}</div>
-                <div className="text-xs">{position}</div>
+              <FaBuilding className="text-blue-500 mr-1 flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="font-medium truncate">{buildingDetailId?.substring(0, 8)}</div>
+                <div className="text-xs truncate">{position}</div>
               </div>
             </div>
           );
@@ -290,19 +293,22 @@ const TaskManagement: React.FC = () => {
             const buildingDetailName = buildingDetail.name || '';
 
             buildingInfo = (
-              <div className="flex items-center">
-                <FaBuilding className="text-green-500 mr-1" />
-                <div>
-                  <div className="font-medium">{buildingName}</div>
-                  <div className="text-xs">{buildingDetailName}</div>
+              <Tooltip content={`${buildingName} - ${buildingDetailName}`} position="bottom">
+                <div className="flex items-center">
+                  <FaBuilding className="text-green-500 mr-1 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <div className="font-medium truncate max-w-[70px] xs:max-w-[100px] sm:max-w-[120px]">{buildingName}</div>
+                    <div className="text-xs truncate max-w-[70px] xs:max-w-[100px] sm:max-w-[120px]">{buildingDetailName}</div>
+                  </div>
                 </div>
-              </div>
+              </Tooltip>
             );
           }
         }
 
         return buildingInfo || <div className="text-sm text-gray-400">-</div>;
       },
+      width: '100px xs:120px sm:140px',
     },
     // Hiển thị cột Crack ID chỉ khi đang xem các task liên quan đến crack
     ...(taskType === 'crack'
@@ -383,14 +389,19 @@ const TaskManagement: React.FC = () => {
                 : 'N/A';
 
               return (
-                <div className="text-sm">
-                  <div className="font-medium text-gray-700 dark:text-gray-300">{scheduleName}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {deviceType} - {runDate}
+                <Tooltip content={`${scheduleName} - ${deviceType} - ${runDate}`} position="bottom">
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-700 dark:text-gray-300 truncate max-w-[80px] xs:max-w-[100px] sm:max-w-[120px] md:max-w-[140px]">
+                      {scheduleName}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[80px] xs:max-w-[100px] sm:max-w-[120px] md:max-w-[140px]">
+                      {deviceType} - {runDate}
+                    </div>
                   </div>
-                </div>
+                </Tooltip>
               );
             },
+            width: '110px xs:140px sm:160px',
           },
           {
             key: 'schedule_status',
@@ -446,16 +457,18 @@ const TaskManagement: React.FC = () => {
                 </span>
               );
             },
+            width: '90px',
           },
         ]),
     {
       key: 'created_at',
       title: 'Created Date',
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
           {new Date(item.created_at).toLocaleDateString()}
         </div>
       ),
+      width: '90px xs:100px sm:110px',
     },
     {
       key: 'status',
@@ -474,6 +487,7 @@ const TaskManagement: React.FC = () => {
           {item.status}
         </span>
       ),
+      width: '90px xs:100px',
     },
     {
       key: 'action',
@@ -489,7 +503,7 @@ const TaskManagement: React.FC = () => {
           />
         </div>
       ),
-      width: '80px',
+      width: '60px xs:70px sm:80px',
     },
   ];
 
@@ -573,7 +587,7 @@ const TaskManagement: React.FC = () => {
               keyExtractor={item => item.task_id}
               onRowClick={item => navigate(`/task-detail/${item.task_id}`)}
               className="w-full"
-              tableClassName="w-full min-w-[640px] sm:min-w-[750px]"
+              tableClassName="w-full min-w-[640px] sm:min-w-[768px] md:min-w-[900px]"
             />
           </div>
 
@@ -609,3 +623,4 @@ const TaskManagement: React.FC = () => {
 };
 
 export default TaskManagement;
+
