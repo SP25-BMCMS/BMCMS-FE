@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import tasksApi from '@/services/tasks';
-import { getAllStaff } from '@/services/staff';
-import { motion } from 'framer-motion';
-import { FORMAT_DATE_TIME } from '@/utils/helpers';
-import { STATUS_COLORS } from '@/constants/colors';
-import { IoArrowBack } from 'react-icons/io5';
+import React, { useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import tasksApi from '@/services/tasks'
+import { getAllStaff } from '@/services/staff'
+import { motion } from 'framer-motion'
+import { FORMAT_DATE_TIME } from '@/utils/helpers'
+import { STATUS_COLORS } from '@/constants/colors'
+import { IoArrowBack } from 'react-icons/io5'
 import {
   FaUser,
   FaCalendarAlt,
@@ -17,67 +17,71 @@ import {
   FaCheck,
   FaFileAlt,
   FaMapMarkerAlt,
-} from 'react-icons/fa';
-import SimpleInspectionModal from '@/components/TaskManager/SimpleInspectionModal';
-import InspectionDetails from '@/components/TaskManager/InspectionDetails';
-import { StaffData, TaskAssignment, TaskResponse } from '@/types';
+  FaMailBulk,
+} from 'react-icons/fa'
+import SimpleInspectionModal from '@/components/TaskManager/SimpleInspectionModal'
+import InspectionDetails from '@/components/TaskManager/InspectionDetails'
+import { StaffData, TaskAssignment, TaskResponse } from '@/types'
+import { toast } from 'react-hot-toast'
+import apiInstance from '@/lib/axios'
 
 // Extended task data interface that includes both task assignment and crack info
 interface ExtendedTaskData {
-  task_id: string;
-  description: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  crack_id?: string;
-  schedule_job_id?: string;
-  taskAssignments: TaskAssignment[];
+  task_id: string
+  description: string
+  status: string
+  created_at: string
+  updated_at: string
+  crack_id?: string
+  schedule_job_id?: string
+  taskAssignments: TaskAssignment[]
   // Include crackInfo from TaskResponse type
-  crackInfo?: TaskResponse['crackInfo'];
+  crackInfo?: TaskResponse['crackInfo']
 }
 
 const TaskDetail: React.FC = () => {
-  const { taskId } = useParams<{ taskId: string }>();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
+  const { taskId } = useParams<{ taskId: string }>()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   // Fetch all staff data to map IDs to names
   const { data: staffData } = useQuery({
     queryKey: ['staff'],
     queryFn: async () => {
-      const response = await getAllStaff();
-      return response.data || [];
+      const response = await getAllStaff()
+      return response.data || []
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
-  });
+  })
 
   // Create a map of staff IDs to names
   const staffNameMap = React.useMemo(() => {
-    const map: { [key: string]: string } = {};
+    const map: { [key: string]: string } = {}
     if (staffData) {
       staffData.forEach((staff: StaffData) => {
-        map[staff.userId] = staff.username;
-      });
+        map[staff.userId] = staff.username
+      })
     }
-    return map;
-  }, [staffData]);
+    return map
+  }, [staffData])
 
   // Fetch task details and assignments
   const { data: taskData, isLoading } = useQuery({
     queryKey: ['taskAssignments', taskId],
     queryFn: async () => {
-      const response = await tasksApi.getTaskAssignmentsByTaskId(taskId || '');
+      const response = await tasksApi.getTaskAssignmentsByTaskId(taskId || '')
 
       // Also fetch the task details to get crack info if needed
       if (response.data?.crack_id) {
         try {
           // Fetch task with crack info from the tasks API
-          const taskResponse = await tasksApi.getTasks({ search: response.data.task_id });
+          const taskResponse = await tasksApi.getTasks({ search: response.data.task_id })
           if (taskResponse.data && taskResponse.data.length > 0) {
             const taskWithCrackInfo = taskResponse.data.find(
               t => t.task_id === response.data.task_id
-            );
+            )
             if (taskWithCrackInfo) {
               // Merge the crack info with the task assignments data
               return {
@@ -90,11 +94,11 @@ const TaskDetail: React.FC = () => {
                     employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
                   })),
                 },
-              };
+              }
             }
           }
         } catch (error) {
-          console.error('Error fetching task with crack info:', error);
+          console.error('Error fetching task with crack info:', error)
         }
       }
 
@@ -109,15 +113,16 @@ const TaskDetail: React.FC = () => {
               employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
             })),
           },
-        };
+        }
       }
 
-      return response;
+      return response
     },
     enabled: !!taskId && Object.keys(staffNameMap).length > 0,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-  });
+  })
+  console.log("🚀 Kha ne ~ taskData:", taskData)
 
   // Fetch inspections for selected assignment only when modal is open
   const {
@@ -128,7 +133,7 @@ const TaskDetail: React.FC = () => {
     queryKey: ['inspections', selectedAssignmentId],
     queryFn: async () => {
       try {
-        const response = await tasksApi.getInspectionsByAssignmentId(selectedAssignmentId || '');
+        const response = await tasksApi.getInspectionsByAssignmentId(selectedAssignmentId || '')
 
         // Enhance inspection data with staff names
         if (response.data && response.data.length > 0) {
@@ -142,33 +147,48 @@ const TaskDetail: React.FC = () => {
               },
               confirmed_by_user: inspection.confirmed_by
                 ? {
-                    userId: inspection.confirmed_by,
-                    username: staffNameMap[inspection.confirmed_by] || 'Unknown Staff',
-                  }
+                  userId: inspection.confirmed_by,
+                  username: staffNameMap[inspection.confirmed_by] || 'Unknown Staff',
+                }
                 : null,
             })),
-          };
+          }
         }
 
-        return response;
+        return response
       } catch (error) {
-        console.error('Error fetching inspections:', error);
-        throw error;
+        console.error('Error fetching inspections:', error)
+        throw error
       }
     },
     enabled: !!selectedAssignmentId && Object.keys(staffNameMap).length > 0,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 1,
-  });
+  })
 
   // Get crack information
   const hasCrackInfo =
     taskData?.data?.crack_id &&
     (taskData?.data as ExtendedTaskData)?.crackInfo?.isSuccess &&
-    (taskData?.data as ExtendedTaskData)?.crackInfo?.data?.length > 0;
+    (taskData?.data as ExtendedTaskData)?.crackInfo?.data?.length > 0
 
-  const crackInfo = hasCrackInfo ? (taskData?.data as ExtendedTaskData)?.crackInfo?.data[0] : null;
+  const crackInfo = hasCrackInfo ? (taskData?.data as ExtendedTaskData)?.crackInfo?.data[0] : null
+
+  // Add mutation for sending notification
+  const sendNotificationMutation = useMutation({
+    mutationFn: async (data: { taskId: string; scheduleJobId: string }) => {
+      const response = await apiInstance.post('/tasks/notification-thanks-to-resident', data)
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Notification sent successfully')
+      navigate('/tasks')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to send notification')
+    },
+  })
 
   if (isLoading) {
     return (
@@ -179,7 +199,7 @@ const TaskDetail: React.FC = () => {
           className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"
         />
       </div>
-    );
+    )
   }
 
   if (!taskData || !taskId) {
@@ -189,10 +209,10 @@ const TaskDetail: React.FC = () => {
           <p>Unable to load job information. Please try again later.</p>
         </div>
       </div>
-    );
+    )
   }
 
-  const task = taskData.data as ExtendedTaskData;
+  const task = taskData.data as ExtendedTaskData
 
   // Group assignments by status
   const assignmentsByStatus = {
@@ -200,49 +220,72 @@ const TaskDetail: React.FC = () => {
     Reassigned: task.taskAssignments.filter(a => a.status === 'Reassigned'),
     InFixing: task.taskAssignments.filter(a => a.status === 'InFixing'),
     Fixed: task.taskAssignments.filter(a => a.status === 'Fixed'),
-  };
+  }
 
   // Get status icon based on status
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'Confirmed':
-        return <FaCheckCircle className="text-[#360AFE]" />;
+        return <FaCheckCircle className="text-[#360AFE]" />
       case 'Reassigned':
-        return <FaExchangeAlt className="text-[#5856D6]" />;
+        return <FaExchangeAlt className="text-[#5856D6]" />
       case 'InFixing':
-        return <FaTools className="text-[#FFA500]" />;
+        return <FaTools className="text-[#FFA500]" />
       case 'Fixed':
-        return <FaCheck className="text-[#50F186]" />;
+        return <FaCheck className="text-[#50F186]" />
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   // Find the selected assignment from task data
   const findSelectedAssignment = () => {
-    if (!selectedAssignmentId || !task.taskAssignments) return null;
-    return task.taskAssignments.find(a => a.assignment_id === selectedAssignmentId) || null;
-  };
+    if (!selectedAssignmentId || !task.taskAssignments) return null
+    return task.taskAssignments.find(a => a.assignment_id === selectedAssignmentId) || null
+  }
 
   const handleAssignmentClick = (assignmentId: string) => {
-    setSelectedAssignmentId(assignmentId);
-  };
+    setSelectedAssignmentId(assignmentId)
+  }
 
   const handleCloseModal = () => {
-    setSelectedAssignmentId(null);
-  };
+    setSelectedAssignmentId(null)
+  }
 
-  const selectedAssignment = findSelectedAssignment();
+  const selectedAssignment = findSelectedAssignment()
 
   // Helper function to display staff name
   const displayStaffName = assignment => {
-    return assignment.employee_name || 'Staff Member';
-  };
+    return assignment.employee_name || 'Staff Member'
+  }
 
   // Format assignment identifier
   const formatAssignmentNumber = (index: number) => {
-    return `#${index + 1}`;
-  };
+    return `#${index + 1}`
+  }
+
+  // Add handler for opening confirmation modal
+  const handleOpenConfirmModal = () => {
+    setShowConfirmModal(true)
+  }
+
+  // Add handler for closing confirmation modal
+  const handleCloseConfirmModal = () => {
+    setShowConfirmModal(false)
+  }
+
+  // Update handler for confirming and sending notification
+  const handleConfirmAndSend = async () => {
+    if (!taskId) return
+    try {
+      await sendNotificationMutation.mutateAsync({
+        taskId: taskId,
+        scheduleJobId: ""
+      })
+    } catch (error) {
+      console.error('Error sending notification:', error)
+    }
+  }
 
   return (
     <div className="p-6 w-full bg-gray-50 dark:bg-gray-800 min-h-screen">
@@ -341,6 +384,18 @@ const TaskDetail: React.FC = () => {
                   <span className="text-gray-700 dark:text-gray-300">
                     Location: {crackInfo.position}
                   </span>
+                </div>
+              )}
+              {crackInfo.isPrivatesAsset === false && task.status !== 'Completed' && (
+                <div className="mt-4">
+                  <button
+                    onClick={handleOpenConfirmModal}
+                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                    title="Send Maintenance Notification to Residents"
+                  >
+                    <FaMailBulk className="w-5 h-5 mr-2" />
+                    Send Maintenance Notification to Residents
+                  </button>
                 </div>
               )}
             </>
@@ -559,8 +614,44 @@ const TaskDetail: React.FC = () => {
           error={inspectionsError ? String(inspectionsError) : undefined}
         />
       )}
-    </div>
-  );
-};
 
-export default TaskDetail;
+      {/* Add confirmation modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 relative">
+            <div className="text-center mb-5">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/20 mb-4">
+                <FaMailBulk className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Confirm Notification</h3>
+              <div className="mt-2">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Are you sure you want to send maintenance notification to residents and mark this task as completed?
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex justify-center space-x-3">
+              <button
+                type="button"
+                onClick={handleCloseConfirmModal}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAndSend}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none"
+              >
+                Send & Complete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default TaskDetail

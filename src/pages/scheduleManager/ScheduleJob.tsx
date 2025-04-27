@@ -33,6 +33,7 @@ import { STATUS_COLORS } from '@/constants/colors'
 import { getMaintenanceCycles } from '@/services/maintenanceCycle'
 import { createPortal } from 'react-dom'
 import ConfirmModal from '@/components/ConfirmModal'
+import apiInstance from '@/lib/axios'
 
 const ScheduleJob: React.FC = () => {
   const { scheduleId } = useParams<{ scheduleId: string }>()
@@ -78,6 +79,24 @@ const ScheduleJob: React.FC = () => {
         page: currentPage,
         limit: itemsPerPage,
       }),
+    enabled: !!scheduleId,
+  })
+
+  // Fetch staff leaders for the schedule job
+  const { data: staffLeaders } = useQuery({
+    queryKey: ['staff-leaders', scheduleId],
+    queryFn: async () => {
+      if (!scheduleId) {
+        throw new Error('Schedule ID is required')
+      }
+      const response = await apiInstance.get(
+        `${import.meta.env.VITE_GET_STAFF_LEADERS_BY_SCHEDULE_JOB.replace(
+          '{scheduleJobId}',
+          scheduleId
+        )}`
+      )
+      return response.data
+    },
     enabled: !!scheduleId,
   })
 
