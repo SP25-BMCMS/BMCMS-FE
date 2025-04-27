@@ -1,4 +1,4 @@
-import { TaskEvent } from '@/types/calendar';
+import { TaskEvent } from '@/types/calendar'
 import {
   BuildingOfficeIcon,
   CalendarIcon,
@@ -7,51 +7,51 @@ import {
   XMarkIcon,
   CogIcon,
   CheckCircleIcon,
-} from '@heroicons/react/24/outline';
-import { vi } from 'date-fns/locale';
-import React, { useEffect, useState } from 'react';
-import DatePicker, { registerLocale } from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import BuildingDetailSelectionModal from './BuildingDetailSelectionModal';
-import ConfirmModal from './ConfirmModal';
-import { BuildingDetail } from '@/types/buildingDetail';
-import { MaintenanceCycle } from '@/types';
+} from '@heroicons/react/24/outline'
+import { vi } from 'date-fns/locale'
+import React, { useEffect, useState } from 'react'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import BuildingDetailSelectionModal from './BuildingDetailSelectionModal'
+import ConfirmModal from './ConfirmModal'
+import { BuildingDetail } from '@/types/buildingDetail'
+import { MaintenanceCycle } from '@/types'
 
-registerLocale('vi', vi);
+registerLocale('vi', vi)
 
 interface FormData {
-  title: string;
-  description: string;
-  schedule_type: string;
-  start_date: Date;
-  end_date: Date;
-  buildingDetailIds: string[];
-  cycle_id: string;
-  schedule_status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel';
+  title: string
+  description: string
+  schedule_type: string
+  start_date: Date
+  end_date: Date
+  buildingDetailIds: string[]
+  cycle_id: string
+  schedule_status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel'
 }
 
 interface EventModalProps {
-  isOpen: boolean;
-  isCreateMode: boolean;
-  selectedEvent: TaskEvent | null;
-  onClose: () => void;
-  onSave: (formData: FormData) => void;
-  onUpdate: (formData: FormData) => void;
-  onDelete: (id: string) => void;
-  onViewScheduleJob: () => void;
-  onUpdateStatus: (id: string, status: string) => void;
-  initialFormData: Partial<TaskEvent>;
+  isOpen: boolean
+  isCreateMode: boolean
+  selectedEvent: TaskEvent | null
+  onClose: () => void
+  onSave: (formData: FormData) => void
+  onUpdate: (formData: FormData) => void
+  onDelete: (id: string) => void
+  onViewScheduleJob: () => void
+  onUpdateStatus: (id: string, status: string) => void
+  initialFormData: Partial<TaskEvent>
   buildings: Array<{
-    buildingId: string;
-    name: string;
-    description?: string;
-    Status: string;
-  }>;
-  buildingDetails: BuildingDetail[];
-  selectedBuildingDetails: string[];
-  onBuildingDetailSelect: (buildingDetailId: string) => void;
-  onSetSelectedBuildingDetails: (buildingDetails: string[]) => void;
-  maintenanceCycles: MaintenanceCycle[];
+    buildingId: string
+    name: string
+    description?: string
+    Status: string
+  }>
+  buildingDetails: BuildingDetail[]
+  selectedBuildingDetails: string[]
+  onBuildingDetailSelect: (buildingDetailId: string) => void
+  onSetSelectedBuildingDetails: (buildingDetails: string[]) => void
+  maintenanceCycles: MaintenanceCycle[]
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -80,9 +80,9 @@ const EventModal: React.FC<EventModalProps> = ({
     buildingDetailIds: [],
     cycle_id: '',
     schedule_status: 'Pending',
-  });
-  const [showBuildingModal, setShowBuildingModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  })
+  const [showBuildingModal, setShowBuildingModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     if (isCreateMode && initialFormData) {
@@ -95,24 +95,24 @@ const EventModal: React.FC<EventModalProps> = ({
         buildingDetailIds: selectedBuildingDetails,
         cycle_id: initialFormData.cycle_id || '',
         schedule_status: 'Pending',
-      });
+      })
     } else if (selectedEvent) {
       // Map event status to API status format
-      let scheduleStatus: 'Pending' | 'InProgress' | 'Completed' | 'Cancel' = 'InProgress';
+      let scheduleStatus: 'Pending' | 'InProgress' | 'Completed' | 'Cancel' = 'InProgress'
 
       if (selectedEvent.status === 'pending') {
-        scheduleStatus = 'Pending';
+        scheduleStatus = 'Pending'
       } else if (selectedEvent.status === 'inprogress') {
-        scheduleStatus = 'InProgress';
+        scheduleStatus = 'InProgress'
       } else if (selectedEvent.status === 'completed') {
-        scheduleStatus = 'Completed';
+        scheduleStatus = 'Completed'
       } else if (selectedEvent.status === 'cancel') {
-        scheduleStatus = 'Cancel';
+        scheduleStatus = 'Cancel'
       }
 
       // Get cycle ID from existing data if available
-      const cycleId = selectedEvent.cycle_id || '';
-      console.log('Selected Event Cycle ID:', cycleId); // Debug log
+      const cycleId = selectedEvent.cycle_id || ''
+      console.log('Selected Event Cycle ID:', cycleId) // Debug log
 
       setFormData({
         title: selectedEvent.title || '',
@@ -123,11 +123,11 @@ const EventModal: React.FC<EventModalProps> = ({
         buildingDetailIds: selectedEvent.buildingDetailIds || [],
         cycle_id: cycleId,
         schedule_status: scheduleStatus,
-      });
+      })
 
       // Set selectedBuildingDetails only if modal first opens
       if (selectedEvent.buildingDetailIds && selectedEvent.buildingDetailIds.length > 0) {
-        onSetSelectedBuildingDetails(selectedEvent.buildingDetailIds);
+        onSetSelectedBuildingDetails(selectedEvent.buildingDetailIds)
       }
     }
   }, [
@@ -137,44 +137,44 @@ const EventModal: React.FC<EventModalProps> = ({
     isOpen,
     onSetSelectedBuildingDetails,
     maintenanceCycles,
-  ]);
+  ])
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     // Prepare data for API submission
     const submitData = {
       ...formData,
       buildingDetailIds: selectedBuildingDetails,
-    };
+    }
 
     // For edit mode, ensure we're passing the schedule_name field correctly
     const finalData = {
       ...submitData,
       // Map title to schedule_name for the API
       schedule_name: submitData.title,
-    };
+    }
 
     if (isCreateMode) {
-      onSave(finalData);
+      onSave(finalData)
     } else {
-      onUpdate(finalData);
+      onUpdate(finalData)
     }
-  };
+  }
 
   const handleDelete = () => {
     if (selectedEvent?.id) {
-      onDelete(selectedEvent.id);
-      setShowDeleteConfirm(false);
+      onDelete(selectedEvent.id)
+      setShowDeleteConfirm(false)
     }
-  };
+  }
 
   const statusOptions = [
     { value: 'Pending', label: 'Pending' },
     { value: 'InProgress', label: 'In Progress' },
     { value: 'Completed', label: 'Completed' },
     { value: 'Cancel', label: 'Cancel' },
-  ];
+  ]
 
   // Add this function to handle building modal toggling while preserving form data
   const handleOpenBuildingModal = () => {
@@ -182,9 +182,9 @@ const EventModal: React.FC<EventModalProps> = ({
     setFormData(prev => ({
       ...prev,
       buildingDetailIds: selectedBuildingDetails,
-    }));
-    setShowBuildingModal(true);
-  };
+    }))
+    setShowBuildingModal(true)
+  }
 
   // Add effect to sync form data with selected building details
   useEffect(() => {
@@ -193,53 +193,53 @@ const EventModal: React.FC<EventModalProps> = ({
       setFormData(prev => ({
         ...prev,
         buildingDetailIds: selectedBuildingDetails,
-      }));
+      }))
     }
-  }, [selectedBuildingDetails, isCreateMode, selectedEvent]);
+  }, [selectedBuildingDetails, isCreateMode, selectedEvent])
 
   // Add function to get cycle label
   const getCycleLabel = (cycleId: string) => {
-    console.log('Getting cycle label for:', cycleId);
-    console.log('Available cycles:', maintenanceCycles);
+    console.log('Getting cycle label for:', cycleId)
+    console.log('Available cycles:', maintenanceCycles)
 
     // Extract data array from the response if needed
     const cyclesArray = Array.isArray(maintenanceCycles)
       ? maintenanceCycles
-      : maintenanceCycles?.data || [];
+      : maintenanceCycles?.data || []
 
     // Ensure cyclesArray is an array and cycleId exists
     if (!Array.isArray(cyclesArray) || !cycleId || cycleId.trim() === '') {
-      console.log('Invalid maintenance cycles or cycle ID');
-      return '';
+      console.log('Invalid maintenance cycles or cycle ID')
+      return ''
     }
 
     try {
-      const cycle = cyclesArray.find(c => c.cycle_id === cycleId);
-      console.log('Found cycle:', cycle);
-      return cycle ? `${cycle.device_type} - ${cycle.frequency} (${cycle.basis})` : '';
+      const cycle = cyclesArray.find(c => c.cycle_id === cycleId)
+      console.log('Found cycle:', cycle)
+      return cycle ? `${cycle.device_type} - ${cycle.frequency} (${cycle.basis})` : ''
     } catch (error) {
-      console.error('Error getting cycle label:', error);
-      return '';
+      console.error('Error getting cycle label:', error)
+      return ''
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
-  console.log('Rendering Modal - Form Data:', formData);
-  console.log('Rendering Modal - Maintenance Cycles:', maintenanceCycles);
+  console.log('Rendering Modal - Form Data:', formData)
+  console.log('Rendering Modal - Maintenance Cycles:', maintenanceCycles)
 
   // Extract data array from the response if needed
   const cyclesArray = Array.isArray(maintenanceCycles)
     ? maintenanceCycles
-    : maintenanceCycles?.data || [];
+    : maintenanceCycles?.data || []
 
   // Get current cycle for display
   const currentCycle =
     Array.isArray(cyclesArray) && formData.cycle_id && formData.cycle_id.trim() !== ''
       ? cyclesArray.find(c => c.cycle_id === formData.cycle_id)
-      : null;
+      : null
 
-  console.log('Current Cycle:', currentCycle); // Debug log
+  console.log('Current Cycle:', currentCycle) // Debug log
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50" onClick={onClose}>
@@ -309,7 +309,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 selected={formData.start_date}
                 onChange={(date: Date | null) => {
                   if (date) {
-                    setFormData(prev => ({ ...prev, start_date: date }));
+                    setFormData(prev => ({ ...prev, start_date: date }))
                   }
                 }}
                 showTimeSelect
@@ -331,7 +331,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 selected={formData.end_date}
                 onChange={(date: Date | null) => {
                   if (date) {
-                    setFormData(prev => ({ ...prev, end_date: date }));
+                    setFormData(prev => ({ ...prev, end_date: date }))
                   }
                 }}
                 showTimeSelect
@@ -423,7 +423,7 @@ const EventModal: React.FC<EventModalProps> = ({
                   {selectedBuildingDetails.map((buildingDetailId, index) => {
                     const buildingDetail = buildingDetails.find(
                       b => b.buildingDetailId === buildingDetailId
-                    );
+                    )
                     return buildingDetail ? (
                       <div
                         key={`${buildingDetailId}-${index}`}
@@ -439,7 +439,7 @@ const EventModal: React.FC<EventModalProps> = ({
                           <XMarkIcon className="w-4 h-4" />
                         </button>
                       </div>
-                    ) : null;
+                    ) : null
                   })}
                 </div>
               )}
@@ -514,7 +514,7 @@ const EventModal: React.FC<EventModalProps> = ({
         onCancel={() => setShowDeleteConfirm(false)}
       />
     </div>
-  );
-};
+  )
+}
 
-export default EventModal;
+export default EventModal
