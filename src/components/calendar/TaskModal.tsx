@@ -75,12 +75,20 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
 
   // Fetch staff list
   const { data: staffData, isLoading: staffLoading } = useQuery({
-    queryKey: ['staff'],
+    queryKey: ['staff-leaders', scheduleJob?.schedule_job_id],
     queryFn: async () => {
-      const response = await apiInstance.get(import.meta.env.VITE_VIEW_STAFF_LIST)
+      if (!scheduleJob?.schedule_job_id) {
+        throw new Error('Schedule job ID is required')
+      }
+      const response = await apiInstance.get(
+        `${import.meta.env.VITE_GET_STAFF_LEADERS_BY_SCHEDULE_JOB.replace(
+          '{scheduleJobId}',
+          scheduleJob.schedule_job_id
+        )}`
+      )
       return response.data
     },
-    enabled: isOpen,
+    enabled: isOpen && !!scheduleJob?.schedule_job_id,
   })
 
   // Fetch all tasks and filter to find if a task exists for this schedule job
@@ -130,7 +138,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
     },
     onSettled: () => {
       setIsSubmitting(false)
-    }
+    },
   })
 
   // Reset form when modal opens/closes
@@ -142,11 +150,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
   }, [isOpen])
 
   // Filter staff with Leader position
-  const leaderStaff =
-    staffData?.data?.filter(
-      (staff: Staff) =>
-        staff.userDetails?.position?.positionName === 'Leader' && staff.accountStatus === 'Active'
-    ) || []
+  const leaderStaff = staffData?.data || []
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -218,7 +222,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-center bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 p-4 rounded-md border border-green-200 dark:border-green-700">
               <CheckCircleIcon className="w-6 h-6 mr-2 flex-shrink-0" />
-              <p>Task đã tồn tại cho schedule job này</p>
+              <p>Task existing for this schedule job</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -230,7 +234,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                   </h3>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Building: {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
+                      Building:{' '}
+                      {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
                       {scheduleJob?.buildingDetail?.building && (
                         <span className="ml-1 text-gray-500 dark:text-gray-400">
                           ({scheduleJob.buildingDetail.building.name})
@@ -343,7 +348,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
                       <p className="text-gray-500 dark:text-gray-400">
-                        Không có thông tin assignment cho task này
+                        No assignment information for this task
                       </p>
                     </div>
                   </div>
@@ -369,7 +374,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
               </h3>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Building: {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
+                  Building:{' '}
+                  {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
                   {scheduleJob?.buildingDetail?.building && (
                     <span className="ml-1 text-gray-500 dark:text-gray-400">
                       ({scheduleJob.buildingDetail.building.name})

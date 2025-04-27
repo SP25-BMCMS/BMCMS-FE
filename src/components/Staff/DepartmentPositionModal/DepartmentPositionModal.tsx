@@ -47,7 +47,7 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
         >
           <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white" id="modal-headline">
-              Cập nhật phòng ban và vị trí cho {staffName}
+              Update Department and Position for {staffName}
             </h3>
             <button
               onClick={onClose}

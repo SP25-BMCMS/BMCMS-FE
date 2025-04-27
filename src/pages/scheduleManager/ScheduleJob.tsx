@@ -32,6 +32,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { STATUS_COLORS } from '@/constants/colors'
 import { getMaintenanceCycles } from '@/services/maintenanceCycle'
 import { createPortal } from 'react-dom'
+import ConfirmModal from '@/components/ConfirmModal'
+import apiInstance from '@/lib/axios'
 
 const ScheduleJob: React.FC = () => {
   const { scheduleId } = useParams<{ scheduleId: string }>()
@@ -47,6 +49,7 @@ const ScheduleJob: React.FC = () => {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
   const [showTooltip, setShowTooltip] = useState(false)
   const [currentDevice, setCurrentDevice] = useState<any>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Fetch schedule details
   const { data: schedule, isLoading: isScheduleLoading } = useQuery({
@@ -65,13 +68,35 @@ const ScheduleJob: React.FC = () => {
   })
 
   // Fetch schedule jobs with pagination
-  const { data: scheduleJobsData, isLoading: isJobsLoading, refetch: refetchJobs } = useQuery({
+  const {
+    data: scheduleJobsData,
+    isLoading: isJobsLoading,
+    refetch: refetchJobs,
+  } = useQuery({
     queryKey: ['scheduleJobs', scheduleId, currentPage, itemsPerPage],
     queryFn: () =>
       scheduleJobsApi.fetchScheduleJobsByScheduleId(scheduleId!, {
         page: currentPage,
         limit: itemsPerPage,
       }),
+    enabled: !!scheduleId,
+  })
+
+  // Fetch staff leaders for the schedule job
+  const { data: staffLeaders } = useQuery({
+    queryKey: ['staff-leaders', scheduleId],
+    queryFn: async () => {
+      if (!scheduleId) {
+        throw new Error('Schedule ID is required')
+      }
+      const response = await apiInstance.get(
+        `${import.meta.env.VITE_GET_STAFF_LEADERS_BY_SCHEDULE_JOB.replace(
+          '{scheduleJobId}',
+          scheduleId
+        )}`
+      )
+      return response.data
+    },
     enabled: !!scheduleId,
   })
 
@@ -121,7 +146,10 @@ const ScheduleJob: React.FC = () => {
     setShowUpdateStatusModal(true)
   }
 
-  const handleUpdateStatus = async (jobId: string, status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel') => {
+  const handleUpdateStatus = async (
+    jobId: string,
+    status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel'
+  ) => {
     try {
       await updateJobMutation.mutateAsync({
         jobId,
@@ -133,13 +161,20 @@ const ScheduleJob: React.FC = () => {
   }
 
   const handleDeleteJob = async (jobId: string) => {
-    if (confirm('Are you sure you want to cancel this schedule job?')) {
+    setSelectedJob(scheduleJobsData?.data.find(job => job.schedule_job_id === jobId) || null)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (selectedJob) {
       try {
         await updateJobMutation.mutateAsync({
-          jobId,
+          jobId: selectedJob.schedule_job_id,
           data: { status: 'Cancel' },
         })
         toast.success('Schedule job cancelled successfully')
+        setShowDeleteConfirm(false)
+        setSelectedJob(null)
       } catch (error) {
         console.error('Error cancelling schedule job:', error)
       }
@@ -297,7 +332,8 @@ const ScheduleJob: React.FC = () => {
                     <div className="flex items-center text-gray-600 dark:text-gray-300">
                       <RiCalendarCheckLine className="mr-2 text-blue-500" />
                       <span>
-                        Schedule Period: {formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}
+                        Schedule Period: {formatDate(schedule.start_date)} -{' '}
+                        {formatDate(schedule.end_date)}
                       </span>
                     </div>
                     {schedule.schedule_type && (
@@ -369,7 +405,9 @@ const ScheduleJob: React.FC = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <RiBuilding2Line className="text-blue-500 mr-2 w-5 h-5" />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Maintenance Jobs</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Maintenance Jobs
+              </h2>
             </div>
             <div className="flex items-center space-x-3">
               <div className="text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-md shadow-sm">
@@ -396,7 +434,8 @@ const ScheduleJob: React.FC = () => {
                 No maintenance jobs found
               </h3>
               <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
-                There are no jobs associated with this schedule yet. Click below to create your first maintenance job.
+                There are no jobs associated with this schedule yet. Click below to create your
+                first maintenance job.
               </p>
               <button
                 onClick={handleOpenCreateJobModal}
@@ -450,7 +489,8 @@ const ScheduleJob: React.FC = () => {
                               {job.buildingDetail?.building?.area?.name}
                             </div>
                             <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {job.buildingDetail?.total_apartments} apartments • {job.buildingDetail?.building?.numberFloor} floors
+                              {job.buildingDetail?.total_apartments} apartments •{' '}
+                              {job.buildingDetail?.building?.numberFloor} floors
                             </div>
                           </div>
                         </div>
@@ -459,13 +499,13 @@ const ScheduleJob: React.FC = () => {
                         {job.buildingDetail?.device && job.buildingDetail.device.length > 0 ? (
                           <div className="flex flex-col gap-2">
                             {(() => {
-                              const matchingDevices = job.buildingDetail.device.filter(device => device.type === cycleData?.device_type)
+                              const matchingDevices = job.buildingDetail.device.filter(
+                                device => device.type === cycleData?.device_type
+                              )
                               if (matchingDevices.length === 0) {
                                 return (
                                   <div className="relative">
-                                    <button
-                                      className="text-xs px-2 py-1 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/30 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full transition-colors flex items-center"
-                                    >
+                                    <button className="text-xs px-2 py-1 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/30 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full transition-colors flex items-center">
                                       Other
                                     </button>
                                   </div>
@@ -477,7 +517,7 @@ const ScheduleJob: React.FC = () => {
                                     <div key={device.device_id} className="relative">
                                       <button
                                         onClick={() => toggleDeviceDetails(device.device_id)}
-                                        onMouseEnter={(e) => handleDeviceHover(e, device)}
+                                        onMouseEnter={e => handleDeviceHover(e, device)}
                                         onMouseLeave={handleDeviceLeave}
                                         className="text-xs px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-300 rounded-full transition-colors flex items-center"
                                       >
@@ -495,7 +535,9 @@ const ScheduleJob: React.FC = () => {
                             })()}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-500 italic">No equipment assigned</span>
+                          <span className="text-xs text-gray-500 italic">
+                            No equipment assigned
+                          </span>
                         )}
                       </td>
                       <td className="px-6 py-4">
@@ -616,27 +658,47 @@ const ScheduleJob: React.FC = () => {
         onUpdateStatus={handleUpdateStatus}
       />
 
-      {showTooltip && currentDevice && createPortal(
-        <div
-          className="fixed z-[100] bg-white dark:bg-gray-800 rounded-md shadow-lg p-3 min-w-[200px] max-w-[300px] text-xs border border-gray-200 dark:border-gray-700 max-h-[200px] overflow-y-auto"
-          style={{
-            top: `${tooltipPosition.y}px`,
-            left: `${tooltipPosition.x}px`,
-            transform: 'translateY(-100%)'
-          }}
-        >
-          <h4 className="font-medium mb-2 text-gray-800 dark:text-gray-200">{currentDevice.name}</h4>
-          <div className="space-y-1 text-gray-600 dark:text-gray-400">
-            <p><span className="font-medium">Type:</span> {currentDevice.type}</p>
-            <p><span className="font-medium">Manufacturer:</span> {currentDevice.manufacturer}</p>
-            <p><span className="font-medium">Model:</span> {currentDevice.model}</p>
-          </div>
-        </div>,
-        document.body
-      )}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Cancel Schedule Job"
+        message="Are you sure you want to cancel this schedule job? This action cannot be undone."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirm(false)
+          setSelectedJob(null)
+        }}
+      />
+
+      {showTooltip &&
+        currentDevice &&
+        createPortal(
+          <div
+            className="fixed z-[100] bg-white dark:bg-gray-800 rounded-md shadow-lg p-3 min-w-[200px] max-w-[300px] text-xs border border-gray-200 dark:border-gray-700 max-h-[200px] overflow-y-auto"
+            style={{
+              top: `${tooltipPosition.y}px`,
+              left: `${tooltipPosition.x}px`,
+              transform: 'translateY(-100%)',
+            }}
+          >
+            <h4 className="font-medium mb-2 text-gray-800 dark:text-gray-200">
+              {currentDevice.name}
+            </h4>
+            <div className="space-y-1 text-gray-600 dark:text-gray-400">
+              <p>
+                <span className="font-medium">Type:</span> {currentDevice.type}
+              </p>
+              <p>
+                <span className="font-medium">Manufacturer:</span> {currentDevice.manufacturer}
+              </p>
+              <p>
+                <span className="font-medium">Model:</span> {currentDevice.model}
+              </p>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   )
 }
 
 export default ScheduleJob
-

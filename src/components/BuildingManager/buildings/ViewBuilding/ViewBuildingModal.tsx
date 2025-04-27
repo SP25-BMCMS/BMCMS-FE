@@ -818,12 +818,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                           </div>
                           {device.contract_id && (
                             <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600 col-span-2">
-                              <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
-                                Contract ID:
-                              </span>
-                              <span className="text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded border border-blue-100 dark:border-blue-700">
-                                {device.contract_id}
-                              </span>
+                              
                             </div>
                           )}
                         </div>
@@ -991,14 +986,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
           <motion.div
             className="flex justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"
             variants={itemVariants}
-          >
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-            >
-              Close
-            </button>
-          </motion.div>
+          ></motion.div>
         </motion.div>
       ) : null}
     </Modal>

@@ -45,13 +45,13 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
       if (response.data) {
         setBuildingDetail(response.data);
       } else {
-        setError('Không thể tải thông tin chi tiết tòa nhà');
-        toast.error('Không thể tải thông tin chi tiết tòa nhà');
+        setError('An error occurred');
+        toast.error('An error occurred');
       }
     } catch (error: any) {
       console.error('Error fetching building detail:', error);
-      setError(error.message || 'Đã xảy ra lỗi');
-      toast.error(error.message || 'Không thể tải thông tin chi tiết tòa nhà');
+      setError(error.message || 'An error occurred');
+      toast.error(error.message || 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +131,7 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Không thể tải thông tin
+            An error occurred
           </h3>
           <p className="text-gray-600 dark:text-gray-400">{error}</p>
         </motion.div>

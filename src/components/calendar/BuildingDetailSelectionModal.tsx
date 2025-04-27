@@ -1,14 +1,14 @@
-import { TaskEvent } from '@/types/calendar'
-import { BuildingDetail } from '@/types/buildingDetail'
-import React, { useMemo, useState, useCallback } from 'react'
+import { TaskEvent } from '@/types/calendar';
+import { BuildingDetail } from '@/types/buildingDetail';
+import React, { useMemo, useState, useCallback } from 'react';
 
 interface BuildingDetailSelectionModalProps {
-  isOpen: boolean
-  onClose: () => void
-  buildingDetails: BuildingDetail[]
-  selectedBuildingDetails: string[]
-  onBuildingDetailSelect: (buildingDetailId: string) => void
-  selectedEvent: TaskEvent | null
+  isOpen: boolean;
+  onClose: () => void;
+  buildingDetails: BuildingDetail[];
+  selectedBuildingDetails: string[];
+  onBuildingDetailSelect: (buildingDetailId: string) => void;
+  selectedEvent: TaskEvent | null;
 }
 
 const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> = ({
@@ -19,87 +19,96 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
   onBuildingDetailSelect,
   selectedEvent,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Filter out building details with Cancel status and keep only unique names
   const filteredBuildingDetails = useMemo(() => {
     // First, exclude details with Cancel status
-    const activeBuildingDetails = buildingDetails.filter(detail =>
-      !(detail.status && detail.status.toLowerCase() === 'cancel')
-    )
+    const activeBuildingDetails = buildingDetails.filter(
+      detail => !(detail.status && detail.status.toLowerCase() === 'cancel')
+    );
 
     // Then create a map to track unique names
-    const uniqueNameMap = new Map<string, BuildingDetail>()
+    const uniqueNameMap = new Map<string, BuildingDetail>();
 
     // For each building detail, only keep the first occurrence of each name
     activeBuildingDetails.forEach(detail => {
-      const lowerName = detail.name.toLowerCase()
+      const lowerName = detail.name.toLowerCase();
       if (!uniqueNameMap.has(lowerName)) {
-        uniqueNameMap.set(lowerName, detail)
+        uniqueNameMap.set(lowerName, detail);
       }
-    })
+    });
 
     // Convert map values back to array
-    return Array.from(uniqueNameMap.values())
-  }, [buildingDetails])
+    return Array.from(uniqueNameMap.values());
+  }, [buildingDetails]);
 
   // Get selected building detail objects
   const selectedDetailObjects = useMemo(() => {
     return filteredBuildingDetails.filter(detail =>
       selectedBuildingDetails.includes(detail.buildingDetailId)
-    )
-  }, [filteredBuildingDetails, selectedBuildingDetails])
+    );
+  }, [filteredBuildingDetails, selectedBuildingDetails]);
 
   // Get unselected building detail objects
   const unselectedDetailObjects = useMemo(() => {
-    return filteredBuildingDetails.filter(detail =>
-      !selectedBuildingDetails.includes(detail.buildingDetailId)
-    )
-  }, [filteredBuildingDetails, selectedBuildingDetails])
+    return filteredBuildingDetails.filter(
+      detail => !selectedBuildingDetails.includes(detail.buildingDetailId)
+    );
+  }, [filteredBuildingDetails, selectedBuildingDetails]);
 
   // Filter and sort building details based on search
   const filteredUnselectedDetails = useMemo(() => {
-    if (!searchQuery) return unselectedDetailObjects
+    if (!searchQuery) return unselectedDetailObjects;
 
-    const query = searchQuery.toLowerCase()
-    return unselectedDetailObjects.filter(detail =>
-      detail.name.toLowerCase().includes(query)
-    ).sort((a, b) => a.name.localeCompare(b.name))
-  }, [unselectedDetailObjects, searchQuery])
+    const query = searchQuery.toLowerCase();
+    return unselectedDetailObjects
+      .filter(detail => detail.name.toLowerCase().includes(query))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [unselectedDetailObjects, searchQuery]);
 
   // Các hàm xử lý event - thêm useCallback để tránh render không cần thiết
-  const handleBuildingDetailSelect = useCallback((buildingDetailId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    onBuildingDetailSelect(buildingDetailId)
-  }, [onBuildingDetailSelect])
+  const handleBuildingDetailSelect = useCallback(
+    (buildingDetailId: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      onBuildingDetailSelect(buildingDetailId);
+    },
+    [onBuildingDetailSelect]
+  );
 
   const handleModalClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-  }, [])
+    e.stopPropagation();
+  }, []);
 
-  const handleClearAll = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    // Clear all selected building details one by one
-    const selectedIds = [...selectedBuildingDetails]
-    selectedIds.forEach(id => onBuildingDetailSelect(id))
-  }, [selectedBuildingDetails, onBuildingDetailSelect])
+  const handleClearAll = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      // Clear all selected building details one by one
+      const selectedIds = [...selectedBuildingDetails];
+      selectedIds.forEach(id => onBuildingDetailSelect(id));
+    },
+    [selectedBuildingDetails, onBuildingDetailSelect]
+  );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation()
-    setSearchQuery(e.target.value)
-  }, [])
+    e.stopPropagation();
+    setSearchQuery(e.target.value);
+  }, []);
 
   const handleClearSearch = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    setSearchQuery('')
-  }, [])
+    e.stopPropagation();
+    setSearchQuery('');
+  }, []);
 
-  const handleDone = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    onClose()
-  }, [onClose])
+  const handleDone = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onClose();
+    },
+    [onClose]
+  );
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div
@@ -121,7 +130,8 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
         {/* Show selection count */}
         <div className="mb-4 px-3 py-2 bg-blue-50/70 dark:bg-blue-900/10 rounded-md border border-blue-100 dark:border-blue-800/30">
           <span className="text-blue-700 dark:text-blue-400 font-medium text-sm">
-            {selectedBuildingDetails.length} building{selectedBuildingDetails.length !== 1 ? 's' : ''} selected
+            {selectedBuildingDetails.length} building
+            {selectedBuildingDetails.length !== 1 ? 's' : ''} selected
           </span>
         </div>
 
@@ -155,7 +165,12 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
               aria-label="Clear search"
             >
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           )}
@@ -228,8 +243,7 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
                   onClick={e => handleBuildingDetailSelect(buildingDetail.buildingDetailId, e)}
                 >
                   <div className="flex items-center">
-                    <div className="w-5 h-5 mr-3 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center flex-shrink-0">
-                    </div>
+                    <div className="w-5 h-5 mr-3 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center flex-shrink-0"></div>
                     <div>
                       <div className="font-medium text-gray-800 dark:text-gray-200 text-sm">
                         {buildingDetail.name}
@@ -252,8 +266,7 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
                   ? `No building details match "${searchQuery}"`
                   : selectedBuildingDetails.length === filteredBuildingDetails.length
                     ? 'All building details selected'
-                    : 'No available building details.'
-                }
+                    : 'No available building details.'}
               </div>
             )}
           </div>
@@ -269,13 +282,13 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 // Helper function to render status badges
 function getStatusBadge(status: string) {
-  let bgColor = ''
-  let textColor = ''
+  let bgColor = '';
+  let textColor = '';
 
   switch (status.toLowerCase()) {
     case 'operational':
@@ -283,30 +296,30 @@ function getStatusBadge(status: string) {
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
           Operational
         </span>
-      )
+      );
     case 'maintenance':
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
           Maintenance
         </span>
-      )
+      );
     case 'inactive':
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
           Inactive
         </span>
-      )
+      );
     default:
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
           {status}
         </span>
-      )
+      );
   }
 }
 
 // Add some global styles for custom scrollbars
-const styleSheet = document.createElement('style')
+const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
@@ -328,7 +341,7 @@ styleSheet.textContent = `
   .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background-color: rgba(75, 85, 99, 0.7);
   }
-`
-document.head.appendChild(styleSheet)
+`;
+document.head.appendChild(styleSheet);
 
-export default BuildingDetailSelectionModal
+export default BuildingDetailSelectionModal;

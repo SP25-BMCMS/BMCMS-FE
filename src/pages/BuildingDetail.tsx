@@ -204,7 +204,7 @@ const BuildingDetail: React.FC = () => {
       title: 'Crack Type',
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-          <FileWarning className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
+          <FileWarning className="h-3.5 w-3.5 mr-1.5 text-amber-500 dark:text-amber-400" />
           {item.crackType}
         </div>
       ),
@@ -214,7 +214,7 @@ const BuildingDetail: React.FC = () => {
       title: 'Dimensions (L × W × D)',
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-          <Ruler className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+          <Ruler className="h-3.5 w-3.5 mr-1.5 text-blue-500 dark:text-blue-400" />
           {item.length} × {item.width} × {item.depth} m
         </div>
       ),
@@ -224,7 +224,7 @@ const BuildingDetail: React.FC = () => {
       title: 'Description',
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-          <TextIcon className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
+          <TextIcon className="h-3.5 w-3.5 mr-1.5 text-gray-500 dark:text-gray-400" />
           {item.description}
         </div>
       ),
@@ -234,7 +234,7 @@ const BuildingDetail: React.FC = () => {
       title: 'Recorded Date',
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-          <Clock className="h-3.5 w-3.5 mr-1.5 text-green-500" />
+          <Clock className="h-3.5 w-3.5 mr-1.5 text-green-500 dark:text-green-400" />
           {formatDate(item.createdAt)}
         </div>
       ),
@@ -297,7 +297,7 @@ const BuildingDetail: React.FC = () => {
       title: 'Device',
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-          <Tv className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+          <Tv className="h-3.5 w-3.5 mr-1.5 text-blue-500 dark:text-blue-400" />
           {item.device.name} ({item.device.type})
         </div>
       ),
@@ -307,7 +307,7 @@ const BuildingDetail: React.FC = () => {
       title: 'Maintenance Date',
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-          <CalendarIcon className="h-3.5 w-3.5 mr-1.5 text-green-500" />
+          <CalendarIcon className="h-3.5 w-3.5 mr-1.5 text-green-500 dark:text-green-400" />
           {formatDate(item.date_performed)}
         </div>
       ),
@@ -317,7 +317,7 @@ const BuildingDetail: React.FC = () => {
       title: 'Description',
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-          <WrenchIcon className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
+          <WrenchIcon className="h-3.5 w-3.5 mr-1.5 text-gray-500 dark:text-gray-400" />
           {item.description}
         </div>
       ),
@@ -327,7 +327,7 @@ const BuildingDetail: React.FC = () => {
       title: 'Cost',
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-          <DollarSign className="h-3.5 w-3.5 mr-1.5 text-yellow-500" />
+          <DollarSign className="h-3.5 w-3.5 mr-1.5 text-yellow-500 dark:text-yellow-400" />
           {formatCurrency(item.cost)}
         </div>
       ),
@@ -338,13 +338,13 @@ const BuildingDetail: React.FC = () => {
   const getDeviceIcon = (type: string) => {
     switch (type.toUpperCase()) {
       case 'HVAC':
-        return <Tv className="h-3.5 w-3.5 mr-1.5 text-blue-500" />;
+        return <Tv className="h-3.5 w-3.5 mr-1.5 text-blue-500 dark:text-blue-400" />;
       case 'ELECTRICAL':
-        return <Cpu className="h-3.5 w-3.5 mr-1.5 text-yellow-500" />;
+        return <Cpu className="h-3.5 w-3.5 mr-1.5 text-yellow-500 dark:text-yellow-400" />;
       case 'PLUMBING':
-        return <ToyBrick className="h-3.5 w-3.5 mr-1.5 text-green-500" />;
+        return <ToyBrick className="h-3.5 w-3.5 mr-1.5 text-green-500 dark:text-green-400" />;
       default:
-        return <Cog className="h-3.5 w-3.5 mr-1.5 text-gray-500" />;
+        return <Cog className="h-3.5 w-3.5 mr-1.5 text-gray-500 dark:text-gray-400" />;
     }
   };
 
@@ -388,7 +388,7 @@ const BuildingDetail: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="bg-gray-900 dark:bg-gray-900 text-white p-4 flex items-center">
+      <div className="bg-white-900 dark:bg-gray-800 dark:text-white p-4 flex items-center">
         <Link to="/buildings-for-manager" className="hover:text-blue-400 transition-colors mr-2">
           <div className="flex items-center">
             <Building2 className="h-4 w-4 mr-1" />
@@ -403,7 +403,7 @@ const BuildingDetail: React.FC = () => {
         {/* Header with overview information */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center mb-4">
-            <Building2 className="h-6 w-6 mr-2 text-blue-500" />
+            <Building2 className="h-6 w-6 mr-2 text-blue-500 dark:text-blue-400" />
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               {buildingDetail.name}
               {buildingDetail.building?.area?.name && ` (${buildingDetail.building.area.name})`}
@@ -419,36 +419,36 @@ const BuildingDetail: React.FC = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-6">
             <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-blue-500" />
+              <MapPin className="h-5 w-5 text-blue-500 dark:text-blue-400" />
               <div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Area</div>
-                <div className="font-medium">{buildingDetail.building?.area?.name || 'N/A'}</div>
+                <div className="font-medium text-gray-900 dark:text-white">{buildingDetail.building?.area?.name || 'N/A'}</div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <Layers className="h-5 w-5 text-blue-500" />
+              <Layers className="h-5 w-5 text-blue-500 dark:text-blue-400" />
               <div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Floors</div>
-                <div className="font-medium">{buildingDetail.building?.numberFloor || 'N/A'}</div>
+                <div className="font-medium text-gray-900 dark:text-white">{buildingDetail.building?.numberFloor || 'N/A'}</div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-500" />
+              <Calendar className="h-5 w-5 text-blue-500 dark:text-blue-400" />
               <div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Construction</div>
-                <div className="font-medium">
+                <div className="font-medium text-gray-900 dark:text-white">
                   {formatDate(buildingDetail.building?.construction_date)}
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-500" />
+              <Calendar className="h-5 w-5 text-blue-500 dark:text-blue-400" />
               <div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Completion</div>
-                <div className="font-medium">
+                <div className="font-medium text-gray-900 dark:text-white">
                   {formatDate(buildingDetail.building?.completion_date)}
                 </div>
               </div>
@@ -457,8 +457,8 @@ const BuildingDetail: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-2 flex items-center">
-                <Info className="h-4 w-4 mr-2 text-blue-500" />
+              <h3 className="text-lg font-medium mb-2 flex items-center text-gray-900 dark:text-white">
+                <Info className="h-4 w-4 mr-2 text-blue-500 dark:text-blue-400" />
                 Building Information
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
@@ -486,31 +486,31 @@ const BuildingDetail: React.FC = () => {
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-2 flex items-center">
-                <Calendar className="h-4 w-4 mr-2 text-blue-500" />
+              <h3 className="text-lg font-medium mb-2 flex items-center text-gray-900 dark:text-white">
+                <Calendar className="h-4 w-4 mr-2 text-blue-500 dark:text-blue-400" />
                 Dates
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-1 flex items-center">
-                <Clock className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
+                <Clock className="h-3.5 w-3.5 mr-1.5 text-gray-400 dark:text-gray-500" />
                 <span className="font-medium">Created:</span> {formatDate(buildingDetail.createdAt)}
               </p>
               {buildingDetail.building?.construction_date && (
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-1 flex items-center">
-                  <Calendar className="h-3.5 w-3.5 mr-1.5 text-orange-500" />
+                  <Calendar className="h-3.5 w-3.5 mr-1.5 text-orange-500 dark:text-orange-400" />
                   <span className="font-medium">Construction:</span>{' '}
                   {formatDate(buildingDetail.building.construction_date)}
                 </p>
               )}
               {buildingDetail.building?.completion_date && (
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-1 flex items-center">
-                  <Calendar className="h-3.5 w-3.5 mr-1.5 text-green-500" />
+                  <Calendar className="h-3.5 w-3.5 mr-1.5 text-green-500 dark:text-green-400" />
                   <span className="font-medium">Completion:</span>{' '}
                   {formatDate(buildingDetail.building.completion_date)}
                 </p>
               )}
               {buildingDetail.building?.Warranty_date && (
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-1 flex items-center">
-                  <ShieldCheck className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+                  <ShieldCheck className="h-3.5 w-3.5 mr-1.5 text-blue-500 dark:text-blue-400" />
                   <span className="font-medium">Warranty Until:</span>{' '}
                   {formatDate(buildingDetail.building.Warranty_date)}
                 </p>
@@ -518,8 +518,8 @@ const BuildingDetail: React.FC = () => {
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-2 flex items-center">
-                <TextIcon className="h-4 w-4 mr-2 text-blue-500" />
+              <h3 className="text-lg font-medium mb-2 flex items-center text-gray-900 dark:text-white">
+                <TextIcon className="h-4 w-4 mr-2 text-blue-500 dark:text-blue-400" />
                 Description
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -533,7 +533,7 @@ const BuildingDetail: React.FC = () => {
         {buildingDetail.device && buildingDetail.device.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-              <Cpu className="h-5 w-5 mr-2 text-blue-500" />
+              <Cpu className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
               Building Devices ({buildingDetail.device.length})
             </h2>
 
@@ -552,7 +552,7 @@ const BuildingDetail: React.FC = () => {
         {/* Maintenance History Section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-            <WrenchIcon className="h-5 w-5 mr-2 text-blue-500" />
+            <WrenchIcon className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
             Maintenance History
           </h2>
 
@@ -560,7 +560,7 @@ const BuildingDetail: React.FC = () => {
             <LoadingIndicator />
           ) : maintenanceHistoryError ? (
             <div className="text-center py-8">
-              <p className="text-red-500">Error loading maintenance history</p>
+              <p className="text-red-500 dark:text-red-400">Error loading maintenance history</p>
               <p className="text-gray-500 dark:text-gray-400 mt-2">
                 There was a problem fetching maintenance history for this building.
               </p>
@@ -608,7 +608,7 @@ const BuildingDetail: React.FC = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-            <AlertCircle className="h-5 w-5 mr-2 text-red-500" />
+            <AlertCircle className="h-5 w-5 mr-2 text-red-500 dark:text-red-400" />
             Crack Records
           </h2>
 
@@ -616,7 +616,7 @@ const BuildingDetail: React.FC = () => {
             <LoadingIndicator />
           ) : crackRecordsError ? (
             <div className="text-center py-8">
-              <p className="text-red-500">Error loading crack records</p>
+              <p className="text-red-500 dark:text-red-400">Error loading crack records</p>
               <p className="text-gray-500 dark:text-gray-400 mt-2">
                 There was a problem fetching crack records for this building.
               </p>

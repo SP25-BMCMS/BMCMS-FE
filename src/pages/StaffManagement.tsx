@@ -1,39 +1,70 @@
-import React, { useState } from 'react';
-import Table, { Column } from '@/components/Table';
-import { Staff, StaffData } from '@/types';
-import { FiUserPlus } from 'react-icons/fi';
-import DropdownMenu from '@/components/DropDownMenu';
-import SearchInput from '@/components/SearchInput';
-import AddButton from '@/components/AddButton';
-import { getAllStaff } from '@/services/staffs';
-import AddStaff from '@/components/Staff/AddStaff/AddStaff';
-import { useAddStaff } from '@/components/Staff/AddStaff/use-add-staff';
-import { Toaster } from 'react-hot-toast';
-import { motion } from 'framer-motion';
-import DepartmentPositionModal from '@/components/Staff/DepartmentPositionModal';
-import ViewDetailStaff from '@/components/Staff/ViewDetailStaff';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
+import React, { useState } from 'react'
+import Table, { Column } from '@/components/Table'
+import { Staff, StaffData } from '@/types'
+import { FiUserPlus } from 'react-icons/fi'
+import DropdownMenu from '@/components/DropDownMenu'
+import SearchInput from '@/components/SearchInput'
+import AddButton from '@/components/AddButton'
+import { getAllStaff } from '@/services/staffs'
+import AddStaff from '@/components/Staff/AddStaff/AddStaff'
+import { useAddStaff } from '@/components/Staff/AddStaff/use-add-staff'
+import { Toaster } from 'react-hot-toast'
+import { motion } from 'framer-motion'
+import DepartmentPositionModal from '@/components/Staff/DepartmentPositionModal'
+import ViewDetailStaff from '@/components/Staff/ViewDetailStaff'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import { toast } from 'react-hot-toast'
+import Pagination from '@/components/Pagination'
+import FilterDropdown from '@/components/FilterDropdown'
 
 interface StaffResponse {
-  isSuccess: boolean;
-  data: StaffData[];
+  isSuccess: boolean
+  data: StaffData[]
+  pagination?: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
 }
 
 const StaffManagement: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false);
-  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
+  const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false)
+  const [isViewDetailOpen, setIsViewDetailOpen] = useState<boolean>(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [selectedRole, setSelectedRole] = useState<string>('all')
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
+
+  // Define role filter options
+  const roleOptions = [
+    { value: 'all', label: 'All Roles' },
+    { value: 'Staff', label: 'Staff' },
+    { value: 'Manager', label: 'Manager' },
+    { value: 'Admin', label: 'Admin' },
+  ]
 
   // Fetch staff with React Query
   const { data: staffResponse, isLoading: isLoadingStaff } = useQuery<StaffResponse>({
-    queryKey: ['staff', searchTerm],
+    queryKey: ['staff', searchTerm, currentPage, itemsPerPage, selectedRole],
     queryFn: async () => {
-      const response = await getAllStaff();
-      return response;
+      // In a real implementation, you would pass page, limit, and role to your API
+      const response = await getAllStaff()
+
+      // If the API doesn't support pagination, you can implement it client-side
+      // This is a simplified example
+      return {
+        ...response,
+        pagination: response.pagination || {
+          total: response.data.length,
+          page: currentPage,
+          limit: itemsPerPage,
+          totalPages: Math.ceil(response.data.length / itemsPerPage),
+        },
+      }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -41,10 +72,10 @@ const StaffManagement: React.FC = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     retry: false,
-  });
+  })
 
   // Format staff data
-  const staffList =
+  const allStaffList =
     staffResponse?.data.map((staff: StaffData) => ({
       id: staff.userId,
       name: staff.username,
@@ -54,7 +85,8 @@ const StaffManagement: React.FC = () => {
       dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
       gender: staff.gender,
       createdDate: new Date().toLocaleDateString(),
-    })) || [];
+      userDetails: staff.userDetails,
+    })) || []
 
   const {
     isModalOpen,
@@ -64,19 +96,33 @@ const StaffManagement: React.FC = () => {
     addNewStaff,
   } = useAddStaff({
     onAddSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      queryClient.invalidateQueries({ queryKey: ['staff'] })
     },
-  });
+  })
 
   const handleViewDetail = (staff: Staff) => {
-    setSelectedStaff(staff);
-    setIsViewDetailOpen(true);
-  };
+    setSelectedStaff(staff)
+    setIsViewDetailOpen(true)
+  }
 
   const handleOpenDeptPosModal = (staff: Staff) => {
-    setSelectedStaff(staff);
-    setIsDeptPosModalOpen(true);
-  };
+    setSelectedStaff(staff)
+    setIsDeptPosModalOpen(true)
+  }
+
+  const handleRoleChange = (role: string) => {
+    setSelectedRole(role)
+    setCurrentPage(1) // Reset to first page when changing filter
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleLimitChange = (limit: number) => {
+    setItemsPerPage(limit)
+    setCurrentPage(1) // Reset to first page when changing items per page
+  }
 
   // Update staff mutation
   const updateStaffMutation = useMutation({
@@ -84,19 +130,19 @@ const StaffManagement: React.FC = () => {
       staffId,
       updatedData,
     }: {
-      staffId: string;
-      updatedData: Partial<Staff>;
+      staffId: string
+      updatedData: Partial<Staff>
     }) => {
       // Here you would call your API to update the staff
       // For now, we'll just simulate a successful update
-      return { staffId, updatedData };
+      return { staffId, updatedData }
     },
     onMutate: async ({ staffId, updatedData }) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['staff'] });
+      await queryClient.cancelQueries({ queryKey: ['staff'] })
 
       // Snapshot the previous value
-      const previousStaff = queryClient.getQueryData(['staff']);
+      const previousStaff = queryClient.getQueryData(['staff'])
 
       // Optimistically update to the new value
       queryClient.setQueryData(['staff'], (old: StaffResponse) => ({
@@ -104,29 +150,31 @@ const StaffManagement: React.FC = () => {
         data: old.data.map((staff: StaffData) =>
           staff.userId === staffId ? { ...staff, ...updatedData } : staff
         ),
-      }));
+      }))
 
-      return { previousStaff };
+      return { previousStaff }
     },
     onError: (err, variables, context) => {
       // Revert back to the previous value
       if (context?.previousStaff) {
-        queryClient.setQueryData(['staff'], context.previousStaff);
+        queryClient.setQueryData(['staff'], context.previousStaff)
       }
-      toast.error('Failed to update staff!');
+      toast.error('Failed to update staff!')
     },
     onSettled: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      queryClient.invalidateQueries({ queryKey: ['staff'] })
     },
-  });
+  })
 
   const columns: Column<Staff>[] = [
     {
       key: 'index',
       title: 'No',
       render: (_, index) => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {(currentPage - 1) * itemsPerPage + index + 1}
+        </div>
       ),
       width: '60px',
     },
@@ -156,29 +204,36 @@ const StaffManagement: React.FC = () => {
           Staff: 'bg-[#F213FE] bg-opacity-30 border border-[#F213FE] text-[#F213FE]',
           Manager: 'bg-[#360AFE] bg-opacity-30 border border-[#360AFE] text-[#360AFE]',
           Admin: 'bg-[#50f186] bg-opacity-30 border border-[#50f186] text-[#00ff90]',
-        };
+        }
         return (
           <span
-            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${
-              roleColors[item.role] ||
+            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${roleColors[item.role] ||
               'text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-            }`}
+              }`}
           >
             {item.role}
           </span>
-        );
+        )
       },
+    },
+    {
+      key: 'department',
+      title: 'Department',
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {item.userDetails?.department?.departmentName || '-'}
+        </div>
+      ),
     },
     {
       key: 'Gender',
       title: 'Gender',
       render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.gender === 'Male'
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === 'Male'
               ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
               : 'bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]'
-          }`}
+            }`}
         >
           {item.gender}
         </span>
@@ -192,36 +247,38 @@ const StaffManagement: React.FC = () => {
       ),
     },
     {
-      key: 'createdDate',
-      title: 'Created Date',
-      render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
-      ),
-    },
-    {
       key: 'action',
       title: 'Action',
       render: item => (
-        <div className="relative staff-action-cell">
+        <div onClick={e => e.stopPropagation()}>
           <DropdownMenu
             onViewDetail={() => handleViewDetail(item)}
             onChangeStatus={() => handleOpenDeptPosModal(item)}
             onRemove={() => console.log('Remove clicked', item)}
             changeStatusTitle="Change Department"
-            className="right-0 origin-top-right dropdown-fix"
           />
         </div>
       ),
       width: '80px',
     },
-  ];
+  ]
 
-  // Lọc danh sách nhân viên dựa trên từ khóa tìm kiếm
-  const filteredStaff = staffList.filter(
+  // Lọc danh sách nhân viên dựa trên từ khóa tìm kiếm và role
+  const filteredStaffList = allStaffList.filter(
     staff =>
-      staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      (staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        staff.id.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (selectedRole === 'all' || staff.role === selectedRole)
+  )
+
+  // Apply pagination to filtered staff
+  const paginatedStaff = filteredStaffList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredStaffList.length / itemsPerPage)
 
   // Loading animation
   const loadingVariants = {
@@ -231,7 +288,7 @@ const StaffManagement: React.FC = () => {
       repeat: Infinity,
       ease: 'linear',
     },
-  };
+  }
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -241,10 +298,10 @@ const StaffManagement: React.FC = () => {
       />
       <p className="text-gray-700 dark:text-gray-300">Loading staff data...</p>
     </div>
-  );
+  )
 
-  if (isLoadingStaff && staffList.length === 0) {
-    return <LoadingIndicator />;
+  if (isLoadingStaff && allStaffList.length === 0) {
+    return <LoadingIndicator />
   }
 
   return (
@@ -253,25 +310,46 @@ const StaffManagement: React.FC = () => {
 
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
         <SearchInput
-          placeholder="Tìm kiếm theo tên hoặc ID"
+          placeholder="Search by name or ID"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="w-[20rem] max-w-xs"
         />
 
-        <AddButton label="Add Staff" icon={<FiUserPlus />} onClick={openModal} />
+        <div className="flex items-center space-x-4">
+          <FilterDropdown
+            options={roleOptions}
+            onSelect={handleRoleChange}
+            selectedValue={selectedRole}
+            label="Filter by Role"
+            buttonClassName="w-[150px]"
+          />
+          <AddButton label="Add Staff" icon={<FiUserPlus />} onClick={openModal} />
+        </div>
       </div>
 
       <Table<Staff>
-        data={filteredStaff}
+        data={paginatedStaff}
         columns={columns}
         keyExtractor={item => item.id}
         onRowClick={item => console.log('Row clicked:', item)}
         className="w-[95%] mx-auto"
         tableClassName="w-full"
         isLoading={isLoadingStaff}
-        emptyText="Không tìm thấy dữ liệu nhân viên"
+        emptyText="No staff data found"
       />
+
+      <div className="w-[95%] mx-auto mt-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={filteredStaffList.length}
+          itemsPerPage={itemsPerPage}
+          onLimitChange={handleLimitChange}
+          limitOptions={[5, 10, 20, 50]}
+        />
+      </div>
 
       <AddStaff
         isOpen={isModalOpen}
@@ -290,7 +368,7 @@ const StaffManagement: React.FC = () => {
               updateStaffMutation.mutate({
                 staffId: selectedStaff.id,
                 updatedData: {},
-              });
+              })
             }
           }}
         />
@@ -303,7 +381,7 @@ const StaffManagement: React.FC = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default StaffManagement;
+export default StaffManagement

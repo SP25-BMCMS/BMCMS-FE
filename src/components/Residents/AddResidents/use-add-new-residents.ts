@@ -30,7 +30,7 @@ export const useAddNewResident = (props?: UseAddNewResidentProps) => {
     try {
       // Kiểm tra dữ liệu đầu vào
       if (!data.fullName || !data.area) {
-        toast.error('Vui lòng điền đầy đủ thông tin cần thiết!');
+        toast.error('Please fill in all required fields!');
         setIsLoading(false);
         return null;
       }
@@ -52,8 +52,8 @@ export const useAddNewResident = (props?: UseAddNewResidentProps) => {
       // Giả lập API call - đây là nơi bạn sẽ gọi API thực tế
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Hiển thị thông báo thành công
-      toast.success('Thêm cư dân mới thành công!');
+      // Show success message
+      toast.success('New resident added successfully!');
 
       // Đóng modal
       closeModal();
@@ -66,9 +66,9 @@ export const useAddNewResident = (props?: UseAddNewResidentProps) => {
       setIsLoading(false);
       return newResident;
     } catch (error) {
-      // Xử lý lỗi
-      console.error('Lỗi khi thêm cư dân:', error);
-      toast.error('Có lỗi xảy ra khi thêm cư dân mới!');
+      // Handle error
+      console.error('Error adding resident:', error);
+      toast.error('Failed to add new resident!');
       setIsLoading(false);
       return null;
     }

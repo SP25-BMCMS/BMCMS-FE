@@ -130,7 +130,14 @@ const EventModal: React.FC<EventModalProps> = ({
         onSetSelectedBuildingDetails(selectedEvent.buildingDetailIds)
       }
     }
-  }, [isCreateMode, initialFormData, selectedEvent, isOpen, onSetSelectedBuildingDetails, maintenanceCycles])
+  }, [
+    isCreateMode,
+    initialFormData,
+    selectedEvent,
+    isOpen,
+    onSetSelectedBuildingDetails,
+    maintenanceCycles,
+  ])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -198,7 +205,7 @@ const EventModal: React.FC<EventModalProps> = ({
     // Extract data array from the response if needed
     const cyclesArray = Array.isArray(maintenanceCycles)
       ? maintenanceCycles
-      : (maintenanceCycles?.data || [])
+      : maintenanceCycles?.data || []
 
     // Ensure cyclesArray is an array and cycleId exists
     if (!Array.isArray(cyclesArray) || !cycleId || cycleId.trim() === '') {
@@ -224,12 +231,13 @@ const EventModal: React.FC<EventModalProps> = ({
   // Extract data array from the response if needed
   const cyclesArray = Array.isArray(maintenanceCycles)
     ? maintenanceCycles
-    : (maintenanceCycles?.data || [])
+    : maintenanceCycles?.data || []
 
   // Get current cycle for display
-  const currentCycle = Array.isArray(cyclesArray) && formData.cycle_id && formData.cycle_id.trim() !== ''
-    ? cyclesArray.find(c => c.cycle_id === formData.cycle_id)
-    : null
+  const currentCycle =
+    Array.isArray(cyclesArray) && formData.cycle_id && formData.cycle_id.trim() !== ''
+      ? cyclesArray.find(c => c.cycle_id === formData.cycle_id)
+      : null
 
   console.log('Current Cycle:', currentCycle) // Debug log
 
@@ -350,14 +358,12 @@ const EventModal: React.FC<EventModalProps> = ({
                 required
               >
                 <option value="">Select a maintenance cycle</option>
-                {Array.isArray(cyclesArray) && cyclesArray.map(cycle => (
-                  <option
-                    key={cycle.cycle_id}
-                    value={cycle.cycle_id}
-                  >
-                    {cycle.device_type} - {cycle.frequency} ({cycle.basis})
-                  </option>
-                ))}
+                {Array.isArray(cyclesArray) &&
+                  cyclesArray.map(cycle => (
+                    <option key={cycle.cycle_id} value={cycle.cycle_id}>
+                      {cycle.device_type} - {cycle.frequency} ({cycle.basis})
+                    </option>
+                  ))}
               </select>
               {!isCreateMode && formData.cycle_id && formData.cycle_id.trim() !== '' && (
                 <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -374,7 +380,16 @@ const EventModal: React.FC<EventModalProps> = ({
                 </label>
                 <select
                   value={formData.schedule_status}
-                  onChange={e => setFormData(prev => ({ ...prev, schedule_status: e.target.value as 'Pending' | 'InProgress' | 'Completed' | 'Cancel' }))}
+                  onChange={e =>
+                    setFormData(prev => ({
+                      ...prev,
+                      schedule_status: e.target.value as
+                        | 'Pending'
+                        | 'InProgress'
+                        | 'Completed'
+                        | 'Cancel',
+                    }))
+                  }
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   aria-label="Schedule status"
                 >

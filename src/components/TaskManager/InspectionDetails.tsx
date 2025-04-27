@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { TaskAssignment, InspectionResponse, Inspection } from '@/types';
 import inspectionsApi from '@/services/inspections';
+import { getAllStaff } from '@/services/staff'; // Import staff service
 import { FORMAT_DATE_TIME } from '@/utils/helpers';
 import { motion } from 'framer-motion';
 import { STATUS_COLORS } from '@/constants/colors';
@@ -14,6 +15,7 @@ import {
   FaMoneyBillWave,
   FaImages,
   FaEdit,
+  FaFileAlt,
 } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
 import InspectionStatusModal from './InspectionStatusModal';
@@ -25,13 +27,43 @@ interface InspectionDetailsProps {
 // Type for report status
 type ReportStatus = 'NoPending' | 'Pending' | 'Rejected' | 'Approved';
 
+// Extended inspection type for our component
+interface EnhancedInspection extends Inspection {
+  confirmed_by_user?: {
+    userId: string;
+    username: string;
+  } | null;
+}
+
 const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(
     taskAssignments.length > 0 ? taskAssignments[0].assignment_id : null
   );
-  const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
+  const [selectedInspection, setSelectedInspection] = useState<EnhancedInspection | null>(null);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Fetch all staff data to map IDs to names
+  const { data: staffData } = useQuery({
+    queryKey: ['staff'],
+    queryFn: async () => {
+      const response = await getAllStaff();
+      return response.data || [];
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  // Create a map of staff IDs to names
+  const staffNameMap = React.useMemo(() => {
+    const map: { [key: string]: string } = {};
+    if (staffData) {
+      staffData.forEach(staff => {
+        map[staff.userId] = staff.username;
+      });
+    }
+    return map;
+  }, [staffData]);
 
   // Fetch inspections data
   const {
@@ -40,28 +72,48 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
     error: inspectionsError,
   } = useQuery({
     queryKey: ['inspections', selectedAssignmentId],
-    queryFn: () => inspectionsApi.getInspectionsByAssignmentId(selectedAssignmentId || ''),
-    enabled: !!selectedAssignmentId,
+    queryFn: async () => {
+      const response = await inspectionsApi.getInspectionsByAssignmentId(
+        selectedAssignmentId || ''
+      );
+
+      // Map inspected_by IDs to usernames using our staff data
+      if (response.data && response.data.length > 0) {
+        return {
+          ...response,
+          data: response.data.map(
+            inspection =>
+              ({
+                ...inspection,
+                inspected_by_user: {
+                  userId: inspection.inspected_by,
+                  username: staffNameMap[inspection.inspected_by] || 'Unknown Staff',
+                },
+                // Also map confirmed_by ID to name if it exists
+                confirmed_by_user: inspection.confirmed_by
+                  ? {
+                      userId: inspection.confirmed_by,
+                      username: staffNameMap[inspection.confirmed_by] || 'Unknown Staff',
+                    }
+                  : null,
+              }) as EnhancedInspection
+          ),
+        };
+      }
+
+      return response;
+    },
+    enabled: !!selectedAssignmentId && Object.keys(staffNameMap).length > 0,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
-  // Debug log when inspections data changes
+  // Select first assignment when assignments change
   useEffect(() => {
-    if (inspectionsData) {
-      console.log('Component received inspections data:', inspectionsData);
-
-      // Check if staff names are properly mapped
-      if (inspectionsData.data && inspectionsData.data.length > 0) {
-        inspectionsData.data.forEach(inspection => {
-          console.log(
-            `Inspection ${inspection.inspection_id} staff info:`,
-            inspection.inspected_by_user
-          );
-        });
-      }
+    if (taskAssignments.length > 0 && !selectedAssignmentId) {
+      setSelectedAssignmentId(taskAssignments[0].assignment_id);
     }
-  }, [inspectionsData]);
+  }, [taskAssignments, selectedAssignmentId]);
 
   const handleAssignmentSelect = (assignmentId: string) => {
     setSelectedAssignmentId(assignmentId);
@@ -71,7 +123,7 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
     setSelectedImage(imageUrl);
   };
 
-  const handleStatusChange = (inspection: Inspection) => {
+  const handleStatusChange = (inspection: EnhancedInspection) => {
     setSelectedInspection(inspection);
     setIsStatusModalOpen(true);
   };
@@ -79,6 +131,8 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
   const handleCloseStatusModal = () => {
     setIsStatusModalOpen(false);
     setSelectedInspection(null);
+    // Invalidate inspections query to refresh data
+    queryClient.invalidateQueries({ queryKey: ['inspections', selectedAssignmentId] });
   };
 
   // Get current selected assignment
@@ -87,14 +141,40 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
   );
 
   // Get inspections list
-  const inspectionsList = inspectionsData?.data || [];
+  const inspectionsList = (inspectionsData?.data as EnhancedInspection[]) || [];
 
   // Helper function to display staff name
-  const displayStaffName = (inspection: Inspection) => {
-    if (inspection.inspected_by_user && inspection.inspected_by_user.username) {
-      return inspection.inspected_by_user.username;
+  const displayStaffName = (
+    inspection: EnhancedInspection,
+    field: 'inspected_by' | 'confirmed_by' = 'inspected_by'
+  ): string => {
+    // For inspected_by field
+    if (field === 'inspected_by') {
+      if (inspection.inspected_by_user && inspection.inspected_by_user.username) {
+        return inspection.inspected_by_user.username;
+      }
+
+      // If we have the staff data but not in the inspection, try to get it from our map
+      if (staffNameMap[inspection.inspected_by]) {
+        return staffNameMap[inspection.inspected_by];
+      }
     }
-    return inspection.inspected_by.substring(0, 8);
+
+    // For confirmed_by field
+    if (field === 'confirmed_by' && inspection.confirmed_by) {
+      if (inspection.confirmed_by_user && inspection.confirmed_by_user.username) {
+        return inspection.confirmed_by_user.username;
+      }
+
+      if (staffNameMap[inspection.confirmed_by]) {
+        return staffNameMap[inspection.confirmed_by];
+      }
+
+      return 'Unknown Staff';
+    }
+
+    // Fallback: show a friendly placeholder instead of an ID
+    return field === 'confirmed_by' ? 'Not confirmed yet' : 'Staff Member';
   };
 
   // Helper function to get status display text
@@ -134,6 +214,11 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
     }
   };
 
+  // Format inspection identifier
+  const formatInspectionNumber = (index: number) => {
+    return `#${index + 1}`;
+  };
+
   if (isLoadingInspections) {
     return (
       <div className="w-full flex items-center justify-center p-12">
@@ -154,7 +239,7 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
       <div className="mb-6">
         <h3 className="text-md font-medium mb-2 dark:text-white">Select Assignment</h3>
         <div className="flex flex-wrap gap-2">
-          {taskAssignments.map(assignment => (
+          {taskAssignments.map((assignment, index) => (
             <button
               key={assignment.assignment_id}
               onClick={() => handleAssignmentSelect(assignment.assignment_id)}
@@ -164,8 +249,7 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
                   : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-500'
               }`}
             >
-              {assignment.status} -{' '}
-              {assignment.employee_name || assignment.employee_id.substring(0, 8)}
+              Assignment {index + 1} • {assignment.status}
             </button>
           ))}
         </div>
@@ -194,7 +278,9 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
             <div className="flex items-center text-gray-600 dark:text-gray-300">
               <FaUser className="mr-2 text-gray-400" />
               Staff:{' '}
-              {selectedAssignment.employee_name || selectedAssignment.employee_id.substring(0, 8)}
+              {selectedAssignment.employee_name ||
+                staffNameMap[selectedAssignment.employee_id] ||
+                'Unknown Staff'}
             </div>
             <div className="flex items-center text-gray-600 dark:text-gray-300">
               <FaCalendarAlt className="mr-2 text-gray-400" />
@@ -228,7 +314,7 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
           </div>
         ) : (
           <div className="space-y-6">
-            {inspectionsList.map((inspection: Inspection) => {
+            {inspectionsList.map((inspection, index: number) => {
               const status = inspection.report_status as ReportStatus;
               const statusColors = getStatusColors(status);
 
@@ -239,8 +325,9 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
                 >
                   <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b dark:border-gray-600">
                     <div className="flex justify-between items-center">
-                      <h4 className="font-medium dark:text-white">
-                        Inspection #{inspection.inspection_id.substring(0, 8)}
+                      <h4 className="font-medium dark:text-white flex items-center">
+                        <FaFileAlt className="mr-2 text-blue-500" />
+                        Inspection {formatInspectionNumber(index)}
                       </h4>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         {FORMAT_DATE_TIME(inspection.created_at)}
@@ -254,7 +341,7 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
                         <div className="flex items-center text-sm mb-2">
                           <FaUser className="text-gray-400 mr-2" />
                           <span className="text-gray-700 dark:text-gray-300">
-                            Inspected By: {displayStaffName(inspection)}
+                            Inspected By: {displayStaffName(inspection, 'inspected_by')}
                           </span>
                         </div>
 
@@ -274,6 +361,16 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
                                 style: 'currency',
                                 currency: 'VND',
                               }).format(Number(inspection.total_cost))}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Add confirmed by info if applicable */}
+                        {status === 'Approved' && inspection.confirmed_by && (
+                          <div className="flex items-center text-sm mt-2">
+                            <FaCheckCircle className="text-green-500 mr-2" />
+                            <span className="text-gray-700 dark:text-gray-300">
+                              Confirmed By: {displayStaffName(inspection, 'confirmed_by')}
                             </span>
                           </div>
                         )}
@@ -310,23 +407,22 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
                     {/* Report status and other fields */}
                     <div className="mt-2 pt-2 border-t dark:border-gray-600 flex justify-between items-center">
                       <div className="flex items-center text-sm">
-                        {status && status !== 'NoPending' && (
-                          <span
-                            className="px-2 py-1 rounded-full text-xs font-medium"
-                            style={{
-                              backgroundColor: statusColors.bg,
-                              color: statusColors.text,
-                              borderWidth: '1px',
-                              borderStyle: 'solid',
-                              borderColor: statusColors.border,
-                            }}
-                          >
-                            {getStatusDisplayText(status)}
-                          </span>
-                        )}
+                        {/* Always show status badge, including for Approved status */}
+                        <span
+                          className="px-2 py-1 rounded-full text-xs font-medium"
+                          style={{
+                            backgroundColor: statusColors.bg,
+                            color: statusColors.text,
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderColor: statusColors.border,
+                          }}
+                        >
+                          {getStatusDisplayText(status)}
+                        </span>
                         {inspection.isprivateasset && (
                           <span
-                            className={`${status && status !== 'NoPending' ? 'ml-2' : ''} px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400`}
+                            className="ml-2 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
                           >
                             Private Asset
                           </span>

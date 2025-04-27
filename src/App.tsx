@@ -1,21 +1,19 @@
-import React from 'react'
-import AppRoutes from '@/routes'
-import { Toaster } from 'react-hot-toast'
-import { ThemeProvider } from './contexts/ThemeContext'
-import { HashRouter } from 'react-router-dom'
-import { RiSunLine, RiMoonLine } from 'react-icons/ri'
+import React from 'react';
+import AppRoutes from '@/routes';
+import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { HashRouter } from 'react-router-dom';
+import { RiSunLine, RiMoonLine } from 'react-icons/ri';
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = React.useState(false)
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
 
   const Header = () => {
     return (
       <header className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex">
-              {/* ... existing code ... */}
-            </div>
+            <div className="flex">{/* ... existing code ... */}</div>
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
@@ -31,8 +29,8 @@ function App() {
           </div>
         </div>
       </header>
-    )
-  }
+    );
+  };
 
   return (
     <ThemeProvider>
@@ -43,7 +41,7 @@ function App() {
         </div>
       </HashRouter>
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;

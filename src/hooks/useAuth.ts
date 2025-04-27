@@ -1,36 +1,36 @@
-import { useState, useEffect } from 'react'
-import authApi from '@/services/auth'
-import { GetCurrentUserAPIResponse } from '@/types'
+import { useState, useEffect } from 'react';
+import authApi from '@/services/auth';
+import { GetCurrentUserAPIResponse } from '@/types';
 
 export const useAuth = () => {
   const [user, setUser] = useState<GetCurrentUserAPIResponse | null>(() => {
-    const storedUser = localStorage.getItem('bmcms_user')
-    return storedUser ? JSON.parse(storedUser) : null
-  })
-  const [loading, setLoading] = useState(false)
+    const storedUser = localStorage.getItem('bmcms_user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [loading, setLoading] = useState(false);
 
   const fetchUser = async () => {
     try {
-      setLoading(true)
-      const response = await authApi.getCurrentUser()
+      setLoading(true);
+      const response = await authApi.getCurrentUser();
       if (response) {
-        setUser(response)
-        localStorage.setItem('bmcms_user', JSON.stringify(response))
+        setUser(response);
+        localStorage.setItem('bmcms_user', JSON.stringify(response));
       }
     } catch (error) {
-      console.error('Failed to fetch user:', error)
-      localStorage.removeItem('bmcms_user')
-      setUser(null)
+      console.error('Failed to fetch user:', error);
+      localStorage.removeItem('bmcms_user');
+      setUser(null);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (!user) {
-      fetchUser()
+      fetchUser();
     }
-  }, [])
+  }, []);
 
-  return { user, loading }
-}
+  return { user, loading };
+};

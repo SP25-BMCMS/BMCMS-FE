@@ -74,21 +74,20 @@ const Pagination: React.FC<PaginationProps> = ({
               {Math.min(currentPage * itemsPerPage, totalItems)}
             </span>
             <span className="ml-1">
-              <span className="text-gray-500 dark:text-gray-400">của</span> {totalItems}{' '}
-              <span className="hidden sm:inline">mục</span>
+              <span className="text-gray-500 dark:text-gray-400">of</span> {totalItems}{' '}
+              <span className="hidden sm:inline">items</span>
             </span>
           </div>
         )}
 
         {onLimitChange && (
           <div className="flex items-center ml-4 border-l border-gray-300 dark:border-gray-600 pl-4">
-            <label className="mr-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">
-              Hiển thị:
-            </label>
+            <label className="mr-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">Show:</label>
             <select
               className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-gray-700 dark:text-gray-200"
               value={itemsPerPage}
               onChange={e => onLimitChange(Number(e.target.value))}
+              title="Select number of items per page"
             >
               {limitOptions.map(option => (
                 <option key={option} value={option}>
@@ -109,7 +108,7 @@ const Pagination: React.FC<PaginationProps> = ({
               ? 'text-gray-300 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-not-allowed'
               : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400'
           }`}
-          aria-label="Trang trước"
+          aria-label="Previous page"
         >
           <IoChevronBack className="w-5 h-5" />
         </button>
@@ -132,7 +131,7 @@ const Pagination: React.FC<PaginationProps> = ({
                     ? 'bg-blue-500 dark:bg-blue-600 text-white shadow-sm border border-blue-600 dark:border-blue-700'
                     : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
-                aria-label={`Trang ${page}`}
+                aria-label={`Page ${page}`}
                 aria-current={currentPage === page ? 'page' : undefined}
               >
                 {page}
@@ -149,7 +148,7 @@ const Pagination: React.FC<PaginationProps> = ({
               ? 'text-gray-300 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-not-allowed'
               : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400'
           }`}
-          aria-label="Trang sau"
+          aria-label="Next page"
         >
           <IoChevronForward className="w-5 h-5" />
         </button>
