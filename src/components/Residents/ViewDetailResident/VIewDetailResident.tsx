@@ -33,7 +33,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   // Debug: console log when component renders with resident
   useEffect(() => {
     if (isOpen && resident) {
-      console.log('ViewDetailResident mở với resident:', resident);
+      console.log('ViewDetailResident opened with resident:', resident);
     }
   }, [isOpen, resident]);
 
@@ -46,7 +46,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
     } else if (resident) {
       setApartments([]);
       setError(null);
-      console.log('Trạng thái tài khoản:', resident.accountStatus);
+      console.log('Account status:', resident.accountStatus);
 
       // Only fetch if resident is active
       if (resident.accountStatus === 'Active') {
@@ -66,29 +66,29 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
 
   const fetchResidentApartments = async () => {
     if (!resident) {
-      console.error('Không thể lấy thông tin căn hộ: resident là null');
+      console.error('Cannot get apartment information: resident is null');
       return;
     }
 
     setIsLoading(true);
     setError(null);
     try {
-      console.log('Đang gọi API getResidentApartments với userId:', resident.userId);
+      console.log('Calling API getResidentApartments with userId:', resident.userId);
       const response = await getResidentApartments(resident.userId);
       console.log('API response:', response);
 
       if (response && response.isSuccess && Array.isArray(response.data)) {
-        console.log('Tìm thấy căn hộ:', response.data.length);
+        console.log('apartments:', response.data.length);
         setApartments(response.data);
       } else {
-        const errorMsg = response?.message || 'Không thể tải thông tin căn hộ';
-        console.error('Lỗi khi lấy danh sách căn hộ:', errorMsg);
+        const errorMsg = response?.message || 'cannot get apartments';
+        console.error('errorMsg:', errorMsg);
         setError(errorMsg);
         toast.error(errorMsg);
       }
     } catch (error: any) {
-      console.error('Lỗi khi gọi API getResidentApartments:', error);
-      const errorMessage = error.message || 'Đã xảy ra lỗi khi tải thông tin căn hộ';
+      console.error('Error calling API getResidentApartments:', error);
+      const errorMessage = error.message || 'An error occurred while loading apartment information';
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -98,7 +98,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
 
   // Handle custom close function to ensure state is reset
   const handleClose = () => {
-    console.log('Đóng modal');
+    console.log('Close modal');
     setApartments([]);
     setError(null);
     onClose();
@@ -113,7 +113,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
         day: 'numeric',
       });
     } catch (error) {
-      console.error('Lỗi khi định dạng ngày:', error);
+      console.error('Error when formatting date:', error);
       return dateString;
     }
   };
@@ -135,13 +135,13 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   };
 
   if (!resident) {
-    console.log('Không hiển thị modal vì resident là null');
+    console.log('Not displaying modal because resident is null');
     return null;
   }
 
   // Show warning for inactive residents
   const isInactive = resident.accountStatus !== 'Active';
-  console.log('Trạng thái tài khoản hiện tại:', resident.accountStatus, 'isInactive:', isInactive);
+  console.log('Current account status:', resident.accountStatus, 'isInactive:', isInactive);
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Resident Details" size="lg">
@@ -175,7 +175,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
       ) : isLoading ? (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
-          <span className="ml-3">Đang tải dữ liệu...</span>
+          <span className="ml-3">Loading data...</span>
         </div>
       ) : (
         <div>

@@ -267,7 +267,7 @@ const Resident: React.FC = () => {
         <DropdownMenu
           onViewDetail={() => handleViewDetail(item)}
           onChangeStatus={() => openStatusChangeModal(item)}
-          onRemove={() => openRemoveModal(item)}
+          // onRemove={() => openRemoveModal(item)}
         />
       ),
       width: '80px',
@@ -359,13 +359,13 @@ const Resident: React.FC = () => {
         onConfirm={handleChangeStatus}
         resident={residentToChangeStatus}
       />
-      <RemoveResident
+      {/* <RemoveResident
         isOpen={isRemoveModalOpen}
         onClose={closeRemoveModal}
         onConfirm={removeResident}
         isLoading={isRemoving}
         resident={residentToRemove}
-      />
+      /> */}
       <ViewDetailResident
         isOpen={isViewDetailOpen}
         onClose={() => setIsViewDetailOpen(false)}

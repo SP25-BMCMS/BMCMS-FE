@@ -818,12 +818,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                           </div>
                           {device.contract_id && (
                             <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600 col-span-2">
-                              <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
-                                Contract ID:
-                              </span>
-                              <span className="text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded border border-blue-100 dark:border-blue-700">
-                                {device.contract_id}
-                              </span>
+                              
                             </div>
                           )}
                         </div>

@@ -407,23 +407,22 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
                     {/* Report status and other fields */}
                     <div className="mt-2 pt-2 border-t dark:border-gray-600 flex justify-between items-center">
                       <div className="flex items-center text-sm">
-                        {status && status !== 'NoPending' && (
-                          <span
-                            className="px-2 py-1 rounded-full text-xs font-medium"
-                            style={{
-                              backgroundColor: statusColors.bg,
-                              color: statusColors.text,
-                              borderWidth: '1px',
-                              borderStyle: 'solid',
-                              borderColor: statusColors.border,
-                            }}
-                          >
-                            {getStatusDisplayText(status)}
-                          </span>
-                        )}
+                        {/* Always show status badge, including for Approved status */}
+                        <span
+                          className="px-2 py-1 rounded-full text-xs font-medium"
+                          style={{
+                            backgroundColor: statusColors.bg,
+                            color: statusColors.text,
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderColor: statusColors.border,
+                          }}
+                        >
+                          {getStatusDisplayText(status)}
+                        </span>
                         {inspection.isprivateasset && (
                           <span
-                            className={`${status && status !== 'NoPending' ? 'ml-2' : ''} px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400`}
+                            className="ml-2 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
                           >
                             Private Asset
                           </span>
