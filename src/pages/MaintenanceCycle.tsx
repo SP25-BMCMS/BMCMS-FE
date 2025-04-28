@@ -5,13 +5,13 @@ import MaintenanceCycleFilter from '@/components/MaintenanceCycle/MaintenanceCyc
 import Pagination from '@/components/Pagination'
 import Table, { Column } from '@/components/Table'
 import buildingDetailsApi from '@/services/buildingDetails'
-import { deleteMaintenanceCycle, getMaintenanceCycles } from '@/services/maintenanceCycle'
+import { deleteMaintenanceCycle, getMaintenanceCycles, getMaintenanceCycleHistory } from '@/services/maintenanceCycle'
 import schedulesApi, { CycleConfig } from '@/services/schedules'
 import { MaintenanceCycle } from '@/types'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { motion } from 'framer-motion'
-import { AlertTriangle, Calendar, Edit, Plus, Settings, Trash2, X } from 'lucide-react'
+import { AlertTriangle, Calendar, Edit, Plus, Settings, Trash2, X, History } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
@@ -103,6 +103,10 @@ const MaintenanceCycleManagement: React.FC = () => {
   const [selectedCycles, setSelectedCycles] = useState<CycleConfig[]>([])
   const [selectedBuildingDetails, setSelectedBuildingDetails] = useState<string[]>([])
 
+  // Add state for history modal
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
+  const [selectedCycleId, setSelectedCycleId] = useState<string>('')
+
   // Apply filters
   const handleFilterApply = () => {
     setPagination(prev => ({ ...prev, currentPage: 1 }))
@@ -161,6 +165,13 @@ const MaintenanceCycleManagement: React.FC = () => {
       return buildingDetailsApi.getBuildingDetailsForManager(userId)
     },
     enabled: !!localStorage.getItem('bmcms_user'), // Only run query if user exists
+  })
+
+  // Add query for fetching history
+  const { data: historyData, isLoading: isLoadingHistory } = useQuery({
+    queryKey: ['maintenanceCycleHistory', selectedCycleId],
+    queryFn: () => getMaintenanceCycleHistory(selectedCycleId),
+    enabled: !!selectedCycleId && isHistoryModalOpen,
   })
 
   // Update pagination when data changes
@@ -337,6 +348,18 @@ const MaintenanceCycleManagement: React.FC = () => {
     }
   }
 
+  // Add handler for opening history modal
+  const handleOpenHistoryModal = (cycleId: string) => {
+    setSelectedCycleId(cycleId)
+    setIsHistoryModalOpen(true)
+  }
+
+  // Add handler for closing history modal
+  const handleCloseHistoryModal = () => {
+    setIsHistoryModalOpen(false)
+    setSelectedCycleId('')
+  }
+
   // Table columns definition
   const columns: Column<MaintenanceCycle>[] = [
     {
@@ -384,6 +407,16 @@ const MaintenanceCycleManagement: React.FC = () => {
           <button
             onClick={e => {
               e.stopPropagation()
+              handleOpenHistoryModal(item.cycle_id)
+            }}
+            className="p-2 bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 rounded-md hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+            title="View History"
+          >
+            <History size={16} />
+          </button>
+          <button
+            onClick={e => {
+              e.stopPropagation()
               handleEditCycle(item)
             }}
             className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
@@ -426,6 +459,83 @@ const MaintenanceCycleManagement: React.FC = () => {
       <p className="text-gray-700 dark:text-gray-300">Loading maintenance cycles...</p>
     </div>
   )
+
+  // Add History Modal component
+  const HistoryModal = ({ isOpen, onClose, historyData, isLoading }: {
+    isOpen: boolean
+    onClose: () => void
+    historyData: MaintenanceCycleHistoryResponse | undefined
+    isLoading: boolean
+  }) => {
+    if (!isOpen) return null
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-6 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            title="Close"
+          >
+            <X size={20} />
+          </button>
+
+          <div className="text-center mb-5">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/20 mb-4">
+              <History className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Maintenance Cycle History</h3>
+          </div>
+
+          {isLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : historyData?.data && historyData.data.length > 0 ? (
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              {historyData.data.map(history => (
+                <div
+                  key={history.history_id}
+                  className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {history.device_type} - {history.frequency}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Changed at: {new Date(history.changed_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      Updated by: {history.updated_by}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Reason: {history.reason}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              No history found
+            </div>
+          )}
+
+          <div className="mt-5 flex justify-center">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full mt-[60px]">
@@ -513,6 +623,14 @@ const MaintenanceCycleManagement: React.FC = () => {
         onClose={closeDeleteModal}
         onConfirm={handleDeleteCycle}
         cycleName={cycleToDelete?.name || ''}
+      />
+
+      {/* History Modal */}
+      <HistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={handleCloseHistoryModal}
+        historyData={historyData}
+        isLoading={isLoadingHistory}
       />
     </div>
   )

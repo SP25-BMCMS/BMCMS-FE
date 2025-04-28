@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { createMaintenanceCycle, updateMaintenanceCycle } from '@/services/maintenanceCycle';
-import { toast } from 'react-hot-toast';
-import { X } from 'lucide-react';
-import { MaintenanceCycle } from '@/types';
+import React, { useState, useEffect } from 'react'
+import { createMaintenanceCycle, updateMaintenanceCycle } from '@/services/maintenanceCycle'
+import { toast } from 'react-hot-toast'
+import { X } from 'lucide-react'
+import { MaintenanceCycle } from '@/types'
 
 interface MaintenanceCycleModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  editMode?: boolean;
-  cycleData?: MaintenanceCycle;
+  isOpen: boolean
+  onClose: () => void
+  onSuccess: () => void
+  editMode?: boolean
+  cycleData?: MaintenanceCycle
 }
 
 const frequencyOptions = [
@@ -18,14 +18,14 @@ const frequencyOptions = [
   { value: 'Monthly', label: 'Monthly' },
   { value: 'Yearly', label: 'Yearly' },
   { value: 'Specific', label: 'Specific' },
-];
+]
 
 const basisOptions = [
   { value: 'ManufacturerRecommendation', label: 'Manufacturer Recommendation' },
   { value: 'LegalStandard', label: 'Legal Standard' },
   { value: 'OperationalExperience', label: 'Operational Experience' },
   { value: 'Other', label: 'Other' },
-];
+]
 
 const deviceTypeOptions = [
   { value: 'Elevator', label: 'Elevator' },
@@ -39,7 +39,7 @@ const deviceTypeOptions = [
   { value: 'AutomaticDoor', label: 'Automatic Door' },
   { value: 'FireExtinguisher', label: 'Fire Extinguisher' },
   { value: 'Other', label: 'Other' },
-];
+]
 
 const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
   isOpen,
@@ -48,66 +48,93 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
   editMode = false,
   cycleData,
 }) => {
-  const [deviceType, setDeviceType] = useState('');
-  const [frequency, setFrequency] = useState('');
-  const [basis, setBasis] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deviceType, setDeviceType] = useState('')
+  const [frequency, setFrequency] = useState('')
+  const [basis, setBasis] = useState('')
+  const [reason, setReason] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Populate form when in edit mode
   useEffect(() => {
     if (editMode && cycleData) {
-      setDeviceType(cycleData.device_type || '');
-      setFrequency(cycleData.frequency || '');
-      setBasis(cycleData.basis || '');
+      setDeviceType(cycleData.device_type || '')
+      setFrequency(cycleData.frequency || '')
+      setBasis(cycleData.basis || '')
+      setReason(cycleData.reason || '')
     }
-  }, [editMode, cycleData, isOpen]);
+  }, [editMode, cycleData, isOpen])
 
   const resetForm = () => {
-    setDeviceType('');
-    setFrequency('');
-    setBasis('');
-  };
+    setDeviceType('')
+    setFrequency('')
+    setBasis('')
+    setReason('')
+  }
 
   const handleClose = () => {
-    resetForm();
-    onClose();
-  };
+    resetForm()
+    onClose()
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!deviceType || !frequency || !basis) {
-      toast.error('Please fill in all required fields');
-      return;
+      toast.error('Please fill in all required fields')
+      return
     }
 
-    const payload = {
+    const formData = {
       device_type: deviceType,
       frequency,
       basis,
-    };
+      reason,
+    }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       if (editMode && cycleData) {
-        await updateMaintenanceCycle(cycleData.cycle_id, payload);
-        toast.success('Maintenance cycle updated successfully');
-      } else {
-        await createMaintenanceCycle(payload);
-        toast.success('Maintenance cycle created successfully');
-      }
-      resetForm();
-      onSuccess();
-      onClose();
-    } catch (error) {
-      console.error(`Error ${editMode ? 'updating' : 'creating'} maintenance cycle:`, error);
-      toast.error(`Failed to ${editMode ? 'update' : 'create'} maintenance cycle`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+        // Get userId from localStorage (bmcms_user)
+        const userStr = localStorage.getItem('bmcms_user')
 
-  if (!isOpen) return null;
+        let userId = ''
+        if (userStr) {
+          try {
+            const userData = JSON.parse(userStr)
+            if (userData && userData.userId) {
+              userId = userData.userId
+            }
+          } catch (error) {
+            userId = ''
+          }
+        }
+
+        if (!userId) {
+          toast.error('User ID not found')
+          return
+        }
+
+        await updateMaintenanceCycle(cycleData.cycle_id, {
+          ...formData,
+          updated_by: userId
+        })
+        toast.success('Maintenance cycle updated successfully')
+      } else {
+        await createMaintenanceCycle(formData)
+        toast.success('Maintenance cycle created successfully')
+      }
+      resetForm()
+      onSuccess()
+      onClose()
+    } catch (error) {
+      console.error(`Error ${editMode ? 'updating' : 'creating'} maintenance cycle:`, error)
+      toast.error(`Failed to ${editMode ? 'update' : 'create'} maintenance cycle`)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -178,6 +205,24 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
                 ))}
               </select>
             </div>
+
+            {editMode && (
+              <div>
+                <label htmlFor="reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Reason for Change <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="reason"
+                  name="reason"
+                  rows={3}
+                  value={reason}
+                  onChange={e => setReason(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                  placeholder="Enter reason for change..."
+                  required
+                />
+              </div>
+            )}
           </div>
 
           <div className="mt-6 flex justify-end space-x-3">
@@ -191,9 +236,8 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none ${
-                isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-              }`}
+              className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
             >
               {isSubmitting
                 ? editMode
@@ -207,7 +251,7 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default MaintenanceCycleModal;
+export default MaintenanceCycleModal
