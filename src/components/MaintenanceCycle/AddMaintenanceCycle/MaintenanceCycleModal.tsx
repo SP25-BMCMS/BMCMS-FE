@@ -84,13 +84,6 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
       return
     }
 
-    const formData = {
-      device_type: deviceType,
-      frequency,
-      basis,
-      reason,
-    }
-
     setIsSubmitting(true)
     try {
       if (editMode && cycleData) {
@@ -115,12 +108,19 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
         }
 
         await updateMaintenanceCycle(cycleData.cycle_id, {
-          ...formData,
+          device_type: deviceType,
+          frequency,
+          basis,
+          reason,
           updated_by: userId
         })
         toast.success('Maintenance cycle updated successfully')
       } else {
-        await createMaintenanceCycle(formData)
+        await createMaintenanceCycle({
+          device_type: deviceType,
+          frequency,
+          basis
+        })
         toast.success('Maintenance cycle created successfully')
       }
       resetForm()
