@@ -16,6 +16,7 @@ import BuildingDetailSelectionModal from './BuildingDetailSelectionModal'
 import ConfirmModal from './ConfirmModal'
 import { BuildingDetail } from '@/types/buildingDetail'
 import { MaintenanceCycle } from '@/types'
+import { useTranslation } from 'react-i18next'
 
 registerLocale('vi', vi)
 
@@ -71,6 +72,7 @@ const EventModal: React.FC<EventModalProps> = ({
   onSetSelectedBuildingDetails,
   maintenanceCycles,
 }) => {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
@@ -250,7 +252,7 @@ const EventModal: React.FC<EventModalProps> = ({
       >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-            {isCreateMode ? 'Create New Schedule' : 'Edit Schedule'}
+            {isCreateMode ? t('calendar.eventModal.createTitle') : t('calendar.eventModal.editTitle')}
           </h2>
           <button
             onClick={onClose}
@@ -266,7 +268,7 @@ const EventModal: React.FC<EventModalProps> = ({
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 <DocumentTextIcon className="w-4 h-4 inline-block mr-2" />
-                Title
+                {t('calendar.eventModal.title')}
               </label>
               <input
                 type="text"
@@ -275,7 +277,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 required
                 aria-label="Schedule title"
-                placeholder="Enter schedule title"
+                placeholder={t('calendar.eventModal.titlePlaceholder')}
               />
             </div>
 
@@ -283,7 +285,7 @@ const EventModal: React.FC<EventModalProps> = ({
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   <TagIcon className="w-4 h-4 inline-block mr-2" />
-                  Schedule Type
+                  {t('calendar.eventModal.scheduleType')}
                 </label>
                 <select
                   value={formData.schedule_type}
@@ -303,7 +305,7 @@ const EventModal: React.FC<EventModalProps> = ({
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 <CalendarIcon className="w-4 h-4 inline-block mr-2" />
-                Start Date
+                {t('calendar.eventModal.startDate')}
               </label>
               <DatePicker
                 selected={formData.start_date}
@@ -325,7 +327,7 @@ const EventModal: React.FC<EventModalProps> = ({
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 <CalendarIcon className="w-4 h-4 inline-block mr-2" />
-                End Date
+                {t('calendar.eventModal.endDate')}
               </label>
               <DatePicker
                 selected={formData.end_date}
@@ -348,7 +350,7 @@ const EventModal: React.FC<EventModalProps> = ({
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 <CogIcon className="w-4 h-4 inline-block mr-2" />
-                Maintenance Cycle
+                {t('calendar.eventModal.maintenanceCycle')}
               </label>
               <select
                 value={formData.cycle_id || ''}
@@ -357,7 +359,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 aria-label="Maintenance Cycle"
                 required
               >
-                <option value="">Select a maintenance cycle</option>
+                <option value="">{t('calendar.eventModal.selectCycle')}</option>
                 {Array.isArray(cyclesArray) &&
                   cyclesArray.map(cycle => (
                     <option key={cycle.cycle_id} value={cycle.cycle_id}>
@@ -367,7 +369,7 @@ const EventModal: React.FC<EventModalProps> = ({
               </select>
               {!isCreateMode && formData.cycle_id && formData.cycle_id.trim() !== '' && (
                 <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Current cycle: {getCycleLabel(formData.cycle_id)}
+                  {t('calendar.eventModal.currentCycle')}: {getCycleLabel(formData.cycle_id)}
                 </div>
               )}
             </div>
@@ -376,7 +378,7 @@ const EventModal: React.FC<EventModalProps> = ({
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   <CheckCircleIcon className="w-4 h-4 inline-block mr-2" />
-                  Status
+                  {t('calendar.eventModal.status')}
                 </label>
                 <select
                   value={formData.schedule_status}
@@ -405,7 +407,7 @@ const EventModal: React.FC<EventModalProps> = ({
             <div className="md:col-span-2 space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 <BuildingOfficeIcon className="w-4 h-4 inline-block mr-2" />
-                Building Details
+                {t('calendar.eventModal.buildingDetails')}
               </label>
               <button
                 type="button"
@@ -414,8 +416,8 @@ const EventModal: React.FC<EventModalProps> = ({
                 aria-label="Select building details"
               >
                 {selectedBuildingDetails.length > 0
-                  ? `${selectedBuildingDetails.length} Building Details Selected`
-                  : 'Select Building Details'}
+                  ? t('calendar.eventModal.buildingDetailsSelected', { count: selectedBuildingDetails.length })
+                  : t('calendar.eventModal.selectBuildingDetails')}
               </button>
 
               {selectedBuildingDetails.length > 0 && (
@@ -448,7 +450,7 @@ const EventModal: React.FC<EventModalProps> = ({
             <div className="md:col-span-2 space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 <DocumentTextIcon className="w-4 h-4 inline-block mr-2" />
-                Description
+                {t('calendar.eventModal.description')}
               </label>
               <textarea
                 value={formData.description}
@@ -456,7 +458,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 rows={4}
                 aria-label="Schedule description"
-                placeholder="Enter schedule description"
+                placeholder={t('calendar.eventModal.descriptionPlaceholder')}
               />
             </div>
           </div>
@@ -469,14 +471,14 @@ const EventModal: React.FC<EventModalProps> = ({
                   onClick={() => setShowDeleteConfirm(true)}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  Delete
+                  {t('calendar.eventModal.buttons.delete')}
                 </button>
                 <button
                   type="button"
                   onClick={onViewScheduleJob}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  View Detail
+                  {t('calendar.eventModal.buttons.viewDetail')}
                 </button>
               </>
             )}
@@ -485,13 +487,13 @@ const EventModal: React.FC<EventModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
-              Cancel
+              {t('calendar.eventModal.buttons.cancel')}
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              {isCreateMode ? 'Create' : 'Update'}
+              {isCreateMode ? t('calendar.eventModal.buttons.create') : t('calendar.eventModal.buttons.update')}
             </button>
           </div>
         </form>
@@ -508,8 +510,8 @@ const EventModal: React.FC<EventModalProps> = ({
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
-        title="Confirm Delete"
-        message="Are you sure you want to delete this schedule? This action cannot be undone."
+        title={t('calendar.eventModal.deleteConfirm.title')}
+        message={t('calendar.eventModal.deleteConfirm.message')}
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}
       />

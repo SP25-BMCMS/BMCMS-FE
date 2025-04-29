@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog } from '@headlessui/react';
-import { Material } from '@/services/materials';
-import { useTheme } from '@/contexts/ThemeContext';
-import { ACTIVE, INACTIVE } from '@/constants/colors';
+import React, { useState, useEffect } from 'react'
+import { Dialog } from '@headlessui/react'
+import { Material } from '@/services/materials'
+import { useTheme } from '@/contexts/ThemeContext'
+import { ACTIVE, INACTIVE } from '@/constants/colors'
+import { useTranslation } from 'react-i18next'
 
 interface UpdateStatusModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (status: 'ACTIVE' | 'INACTIVE') => void;
-  material: Material;
-  isLoading: boolean;
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: (status: 'ACTIVE' | 'INACTIVE') => void
+  material: Material
+  isLoading: boolean
 }
 
 const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
@@ -19,19 +20,20 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
   material,
   isLoading,
 }) => {
-  const { theme } = useTheme();
-  const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE'>(material.status);
-  const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const { t } = useTranslation()
+  const { theme } = useTheme()
+  const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE'>(material.status)
+  const [showDropdown, setShowDropdown] = useState<boolean>(false)
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(status);
-  };
+    e.preventDefault()
+    onSubmit(status)
+  }
 
   // Add keyframes to the document for animations
   useEffect(() => {
     // Create style element
-    const styleElement = document.createElement('style');
+    const styleElement = document.createElement('style')
     // Add keyframe animations
     styleElement.textContent = `
       @keyframes modalFadeIn {
@@ -118,15 +120,15 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
       .arrow-spin-reverse {
         animation: arrowSpinReverse 0.3s ease forwards;
       }
-    `;
+    `
     // Append to document head
-    document.head.appendChild(styleElement);
+    document.head.appendChild(styleElement)
 
     // Cleanup on component unmount
     return () => {
-      document.head.removeChild(styleElement);
-    };
-  }, []);
+      document.head.removeChild(styleElement)
+    }
+  }, [])
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -140,28 +142,28 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
           }}
         >
           <Dialog.Title className="text-xl font-medium mb-6 text-gray-900 dark:text-white">
-            Update Status
+            {t('materialManagement.updateStatus.title')}
           </Dialog.Title>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Material: <span className="font-bold">{material.name}</span>
+                {t('materialManagement.updateStatus.material')}: <span className="font-bold">{material.name}</span>
               </label>
 
               <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-4">
-                Current Status:
+                {t('materialManagement.updateStatus.currentStatus')}:
                 <span
                   className={`ml-2 px-3 py-1 text-xs leading-5 font-semibold rounded-full inline-flex items-center
                     ${material.status === 'ACTIVE' ? ACTIVE : INACTIVE}`}
                 >
-                  {material.status}
+                  {material.status === 'ACTIVE' ? t('materialManagement.updateStatus.statusActive') : t('materialManagement.updateStatus.statusInactive')}
                 </span>
               </label>
 
               <div className="mt-4 w-full">
                 <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  New Status
+                  {t('materialManagement.updateStatus.newStatus')}
                 </label>
                 <div className="relative" onClick={() => setShowDropdown(!showDropdown)}>
                   <div
@@ -175,7 +177,7 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
                         className={`inline-block w-3 h-3 rounded-full mr-2 ${status === 'ACTIVE' ? 'bg-green-500' : 'bg-red-500'}`}
                         style={{ animation: 'smoothPulse 2s ease-in-out infinite' }}
                       ></span>
-                      <span>{status === 'ACTIVE' ? 'Active' : 'Inactive'}</span>
+                      <span>{status === 'ACTIVE' ? t('materialManagement.updateStatus.statusActive') : t('materialManagement.updateStatus.statusInactive')}</span>
                     </div>
 
                     <svg
@@ -207,18 +209,17 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
                         <button
                           type="button"
                           onClick={e => {
-                            e.stopPropagation();
-                            setStatus('ACTIVE');
-                            setShowDropdown(false);
+                            e.stopPropagation()
+                            setStatus('ACTIVE')
+                            setShowDropdown(false)
                           }}
-                          className={`flex items-center w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-150 ${
-                            status === 'ACTIVE'
-                              ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
-                              : 'text-gray-700 dark:text-gray-300'
-                          }`}
+                          className={`flex items-center w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-150 ${status === 'ACTIVE'
+                            ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
+                            : 'text-gray-700 dark:text-gray-300'
+                            }`}
                         >
                           <span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
-                          <span>Active</span>
+                          <span>{t('materialManagement.updateStatus.statusActive')}</span>
                           {status === 'ACTIVE' && (
                             <svg
                               className="w-4 h-4 ml-auto text-blue-600 dark:text-blue-400"
@@ -243,18 +244,17 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
                         <button
                           type="button"
                           onClick={e => {
-                            e.stopPropagation();
-                            setStatus('INACTIVE');
-                            setShowDropdown(false);
+                            e.stopPropagation()
+                            setStatus('INACTIVE')
+                            setShowDropdown(false)
                           }}
-                          className={`flex items-center w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-150 ${
-                            status === 'INACTIVE'
-                              ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
-                              : 'text-gray-700 dark:text-gray-300'
-                          }`}
+                          className={`flex items-center w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-150 ${status === 'INACTIVE'
+                            ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
+                            : 'text-gray-700 dark:text-gray-300'
+                            }`}
                         >
                           <span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
-                          <span>Inactive</span>
+                          <span>{t('materialManagement.updateStatus.statusInactive')}</span>
                           {status === 'INACTIVE' && (
                             <svg
                               className="w-4 h-4 ml-auto text-blue-600 dark:text-blue-400"
@@ -292,7 +292,7 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
                           dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 
                           transition-colors"
               >
-                Cancel
+                {t('materialManagement.updateStatus.cancel')}
               </button>
               <button
                 type="submit"
@@ -301,14 +301,14 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
                           hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 
                           disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isLoading ? 'Updating...' : 'Update'}
+                {isLoading ? t('materialManagement.updateStatus.updating') : t('materialManagement.updateStatus.update')}
               </button>
             </div>
           </form>
         </Dialog.Panel>
       </div>
     </Dialog>
-  );
-};
+  )
+}
 
-export default UpdateStatusModal;
+export default UpdateStatusModal

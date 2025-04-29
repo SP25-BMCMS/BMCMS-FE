@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import crackApi from '@/services/cracks';
-import { getBuildingDetail } from '@/services/building';
+import React, { useState, useEffect, useRef } from 'react'
+import { Link, useParams, useNavigate } from 'react-router-dom'
+import crackApi from '@/services/cracks'
+import { getBuildingDetail } from '@/services/building'
 import {
   ArrowLeft,
   CheckCircle,
@@ -11,68 +11,69 @@ import {
   Loader2,
   Building2,
   MapPin,
-} from 'lucide-react';
-import { STATUS_COLORS } from '@/constants/colors';
-import { useQuery } from '@tanstack/react-query';
+} from 'lucide-react'
+import { STATUS_COLORS } from '@/constants/colors'
+import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 
 // Add this CSS class at the top of the file
 const pulseAnimation = {
   pending: `animate-pulse-fast bg-[${STATUS_COLORS.PENDING.TEXT}]`,
   inProgress: `animate-pulse bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`,
   resolved: `bg-[${STATUS_COLORS.RESOLVED.TEXT}]`,
-};
+}
 
 // Define types for crack data
 interface CrackDetail {
-  crackReportId: string;
-  description: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  reportedBy: string | { userId: string; username: string };
-  verifiedBy?: string | { userId: string; username: string };
-  buildingDetailId: string;
-  isPrivatesAsset: boolean;
-  position?: string;
+  crackReportId: string
+  description: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  reportedBy: string | { userId: string; username: string }
+  verifiedBy?: string | { userId: string; username: string }
+  buildingDetailId: string
+  isPrivatesAsset: boolean
+  position?: string
   crackDetails: Array<{
-    crackDetailsId: string;
-    photoUrl: string;
-    aiDetectionUrl: string;
-    severity: string;
-    createdAt: string;
-  }>;
+    crackDetailsId: string
+    photoUrl: string
+    aiDetectionUrl: string
+    severity: string
+    createdAt: string
+  }>
 }
 
 // Define types for building detail data
 interface BuildingDetailData {
-  buildingDetailId: string;
-  buildingId: string;
-  name: string;
-  total_apartments: number;
-  createdAt: string;
-  updatedAt: string;
+  buildingDetailId: string
+  buildingId: string
+  name: string
+  total_apartments: number
+  createdAt: string
+  updatedAt: string
   building: {
-    buildingId: string;
-    name: string;
-    description: string;
-    numberFloor: number;
-    imageCover: string;
-    manager_id: string;
-    areaId: string;
-    createdAt: string;
-    updatedAt: string;
-    Status: string;
-    construction_date: string;
-    completion_date: string;
-    Warranty_date: string;
+    buildingId: string
+    name: string
+    description: string
+    numberFloor: number
+    imageCover: string
+    manager_id: string
+    areaId: string
+    createdAt: string
+    updatedAt: string
+    Status: string
+    construction_date: string
+    completion_date: string
+    Warranty_date: string
     area: {
-      areaId: string;
-      name: string;
-      description: string;
-      createdAt: string;
-      updatedAt: string;
-    };
-  };
+      areaId: string
+      name: string
+      description: string
+      createdAt: string
+      updatedAt: string
+    }
+  }
 }
 
 // Function to generate a tiny placeholder URL
@@ -82,22 +83,23 @@ const generateTinyPlaceholder = (originalUrl: string): string => {
   // This will make the browser download a low-quality version first
   if (originalUrl && originalUrl.startsWith('http')) {
     // If it's an external URL, we can use it directly
-    return originalUrl;
+    return originalUrl
   }
   // Fallback to a placeholder if no valid URL
-  return `https://via.placeholder.com/20x20/cccccc/ffffff?text=Loading`;
-};
+  return `https://via.placeholder.com/20x20/cccccc/ffffff?text=Loading`
+}
 
 const DetailCrack: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [crack, setCrack] = useState<CrackDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [imageErrorStates, setImageErrorStates] = useState<{ [key: string]: boolean }>({});
-  const [visibleImages, setVisibleImages] = useState<{ [key: string]: boolean }>({});
-  const [imageLoadedStates, setImageLoadedStates] = useState<{ [key: string]: boolean }>({});
-  const imageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const { t } = useTranslation()
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const [crack, setCrack] = useState<CrackDetail | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  const [imageErrorStates, setImageErrorStates] = useState<{ [key: string]: boolean }>({})
+  const [visibleImages, setVisibleImages] = useState<{ [key: string]: boolean }>({})
+  const [imageLoadedStates, setImageLoadedStates] = useState<{ [key: string]: boolean }>({})
+  const imageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
   // Initialize Intersection Observer
   useEffect(() => {
@@ -105,60 +107,60 @@ const DetailCrack: React.FC = () => {
       entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            const imageId = entry.target.getAttribute('data-image-id');
+            const imageId = entry.target.getAttribute('data-image-id')
             if (imageId) {
               setVisibleImages(prev => ({
                 ...prev,
                 [imageId]: true,
-              }));
+              }))
             }
-            observer.unobserve(entry.target);
+            observer.unobserve(entry.target)
           }
-        });
+        })
       },
       {
         root: null,
         rootMargin: '50px',
         threshold: 0.1,
       }
-    );
+    )
 
     // Observe all image containers
     Object.keys(imageRefs.current).forEach(imageId => {
-      const element = imageRefs.current[imageId];
+      const element = imageRefs.current[imageId]
       if (element) {
-        observer.observe(element);
+        observer.observe(element)
       }
-    });
+    })
 
     return () => {
-      observer.disconnect();
-    };
-  }, [crack]);
+      observer.disconnect()
+    }
+  }, [crack])
 
   useEffect(() => {
     const fetchCrackDetail = async () => {
-      if (!id) return;
+      if (!id) return
 
       try {
-        setLoading(true);
-        const response = await crackApi.getCrackDetail(id);
-        console.log('Crack detail response:', response);
+        setLoading(true)
+        const response = await crackApi.getCrackDetail(id)
+        console.log('Crack detail response:', response)
         if (response.isSuccess && response.data.length > 0) {
-          setCrack(response.data[0]);
+          setCrack(response.data[0])
         } else {
-          setError('No crack data found');
+          setError(t('crackManagement.noData'))
         }
       } catch (error) {
-        console.error('Error fetching crack detail:', error);
-        setError('Failed to load crack details');
+        console.error('Error fetching crack detail:', error)
+        setError(t('crackManagement.errorLoading'))
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchCrackDetail();
-  }, [id]);
+    fetchCrackDetail()
+  }, [id, t])
 
   // Fetch building detail data using TanStack Query
   const { data: buildingDetail, isLoading: isBuildingLoading } = useQuery({
@@ -166,68 +168,68 @@ const DetailCrack: React.FC = () => {
     queryFn: () => getBuildingDetail(crack?.buildingDetailId || ''),
     enabled: !!crack?.buildingDetailId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  })
 
   // Get reporter username
   const getReporterName = () => {
-    if (!crack) return 'Unknown';
+    if (!crack) return t('common.unknown')
     return crack.reportedBy && typeof crack.reportedBy === 'object'
       ? crack.reportedBy.username
       : typeof crack.reportedBy === 'string'
         ? crack.reportedBy
-        : 'Unknown';
-  };
+        : t('common.unknown')
+  }
 
   // Get verifier username
   const getVerifierName = () => {
-    if (!crack) return 'Not verified';
+    if (!crack) return t('crackManagement.notVerified')
     return crack.verifiedBy
       ? typeof crack.verifiedBy === 'object'
         ? crack.verifiedBy.username
         : crack.verifiedBy
-      : 'Not verified yet';
-  };
+      : t('crackManagement.notVerifiedYet')
+  }
 
   // Convert status to animation key
   const getStatusAnimationClass = (status: string) => {
     switch (status) {
       case 'Resolved':
-        return pulseAnimation.resolved;
+        return pulseAnimation.resolved
       case 'InProgress':
-        return pulseAnimation.inProgress;
+        return pulseAnimation.inProgress
       default:
-        return pulseAnimation.pending;
+        return pulseAnimation.pending
     }
-  };
+  }
 
   // Handle image loading state
   const handleImageLoad = (imageId: string) => {
     setImageLoadedStates(prev => ({
       ...prev,
       [imageId]: true,
-    }));
-  };
+    }))
+  }
 
   // Handle image error state
   const handleImageError = (imageId: string) => {
     setImageErrorStates(prev => ({
       ...prev,
       [imageId]: true,
-    }));
-  };
+    }))
+  }
 
   // Handle back navigation
   const handleBack = () => {
-    navigate('/crack');
-  };
+    navigate('/crack')
+  }
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-800 transition-colors">
         <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
-        <p className="text-xl text-gray-600 dark:text-gray-300 mt-4">Loading crack details...</p>
+        <p className="text-xl text-gray-600 dark:text-gray-300 mt-4">{t('crackManagement.loading')}</p>
       </div>
-    );
+    )
   }
 
   if (error || !crack) {
@@ -237,19 +239,19 @@ const DetailCrack: React.FC = () => {
           <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-8 text-center">
             <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
             <p className="text-xl text-gray-700 dark:text-gray-200 mb-6">
-              {error || `Crack ID#${id} not found`}
+              {error || t('crackManagement.notFound', { id })}
             </p>
             <button
               className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto"
               onClick={handleBack}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Go Back
+              {t('common.goBack')}
             </button>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   // Format the date for display
@@ -261,18 +263,18 @@ const DetailCrack: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-    });
-  };
+    })
+  }
 
   // Get building detail name and area name
-  const buildingDetailName = buildingDetail?.data?.name || 'Loading...';
-  const buildingAreaName = buildingDetail?.data?.building?.area?.name || '';
+  const buildingDetailName = buildingDetail?.data?.name || t('common.loading')
+  const buildingAreaName = buildingDetail?.data?.building?.area?.name || ''
 
   const buildingDetailInfo = isBuildingLoading
-    ? 'Loading building details...'
+    ? t('buildingDetail.loading')
     : buildingDetail
       ? `${buildingDetailName}${buildingAreaName ? ` (${buildingAreaName})` : ''}`
-      : 'Building detail not found';
+      : t('buildingDetail.notFound')
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors pb-12">
@@ -283,12 +285,12 @@ const DetailCrack: React.FC = () => {
             <button
               onClick={handleBack}
               className="mr-4 p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              aria-label="Go back"
+              aria-label={t('common.goBack')}
             >
               <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             </button>
             <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
-              Crack Report Details
+              {t('crackManagement.crackDetails')}
               <span className="ml-3 px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-normal text-gray-700 dark:text-gray-300">
                 ID: {crack.crackReportId.substring(0, 8)}...
               </span>
@@ -300,10 +302,10 @@ const DetailCrack: React.FC = () => {
               to="/crack"
               className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
             >
-              Crack Management
+              {t('crackManagement.title')}
             </Link>
             <span className="mx-2">&gt;</span>
-            <span className="text-gray-700 dark:text-gray-300 font-medium">Detail View</span>
+            <span className="text-gray-700 dark:text-gray-300 font-medium">{t('crackManagement.detailView')}</span>
 
             <div className="ml-auto flex items-center space-x-4">
               <div className="flex items-center">
@@ -322,13 +324,12 @@ const DetailCrack: React.FC = () => {
                         : crack.status === 'InProgress'
                           ? STATUS_COLORS.IN_PROGRESS.TEXT
                           : STATUS_COLORS.PENDING.TEXT,
-                    border: `1px solid ${
-                      crack.status === 'Resolved'
-                        ? STATUS_COLORS.RESOLVED.BORDER
-                        : crack.status === 'InProgress'
-                          ? STATUS_COLORS.IN_PROGRESS.BORDER
-                          : STATUS_COLORS.PENDING.BORDER
-                    }`,
+                    border: `1px solid ${crack.status === 'Resolved'
+                      ? STATUS_COLORS.RESOLVED.BORDER
+                      : crack.status === 'InProgress'
+                        ? STATUS_COLORS.IN_PROGRESS.BORDER
+                        : STATUS_COLORS.PENDING.BORDER
+                      }`,
                   }}
                 >
                   <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
@@ -355,7 +356,7 @@ const DetailCrack: React.FC = () => {
                       ></span>
                     )}
                   </span>
-                  {crack.status}
+                  {t(`crackManagement.status.${crack.status.toLowerCase()}`)}
                 </span>
               </div>
             </div>
@@ -365,21 +366,21 @@ const DetailCrack: React.FC = () => {
             <div className="flex items-center">
               <User className="h-4 w-4 mr-1" />
               <span>
-                Reported by: <span className="font-medium">{getReporterName()}</span>
+                {t('crackManagement.reportedBy')}: <span className="font-medium">{getReporterName()}</span>
               </span>
             </div>
             {crack.verifiedBy && (
               <div className="flex items-center">
                 <CheckCircle className="h-4 w-4 mr-1" />
                 <span>
-                  Verified by: <span className="font-medium">{getVerifierName()}</span>
+                  {t('crackManagement.verifiedBy')}: <span className="font-medium">{getVerifierName()}</span>
                 </span>
               </div>
             )}
             <div className="flex items-center">
               <Calendar className="h-4 w-4 mr-1" />
               <span>
-                Created: <span className="font-medium">{formatDate(crack.createdAt)}</span>
+                {t('common.created')}: <span className="font-medium">{formatDate(crack.createdAt)}</span>
               </span>
             </div>
           </div>
@@ -393,19 +394,19 @@ const DetailCrack: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
-                Report Information
+                {t('crackManagement.reportInformation')}
               </h2>
 
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Description</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('common.description')}</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
                     {crack.description}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Building</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('common.building')}</p>
                   <div className="flex items-center text-gray-800 dark:text-gray-200 font-medium mt-1">
                     <Building2 className="h-4 w-4 mr-1.5 text-blue-500" />
                     {buildingDetailInfo}
@@ -417,7 +418,7 @@ const DetailCrack: React.FC = () => {
 
                 {buildingAreaName && (
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Area</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('common.area')}</p>
                     <div className="flex items-center text-gray-800 dark:text-gray-200 font-medium mt-1">
                       <MapPin className="h-4 w-4 mr-1.5 text-green-500" />
                       {buildingAreaName}
@@ -426,16 +427,16 @@ const DetailCrack: React.FC = () => {
                 )}
 
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Asset Type</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('crackManagement.assetType')}</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
-                    {crack.isPrivatesAsset ? 'Private Asset' : 'Public Asset'}
+                    {crack.isPrivatesAsset ? t('crackManagement.privateAsset') : t('crackManagement.publicAsset')}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Location</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('crackManagement.location')}</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
-                    {crack.position || 'Not specified'}
+                    {crack.position || t('crackManagement.notSpecified')}
                   </p>
                 </div>
               </div>
@@ -443,33 +444,33 @@ const DetailCrack: React.FC = () => {
 
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mt-6 transition-colors">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
-                Reporting Details
+                {t('crackManagement.reportingDetails')}
               </h2>
 
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Reported By</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('crackManagement.reportedBy')}</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
                     {getReporterName()}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Verified By</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('crackManagement.verifiedBy')}</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
                     {getVerifierName()}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Created Date</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('common.created')}</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
                     {formatDate(crack.createdAt)}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Last Updated</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('common.lastUpdated')}</p>
                   <p className="text-gray-800 dark:text-gray-200 font-medium mt-1">
                     {formatDate(crack.updatedAt)}
                   </p>
@@ -482,7 +483,7 @@ const DetailCrack: React.FC = () => {
           <div className="lg:col-span-2">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
-                Crack Images
+                {t('crackManagement.crackImages')}
               </h2>
 
               {crack.crackDetails && crack.crackDetails.length > 0 ? (
@@ -491,42 +492,39 @@ const DetailCrack: React.FC = () => {
                     (detail: CrackDetail['crackDetails'][0], index: number) => (
                       <div
                         key={detail.crackDetailsId}
-                        className={`space-y-4 p-4 rounded-lg ${
-                          detail.severity === 'High'
-                            ? 'animate-pulse-border border border-red-300 dark:border-red-700'
-                            : 'border border-gray-200 dark:border-gray-700'
-                        }`}
+                        className={`space-y-4 p-4 rounded-lg ${detail.severity === 'High'
+                          ? 'animate-pulse-border border border-red-300 dark:border-red-700'
+                          : 'border border-gray-200 dark:border-gray-700'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">
-                            Image #{index + 1}
+                            {t('crackManagement.image')} #{index + 1}
                           </h3>
                           <span
-                            className={`px-2 py-1 rounded-full text-xs flex items-center ${
-                              detail.severity === 'High'
-                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                                : detail.severity === 'Medium'
-                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                  : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                            }`}
+                            className={`px-2 py-1 rounded-full text-xs flex items-center ${detail.severity === 'High'
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                              : detail.severity === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              }`}
                           >
                             <div
-                              className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                                detail.severity === 'High'
-                                  ? `animate-pulse-fast bg-[${STATUS_COLORS.PENDING.TEXT}]`
-                                  : detail.severity === 'Medium'
-                                    ? `animate-pulse bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`
-                                    : `bg-[${STATUS_COLORS.RESOLVED.TEXT}]`
-                              }`}
+                              className={`w-1.5 h-1.5 rounded-full mr-1.5 ${detail.severity === 'High'
+                                ? `animate-pulse-fast bg-[${STATUS_COLORS.PENDING.TEXT}]`
+                                : detail.severity === 'Medium'
+                                  ? `animate-pulse bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`
+                                  : `bg-[${STATUS_COLORS.RESOLVED.TEXT}]`
+                                }`}
                             ></div>
-                            {detail.severity} Severity
+                            {t('crackManagement.severity')}: {t(`crackManagement.filterOptions.${detail.severity.toLowerCase()}`)} 
                           </span>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                              Original Image
+                              {t('crackManagement.originalImage')}
                             </p>
                             <div
                               className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden relative aspect-video bg-gray-100 dark:bg-gray-700"
@@ -555,12 +553,11 @@ const DetailCrack: React.FC = () => {
                                       detail.photoUrl ||
                                       'https://via.placeholder.com/400x300?text=No+Image+Available'
                                     }
-                                    alt={`Original crack image ${index + 1}`}
-                                    className={`w-full h-full object-cover transition-all duration-1000 ${
-                                      imageLoadedStates[`original-${detail.crackDetailsId}`]
-                                        ? 'opacity-100 filter blur-0'
-                                        : 'opacity-0 filter blur-xl'
-                                    }`}
+                                    alt={`${t('crackManagement.originalImage')} ${index + 1}`}
+                                    className={`w-full h-full object-cover transition-all duration-1000 ${imageLoadedStates[`original-${detail.crackDetailsId}`]
+                                      ? 'opacity-100 filter blur-0'
+                                      : 'opacity-0 filter blur-xl'
+                                      }`}
                                     onLoad={() =>
                                       handleImageLoad(`original-${detail.crackDetailsId}`)
                                     }
@@ -579,7 +576,7 @@ const DetailCrack: React.FC = () => {
                                     <div className="text-center p-4">
                                       <XCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
                                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        Failed to load image
+                                        {t('crackManagement.imageLoadError')}
                                       </p>
                                     </div>
                                   </div>
@@ -589,7 +586,7 @@ const DetailCrack: React.FC = () => {
 
                           <div className="space-y-2">
                             <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                              AI Detected
+                              {t('crackManagement.aiDetected')}
                             </p>
                             <div
                               className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden relative aspect-video bg-gray-100 dark:bg-gray-700"
@@ -616,12 +613,11 @@ const DetailCrack: React.FC = () => {
                                       detail.aiDetectionUrl ||
                                       'https://via.placeholder.com/400x300?text=No+AI+Detection'
                                     }
-                                    alt={`AI detected crack image ${index + 1}`}
-                                    className={`w-full h-full object-cover transition-all duration-1000 ${
-                                      imageLoadedStates[`ai-${detail.crackDetailsId}`]
-                                        ? 'opacity-100 filter blur-0'
-                                        : 'opacity-0 filter blur-xl'
-                                    }`}
+                                    alt={`${t('crackManagement.aiDetected')} ${index + 1}`}
+                                    className={`w-full h-full object-cover transition-all duration-1000 ${imageLoadedStates[`ai-${detail.crackDetailsId}`]
+                                      ? 'opacity-100 filter blur-0'
+                                      : 'opacity-0 filter blur-xl'
+                                      }`}
                                     onLoad={() => handleImageLoad(`ai-${detail.crackDetailsId}`)}
                                     onError={() => handleImageError(`ai-${detail.crackDetailsId}`)}
                                     loading="lazy"
@@ -636,7 +632,7 @@ const DetailCrack: React.FC = () => {
                                     <div className="text-center p-4">
                                       <XCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
                                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        Failed to load image
+                                        {t('crackManagement.imageLoadError')}
                                       </p>
                                     </div>
                                   </div>
@@ -646,7 +642,7 @@ const DetailCrack: React.FC = () => {
                         </div>
 
                         <div className="text-sm text-gray-500 dark:text-gray-400 flex justify-between">
-                          <span>Uploaded: {formatDate(detail.createdAt)}</span>
+                          <span>{t('common.uploaded')}: {formatDate(detail.createdAt)}</span>
                           <span>ID: {detail.crackDetailsId.substring(0, 8)}...</span>
                         </div>
                       </div>
@@ -655,7 +651,7 @@ const DetailCrack: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
-                  <p className="text-center mb-4">No crack images available</p>
+                  <p className="text-center mb-4">{t('crackManagement.noImages')}</p>
                 </div>
               )}
             </div>
@@ -663,7 +659,7 @@ const DetailCrack: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DetailCrack;
+export default DetailCrack

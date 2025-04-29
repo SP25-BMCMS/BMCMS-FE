@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom'
 import ChangeStatusModal from '@/components/TaskManager/ChangeStatusModal'
 import { FaTools, FaCalendarAlt, FaBuilding } from 'react-icons/fa'
 import Tooltip from '@/components/Tooltip'
+import { useTranslation } from 'react-i18next'
 
 interface TasksCacheData {
   data: TaskResponse[]
@@ -26,6 +27,7 @@ interface TasksCacheData {
 }
 
 const TaskManagement: React.FC = () => {
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
@@ -38,6 +40,9 @@ const TaskManagement: React.FC = () => {
   const navigate = useNavigate()
 
   const queryClient = useQueryClient()
+
+  // Add new state for loading navigation
+  const [isNavigating, setIsNavigating] = useState(false)
 
   // Fetch tasks with React Query
   const { data: tasksData, isLoading: isLoadingTasks, error: tasksError } = useQuery({
@@ -173,7 +178,7 @@ const TaskManagement: React.FC = () => {
 
   const handleCrackStatusChange = (task: TaskResponse) => {
     if (!task.crackInfo || !task.crackInfo.isSuccess || !task.crackInfo.data.length) {
-      toast.error('Crack information is not available')
+      toast.error(t('taskManagement.crackInfoNotAvailable'))
       return
     }
 
@@ -215,7 +220,7 @@ const TaskManagement: React.FC = () => {
         animate={loadingVariants}
         className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
       />
-      <p className="text-gray-600 dark:text-gray-300">Loading tasks...</p>
+      <p className="text-gray-600 dark:text-gray-300">{t('taskManagement.loading')}</p>
     </div>
   )
 
@@ -227,27 +232,33 @@ const TaskManagement: React.FC = () => {
         </svg>
       </div>
       <p className="text-red-600 dark:text-red-400 text-center px-4">
-        {tasksError instanceof Error ? tasksError.message : 'Failed to load tasks'}
+        {tasksError instanceof Error ? tasksError.message : t('taskManagement.error')}
       </p>
       <button
         onClick={() => queryClient.invalidateQueries({ queryKey: ['tasks'] })}
         className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
       >
-        Try Again
+        {t('taskManagement.tryAgain')}
       </button>
     </div>
   )
 
   const filterOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'Assigned', label: 'Assigned' },
-    { value: 'Completed', label: 'Completed' },
+    { value: 'all', label: t('taskManagement.filterOptions.all') },
+    { value: 'Assigned', label: t('taskManagement.filterOptions.assigned') },
+    { value: 'Completed', label: t('taskManagement.filterOptions.completed') },
   ]
+
+  // Update the navigation handler
+  const handleNavigateToDetail = (taskId: string) => {
+    setIsNavigating(true)
+    navigate(`/task-detail/${taskId}`)
+  }
 
   const columns: Column<TaskResponse>[] = [
     {
       key: 'index',
-      title: 'No',
+      title: t('taskManagement.table.no'),
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
@@ -257,7 +268,7 @@ const TaskManagement: React.FC = () => {
     },
     {
       key: 'title',
-      title: 'Title',
+      title: t('taskManagement.table.title'),
       render: item => (
         <Tooltip content={item.title || ''} position="bottom">
           <div className="text-sm font-medium text-gray-900 dark:text-gray-100 max-w-[120px] xs:max-w-[140px] sm:max-w-[180px] md:max-w-[220px] truncate">
@@ -269,9 +280,8 @@ const TaskManagement: React.FC = () => {
     },
     {
       key: 'description',
-      title: 'Description',
+      title: t('taskManagement.table.description'),
       render: item => {
-        // Only show tooltip if description is longer than 60 characters
         const shortDescription = item.description?.substring(0, 60) || ''
         const needsTooltip = (item.description?.length || 0) > 60
 
@@ -288,12 +298,11 @@ const TaskManagement: React.FC = () => {
     },
     {
       key: 'building',
-      title: 'Building',
+      title: t('taskManagement.table.building'),
       render: item => {
         let buildingInfo = null
 
         if (taskType === 'crack' && item.crackInfo?.isSuccess && item.crackInfo.data.length > 0) {
-          // Lấy thông tin tòa nhà từ crack report
           const crackData = item.crackInfo.data[0]
           const buildingDetailId = crackData.buildingDetailId
           const position = crackData.position
@@ -308,7 +317,6 @@ const TaskManagement: React.FC = () => {
             </div>
           )
         } else if (taskType === 'schedule' && item.schedulesjobInfo?.isSuccess) {
-          // Lấy thông tin tòa nhà từ schedule job
           const scheduleData = item.schedulesjobInfo.data
           if (scheduleData.buildingDetail) {
             const buildingDetail = scheduleData.buildingDetail
@@ -333,12 +341,11 @@ const TaskManagement: React.FC = () => {
       },
       width: '100px xs:120px sm:140px',
     },
-    // Hiển thị cột Crack ID chỉ khi đang xem các task liên quan đến crack
     ...(taskType === 'crack'
       ? [
         {
           key: 'crack_status',
-          title: 'Crack Status',
+          title: t('taskManagement.table.crackStatus'),
           render: item => {
             if (!item.crackInfo || !item.crackInfo.isSuccess || !item.crackInfo.data.length) {
               return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>
@@ -365,7 +372,6 @@ const TaskManagement: React.FC = () => {
                 textColor = STATUS_COLORS.IN_PROGRESS.TEXT
                 borderColor = STATUS_COLORS.IN_PROGRESS.BORDER
                 break
-              // @ts-ignore
               case 'Completed':
                 bgColor = STATUS_COLORS.RESOLVED.BG
                 textColor = STATUS_COLORS.RESOLVED.TEXT
@@ -388,17 +394,16 @@ const TaskManagement: React.FC = () => {
                 }}
                 onClick={() => item.crack_id && handleCrackStatusChange(item)}
               >
-                {crackStatus}
+                {t(`taskManagement.crackStatus.${crackStatus.toLowerCase()}`)}
               </span>
             )
           },
         },
       ]
       : [
-        // Hiển thị thông tin lịch trình khi đang xem các task bảo trì định kỳ
         {
           key: 'schedule_info',
-          title: 'Schedule Info',
+          title: t('taskManagement.table.scheduleInfo'),
           render: item => {
             if (!item.schedulesjobInfo?.isSuccess) {
               return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>
@@ -428,7 +433,7 @@ const TaskManagement: React.FC = () => {
         },
         {
           key: 'schedule_status',
-          title: 'Schedule Status',
+          title: t('taskManagement.table.scheduleStatus'),
           render: item => {
             if (!item.schedulesjobInfo?.isSuccess) {
               return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>
@@ -476,7 +481,7 @@ const TaskManagement: React.FC = () => {
                   border: '1px solid',
                 }}
               >
-                {scheduleStatus}
+                {t(`taskManagement.scheduleStatus.${scheduleStatus.toLowerCase()}`)}
               </span>
             )
           },
@@ -484,7 +489,7 @@ const TaskManagement: React.FC = () => {
       ]),
     {
       key: 'created_at',
-      title: 'Created Date',
+      title: t('taskManagement.table.createdDate'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
           {new Date(item.created_at).toLocaleDateString()}
@@ -494,7 +499,7 @@ const TaskManagement: React.FC = () => {
     },
     {
       key: 'status',
-      title: 'Status',
+      title: t('taskManagement.table.status'),
       render: item => (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80 ${item.status === 'Completed'
@@ -505,18 +510,18 @@ const TaskManagement: React.FC = () => {
             }`}
           onClick={() => handleTaskStatusChange(item)}
         >
-          {item.status}
+          {t(`taskManagement.status.${item.status.toLowerCase()}`)}
         </span>
       ),
       width: '90px xs:100px',
     },
     {
       key: 'action',
-      title: 'Action',
+      title: t('taskManagement.table.action'),
       render: item => (
         <div onClick={e => e.stopPropagation()}>
           <DropdownMenu
-            onViewDetail={() => navigate(`/task-detail/${item.task_id}`)}
+            onViewDetail={() => handleNavigateToDetail(item.task_id)}
             onChangeStatus={() => handleTaskStatusChange(item)}
             onRemove={() => console.log('Remove', item)}
             showExportPdf={item.status === 'Completed'}
@@ -532,7 +537,7 @@ const TaskManagement: React.FC = () => {
     if (item.crack_id && item.crackInfo?.isSuccess && item.crackInfo.data.length) {
       return [
         {
-          label: 'Change Crack Status',
+          label: t('taskManagement.changeCrackStatus'),
           onClick: () => handleCrackStatusChange(item),
         },
       ]
@@ -542,10 +547,10 @@ const TaskManagement: React.FC = () => {
 
   return (
     <div className="w-full mt-5 md:mt-6 lg:mt-[30px] xl:mt-[60px] px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8">
-      {/* Header Section - Made responsive */}
+      {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 md:mb-4 gap-2 sm:gap-3 md:gap-4">
         <SearchInput
-          placeholder="Search by name"
+          placeholder={t('taskManagement.searchPlaceholder')}
           value={searchTerm}
           onChange={e => {
             setSearchTerm(e.target.value)
@@ -564,14 +569,14 @@ const TaskManagement: React.FC = () => {
             {taskType === 'crack' ? (
               <>
                 <FaTools className="mr-1 md:mr-2" />
-                <span className="hidden xs:inline">Crack Repair</span>
-                <span className="xs:hidden">Repairs</span>
+                <span className="hidden xs:inline">{t('taskManagement.crackRepair')}</span>
+                <span className="xs:hidden">{t('taskManagement.crackRepair')}</span>
               </>
             ) : (
               <>
                 <FaCalendarAlt className="mr-1 md:mr-2" />
-                <span className="hidden xs:inline">Scheduled Maintenance</span>
-                <span className="xs:hidden">Maintenance</span>
+                <span className="hidden xs:inline">{t('taskManagement.scheduledMaintenance')}</span>
+                <span className="xs:hidden">{t('taskManagement.scheduledMaintenance')}</span>
               </>
             )}
           </button>
@@ -587,41 +592,45 @@ const TaskManagement: React.FC = () => {
       {/* Title Section */}
       <div className="mb-3 md:mb-4">
         <h1 className="text-base sm:text-lg md:text-xl font-bold">
-          {taskType === 'crack' ? 'Crack Repair Tasks' : 'Scheduled Maintenance Tasks'}
+          {taskType === 'crack' ? t('taskManagement.crackRepairTasks') : t('taskManagement.scheduledMaintenanceTasks')}
         </h1>
         <p className="text-xs md:text-sm text-gray-500">
           {taskType === 'crack'
-            ? 'Displaying tasks for building crack repairs'
-            : 'Displaying tasks for scheduled maintenance activities'}
+            ? t('taskManagement.displayingCrackTasks')
+            : t('taskManagement.displayingMaintenanceTasks')}
         </p>
       </div>
 
       {/* Main Content */}
       <div className="w-full overflow-x-auto rounded-lg shadow-sm border border-gray-100 dark:border-gray-800">
-        {isLoadingTasks ? (
+        {isLoadingTasks || isNavigating ? (
           <LoadingIndicator />
         ) : tasksError ? (
           <ErrorMessage />
         ) : (
           <>
-            <Table<TaskResponse>
-              data={tasksData?.data || []}
-              columns={columns}
-              keyExtractor={item => item.task_id}
-              onRowClick={item => navigate(`/task-detail/${item.task_id}`)}
-              className="w-full"
-              tableClassName="w-full min-w-[640px] sm:min-w-[768px] md:min-w-[900px]"
-            />
+            <div className="min-w-[640px] sm:min-w-[768px] md:min-w-[900px]">
+              <Table<TaskResponse>
+                data={tasksData?.data || []}
+                columns={columns}
+                keyExtractor={item => item.task_id}
+                onRowClick={item => handleNavigateToDetail(item.task_id)}
+                className="w-full"
+                tableClassName="w-full"
+              />
+            </div>
 
-            <Pagination
-              currentPage={currentPage}
-              totalPages={tasksData?.pagination?.totalPages || 1}
-              onPageChange={handlePageChange}
-              totalItems={tasksData?.pagination?.total || 0}
-              itemsPerPage={itemsPerPage}
-              onLimitChange={handleLimitChange}
-              className="w-full mt-3 md:mt-4"
-            />
+            <div className="w-full px-4 py-3">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={tasksData?.pagination?.totalPages || 1}
+                onPageChange={handlePageChange}
+                totalItems={tasksData?.pagination?.total || 0}
+                itemsPerPage={itemsPerPage}
+                onLimitChange={handleLimitChange}
+                className="w-full"
+              />
+            </div>
           </>
         )}
       </div>

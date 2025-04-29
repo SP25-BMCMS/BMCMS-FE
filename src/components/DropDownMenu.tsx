@@ -1,16 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { RiEyeLine, RiFilterLine, RiDeleteBinLine, RiFileDownloadLine } from 'react-icons/ri';
-import { createPortal } from 'react-dom';
+import React, { useState, useRef, useEffect } from 'react'
+import { RiEyeLine, RiFilterLine, RiDeleteBinLine, RiFileDownloadLine } from 'react-icons/ri'
+import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 interface DropdownMenuProps {
-  onViewDetail: () => void;
-  onChangeStatus?: () => void;
-  onRemove?: () => void;
-  onExportPdf?: () => void;
-  changeStatusTitle?: string;
-  viewDetailDisabled?: boolean;
-  showExportPdf?: boolean;
-  className?: string;
+  onViewDetail: () => void
+  onChangeStatus?: () => void
+  onRemove?: () => void
+  onExportPdf?: () => void
+  changeStatusTitle?: string
+  viewDetailDisabled?: boolean
+  showExportPdf?: boolean
+  className?: string
 }
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({
@@ -23,39 +24,40 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
   showExportPdf = false,
   className = '',
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-  const [showAbove, setShowAbove] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
+  const [showAbove, setShowAbove] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   // Tính toán số mục menu hiển thị để ước tính chiều cao
   const getItemCount = () => {
-    let count = 1; // View Detail luôn hiển thị
-    if (showExportPdf && onExportPdf) count++;
-    if (onChangeStatus) count++;
-    if (onRemove) count++;
-    return count;
-  };
+    let count = 1 // View Detail luôn hiển thị
+    if (showExportPdf && onExportPdf) count++
+    if (onChangeStatus) count++
+    if (onRemove) count++
+    return count
+  }
 
   const updateMenuPosition = () => {
     if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const menuWidth = 220; // Chiều rộng menu đã tăng lên
-      const itemHeight = 44; // Chiều cao trung bình mỗi menu item
-      const menuHeight = getItemCount() * itemHeight;
+      const rect = buttonRef.current.getBoundingClientRect()
+      const windowHeight = window.innerHeight
+      const menuWidth = 220 // Chiều rộng menu đã tăng lên
+      const itemHeight = 44 // Chiều cao trung bình mỗi menu item
+      const menuHeight = getItemCount() * itemHeight
 
       // Kiểm tra xem có đủ không gian phía dưới không
-      const spaceBelow = windowHeight - rect.bottom;
-      const needToShowAbove = spaceBelow < menuHeight;
+      const spaceBelow = windowHeight - rect.bottom
+      const needToShowAbove = spaceBelow < menuHeight
 
       // Kiểm tra không gian bên phải
-      const rightEdge = rect.right;
-      const spaceOnRight = window.innerWidth - rightEdge;
-      const alignLeft = spaceOnRight < menuWidth;
+      const rightEdge = rect.right
+      const spaceOnRight = window.innerWidth - rightEdge
+      const alignLeft = spaceOnRight < menuWidth
 
-      setShowAbove(needToShowAbove);
+      setShowAbove(needToShowAbove)
 
       setMenuPosition({
         top: needToShowAbove
@@ -64,16 +66,16 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
         left: alignLeft
           ? rect.right - menuWidth + window.scrollX
           : Math.max(rect.left - 20, 5) + window.scrollX, // Giữ menu luôn nằm trong màn hình, lùi vào 20px
-      });
+      })
     }
-  };
+  }
 
   const toggleMenu = () => {
     if (!isOpen) {
-      updateMenuPosition();
+      updateMenuPosition()
     }
-    setIsOpen(!isOpen);
-  };
+    setIsOpen(!isOpen)
+  }
 
   // Đóng dropdown khi click bên ngoài
   useEffect(() => {
@@ -85,29 +87,29 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
         buttonRef.current &&
         !buttonRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isOpen])
 
   // Update position if window is resized
   useEffect(() => {
     if (isOpen) {
-      const handleResize = () => updateMenuPosition();
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
+      const handleResize = () => updateMenuPosition()
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   const handleViewDetail = () => {
     if (!viewDetailDisabled) {
-      onViewDetail();
-      setIsOpen(false);
+      onViewDetail()
+      setIsOpen(false)
     }
-  };
+  }
 
   return (
     <div className="relative">
@@ -145,32 +147,31 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
             <div className="py-1 max-h-[calc(100vh-20px)] overflow-auto">
               <button
                 onClick={handleViewDetail}
-                className={`flex items-center w-full px-4 py-2 ${
-                  viewDetailDisabled
-                    ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                    : 'text-blue-700 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
+                className={`flex items-center w-full px-4 py-2 ${viewDetailDisabled
+                  ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                  : 'text-blue-700 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
                 disabled={viewDetailDisabled}
                 title={
                   viewDetailDisabled
-                    ? 'Not available for buildings under construction'
-                    : 'View details'
+                    ? t('common.dropdown.notAvailable')
+                    : t('common.dropdown.viewDetail')
                 }
               >
                 <RiEyeLine className="mr-2" />
-                View Detail
-                {viewDetailDisabled && <span className="ml-1 text-xs">(Not available)</span>}
+                {t('common.dropdown.viewDetail')}
+                {viewDetailDisabled && <span className="ml-1 text-xs">({t('common.dropdown.notAvailable')})</span>}
               </button>
 
               {showExportPdf && onExportPdf && (
                 <button
                   onClick={() => {
-                    onExportPdf();
-                    setIsOpen(false);
+                    onExportPdf()
+                    setIsOpen(false)
                   }}
                   className="flex items-center w-full px-4 py-2 text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <RiFileDownloadLine className="mr-2" /> Export PDF
+                  <RiFileDownloadLine className="mr-2" /> {t('common.dropdown.exportPdf')}
                 </button>
               )}
 
@@ -178,12 +179,12 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
               {onChangeStatus && (
                 <button
                   onClick={() => {
-                    onChangeStatus();
-                    setIsOpen(false);
+                    onChangeStatus()
+                    setIsOpen(false)
                   }}
                   className="flex items-center w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <RiFilterLine className="mr-2" /> {changeStatusTitle}
+                  <RiFilterLine className="mr-2" /> {t('common.dropdown.changeStatus')}
                 </button>
               )}
 
@@ -191,12 +192,12 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
               {onRemove && (
                 <button
                   onClick={() => {
-                    onRemove();
-                    setIsOpen(false);
+                    onRemove()
+                    setIsOpen(false)
                   }}
                   className="flex items-center w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <RiDeleteBinLine className="mr-2" /> Remove
+                  <RiDeleteBinLine className="mr-2" /> {t('common.dropdown.remove')}
                 </button>
               )}
             </div>
@@ -204,7 +205,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
           document.body
         )}
     </div>
-  );
-};
+  )
+}
 
-export default DropdownMenu;
+export default DropdownMenu

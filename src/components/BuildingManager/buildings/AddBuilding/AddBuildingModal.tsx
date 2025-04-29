@@ -5,6 +5,7 @@ import { getAllStaff } from '@/services/staff';
 import { Area, StaffData } from '@/types';
 import toast from 'react-hot-toast';
 import { Loader2, UserIcon, ShieldCheck, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AddBuildingModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface AddBuildingModalProps {
 }
 
 const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const { t } = useTranslation();
   const [areas, setAreas] = useState<Area[]>([]);
   const [staff, setStaff] = useState<StaffData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -116,23 +118,23 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Building name is required';
+      newErrors.name = t('building.add.nameRequired');
     }
 
     if (!formData.areaId) {
-      newErrors.areaId = 'Please select an area';
+      newErrors.areaId = t('building.add.areaRequired');
     }
 
     if (!formData.construction_date) {
-      newErrors.construction_date = 'Construction date is required';
+      newErrors.construction_date = t('building.add.constructionDateRequired');
     }
 
     if (formData.status === 'operational' && !formData.completion_date) {
-      newErrors.completion_date = 'Completion date is required for operational buildings';
+      newErrors.completion_date = t('building.add.completionDateRequired');
     }
 
     if (formData.status === 'operational' && !formData.Warranty_date) {
-      newErrors.Warranty_date = 'Warranty date is required for operational buildings';
+      newErrors.Warranty_date = t('building.add.warrantyDateRequired');
     }
 
     setErrors(newErrors);
@@ -165,7 +167,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
 
       await addBuilding(buildingData);
 
-      toast.success('Building added successfully!');
+      toast.success(t('building.add.success'));
 
       // Reset form
       setFormData({
@@ -185,7 +187,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
       onClose();
     } catch (err) {
       console.error('Error adding building:', err);
-      toast.error('Error adding new building!');
+      toast.error(t('building.add.error'));
     } finally {
       setIsLoading(false);
     }
@@ -200,15 +202,16 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10 flex justify-between items-center">
           <div>
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-              Add New Building
+              {t('building.add.title')}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Fill in the information below to add a new building
+              {t('building.add.subtitle')}
             </p>
           </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+            aria-label={t('building.add.cancel')}
           >
             <X className="w-6 h-6" />
           </button>
@@ -227,14 +230,14 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Building Name */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Building Name
+                  {t('building.add.name')}
                 </label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Enter building name"
+                  placeholder={t('building.add.namePlaceholder')}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                     errors.name
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -249,7 +252,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Number of Floors */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Number of Floors
+                  {t('building.add.numberFloors')}
                 </label>
                 <input
                   type="number"
@@ -271,14 +274,14 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Image URL */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Image (URL)
+                  {t('building.add.imageURL')}
                 </label>
                 <input
                   type="text"
                   name="imageCover"
                   value={formData.imageCover}
                   onChange={handleChange}
-                  placeholder="Enter image URL"
+                  placeholder={t('building.add.imageURLPlaceholder')}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                     errors.imageCover
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -293,7 +296,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Area Selection */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Area
+                  {t('building.add.area')}
                 </label>
                 <select
                   name="areaId"
@@ -305,7 +308,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                       : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                   }`}
                 >
-                  <option value="">Select area</option>
+                  <option value="">{t('building.add.selectArea')}</option>
                   {areas.map(area => (
                     <option key={area.areaId} value={area.areaId}>
                       {area.name}
@@ -320,7 +323,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Construction Date */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Construction Date
+                  {t('building.add.constructionDate')}
                 </label>
                 <input
                   type="date"
@@ -343,7 +346,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Status */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Status
+                  {t('building.add.status')}
                 </label>
                 <div className="flex space-x-4">
                   <label className="inline-flex items-center">
@@ -355,7 +358,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                       onChange={handleChange}
                       className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                     />
-                    <span className="ml-2 text-gray-700 dark:text-gray-300">Operational</span>
+                    <span className="ml-2 text-gray-700 dark:text-gray-300">{t('building.add.operational')}</span>
                   </label>
                   <label className="inline-flex items-center">
                     <input
@@ -366,7 +369,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                       onChange={handleChange}
                       className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                     />
-                    <span className="ml-2 text-gray-700 dark:text-gray-300">Under construction</span>
+                    <span className="ml-2 text-gray-700 dark:text-gray-300">{t('building.add.underConstruction')}</span>
                   </label>
                 </div>
               </div>
@@ -374,7 +377,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Completion Date */}
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Completion Date
+                  {t('building.add.completionDate')}
                 </label>
                 {formData.status === 'under_construction' ? (
                   <input
@@ -410,7 +413,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                 <div className="space-y-1">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                     <ShieldCheck className="w-4 h-4 mr-1.5 text-green-500" />
-                    Warranty Date
+                    {t('building.add.warrantyDate')}
                   </label>
                   <input
                     type="date"
@@ -436,7 +439,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                 <div className="space-y-1 col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                     <UserIcon className="w-4 h-4 mr-1.5 text-blue-500" />
-                    Building Manager
+                    {t('building.add.buildingManager')}
                   </label>
                   <select
                     name="manager_id"
@@ -444,7 +447,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:text-gray-100"
                   >
-                    <option value="">Select a manager</option>
+                    <option value="">{t('building.add.selectManager')}</option>
                     {staff
                       .filter(s => s.role === 'Manager' || s.role === 'manager')
                       .map(manager => (
@@ -454,7 +457,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                       ))}
                   </select>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Select a manager for this building. This can be updated later.
+                    {t('building.add.managerNote')}
                   </p>
                 </div>
               )}
@@ -462,13 +465,13 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Description - Full Width */}
               <div className="col-span-1 md:col-span-2 space-y-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Description
+                  {t('building.add.description')}
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Enter building description"
+                  placeholder={t('building.add.descriptionPlaceholder')}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                     errors.description
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -492,7 +495,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none transition-colors"
             >
-              Cancel
+              {t('building.add.cancel')}
             </button>
             <button
               onClick={handleSubmit}
@@ -502,10 +505,10 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {isLoading ? (
                 <span className="flex items-center">
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
+                  {t('building.add.processing')}
                 </span>
               ) : (
-                'Add Building'
+                t('building.add.addButton')
               )}
             </button>
           </div>

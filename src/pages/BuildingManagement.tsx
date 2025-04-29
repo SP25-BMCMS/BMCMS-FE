@@ -1,41 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import Table, { Column } from '@/components/Table';
-import { BuildingResponse } from '@/types';
-import { getBuildings, deleteBuilding } from '@/services/building';
-import { getAreaList } from '@/services/areas';
-import { getAllStaff } from '@/services/staff';
-import { PiMapPinAreaBold } from 'react-icons/pi';
-import { FaRegBuilding } from 'react-icons/fa';
-import { User } from 'lucide-react';
-import AddBuildingModal from '@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal';
-import RemoveBuilding from '@/components/BuildingManager/buildings/DeleteBuilding/RemoveBuilding';
-import ViewBuildingModal from '@/components/BuildingManager/buildings/ViewBuilding/ViewBuildingModal';
-import EditBuildingModal from '@/components/BuildingManager/buildings/EditBuilding/EditBuildingModal';
-import DropdownMenu from '@/components/DropDownMenu';
-import SearchInput from '@/components/SearchInput';
-import FilterDropdown from '@/components/FilterDropdown';
-import AddButton from '@/components/AddButton';
-import AddAreaModal from '@/components/BuildingManager/areas/addAreas/AddAreaModal';
-import Pagination from '@/components/Pagination';
-import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react'
+import Table, { Column } from '@/components/Table'
+import { BuildingResponse } from '@/types'
+import { getBuildings, deleteBuilding } from '@/services/building'
+import { getAreaList } from '@/services/areas'
+import { getAllStaff } from '@/services/staff'
+import { PiMapPinAreaBold } from 'react-icons/pi'
+import { FaRegBuilding } from 'react-icons/fa'
+import { User } from 'lucide-react'
+import AddBuildingModal from '@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal'
+import RemoveBuilding from '@/components/BuildingManager/buildings/DeleteBuilding/RemoveBuilding'
+import ViewBuildingModal from '@/components/BuildingManager/buildings/ViewBuilding/ViewBuildingModal'
+import EditBuildingModal from '@/components/BuildingManager/buildings/EditBuilding/EditBuildingModal'
+import DropdownMenu from '@/components/DropDownMenu'
+import SearchInput from '@/components/SearchInput'
+import FilterDropdown from '@/components/FilterDropdown'
+import AddButton from '@/components/AddButton'
+import AddAreaModal from '@/components/BuildingManager/areas/addAreas/AddAreaModal'
+import Pagination from '@/components/Pagination'
+import toast from 'react-hot-toast'
+import { motion } from 'framer-motion'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 
 const Building: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
-  const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
-  const [isRemoveBuildingModalOpen, setIsRemoveBuildingModalOpen] = useState(false);
-  const [isViewBuildingModalOpen, setIsViewBuildingModalOpen] = useState(false);
-  const [isEditBuildingModalOpen, setIsEditBuildingModalOpen] = useState(false);
-  const [selectedBuilding, setSelectedBuilding] = useState<BuildingResponse | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [managerNames, setManagerNames] = useState<Record<string, string>>({});
+  const { t } = useTranslation()
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false)
+  const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false)
+  const [isRemoveBuildingModalOpen, setIsRemoveBuildingModalOpen] = useState(false)
+  const [isViewBuildingModalOpen, setIsViewBuildingModalOpen] = useState(false)
+  const [isEditBuildingModalOpen, setIsEditBuildingModalOpen] = useState(false)
+  const [selectedBuilding, setSelectedBuilding] = useState<BuildingResponse | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [managerNames, setManagerNames] = useState<Record<string, string>>({})
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   // Fetch buildings with React Query
   const { data: buildingsData, isLoading: isLoadingBuildings } = useQuery({
@@ -49,9 +51,9 @@ const Building: React.FC = () => {
           selectedStatus === 'all'
             ? undefined
             : (selectedStatus as 'operational' | 'under_construction'),
-      };
-      const response = await getBuildings(params);
-      return response;
+      }
+      const response = await getBuildings(params)
+      return response
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -59,7 +61,7 @@ const Building: React.FC = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     retry: false,
-  });
+  })
 
   // Fetch areas with React Query
   const { data: areas = [] } = useQuery({
@@ -71,7 +73,7 @@ const Building: React.FC = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     retry: false,
-  });
+  })
 
   // Fetch staff with React Query
   const { data: staffData } = useQuery({
@@ -83,28 +85,28 @@ const Building: React.FC = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     retry: false,
-  });
+  })
 
   // Process staff data for manager names
   useEffect(() => {
     if (staffData && staffData.data) {
-      const managerMapping: Record<string, string> = {};
+      const managerMapping: Record<string, string> = {}
       staffData.data.forEach(staff => {
-        managerMapping[staff.userId] = staff.username;
-      });
-      setManagerNames(managerMapping);
+        managerMapping[staff.userId] = staff.username
+      })
+      setManagerNames(managerMapping)
     }
-  }, [staffData]);
+  }, [staffData])
 
   // Delete building mutation
   const deleteBuildingMutation = useMutation({
     mutationFn: (buildingId: string) => deleteBuilding(buildingId),
     onMutate: async buildingId => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['buildings'] });
+      await queryClient.cancelQueries({ queryKey: ['buildings'] })
 
       // Snapshot the previous value
-      const previousBuildings = queryClient.getQueryData(['buildings']);
+      const previousBuildings = queryClient.getQueryData(['buildings'])
 
       // Optimistically update to the new value
       queryClient.setQueryData(['buildings'], (old: any) => ({
@@ -114,73 +116,74 @@ const Building: React.FC = () => {
           ...old.pagination,
           total: old.pagination.total - 1,
         },
-      }));
+      }))
 
-      return { previousBuildings };
+      return { previousBuildings }
     },
     onError: (err, buildingId, context) => {
       // Revert back to the previous value
       if (context?.previousBuildings) {
-        queryClient.setQueryData(['buildings'], context.previousBuildings);
+        queryClient.setQueryData(['buildings'], context.previousBuildings)
       }
-      toast.error('Failed to delete building!');
+      toast.error('Failed to delete building!')
     },
     onSettled: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['buildings'] });
+      queryClient.invalidateQueries({ queryKey: ['buildings'] })
     },
-  });
+  })
 
   const getAreaName = (areaId: string): string => {
-    const area = areas.find(a => a.areaId === areaId);
-    return area ? area.name : 'N/A';
-  };
+    const area = areas.find(a => a.areaId === areaId)
+    return area ? area.name : 'N/A'
+  }
 
   const getManagerName = (managerId?: string): string => {
-    if (!managerId) return 'Not assigned';
-    return managerNames[managerId] || 'Unknown';
-  };
+    if (!managerId) return t('buildingManagement.notAssigned')
+    return managerNames[managerId] || t('buildingManagement.unknown')
+  }
 
   const handleViewBuildingDetail = (building: BuildingResponse) => {
-    setSelectedBuilding(building);
-    setIsViewBuildingModalOpen(true);
-  };
+    setSelectedBuilding(building)
+    setIsViewBuildingModalOpen(true)
+  }
 
   const handleEditBuilding = (building: BuildingResponse) => {
-    setSelectedBuilding(building);
-    setIsEditBuildingModalOpen(true);
-  };
+    setSelectedBuilding(building)
+    setIsEditBuildingModalOpen(true)
+  }
 
   const handleRemoveBuilding = (building: BuildingResponse) => {
-    setSelectedBuilding(building);
-    setIsRemoveBuildingModalOpen(true);
-  };
+    setSelectedBuilding(building)
+    setIsRemoveBuildingModalOpen(true)
+  }
 
   const confirmRemoveBuilding = async () => {
-    if (!selectedBuilding) return;
+    if (!selectedBuilding) return
 
-    setIsDeleting(true);
+    setIsDeleting(true)
     try {
-      await deleteBuildingMutation.mutateAsync(selectedBuilding.buildingId);
-      toast.success('Building deleted successfully!');
-      setIsRemoveBuildingModalOpen(false);
+      await deleteBuildingMutation.mutateAsync(selectedBuilding.buildingId)
+      toast.success(t('buildingManagement.deleteSuccess'))
+      setIsRemoveBuildingModalOpen(false)
     } catch (error) {
-      console.error('Failed to delete building:', error);
+      console.error('Failed to delete building:', error)
+      toast.error(t('buildingManagement.deleteError'))
     } finally {
-      setIsDeleting(false);
+      setIsDeleting(false)
     }
-  };
+  }
 
   const filterOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'operational', label: 'Operational' },
-    { value: 'under_construction', label: 'Under Construction' },
-  ];
+    { value: 'all', label: t('buildingManagement.filterOptions.all') },
+    { value: 'operational', label: t('buildingManagement.filterOptions.operational') },
+    { value: 'under_construction', label: t('buildingManagement.filterOptions.under_construction') },
+  ]
 
   const columns: Column<BuildingResponse>[] = [
     {
       key: 'index',
-      title: 'No',
+      title: t('buildingManagement.table.no'),
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
       ),
@@ -188,21 +191,21 @@ const Building: React.FC = () => {
     },
     {
       key: 'name',
-      title: 'Building Name',
+      title: t('buildingManagement.table.buildingName'),
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
       ),
     },
     {
       key: 'areaId',
-      title: 'Area Name',
+      title: t('buildingManagement.table.areaName'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{getAreaName(item.areaId)}</div>
       ),
     },
     {
       key: 'manager',
-      title: 'Manager',
+      title: t('buildingManagement.table.manager'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
           <User className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
@@ -212,14 +215,14 @@ const Building: React.FC = () => {
     },
     {
       key: 'Floor',
-      title: 'Floor',
+      title: t('buildingManagement.table.floor'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.numberFloor}</div>
       ),
     },
     {
       key: 'createdAt',
-      title: 'Created Date',
+      title: t('buildingManagement.table.createdDate'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {new Date(item.createdAt).toLocaleDateString()}
@@ -228,7 +231,7 @@ const Building: React.FC = () => {
     },
     {
       key: 'completion Date',
-      title: 'Completion Date',
+      title: t('buildingManagement.table.completionDate'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {item.completion_date ? new Date(item.completion_date).toLocaleDateString() : 'N/A'}
@@ -237,37 +240,36 @@ const Building: React.FC = () => {
     },
     {
       key: 'status',
-      title: 'Status',
+      title: t('buildingManagement.table.status'),
       render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.Status === 'operational'
-              ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
-              : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
-          }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.Status === 'operational'
+            ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
+            : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+            }`}
         >
-          {item.Status}
+          {t(`buildingManagement.status.${item.Status}`)}
         </span>
       ),
     },
     {
       key: 'action',
-      title: 'Action',
+      title: t('buildingManagement.table.action'),
       render: item => (
         <DropdownMenu
           onViewDetail={() => handleViewBuildingDetail(item)}
           onChangeStatus={() => handleEditBuilding(item)}
           onRemove={() => handleRemoveBuilding(item)}
-          changeStatusTitle="Edit Building"
+          changeStatusTitle={t('buildingManagement.editBuilding')}
         />
       ),
       width: '80px',
     },
-  ];
+  ]
 
   const handleAddSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['buildings'] });
-  };
+    queryClient.invalidateQueries({ queryKey: ['buildings'] })
+  }
 
   // Loading animation for standalone use
   const loadingVariants = {
@@ -277,7 +279,7 @@ const Building: React.FC = () => {
       repeat: Infinity,
       ease: 'linear',
     },
-  };
+  }
 
   const LoadingIndicator = () => (
     <div className="flex flex-col justify-center items-center h-64">
@@ -285,15 +287,15 @@ const Building: React.FC = () => {
         animate={loadingVariants}
         className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
       />
-      <p className="text-gray-700 dark:text-gray-300">Loading buildings data...</p>
+      <p className="text-gray-700 dark:text-gray-300">{t('buildingManagement.loading')}</p>
     </div>
-  );
+  )
 
   return (
     <div className="w-full mt-[30px] md:mt-[60px] px-3 sm:px-4 md:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
         <SearchInput
-          placeholder="Search by building name or description"
+          placeholder={t('buildingManagement.searchPlaceholder')}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="w-full md:w-[20rem] max-w-full md:max-w-xs"
@@ -307,13 +309,13 @@ const Building: React.FC = () => {
           />
 
           <AddButton
-            label="Add Area"
+            label={t('buildingManagement.addArea')}
             className="w-auto md:w-[120px] lg:w-[154px]"
             icon={<PiMapPinAreaBold />}
             onClick={() => setIsAddAreaModalOpen(true)}
           />
           <AddButton
-            label="Add Building"
+            label={t('buildingManagement.addBuilding')}
             icon={<FaRegBuilding />}
             className="w-auto md:w-[120px] lg:w-[154px]"
             onClick={() => setIsAddBuildingModalOpen(true)}
@@ -386,7 +388,7 @@ const Building: React.FC = () => {
         buildingId={selectedBuilding?.buildingId || null}
       />
     </div>
-  );
-};
+  )
+}
 
-export default Building;
+export default Building

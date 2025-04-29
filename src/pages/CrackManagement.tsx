@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Table, { Column } from '@/components/Table';
-import DropdownMenu from '@/components/DropDownMenu';
-import SearchInput from '@/components/SearchInput';
-import FilterDropdown from '@/components/FilterDropdown';
-import Pagination from '@/components/Pagination';
-import { CrackReportResponse, Crack, CrackListParams, CrackListPaginationResponse } from '@/types';
-import crackApi from '@/services/cracks';
-import StatusCrack from '@/components/crackManager/StatusCrack';
-import { useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
-import { AxiosError } from 'axios';
-import { STATUS_COLORS } from '@/constants/colors';
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Table, { Column } from '@/components/Table'
+import DropdownMenu from '@/components/DropDownMenu'
+import SearchInput from '@/components/SearchInput'
+import FilterDropdown from '@/components/FilterDropdown'
+import Pagination from '@/components/Pagination'
+import { CrackReportResponse, Crack, CrackListParams, CrackListPaginationResponse } from '@/types'
+import crackApi from '@/services/cracks'
+import StatusCrack from '@/components/crackManager/StatusCrack'
+import { useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query'
+import { toast } from 'react-hot-toast'
+import { AxiosError } from 'axios'
+import { STATUS_COLORS } from '@/constants/colors'
+import { useTranslation } from 'react-i18next'
 
 interface ErrorResponse {
-  message: string;
+  message: string
 }
 
 // Map API response to UI model
@@ -38,81 +39,82 @@ const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
     description: response.description,
     originalImage: response.crackDetails[0]?.photoUrl,
     aiDetectedImage: response.crackDetails[0]?.aiDetectionUrl,
-  };
-};
+  }
+}
 
 interface CracksQueryData {
-  cracks: Crack[];
-  pagination: CrackListPaginationResponse['pagination'];
+  cracks: Crack[]
+  pagination: CrackListPaginationResponse['pagination']
 }
 
 const CrackManagement: React.FC = () => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [selectedSeverity, setSelectedSeverity] = useState<string>('all');
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [selectedCrack, setSelectedCrack] = useState<Crack | null>(null);
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [selectedSeverity, setSelectedSeverity] = useState<string>('all')
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+  const [selectedCrack, setSelectedCrack] = useState<Crack | null>(null)
 
   const severityOptions = [
-    { value: 'all', label: 'All Severities' },
-    { value: 'Low', label: 'Low' },
-    { value: 'Medium', label: 'Medium' },
-    { value: 'High', label: 'High' },
-  ];
+    { value: 'all', label: t('crackManagement.filterOptions.all') },
+    { value: 'Low', label: t('crackManagement.filterOptions.low') },
+    { value: 'Medium', label: t('crackManagement.filterOptions.medium') },
+    { value: 'High', label: t('crackManagement.filterOptions.high') },
+  ]
 
   // Get status animation class
   const getStatusAnimationClass = (status: string) => {
     switch (status) {
       case 'resolved':
-        return '';
+        return ''
       case 'InProgress':
-        return 'animate-pulse';
+        return 'animate-pulse'
       default:
-        return 'animate-pulse-fast';
+        return 'animate-pulse-fast'
     }
-  };
+  }
 
   // Build query params
   const getQueryParams = (): CrackListParams => {
     const params: CrackListParams = {
       page: currentPage,
       limit: itemsPerPage,
-    };
+    }
 
     if (searchTerm) {
-      params.search = searchTerm;
+      params.search = searchTerm
     }
 
     if (selectedStatus !== 'all') {
-      params.status = selectedStatus as 'Pending' | 'InProgress' | 'Resolved' | 'Reviewing';
+      params.status = selectedStatus as 'Pending' | 'InProgress' | 'Resolved' | 'Reviewing'
     }
 
     if (selectedSeverity !== 'all') {
-      params.severityFilter = selectedSeverity as 'Low' | 'Medium' | 'High';
+      params.severityFilter = selectedSeverity as 'Low' | 'Medium' | 'High'
     }
 
-    return params;
-  };
+    return params
+  }
 
   // Fetch cracks using React Query
   const queryOptions: UseQueryOptions<CracksQueryData> = {
     queryKey: ['cracks', currentPage, itemsPerPage, selectedStatus, selectedSeverity, searchTerm],
     queryFn: async () => {
       try {
-        const params = getQueryParams();
-        const response = await crackApi.getCrackList(params);
+        const params = getQueryParams()
+        const response = await crackApi.getCrackList(params)
         return {
           cracks: response.data.map(mapCrackResponseToCrack),
           pagination: response.pagination,
-        };
+        }
       } catch (error) {
-        const axiosError = error as AxiosError<ErrorResponse>;
-        toast.error(axiosError.response?.data?.message || 'Failed to fetch cracks');
-        throw error;
+        const axiosError = error as AxiosError<ErrorResponse>
+        toast.error(axiosError.response?.data?.message || 'Failed to fetch cracks')
+        throw error
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -121,15 +123,15 @@ const CrackManagement: React.FC = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     retry: false,
-  };
+  }
 
-  const { data: cracksData, isLoading, isFetching } = useQuery<CracksQueryData>(queryOptions);
+  const { data: cracksData, isLoading, isFetching } = useQuery<CracksQueryData>(queryOptions)
 
   // Handle search with debounce
   const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
+    setSearchTerm(value)
+    setCurrentPage(1)
+  }
 
   // const handleStatusChange = (value: string) => {
   //   setSelectedStatus(value)
@@ -137,20 +139,20 @@ const CrackManagement: React.FC = () => {
   // }
 
   const handleSeverityChange = (value: string) => {
-    setSelectedSeverity(value);
-    setCurrentPage(1);
-  };
+    setSelectedSeverity(value)
+    setCurrentPage(1)
+  }
 
   // Handle status update with staff assignment
   const handleStatusUpdate = (crack: Crack) => {
-    setSelectedCrack(crack);
-    setIsStatusModalOpen(true);
-  };
+    setSelectedCrack(crack)
+    setIsStatusModalOpen(true)
+  }
 
   const columns: Column<Crack>[] = [
     {
       key: 'index',
-      title: 'No',
+      title: t('crackManagement.table.no'),
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
@@ -160,7 +162,7 @@ const CrackManagement: React.FC = () => {
     },
     {
       key: 'reportDescription',
-      title: 'Report Description',
+      title: t('crackManagement.table.description'),
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
           {item.reportDescription}
@@ -169,21 +171,21 @@ const CrackManagement: React.FC = () => {
     },
     {
       key: 'residentName',
-      title: 'Reported By',
+      title: t('crackManagement.table.reportedBy'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.residentName}</div>
       ),
     },
     {
       key: 'createdDate',
-      title: 'Created Date',
+      title: t('crackManagement.table.createdDate'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
       ),
     },
     {
       key: 'status',
-      title: 'Status',
+      title: t('crackManagement.table.status'),
       render: item => {
         const statusColors =
           item.status === 'resolved'
@@ -192,7 +194,7 @@ const CrackManagement: React.FC = () => {
               ? STATUS_COLORS.IN_PROGRESS
               : item.status === 'Reviewing'
                 ? STATUS_COLORS.REVIEWING
-                : STATUS_COLORS.PENDING;
+                : STATUS_COLORS.PENDING
 
         return (
           <span
@@ -220,19 +222,19 @@ const CrackManagement: React.FC = () => {
               )}
             </span>
             {item.status === 'resolved'
-              ? 'Resolved'
+              ? t('crackManagement.status.resolved')
               : item.status === 'InProgress'
-                ? 'In Progress'
+                ? t('crackManagement.status.inProgress')
                 : item.status === 'Reviewing'
-                  ? 'Reviewing'
-                  : 'Pending'}
+                  ? t('crackManagement.status.reviewing')
+                  : t('crackManagement.status.pending')}
           </span>
-        );
+        )
       },
     },
     {
       key: 'action',
-      title: 'Action',
+      title: t('crackManagement.table.action'),
       render: item => (
         <div onClick={e => e.stopPropagation()}>
           <DropdownMenu
@@ -248,14 +250,14 @@ const CrackManagement: React.FC = () => {
       ),
       width: '80px',
     },
-  ];
+  ]
 
   return (
     <div className="w-full mt-[60px]">
       <div className="flex flex-col space-y-4 mb-4 ml-[90px] mr-[132px]">
         <div className="flex justify-between">
           <SearchInput
-            placeholder="Search by ID or description"
+            placeholder={t('crackManagement.searchPlaceholder')}
             value={searchTerm}
             onChange={e => handleSearch(e.target.value)}
             className="w-[20rem] max-w-xs"
@@ -267,7 +269,7 @@ const CrackManagement: React.FC = () => {
               onSelect={handleSeverityChange}
               buttonClassName="w-[160px]"
               selectedValue={selectedSeverity}
-              label="Severity"
+              label={t('crackManagement.severity')}
             />
           </div>
         </div>
@@ -286,7 +288,7 @@ const CrackManagement: React.FC = () => {
                   style={{ backgroundColor: STATUS_COLORS.PENDING.TEXT }}
                 ></span>
               </span>
-              <span className="text-sm text-gray-600 dark:text-gray-300">Pending</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">{t('crackManagement.status.pending')}</span>
             </div>
 
             {/* In Progress */}
@@ -301,7 +303,7 @@ const CrackManagement: React.FC = () => {
                   style={{ backgroundColor: STATUS_COLORS.IN_PROGRESS.TEXT }}
                 ></span>
               </span>
-              <span className="text-sm text-gray-600 dark:text-gray-300">In Progress</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">{t('crackManagement.status.inProgress')}</span>
             </div>
 
             {/* Reviewing */}
@@ -316,7 +318,7 @@ const CrackManagement: React.FC = () => {
                   style={{ backgroundColor: STATUS_COLORS.REVIEWING.TEXT }}
                 ></span>
               </span>
-              <span className="text-sm text-gray-600 dark:text-gray-300">Reviewing</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">{t('crackManagement.status.reviewing')}</span>
             </div>
 
             {/* Resolved */}
@@ -325,13 +327,13 @@ const CrackManagement: React.FC = () => {
                 className="inline-block w-2 h-2 rounded-full mr-1.5"
                 style={{ backgroundColor: STATUS_COLORS.RESOLVED.TEXT }}
               ></span>
-              <span className="text-sm text-gray-600 dark:text-gray-300">Resolved</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">{t('crackManagement.status.resolved')}</span>
             </div>
           </div>
 
           {/* Total Cracks */}
           <div className="text-sm text-gray-600 dark:text-gray-300">
-            Total Cracks: {cracksData?.pagination.total || 0}
+            {t('crackManagement.totalCracks', { count: cracksData?.pagination.total || 0 })}
           </div>
         </div>
       </div>
@@ -343,7 +345,7 @@ const CrackManagement: React.FC = () => {
         className="w-[95%] mx-auto"
         tableClassName="w-full"
         isLoading={isLoading || isFetching}
-        emptyText="No cracks found"
+        emptyText={t('crackManagement.noData')}
       />
 
       {!isLoading && cracksData && (
@@ -367,12 +369,12 @@ const CrackManagement: React.FC = () => {
           crackId={selectedCrack.id}
           crackStatus={selectedCrack.status}
           onUpdateSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['cracks'] });
+            queryClient.invalidateQueries({ queryKey: ['cracks'] })
           }}
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default CrackManagement;
+export default CrackManagement

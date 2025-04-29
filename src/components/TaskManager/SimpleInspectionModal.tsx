@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { FORMAT_DATE_TIME } from '@/utils/helpers';
-import { InspectionResponse, Inspection } from '@/types';
-import { STATUS_COLORS } from '@/constants/colors';
-import { IoClose } from 'react-icons/io5';
+import React, { useState, useEffect } from 'react'
+import { FORMAT_DATE_TIME } from '@/utils/helpers'
+import { InspectionResponse, Inspection } from '@/types'
+import { STATUS_COLORS } from '@/constants/colors'
+import { IoClose } from 'react-icons/io5'
 import {
   FaUser,
   FaCalendarAlt,
@@ -11,23 +11,24 @@ import {
   FaExclamationTriangle,
   FaMoneyBillWave,
   FaImages,
-} from 'react-icons/fa';
+} from 'react-icons/fa'
+import { useTranslation } from 'react-i18next'
 
 interface SimpleInspectionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
   assignment: {
-    assignment_id: string;
-    task_id: string;
-    employee_id: string;
-    description: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
-  };
-  inspections?: InspectionResponse;
-  isLoading: boolean;
-  error?: string;
+    assignment_id: string
+    task_id: string
+    employee_id: string
+    description: string
+    status: string
+    created_at: string
+    updated_at: string
+  }
+  inspections?: InspectionResponse
+  isLoading: boolean
+  error?: string
 }
 
 const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
@@ -38,60 +39,61 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
   isLoading,
   error,
 }) => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { t } = useTranslation()
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   // Handle ESC key press
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        onClose()
       }
-    };
-    window.addEventListener('keydown', handleEsc);
+    }
+    window.addEventListener('keydown', handleEsc)
 
     return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
-  }, [onClose]);
+      window.removeEventListener('keydown', handleEsc)
+    }
+  }, [onClose])
 
   // Prevent scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = 'auto'
     }
 
     return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isOpen]);
+      document.body.style.overflow = 'auto'
+    }
+  }, [isOpen])
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   // Get status color based on status
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Confirmed':
-        return STATUS_COLORS.IN_PROGRESS;
+        return STATUS_COLORS.IN_PROGRESS
       case 'Reassigned':
-        return STATUS_COLORS.REVIEWING;
+        return STATUS_COLORS.REVIEWING
       case 'InFixing':
-        return STATUS_COLORS.PENDING;
+        return STATUS_COLORS.PENDING
       case 'Fixed':
-        return STATUS_COLORS.RESOLVED;
+        return STATUS_COLORS.RESOLVED
       default:
-        return STATUS_COLORS.PENDING;
+        return STATUS_COLORS.PENDING
     }
-  };
+  }
 
-  const statusColor = getStatusColor(assignment.status);
-  const inspectionsList = inspections?.data || [];
+  const statusColor = getStatusColor(assignment.status)
+  const inspectionsList = inspections?.data || []
 
   // Handle image click to show full image
   const handleImageClick = (imageUrl: string) => {
-    setSelectedImage(imageUrl);
-  };
+    setSelectedImage(imageUrl)
+  }
 
   if (isLoading) {
     return (
@@ -102,7 +104,7 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -118,10 +120,11 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
         >
           {/* Header */}
           <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Inspection Detail</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('taskManagement.inspection.modal.title')}</h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+              title={t('taskManagement.inspection.close')}
             >
               <IoClose className="w-6 h-6" />
             </button>
@@ -151,13 +154,13 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
                   <div className="flex items-center mb-2">
                     <FaUser className="text-gray-400 mr-2" />
                     <span className="text-gray-700 dark:text-gray-300">
-                      ID: {assignment.assignment_id.substring(0, 8)}
+                      {t('taskManagement.inspection.modal.id')}: {assignment.assignment_id.substring(0, 8)}
                     </span>
                   </div>
                   <div className="flex items-center">
                     <FaUser className="text-gray-400 mr-2" />
                     <span className="text-gray-700 dark:text-gray-300">
-                      Staff Id: {assignment.employee_id.substring(0, 8)}
+                      {t('taskManagement.inspection.modal.staffId')}: {assignment.employee_id.substring(0, 8)}
                     </span>
                   </div>
                 </div>
@@ -165,13 +168,13 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
                   <div className="flex items-center mb-2">
                     <FaCalendarAlt className="text-gray-400 mr-2" />
                     <span className="text-gray-700 dark:text-gray-300">
-                      Created: {FORMAT_DATE_TIME(assignment.created_at)}
+                      {t('taskManagement.inspection.modal.created')}: {FORMAT_DATE_TIME(assignment.created_at)}
                     </span>
                   </div>
                   <div className="flex items-center">
                     <FaCalendarAlt className="text-gray-400 mr-2" />
                     <span className="text-gray-700 dark:text-gray-300">
-                      Updated: {FORMAT_DATE_TIME(assignment.updated_at)}
+                      {t('taskManagement.inspection.modal.updated')}: {FORMAT_DATE_TIME(assignment.updated_at)}
                     </span>
                   </div>
                 </div>
@@ -182,21 +185,21 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
             <div className="p-6">
               <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
                 <FaClipboardList className="mr-2" />
-                Inspection ({inspectionsList.length})
+                {t('taskManagement.inspection.modal.inspectionCount', { count: inspectionsList.length })}
               </h4>
 
               {error ? (
                 <div className="text-center py-6">
                   <FaExclamationTriangle className="mx-auto text-yellow-500 text-4xl mb-2" />
                   <p className="text-gray-500 dark:text-gray-400">
-                    Unable to load Inspection data.
+                    {t('taskManagement.inspection.modal.loadError')}
                   </p>
                   <p className="text-red-500 text-sm mt-2">{error}</p>
                 </div>
               ) : inspectionsList.length === 0 ? (
                 <div className="text-center py-6">
                   <FaCheckCircle className="mx-auto text-gray-400 text-4xl mb-2" />
-                  <p className="text-gray-500 dark:text-gray-400">No Inspection data available.</p>
+                  <p className="text-gray-500 dark:text-gray-400">{t('taskManagement.inspection.modal.noData')}</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -208,7 +211,7 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
                       <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b dark:border-gray-600">
                         <div className="flex justify-between items-center">
                           <h4 className="font-medium text-gray-900 dark:text-white">
-                            Inspection #{inspection.inspection_id.substring(0, 8)}
+                            {t('taskManagement.inspection.inspectionNumber', { number: inspection.inspection_id.substring(0, 8) })}
                           </h4>
                           <span className="text-sm text-gray-500 dark:text-gray-400">
                             {FORMAT_DATE_TIME(inspection.created_at)}
@@ -222,21 +225,21 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
                             <div className="flex items-center text-sm mb-2">
                               <FaUser className="text-gray-400 mr-2" />
                               <span className="text-gray-700 dark:text-gray-300">
-                                Staff Id: {inspection.inspected_by.substring(0, 8)}
+                                {t('taskManagement.inspection.modal.staffId')}: {inspection.inspected_by.substring(0, 8)}
                               </span>
                             </div>
 
                             <div className="flex items-center text-sm mb-2">
                               <FaClipboardList className="text-gray-400 mr-2" />
                               <span className="text-gray-700 dark:text-gray-300">
-                                Description: {inspection.description}
+                                {t('taskManagement.inspection.description')}: {inspection.description}
                               </span>
                             </div>
 
                             <div className="flex items-center text-sm">
                               <FaMoneyBillWave className="text-gray-400 mr-2" />
                               <span className="text-gray-700 dark:text-gray-300">
-                                Total Cost:{' '}
+                                {t('taskManagement.inspection.totalCost')}:{' '}
                                 {new Intl.NumberFormat('vi-VN', {
                                   style: 'currency',
                                   currency: 'VND',
@@ -250,7 +253,7 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
                               <div className="flex items-center text-sm mb-2">
                                 <FaImages className="text-gray-400 mr-2" />
                                 <span className="text-gray-700 dark:text-gray-300">
-                                  Images ({inspection.image_urls.length})
+                                  {t('taskManagement.inspection.modal.imageCount', { count: inspection.image_urls.length })}
                                 </span>
                               </div>
 
@@ -294,6 +297,7 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
               <button
                 onClick={() => setSelectedImage(null)}
                 className="absolute -top-10 right-0 text-white hover:text-gray-300"
+                title={t('taskManagement.inspection.close')}
               >
                 <IoClose className="w-8 h-8" />
               </button>
@@ -307,7 +311,7 @@ const SimpleInspectionModal: React.FC<SimpleInspectionModalProps> = ({
         </>
       )}
     </>
-  );
-};
+  )
+}
 
-export default SimpleInspectionModal;
+export default SimpleInspectionModal

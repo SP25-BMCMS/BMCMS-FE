@@ -1,102 +1,104 @@
-import React, { useState } from 'react';
-import { Dialog } from '@headlessui/react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
-import { AxiosError } from 'axios';
-import { ACTIVE, INACTIVE } from '@/constants/colors';
-import materialsApi, { Material } from '@/services/materials';
-import UpdateMaterialModal from './UpdateMaterialModal';
-import UpdateUnitPriceModal from './UpdateUnitPriceModal';
-import UpdateStockQuantityModal from './UpdateStockQuantityModal';
-import UpdateStatusModal from './UpdateStatusModal';
-import { DollarSign, Box, RefreshCw, Calendar, Edit, Tag, FileText, Info } from 'lucide-react';
+import React, { useState } from 'react'
+import { Dialog } from '@headlessui/react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'react-hot-toast'
+import { AxiosError } from 'axios'
+import { ACTIVE, INACTIVE } from '@/constants/colors'
+import materialsApi, { Material } from '@/services/materials'
+import UpdateMaterialModal from './UpdateMaterialModal'
+import UpdateUnitPriceModal from './UpdateUnitPriceModal'
+import UpdateStockQuantityModal from './UpdateStockQuantityModal'
+import UpdateStatusModal from './UpdateStatusModal'
+import { DollarSign, Box, RefreshCw, Calendar, Edit, Tag, FileText, Info } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface MaterialDetailModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  material: Material;
+  isOpen: boolean
+  onClose: () => void
+  material: Material
 }
 
 const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClose, material }) => {
-  const queryClient = useQueryClient();
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isUnitPriceModalOpen, setIsUnitPriceModalOpen] = useState(false);
-  const [isStockQuantityModalOpen, setIsStockQuantityModalOpen] = useState(false);
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+  const [isUnitPriceModalOpen, setIsUnitPriceModalOpen] = useState(false)
+  const [isStockQuantityModalOpen, setIsStockQuantityModalOpen] = useState(false)
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
 
   // Update material mutation
   const updateMaterialMutation = useMutation({
     mutationFn: (data: Partial<Material>) =>
       materialsApi.updateMaterial(material.material_id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] });
-      setIsUpdateModalOpen(false);
-      toast.success('Material updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      setIsUpdateModalOpen(false)
+      toast.success(t('materialManagement.updateSuccess'))
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data?.message || 'Failed to update material');
+      toast.error(error.response?.data?.message || t('materialManagement.updateError'))
     },
-  });
+  })
 
   // Update unit price mutation
   const updateUnitPriceMutation = useMutation({
     mutationFn: (unitPrice: string) =>
       materialsApi.updateUnitPrice(material.material_id, unitPrice),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] });
-      setIsUnitPriceModalOpen(false);
-      toast.success('Unit price updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      setIsUnitPriceModalOpen(false)
+      toast.success(t('materialManagement.unitPriceUpdateSuccess'))
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data?.message || 'Failed to update unit price');
+      toast.error(error.response?.data?.message || t('materialManagement.unitPriceUpdateError'))
     },
-  });
+  })
 
   // Update stock quantity mutation
   const updateStockQuantityMutation = useMutation({
     mutationFn: (stockQuantity: number) =>
       materialsApi.updateStockQuantity(material.material_id, stockQuantity),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] });
-      setIsStockQuantityModalOpen(false);
-      toast.success('Stock quantity updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      setIsStockQuantityModalOpen(false)
+      toast.success(t('materialManagement.stockQuantityUpdateSuccess'))
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data?.message || 'Failed to update stock quantity');
+      toast.error(error.response?.data?.message || t('materialManagement.stockQuantityUpdateError'))
     },
-  });
+  })
 
   // Update status mutation
   const updateStatusMutation = useMutation({
     mutationFn: (status: 'ACTIVE' | 'INACTIVE') =>
       materialsApi.updateStatus(material.material_id, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] });
-      setIsStatusModalOpen(false);
-      toast.success('Status updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      setIsStatusModalOpen(false)
+      toast.success(t('materialManagement.statusUpdateSuccess'))
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data?.message || 'Failed to update status');
+      toast.error(error.response?.data?.message || t('materialManagement.statusUpdateError'))
     },
-  });
+  })
 
   // Format price to VND
   const formatPrice = (price: string) => {
-    if (!price) return '0 VND';
+    if (!price) return '0 VND'
 
     try {
-      const numericPrice = parseInt(price);
-      if (isNaN(numericPrice)) return '0 VND';
+      const numericPrice = parseInt(price)
+      if (isNaN(numericPrice)) return '0 VND'
 
       return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
         currency: 'VND',
         maximumFractionDigits: 0,
-      }).format(numericPrice);
+      }).format(numericPrice)
     } catch (error) {
-      return '0 VND';
+      return '0 VND'
     }
-  };
+  }
 
   return (
     <>
@@ -107,13 +109,14 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <Dialog.Title className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Material Details
+                  {t('materialManagement.details')}
                 </Dialog.Title>
                 <button
                   onClick={onClose}
                   className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                  aria-label={t('common.close')}
                 >
-                  <span className="sr-only">Close</span>
+                  <span className="sr-only">{t('common.close')}</span>
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
@@ -128,14 +131,13 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2 flex items-center">
-                    <Tag className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" /> Basic
-                    Information
+                    <Tag className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" /> {t('materialManagement.basicInfo')}
                   </h2>
                   <dl className="space-y-4">
                     <div></div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
-                        <Tag className="w-4 h-4 mr-2 text-green-500" /> Name
+                        <Tag className="w-4 h-4 mr-2 text-green-500" /> {t('materialManagement.name')}
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         {material.name}
@@ -143,7 +145,7 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
-                        <FileText className="w-4 h-4 mr-2 text-orange-500" /> Description
+                        <FileText className="w-4 h-4 mr-2 text-orange-500" /> {t('materialManagement.description')}
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         {material.description}
@@ -154,13 +156,12 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
 
                 <div>
                   <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2 flex items-center">
-                    <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" /> Additional
-                    Information
+                    <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" /> {t('materialManagement.additionalInfo')}
                   </h2>
                   <dl className="space-y-4">
                     <div>
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
-                        <DollarSign className="w-4 h-4 mr-2 text-green-500" /> Unit Price
+                        <DollarSign className="w-4 h-4 mr-2 text-green-500" /> {t('materialManagement.unitPrice')}
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
                         <span className="bg-green-50 dark:bg-green-900 px-2 py-1 rounded text-green-700 dark:text-green-300">
@@ -169,6 +170,7 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
                         <button
                           onClick={() => setIsUnitPriceModalOpen(true)}
                           className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200"
+                          title={t('materialManagement.edit')}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -176,23 +178,23 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
-                        <Box className="w-4 h-4 mr-2 text-blue-500" /> Stock Quantity
+                        <Box className="w-4 h-4 mr-2 text-blue-500" /> {t('materialManagement.stockQuantity')}
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
                         <span
-                          className={`px-2 py-1 rounded ${
-                            material.stock_quantity > 10
-                              ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                              : material.stock_quantity > 0
-                                ? 'bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300'
-                                : 'bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300'
-                          }`}
+                          className={`px-2 py-1 rounded ${material.stock_quantity > 10
+                            ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                            : material.stock_quantity > 0
+                              ? 'bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300'
+                              : 'bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300'
+                            }`}
                         >
-                          {material.stock_quantity} units
+                          {material.stock_quantity} {t('materialManagement.materialUnit')}
                         </span>
                         <button
                           onClick={() => setIsStockQuantityModalOpen(true)}
                           className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200"
+                          title={t('materialManagement.edit')}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -200,18 +202,19 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
-                        <RefreshCw className="w-4 h-4 mr-2 text-purple-500" /> Status
+                        <RefreshCw className="w-4 h-4 mr-2 text-purple-500" /> {t('materialManagement.materialStatus')}
                       </dt>
                       <dd className="mt-1 flex items-center">
                         <span
                           className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full
                             ${material.status === 'ACTIVE' ? ACTIVE : INACTIVE}`}
                         >
-                          {material.status}
+                          {material.status === 'ACTIVE' ? t('materialManagement.filterOptions.status.active') : t('materialManagement.filterOptions.status.inactive')}
                         </span>
                         <button
                           onClick={() => setIsStatusModalOpen(true)}
                           className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200"
+                          title={t('materialManagement.edit')}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -219,7 +222,7 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
-                        <Calendar className="w-4 h-4 mr-2 text-amber-500" /> Created At
+                        <Calendar className="w-4 h-4 mr-2 text-amber-500" /> {t('materialManagement.createdAt')}
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         {new Date(material.created_at).toLocaleString('vi-VN')}
@@ -227,7 +230,7 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
-                        <Calendar className="w-4 h-4 mr-2 text-indigo-500" /> Updated At
+                        <Calendar className="w-4 h-4 mr-2 text-indigo-500" /> {t('materialManagement.updatedAt')}
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         {new Date(material.updated_at).toLocaleString('vi-VN')}
@@ -242,13 +245,13 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
                   onClick={() => setIsUpdateModalOpen(true)}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center"
                 >
-                  <Edit className="w-4 h-4 mr-2" /> Edit Material
+                  <Edit className="w-4 h-4 mr-2" /> {t('materialManagement.editMaterial')}
                 </button>
                 <button
                   onClick={onClose}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
                 >
-                  Close
+                  {t('common.close')}
                 </button>
               </div>
             </div>
@@ -288,7 +291,7 @@ const MaterialDetailModal: React.FC<MaterialDetailModalProps> = ({ isOpen, onClo
         isLoading={updateStatusMutation.isPending}
       />
     </>
-  );
-};
+  )
+}
 
-export default MaterialDetailModal;
+export default MaterialDetailModal

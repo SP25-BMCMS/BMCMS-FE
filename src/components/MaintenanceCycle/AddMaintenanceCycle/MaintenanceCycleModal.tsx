@@ -3,6 +3,7 @@ import { createMaintenanceCycle, updateMaintenanceCycle } from '@/services/maint
 import { toast } from 'react-hot-toast'
 import { X } from 'lucide-react'
 import { MaintenanceCycle } from '@/types'
+import { useTranslation } from 'react-i18next'
 
 interface MaintenanceCycleModalProps {
   isOpen: boolean
@@ -13,32 +14,32 @@ interface MaintenanceCycleModalProps {
 }
 
 const frequencyOptions = [
-  { value: 'Daily', label: 'Daily' },
-  { value: 'Weekly', label: 'Weekly' },
-  { value: 'Monthly', label: 'Monthly' },
-  { value: 'Yearly', label: 'Yearly' },
-  { value: 'Specific', label: 'Specific' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+  { value: 'specific', label: 'Specific' },
 ]
 
 const basisOptions = [
-  { value: 'ManufacturerRecommendation', label: 'Manufacturer Recommendation' },
-  { value: 'LegalStandard', label: 'Legal Standard' },
-  { value: 'OperationalExperience', label: 'Operational Experience' },
-  { value: 'Other', label: 'Other' },
+  { value: 'manufacturerrecommendation', label: 'Manufacturer Recommendation' },
+  { value: 'legalstandard', label: 'Legal Standard' },
+  { value: 'operationalexperience', label: 'Operational Experience' },
+  { value: 'other', label: 'Other' },
 ]
 
 const deviceTypeOptions = [
-  { value: 'Elevator', label: 'Elevator' },
-  { value: 'FireProtection', label: 'Fire Protection' },
-  { value: 'Electrical', label: 'Electrical' },
-  { value: 'Plumbing', label: 'Plumbing' },
-  { value: 'HVAC', label: 'HVAC' },
-  { value: 'CCTV', label: 'CCTV' },
-  { value: 'Generator', label: 'Generator' },
-  { value: 'Lighting', label: 'Lighting' },
-  { value: 'AutomaticDoor', label: 'Automatic Door' },
-  { value: 'FireExtinguisher', label: 'Fire Extinguisher' },
-  { value: 'Other', label: 'Other' },
+  { value: 'elevator', label: 'Elevator' },
+  { value: 'fireprotection', label: 'Fire Protection' },
+  { value: 'electrical', label: 'Electrical' },
+  { value: 'plumbing', label: 'Plumbing' },
+  { value: 'hvac', label: 'HVAC' },
+  { value: 'cctv', label: 'CCTV' },
+  { value: 'generator', label: 'Generator' },
+  { value: 'lighting', label: 'Lighting' },
+  { value: 'automaticdoor', label: 'Automatic Door' },
+  { value: 'fireextinguisher', label: 'Fire Extinguisher' },
+  { value: 'other', label: 'Other' },
 ]
 
 const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
@@ -48,6 +49,7 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
   editMode = false,
   cycleData,
 }) => {
+  const { t } = useTranslation()
   const [deviceType, setDeviceType] = useState('')
   const [frequency, setFrequency] = useState('')
   const [basis, setBasis] = useState('')
@@ -80,7 +82,7 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
     e.preventDefault()
 
     if (!deviceType || !frequency || !basis) {
-      toast.error('Please fill in all required fields')
+      toast.error(t('maintenanceCycle.modal.deviceType.required'))
       return
     }
 
@@ -114,14 +116,14 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
           reason,
           updated_by: userId
         })
-        toast.success('Maintenance cycle updated successfully')
+        toast.success(t('maintenanceCycle.modal.buttons.updating'))
       } else {
         await createMaintenanceCycle({
           device_type: deviceType,
           frequency,
           basis
         })
-        toast.success('Maintenance cycle created successfully')
+        toast.success(t('maintenanceCycle.modal.buttons.creating'))
       }
       resetForm()
       onSuccess()
@@ -142,29 +144,31 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
         <button
           onClick={handleClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          aria-label={t('maintenanceCycle.modal.buttons.cancel')}
         >
           <X size={20} />
         </button>
 
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-          {editMode ? 'Edit' : 'Create'} Maintenance Cycle
+          {editMode ? t('maintenanceCycle.modal.title.edit') : t('maintenanceCycle.modal.title.create')}
         </h2>
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Device Type <span className="text-red-500">*</span>
+                {t('maintenanceCycle.modal.deviceType.label')} <span className="text-red-500">*</span>
               </label>
               <select
                 value={deviceType}
                 onChange={e => setDeviceType(e.target.value)}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                aria-label={t('maintenanceCycle.modal.deviceType.label')}
               >
-                <option value="">Select Device Type</option>
+                <option value="">{t('maintenanceCycle.modal.deviceType.required')}</option>
                 {deviceTypeOptions.map(option => (
                   <option key={option.value} value={option.value}>
-                    {option.label}
+                    {t(`maintenanceCycle.filterOptions.deviceType.${option.value}`)}
                   </option>
                 ))}
               </select>
@@ -172,17 +176,18 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Frequency <span className="text-red-500">*</span>
+                {t('maintenanceCycle.modal.frequency.label')} <span className="text-red-500">*</span>
               </label>
               <select
                 value={frequency}
                 onChange={e => setFrequency(e.target.value)}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                aria-label={t('maintenanceCycle.modal.frequency.label')}
               >
-                <option value="">Select Frequency</option>
+                <option value="">{t('maintenanceCycle.modal.frequency.required')}</option>
                 {frequencyOptions.map(option => (
                   <option key={option.value} value={option.value}>
-                    {option.label}
+                    {t(`maintenanceCycle.filterOptions.frequency.${option.value}`)}
                   </option>
                 ))}
               </select>
@@ -190,17 +195,18 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Basis <span className="text-red-500">*</span>
+                {t('maintenanceCycle.modal.basis.label')} <span className="text-red-500">*</span>
               </label>
               <select
                 value={basis}
                 onChange={e => setBasis(e.target.value)}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+                aria-label={t('maintenanceCycle.modal.basis.label')}
               >
-                <option value="">Select Basis</option>
+                <option value="">{t('maintenanceCycle.modal.basis.required')}</option>
                 {basisOptions.map(option => (
                   <option key={option.value} value={option.value}>
-                    {option.label}
+                    {t(`maintenanceCycle.filterOptions.basis.${option.value}`)}
                   </option>
                 ))}
               </select>
@@ -209,7 +215,7 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
             {editMode && (
               <div>
                 <label htmlFor="reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Reason for Change <span className="text-red-500">*</span>
+                  {t('maintenanceCycle.modal.reason.label')} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   id="reason"
@@ -218,7 +224,7 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
                   value={reason}
                   onChange={e => setReason(e.target.value)}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
-                  placeholder="Enter reason for change..."
+                  placeholder={t('maintenanceCycle.modal.reason.placeholder')}
                   required
                 />
               </div>
@@ -231,7 +237,7 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
               onClick={handleClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
             >
-              Cancel
+              {t('maintenanceCycle.modal.buttons.cancel')}
             </button>
             <button
               type="submit"
@@ -241,11 +247,11 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
             >
               {isSubmitting
                 ? editMode
-                  ? 'Updating...'
-                  : 'Creating...'
+                  ? t('maintenanceCycle.modal.buttons.updating')
+                  : t('maintenanceCycle.modal.buttons.creating')
                 : editMode
-                  ? 'Update'
-                  : 'Create'}
+                  ? t('maintenanceCycle.modal.buttons.update')
+                  : t('maintenanceCycle.modal.buttons.create')}
             </button>
           </div>
         </form>

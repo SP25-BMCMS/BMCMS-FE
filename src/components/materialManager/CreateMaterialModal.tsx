@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog } from '@headlessui/react';
-import { Material } from '@/services/materials';
-import { useTheme } from '@/contexts/ThemeContext';
-import { X, DollarSign, Layers, FileText, Package, Activity } from 'lucide-react';
-import { ACTIVE, INACTIVE } from '@/constants/colors';
+import React, { useState, useEffect } from 'react'
+import { Dialog } from '@headlessui/react'
+import { Material } from '@/services/materials'
+import { useTheme } from '@/contexts/ThemeContext'
+import { X, DollarSign, Layers, FileText, Package, Activity } from 'lucide-react'
+import { ACTIVE, INACTIVE } from '@/constants/colors'
+import { useTranslation } from 'react-i18next'
 
 interface CreateMaterialModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: Omit<Material, 'materialId' | 'createdAt' | 'updatedAt'>) => void;
-  isLoading: boolean;
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: (data: Omit<Material, 'materialId' | 'createdAt' | 'updatedAt'>) => void
+  isLoading: boolean
 }
 
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
@@ -18,19 +19,20 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
   onSubmit,
   isLoading,
 }) => {
-  const { theme } = useTheme();
+  const { t } = useTranslation()
+  const { theme } = useTheme()
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     unitPrice: 0,
     stockQuantity: 0,
     status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE', // Default status
-  });
-  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  })
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false)
 
   // Add keyframes for animations
   useEffect(() => {
-    const styleElement = document.createElement('style');
+    const styleElement = document.createElement('style')
     styleElement.textContent = `
             @keyframes modalFadeIn {
                 from {
@@ -90,40 +92,40 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
             .arrow-spin-reverse {
                 animation: arrowSpinReverse 0.3s ease forwards;
             }
-        `;
-    document.head.appendChild(styleElement);
+        `
+    document.head.appendChild(styleElement)
 
     return () => {
-      document.head.removeChild(styleElement);
-    };
-  }, []);
+      document.head.removeChild(styleElement)
+    }
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     // Transform the form data to match the expected Material format
     const materialData = {
       name: formData.name,
       description: formData.description,
       unit_price: formData.unitPrice.toString(),
       stock_quantity: formData.stockQuantity,
-    };
-    onSubmit(materialData as any);
-  };
+    }
+    onSubmit(materialData as any)
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
+      const target = event.target as HTMLElement
       if (!target.closest('.status-dropdown') && showStatusDropdown) {
-        setShowStatusDropdown(false);
+        setShowStatusDropdown(false)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showStatusDropdown]);
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showStatusDropdown])
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -137,12 +139,12 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
         >
           <div className="flex items-center justify-between mb-6">
             <Dialog.Title className="text-xl font-semibold text-gray-900 dark:text-white">
-              Create New Material
+              {t('materialManagement.create.title')}
             </Dialog.Title>
             <button
               onClick={onClose}
               className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </button>
@@ -154,7 +156,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
               style={{ animation: 'fieldFadeIn 0.3s ease-out forwards', animationDelay: '0.05s' }}
             >
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Material Name
+                {t('materialManagement.create.name')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -166,8 +168,8 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
                   required
-                  title="Material name"
-                  placeholder="Enter material name"
+                  title={t('materialManagement.create.name')}
+                  placeholder={t('materialManagement.create.namePlaceholder')}
                 />
               </div>
             </div>
@@ -177,7 +179,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
               style={{ animation: 'fieldFadeIn 0.3s ease-out forwards', animationDelay: '0.1s' }}
             >
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Description
+                {t('materialManagement.create.description')}
               </label>
               <div className="relative">
                 <div className="absolute top-3 left-3 flex items-start pointer-events-none">
@@ -189,8 +191,8 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                   className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-none transition-colors"
                   rows={4}
                   required
-                  title="Material description"
-                  placeholder="Enter material description"
+                  title={t('materialManagement.create.description')}
+                  placeholder={t('materialManagement.create.descriptionPlaceholder')}
                 />
               </div>
             </div>
@@ -201,7 +203,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                 style={{ animation: 'fieldFadeIn 0.3s ease-out forwards', animationDelay: '0.15s' }}
               >
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Unit Price
+                  {t('materialManagement.create.unitPrice')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -217,8 +219,8 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                     min="0"
                     step="0.01"
                     required
-                    title="Unit price"
-                    placeholder="0.00"
+                    title={t('materialManagement.create.unitPrice')}
+                    placeholder={t('materialManagement.create.unitPricePlaceholder')}
                   />
                 </div>
               </div>
@@ -228,7 +230,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                 style={{ animation: 'fieldFadeIn 0.3s ease-out forwards', animationDelay: '0.2s' }}
               >
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Stock Quantity
+                  {t('materialManagement.create.stockQuantity')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -243,8 +245,8 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                     className="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
                     min="0"
                     required
-                    title="Stock quantity"
-                    placeholder="0"
+                    title={t('materialManagement.create.stockQuantity')}
+                    placeholder={t('materialManagement.create.stockQuantityPlaceholder')}
                   />
                 </div>
               </div>
@@ -256,7 +258,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
               style={{ animation: 'fieldFadeIn 0.3s ease-out forwards', animationDelay: '0.25s' }}
             >
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Status
+                {t('materialManagement.create.status')}
               </label>
               <div
                 className="relative status-dropdown"
@@ -274,11 +276,10 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                 >
                   <div className="flex items-center">
                     <span
-                      className={`inline-block w-3 h-3 rounded-full mr-2 ${
-                        formData.status === 'ACTIVE' ? 'bg-green-500' : 'bg-red-500'
-                      }`}
+                      className={`inline-block w-3 h-3 rounded-full mr-2 ${formData.status === 'ACTIVE' ? 'bg-green-500' : 'bg-red-500'
+                        }`}
                     ></span>
-                    <span>{formData.status}</span>
+                    <span>{formData.status === 'ACTIVE' ? t('materialManagement.create.statusActive') : t('materialManagement.create.statusInactive')}</span>
                   </div>
                   <svg
                     className={showStatusDropdown ? 'arrow-spin' : 'arrow-spin-reverse'}
@@ -309,21 +310,20 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          setFormData({ ...formData, status: 'ACTIVE' });
-                          setShowStatusDropdown(false);
+                          setFormData({ ...formData, status: 'ACTIVE' })
+                          setShowStatusDropdown(false)
                         }}
-                        className={`flex items-center w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-150 ${
-                          formData.status === 'ACTIVE'
-                            ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
-                            : 'text-gray-700 dark:text-gray-300'
-                        }`}
+                        className={`flex items-center w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-150 ${formData.status === 'ACTIVE'
+                          ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
+                          : 'text-gray-700 dark:text-gray-300'
+                          }`}
                       >
                         <span
                           className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full mr-2 ${ACTIVE}`}
                         >
-                          ACTIVE
+                          {t('materialManagement.create.statusActive')}
                         </span>
-                        <span>Available for use</span>
+                        <span>{t('materialManagement.create.statusActive')}</span>
                         {formData.status === 'ACTIVE' && (
                           <svg
                             className="w-4 h-4 ml-auto text-blue-600 dark:text-blue-400"
@@ -344,21 +344,20 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          setFormData({ ...formData, status: 'INACTIVE' });
-                          setShowStatusDropdown(false);
+                          setFormData({ ...formData, status: 'INACTIVE' })
+                          setShowStatusDropdown(false)
                         }}
-                        className={`flex items-center w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-150 ${
-                          formData.status === 'INACTIVE'
-                            ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
-                            : 'text-gray-700 dark:text-gray-300'
-                        }`}
+                        className={`flex items-center w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-150 ${formData.status === 'INACTIVE'
+                          ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
+                          : 'text-gray-700 dark:text-gray-300'
+                          }`}
                       >
                         <span
                           className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full mr-2 ${INACTIVE}`}
                         >
-                          INACTIVE
+                          {t('materialManagement.create.statusInactive')}
                         </span>
-                        <span>Not available for use</span>
+                        <span>{t('materialManagement.create.statusInactive')}</span>
                         {formData.status === 'INACTIVE' && (
                           <svg
                             className="w-4 h-4 ml-auto text-blue-600 dark:text-blue-400"
@@ -391,21 +390,21 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
                 onClick={onClose}
                 className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors"
               >
-                Cancel
+                {t('materialManagement.create.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
                 className="px-4 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isLoading ? 'Creating...' : 'Create Material'}
+                {isLoading ? t('materialManagement.create.creating') : t('materialManagement.create.create')}
               </button>
             </div>
           </form>
         </Dialog.Panel>
       </div>
     </Dialog>
-  );
-};
+  )
+}
 
-export default CreateMaterialModal;
+export default CreateMaterialModal

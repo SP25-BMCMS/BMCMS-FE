@@ -24,6 +24,7 @@ import InspectionDetails from '@/components/TaskManager/InspectionDetails'
 import { StaffData, TaskAssignment, TaskResponse } from '@/types'
 import { toast } from 'react-hot-toast'
 import apiInstance from '@/lib/axios'
+import { useTranslation } from 'react-i18next'
 
 // Extended task data interface that includes both task assignment and crack info
 interface ExtendedTaskData {
@@ -40,11 +41,13 @@ interface ExtendedTaskData {
 }
 
 const TaskDetail: React.FC = () => {
+  const { t } = useTranslation()
   const { taskId } = useParams<{ taskId: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   // Fetch all staff data to map IDs to names
   const { data: staffData } = useQuery({
@@ -71,52 +74,59 @@ const TaskDetail: React.FC = () => {
   const { data: taskData, isLoading } = useQuery({
     queryKey: ['taskAssignments', taskId],
     queryFn: async () => {
-      const response = await tasksApi.getTaskAssignmentsByTaskId(taskId || '')
+      try {
+        const response = await tasksApi.getTaskAssignmentsByTaskId(taskId || '')
 
-      // Also fetch the task details to get crack info if needed
-      if (response.data?.crack_id) {
-        try {
-          // Fetch task with crack info from the tasks API
-          const taskResponse = await tasksApi.getTasks({ search: response.data.task_id })
-          if (taskResponse.data && taskResponse.data.length > 0) {
-            const taskWithCrackInfo = taskResponse.data.find(
-              t => t.task_id === response.data.task_id
-            )
-            if (taskWithCrackInfo) {
-              // Merge the crack info with the task assignments data
-              return {
-                ...response,
-                data: {
-                  ...response.data,
-                  crackInfo: taskWithCrackInfo.crackInfo,
-                  taskAssignments: response.data.taskAssignments.map(assignment => ({
-                    ...assignment,
-                    employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
-                  })),
-                },
+        // Also fetch the task details to get crack info if needed
+        if (response.data?.crack_id) {
+          try {
+            // Fetch task with crack info from the tasks API
+            const taskResponse = await tasksApi.getTasks({ search: response.data.task_id })
+            if (taskResponse.data && taskResponse.data.length > 0) {
+              const taskWithCrackInfo = taskResponse.data.find(
+                t => t.task_id === response.data.task_id
+              )
+              if (taskWithCrackInfo) {
+                // Merge the crack info with the task assignments data
+                return {
+                  ...response,
+                  data: {
+                    ...response.data,
+                    crackInfo: taskWithCrackInfo.crackInfo,
+                    taskAssignments: response.data.taskAssignments.map(assignment => ({
+                      ...assignment,
+                      employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
+                    })),
+                  },
+                }
               }
             }
+          } catch (error) {
+            console.error('Error fetching task with crack info:', error)
           }
-        } catch (error) {
-          console.error('Error fetching task with crack info:', error)
         }
-      }
 
-      // If no crack info or error, return the original response with employee names
-      if (response.data && response.data.taskAssignments) {
-        return {
-          ...response,
-          data: {
-            ...response.data,
-            taskAssignments: response.data.taskAssignments.map(assignment => ({
-              ...assignment,
-              employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
-            })),
-          },
+        // If no crack info or error, return the original response with employee names
+        if (response.data && response.data.taskAssignments) {
+          return {
+            ...response,
+            data: {
+              ...response.data,
+              taskAssignments: response.data.taskAssignments.map(assignment => ({
+                ...assignment,
+                employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
+              })),
+            },
+          }
         }
-      }
 
-      return response
+        return response
+      } catch (error) {
+        console.error('Error fetching task details:', error)
+        throw error
+      } finally {
+        setIsInitialLoading(false)
+      }
     },
     enabled: !!taskId && Object.keys(staffNameMap).length > 0,
     staleTime: 5 * 60 * 1000,
@@ -189,7 +199,7 @@ const TaskDetail: React.FC = () => {
     },
   })
 
-  if (isLoading) {
+  if (isInitialLoading || isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
         <motion.div
@@ -205,7 +215,7 @@ const TaskDetail: React.FC = () => {
     return (
       <div className="p-6 w-full">
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
-          <p>Unable to load job information. Please try again later.</p>
+          <p>{t('taskManagement.detail.error')}</p>
         </div>
       </div>
     )
@@ -293,10 +303,11 @@ const TaskDetail: React.FC = () => {
         <button
           onClick={() => navigate('/tasks')}
           className="mr-4 p-2 bg-white dark:bg-gray-700 rounded-full shadow hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+          title={t('taskManagement.detail.backButton')}
         >
           <IoArrowBack className="text-xl" />
         </button>
-        <h1 className="text-2xl font-bold dark:text-white">Task Assignment</h1>
+        <h1 className="text-2xl font-bold dark:text-white">{t('taskManagement.detail.title')}</h1>
       </div>
 
       {/* Task details card */}
@@ -309,7 +320,7 @@ const TaskDetail: React.FC = () => {
             </div>
             <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
               <FaFileAlt className="mr-1" />
-              <span>Task Reference: {task.task_id.substring(0, 8)}</span>
+              <span>{t('taskManagement.detail.taskReference')}: {task.task_id.substring(0, 8)}</span>
             </div>
           </div>
           <span
@@ -350,13 +361,13 @@ const TaskDetail: React.FC = () => {
           <div className="flex items-center">
             <FaCalendarAlt className="mr-2 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">
-              Created: {FORMAT_DATE_TIME(task.created_at)}
+              {t('taskManagement.detail.created')}: {FORMAT_DATE_TIME(task.created_at)}
             </span>
           </div>
           <div className="flex items-center">
             <FaCalendarAlt className="mr-2 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">
-              Updated: {FORMAT_DATE_TIME(task.updated_at)}
+              {t('taskManagement.detail.updated')}: {FORMAT_DATE_TIME(task.updated_at)}
             </span>
           </div>
 
@@ -366,14 +377,14 @@ const TaskDetail: React.FC = () => {
               <div className="flex items-center">
                 <FaUser className="mr-2 text-gray-500" />
                 <span className="text-gray-700 dark:text-gray-300">
-                  Reported by: {crackInfo.reportedBy?.username || 'Unknown User'}
+                  {t('taskManagement.detail.reportedBy')}: {crackInfo.reportedBy?.username || 'Unknown User'}
                 </span>
               </div>
               {crackInfo.verifiedBy && (
                 <div className="flex items-center">
                   <FaCheckCircle className="mr-2 text-gray-500" />
                   <span className="text-gray-700 dark:text-gray-300">
-                    Verified by: {crackInfo.verifiedBy?.username || 'Unknown User'}
+                    {t('taskManagement.detail.verifiedBy')}: {crackInfo.verifiedBy?.username || 'Unknown User'}
                   </span>
                 </div>
               )}
@@ -381,7 +392,7 @@ const TaskDetail: React.FC = () => {
                 <div className="flex items-center">
                   <FaMapMarkerAlt className="mr-2 text-gray-500" />
                   <span className="text-gray-700 dark:text-gray-300">
-                    Location: {crackInfo.position}
+                    {t('taskManagement.detail.location')}: {crackInfo.position}
                   </span>
                 </div>
               )}
@@ -390,10 +401,10 @@ const TaskDetail: React.FC = () => {
                   <button
                     onClick={handleOpenConfirmModal}
                     className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                    title="Send Maintenance Notification to Residents"
+                    title={t('taskManagement.detail.sendNotification')}
                   >
                     <FaMailBulk className="w-5 h-5 mr-2" />
-                    Send Maintenance Notification to Residents
+                    {t('taskManagement.detail.sendNotification')}
                   </button>
                 </div>
               )}
@@ -412,7 +423,7 @@ const TaskDetail: React.FC = () => {
               style={{ backgroundColor: STATUS_COLORS.IN_PROGRESS.TEXT }}
             ></div>
             <h3 className="font-semibold dark:text-white">
-              Confirmed ({assignmentsByStatus.Confirmed.length})
+              {t('taskManagement.detail.assignments.confirmed')} ({assignmentsByStatus.Confirmed.length})
             </h3>
           </div>
           <div className="p-2 overflow-y-auto max-h-[70vh]">
@@ -425,7 +436,7 @@ const TaskDetail: React.FC = () => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">
-                    Assignment {formatAssignmentNumber(index)}
+                    {t('taskManagement.detail.assignments.assignment')} {formatAssignmentNumber(index)}
                   </h4>
                   {getStatusIcon(assignment.status)}
                 </div>
@@ -446,7 +457,7 @@ const TaskDetail: React.FC = () => {
             ))}
             {assignmentsByStatus.Confirmed.length === 0 && (
               <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                No assignments in this status
+                {t('taskManagement.detail.assignments.noAssignments')}
               </div>
             )}
           </div>
@@ -460,7 +471,7 @@ const TaskDetail: React.FC = () => {
               style={{ backgroundColor: STATUS_COLORS.REVIEWING.TEXT }}
             ></div>
             <h3 className="font-semibold dark:text-white">
-              Reassigned ({assignmentsByStatus.Reassigned.length})
+              {t('taskManagement.detail.assignments.reassigned')} ({assignmentsByStatus.Reassigned.length})
             </h3>
           </div>
           <div className="p-2 overflow-y-auto max-h-[70vh]">
@@ -473,7 +484,7 @@ const TaskDetail: React.FC = () => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">
-                    Assignment {formatAssignmentNumber(index)}
+                    {t('taskManagement.detail.assignments.assignment')} {formatAssignmentNumber(index)}
                   </h4>
                   {getStatusIcon(assignment.status)}
                 </div>
@@ -494,7 +505,7 @@ const TaskDetail: React.FC = () => {
             ))}
             {assignmentsByStatus.Reassigned.length === 0 && (
               <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                No assignments in this status
+                {t('taskManagement.detail.assignments.noAssignments')}
               </div>
             )}
           </div>
@@ -508,7 +519,7 @@ const TaskDetail: React.FC = () => {
               style={{ backgroundColor: STATUS_COLORS.PENDING.TEXT }}
             ></div>
             <h3 className="font-semibold dark:text-white">
-              In Fixing ({assignmentsByStatus.InFixing.length})
+              {t('taskManagement.detail.assignments.inFixing')} ({assignmentsByStatus.InFixing.length})
             </h3>
           </div>
           <div className="p-2 overflow-y-auto max-h-[70vh]">
@@ -521,7 +532,7 @@ const TaskDetail: React.FC = () => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">
-                    Assignment {formatAssignmentNumber(index)}
+                    {t('taskManagement.detail.assignments.assignment')} {formatAssignmentNumber(index)}
                   </h4>
                   {getStatusIcon(assignment.status)}
                 </div>
@@ -542,7 +553,7 @@ const TaskDetail: React.FC = () => {
             ))}
             {assignmentsByStatus.InFixing.length === 0 && (
               <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                No assignments in this status
+                {t('taskManagement.detail.assignments.noAssignments')}
               </div>
             )}
           </div>
@@ -556,7 +567,7 @@ const TaskDetail: React.FC = () => {
               style={{ backgroundColor: STATUS_COLORS.RESOLVED.TEXT }}
             ></div>
             <h3 className="font-semibold dark:text-white">
-              Fixed ({assignmentsByStatus.Fixed.length})
+              {t('taskManagement.detail.assignments.fixed')} ({assignmentsByStatus.Fixed.length})
             </h3>
           </div>
           <div className="p-2 overflow-y-auto max-h-[70vh]">
@@ -569,7 +580,7 @@ const TaskDetail: React.FC = () => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm dark:text-white line-clamp-2">
-                    Assignment {formatAssignmentNumber(index)}
+                    {t('taskManagement.detail.assignments.assignment')} {formatAssignmentNumber(index)}
                   </h4>
                   {getStatusIcon(assignment.status)}
                 </div>
@@ -590,7 +601,7 @@ const TaskDetail: React.FC = () => {
             ))}
             {assignmentsByStatus.Fixed.length === 0 && (
               <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                No assignments in this status
+                {t('taskManagement.detail.assignments.noAssignments')}
               </div>
             )}
           </div>
@@ -622,10 +633,10 @@ const TaskDetail: React.FC = () => {
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/20 mb-4">
                 <FaMailBulk className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Confirm Notification</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('taskManagement.detail.confirmNotification.title')}</h3>
               <div className="mt-2">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Are you sure you want to send maintenance notification to residents and mark this task as completed?
+                  {t('taskManagement.detail.confirmNotification.message')}
                 </p>
               </div>
             </div>
@@ -636,14 +647,14 @@ const TaskDetail: React.FC = () => {
                 onClick={handleCloseConfirmModal}
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                Cancel
+                {t('taskManagement.detail.confirmNotification.cancel')}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmAndSend}
                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none"
               >
-                Send & Complete
+                {t('taskManagement.detail.confirmNotification.sendAndComplete')}
               </button>
             </div>
           </div>

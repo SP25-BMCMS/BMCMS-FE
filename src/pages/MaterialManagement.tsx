@@ -1,106 +1,108 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Table from '@/components/Table';
-import DropdownMenu from '@/components/DropDownMenu';
-import SearchInput from '@/components/SearchInput';
-import FilterDropdown from '@/components/FilterDropdown';
-import Pagination from '@/components/Pagination';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
-import { AxiosError } from 'axios';
-import { Dialog } from '@headlessui/react';
-import { ACTIVE, INACTIVE } from '@/constants/colors';
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import Table from '@/components/Table'
+import DropdownMenu from '@/components/DropDownMenu'
+import SearchInput from '@/components/SearchInput'
+import FilterDropdown from '@/components/FilterDropdown'
+import Pagination from '@/components/Pagination'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import { toast } from 'react-hot-toast'
+import { AxiosError } from 'axios'
+import { Dialog } from '@headlessui/react'
+import { ACTIVE, INACTIVE } from '@/constants/colors'
 import materialsApi, {
   Material,
   MaterialListParams,
   CreateMaterialData,
   MaterialResponse,
-} from '@/services/materials';
-import CreateMaterialModal from '@/components/materialManager/CreateMaterialModal';
-import UpdateUnitPriceModal from '@/components/materialManager/UpdateUnitPriceModal';
-import UpdateStockQuantityModal from '@/components/materialManager/UpdateStockQuantityModal';
-import UpdateStatusModal from '@/components/materialManager/UpdateStatusModal';
-import MaterialDetailModal from '@/components/materialManager/MaterialDetailModal';
-import AddButton from '@/components/AddButton';
-import { Plus } from 'lucide-react';
+} from '@/services/materials'
+import CreateMaterialModal from '@/components/materialManager/CreateMaterialModal'
+import UpdateUnitPriceModal from '@/components/materialManager/UpdateUnitPriceModal'
+import UpdateStockQuantityModal from '@/components/materialManager/UpdateStockQuantityModal'
+import UpdateStatusModal from '@/components/materialManager/UpdateStatusModal'
+import MaterialDetailModal from '@/components/materialManager/MaterialDetailModal'
+import AddButton from '@/components/AddButton'
+import { Plus } from 'lucide-react'
 
 // Rename to MaterialColumn to avoid conflict with imported Column
 interface MaterialColumn<T> {
-  key: keyof T | string;
-  title: string;
-  render?: (item: T, index?: number) => React.ReactNode;
-  width?: string;
+  key: keyof T | string
+  title: string
+  render?: (item: T, index?: number) => React.ReactNode
+  width?: string
 }
 
 const MaterialManagement: React.FC = () => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [selectedPriceRange, setSelectedPriceRange] = useState<string>('all');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isUnitPriceModalOpen, setIsUnitPriceModalOpen] = useState(false);
-  const [isStockQuantityModalOpen, setIsStockQuantityModalOpen] = useState(false);
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string>('all')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isUnitPriceModalOpen, setIsUnitPriceModalOpen] = useState(false)
+  const [isStockQuantityModalOpen, setIsStockQuantityModalOpen] = useState(false)
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
   const statusOptions = [
-    { value: 'all', label: 'All Status' },
-    { value: 'ACTIVE', label: 'Active' },
-    { value: 'INACTIVE', label: 'Inactive' },
-  ];
+    { value: 'all', label: t('materialManagement.filterOptions.status.all') },
+    { value: 'ACTIVE', label: t('materialManagement.filterOptions.status.active') },
+    { value: 'INACTIVE', label: t('materialManagement.filterOptions.status.inactive') },
+  ]
 
   const priceRangeOptions = [
-    { value: 'all', label: 'All Price' },
-    { value: '0-100000', label: 'Under 100,000 VND' },
-    { value: '100000-500000', label: 'From 100,000 - 500,000 VND' },
-    { value: '500000-1000000', label: 'From 500,000 - 1,000,000 VND' },
-    { value: '1000000+', label: 'Above 1,000,000 VND' },
-  ];
+    { value: 'all', label: t('materialManagement.filterOptions.price.all') },
+    { value: '0-100000', label: t('materialManagement.filterOptions.price.under100k') },
+    { value: '100000-500000', label: t('materialManagement.filterOptions.price.100k-500k') },
+    { value: '500000-1000000', label: t('materialManagement.filterOptions.price.500k-1m') },
+    { value: '1000000+', label: t('materialManagement.filterOptions.price.above1m') },
+  ]
 
   // Build query params
   const getQueryParams = (): MaterialListParams => {
     const params: MaterialListParams = {
       page: currentPage,
       limit: itemsPerPage,
-    };
+    }
 
     if (searchTerm) {
-      params.search = searchTerm;
+      params.search = searchTerm
     }
 
     if (selectedStatus !== 'all') {
-      params.status = selectedStatus as 'ACTIVE' | 'INACTIVE';
+      params.status = selectedStatus as 'ACTIVE' | 'INACTIVE'
     }
 
-    return params;
-  };
+    return params
+  }
 
   // Function to filter materials by price range
   const filterByPriceRange = (materials: Material[]) => {
-    if (selectedPriceRange === 'all') return materials;
+    if (selectedPriceRange === 'all') return materials
 
     return materials.filter(material => {
-      const price = parseInt(material.unit_price);
+      const price = parseInt(material.unit_price)
 
       switch (selectedPriceRange) {
         case '0-100000':
-          return price < 100000;
+          return price < 100000
         case '100000-500000':
-          return price >= 100000 && price < 500000;
+          return price >= 100000 && price < 500000
         case '500000-1000000':
-          return price >= 500000 && price < 1000000;
+          return price >= 500000 && price < 1000000
         case '1000000+':
-          return price >= 1000000;
+          return price >= 1000000
         default:
-          return true;
+          return true
       }
-    });
-  };
+    })
+  }
 
   // Fetch materials using React Query
   const {
@@ -110,8 +112,8 @@ const MaterialManagement: React.FC = () => {
   } = useQuery<MaterialResponse>({
     queryKey: ['materials', currentPage, itemsPerPage, selectedStatus, searchTerm],
     queryFn: async () => {
-      const params = getQueryParams();
-      return materialsApi.getMaterialList(params);
+      const params = getQueryParams()
+      return materialsApi.getMaterialList(params)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -119,135 +121,135 @@ const MaterialManagement: React.FC = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     retry: false,
-  });
+  })
 
   // Apply client-side filtering for price ranges
-  const filteredMaterials = materialsData ? filterByPriceRange(materialsData.data.data) : [];
+  const filteredMaterials = materialsData ? filterByPriceRange(materialsData.data.data) : []
 
   // Create material mutation
   const createMaterialMutation = useMutation({
     mutationFn: materialsApi.createMaterial,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] });
-      setIsCreateModalOpen(false);
-      toast.success('Material created successfully');
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      setIsCreateModalOpen(false)
+      toast.success(t('materialManagement.createSuccess'))
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data?.message || 'Failed to create material');
+      toast.error(error.response?.data?.message || t('materialManagement.createError'))
     },
-  });
+  })
 
   // Update unit price mutation
   const updateUnitPriceMutation = useMutation({
     mutationFn: (unitPrice: number) =>
       materialsApi.updateUnitPrice(selectedMaterial?.material_id || '', unitPrice.toString()),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] });
-      setIsUnitPriceModalOpen(false);
-      toast.success('Unit price updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      setIsUnitPriceModalOpen(false)
+      toast.success(t('materialManagement.unitPriceUpdateSuccess'))
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data?.message || 'Failed to update unit price');
+      toast.error(error.response?.data?.message || t('materialManagement.unitPriceUpdateError'))
     },
-  });
+  })
 
   // Update stock quantity mutation
   const updateStockQuantityMutation = useMutation({
     mutationFn: ({ materialId, stockQuantity }: { materialId: string; stockQuantity: number }) =>
       materialsApi.updateStockQuantity(materialId, stockQuantity),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] });
-      setIsStockQuantityModalOpen(false);
-      toast.success('Stock quantity updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      setIsStockQuantityModalOpen(false)
+      toast.success(t('materialManagement.stockQuantityUpdateSuccess'))
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data?.message || 'Failed to update stock quantity');
+      toast.error(error.response?.data?.message || t('materialManagement.stockQuantityUpdateError'))
     },
-  });
+  })
 
   // Update status mutation
   const updateStatusMutation = useMutation({
     mutationFn: ({ materialId, status }: { materialId: string; status: 'ACTIVE' | 'INACTIVE' }) =>
       materialsApi.updateStatus(materialId, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] });
-      setIsStatusModalOpen(false);
-      toast.success('Status updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      setIsStatusModalOpen(false)
+      toast.success(t('materialManagement.statusUpdateSuccess'))
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data?.message || 'Failed to update status');
+      toast.error(error.response?.data?.message || t('materialManagement.statusUpdateError'))
     },
-  });
+  })
 
   // Add delete mutation
   const deleteMaterialMutation = useMutation({
     mutationFn: (materialId: string) => materialsApi.deleteMaterial(materialId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['materials'] });
-      setIsDeleteModalOpen(false);
-      toast.success('Material deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      setIsDeleteModalOpen(false)
+      toast.success(t('materialManagement.deleteSuccess'))
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data?.message || 'Failed to delete material');
+      toast.error(error.response?.data?.message || t('materialManagement.deleteError'))
     },
-  });
+  })
 
   // Handle search with debounce
   const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
+    setSearchTerm(value)
+    setCurrentPage(1)
+  }
 
   const handleStatusChange = (value: string) => {
-    setSelectedStatus(value);
-    setCurrentPage(1);
-  };
+    setSelectedStatus(value)
+    setCurrentPage(1)
+  }
 
   const handlePriceRangeChange = (value: string) => {
-    setSelectedPriceRange(value);
-    setCurrentPage(1);
-  };
+    setSelectedPriceRange(value)
+    setCurrentPage(1)
+  }
 
   const handleCreateMaterial = (data: CreateMaterialData) => {
-    createMaterialMutation.mutate(data);
-  };
+    createMaterialMutation.mutate(data)
+  }
 
   const handleUpdateUnitPrice = (unitPrice: string) => {
     if (selectedMaterial) {
-      updateUnitPriceMutation.mutate(parseFloat(unitPrice));
+      updateUnitPriceMutation.mutate(parseFloat(unitPrice))
     }
-  };
+  }
 
   const handleUpdateStockQuantity = (stockQuantity: number) => {
     if (selectedMaterial) {
       updateStockQuantityMutation.mutate({
         materialId: selectedMaterial.material_id,
         stockQuantity,
-      });
+      })
     }
-  };
+  }
 
   const handleUpdateStatus = (status: 'ACTIVE' | 'INACTIVE') => {
     if (selectedMaterial) {
-      updateStatusMutation.mutate({ materialId: selectedMaterial.material_id, status });
+      updateStatusMutation.mutate({ materialId: selectedMaterial.material_id, status })
     }
-  };
+  }
 
   const handleDeleteMaterial = () => {
     if (selectedMaterial) {
-      deleteMaterialMutation.mutate(selectedMaterial.material_id);
+      deleteMaterialMutation.mutate(selectedMaterial.material_id)
     }
-  };
+  }
 
   const handleViewDetail = (material: Material) => {
-    setSelectedMaterial(material);
-    setIsDetailModalOpen(true);
-  };
+    setSelectedMaterial(material)
+    setIsDetailModalOpen(true)
+  }
 
   const columns: MaterialColumn<Material>[] = [
     {
       key: 'index',
-      title: 'No',
+      title: t('materialManagement.table.no'),
       render: (item: Material, index = 0) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
@@ -266,75 +268,77 @@ const MaterialManagement: React.FC = () => {
     // },
     {
       key: 'name',
-      title: 'Name',
+      title: t('materialManagement.table.name'),
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
       ),
     },
     {
       key: 'description',
-      title: 'Description',
+      title: t('materialManagement.table.description'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.description}</div>
       ),
     },
     {
       key: 'unit_price',
-      title: 'Unit Price',
+      title: t('materialManagement.table.unitPrice'),
       render: (item: Material) => {
         // Format giá tiền VND với dấu phân cách hàng nghìn
-        const formattedPrice = parseInt(item.unit_price).toLocaleString('vi-VN');
-        return `${formattedPrice} VND`;
+        const formattedPrice = parseInt(item.unit_price).toLocaleString('vi-VN')
+        return `${formattedPrice} VND`
       },
       width: 'w-32',
     },
     {
       key: 'stockQuantity',
-      title: 'Stock Quantity',
+      title: t('materialManagement.table.stockQuantity'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.stock_quantity}</div>
       ),
     },
     {
       key: 'status',
-      title: 'Status',
+      title: t('materialManagement.table.status'),
       render: item => (
         <span
           className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full
             ${item.status === 'ACTIVE' ? ACTIVE : INACTIVE}`}
         >
-          {item.status}
+          {item.status === 'ACTIVE'
+            ? t('materialManagement.filterOptions.status.active')
+            : t('materialManagement.filterOptions.status.inactive')}
         </span>
       ),
     },
     {
       key: 'action',
-      title: 'Action',
+      title: t('materialManagement.table.action'),
       render: item => (
         <DropdownMenu
           onViewDetail={() => handleViewDetail(item)}
           onChangeStatus={() => {
-            setSelectedMaterial(item);
-            setIsStatusModalOpen(true);
+            setSelectedMaterial(item)
+            setIsStatusModalOpen(true)
           }}
           onRemove={() => {
-            setSelectedMaterial(item);
-            setIsDeleteModalOpen(true);
+            setSelectedMaterial(item)
+            setIsDeleteModalOpen(true)
           }}
-          changeStatusTitle="Update Status"
+          changeStatusTitle={t('materialManagement.updateStatus.title')}
           viewDetailDisabled={false}
         />
       ),
       width: '80px',
     },
-  ];
+  ]
 
   return (
     <div className="w-full mt-[60px]">
       <div className="flex flex-col space-y-4 mb-4 ml-[90px] mr-[132px]">
         <div className="flex justify-between">
           <SearchInput
-            placeholder="Search by name or description"
+            placeholder={t('materialManagement.searchPlaceholder')}
             value={searchTerm}
             onChange={e => handleSearch(e.target.value)}
             className="w-[20rem] max-w-xs"
@@ -346,18 +350,18 @@ const MaterialManagement: React.FC = () => {
               onSelect={handlePriceRangeChange}
               buttonClassName="w-[300px]"
               selectedValue={selectedPriceRange}
-              label="Price"
+              label={t('materialManagement.filterOptions.price.all')}
             />
             <FilterDropdown
               options={statusOptions}
               onSelect={handleStatusChange}
               buttonClassName="w-[160px]"
               selectedValue={selectedStatus}
-              label="Status"
+              label={t('materialManagement.filterOptions.status.all')}
             />
             <AddButton
               onClick={() => setIsCreateModalOpen(true)}
-              label="Create Material"
+              label={t('materialManagement.createMaterial')}
               icon={<Plus />}
               className="w-auto"
             />
@@ -369,20 +373,26 @@ const MaterialManagement: React.FC = () => {
             {/* Active Status */}
             <div className="flex items-center">
               <span className="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>
-              <span className="text-sm text-gray-600 dark:text-gray-300">Active</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                {t('materialManagement.filterOptions.status.active')}
+              </span>
             </div>
 
             {/* Inactive Status */}
             <div className="flex items-center">
               <span className="w-2 h-2 rounded-full bg-red-500 mr-1.5"></span>
-              <span className="text-sm text-gray-600 dark:text-gray-300">Inactive</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                {t('materialManagement.filterOptions.status.inactive')}
+              </span>
             </div>
           </div>
 
           {/* Total Materials */}
           <div className="text-sm text-gray-600 dark:text-gray-300">
-            Total Materials: {filteredMaterials.length || 0} /{' '}
-            {materialsData?.data?.pagination?.total || 0}
+            {t('materialManagement.totalMaterials', {
+              filtered: filteredMaterials.length || 0,
+              total: materialsData?.data?.pagination?.total || 0,
+            })}
           </div>
         </div>
       </div>
@@ -394,7 +404,7 @@ const MaterialManagement: React.FC = () => {
         className="w-[95%] mx-auto"
         tableClassName="w-full"
         isLoading={isLoading || isFetching}
-        emptyText="No materials found"
+        emptyText={t('materialManagement.noData')}
       />
 
       {!isLoading && materialsData?.data?.pagination && (
@@ -452,9 +462,11 @@ const MaterialManagement: React.FC = () => {
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
             <div className="fixed inset-0 flex items-center justify-center p-4">
               <Dialog.Panel className="mx-auto max-w-sm rounded bg-white dark:bg-gray-800 p-6">
-                <Dialog.Title className="text-lg font-medium mb-4">Delete Material</Dialog.Title>
+                <Dialog.Title className="text-lg font-medium mb-4">
+                  {t('materialManagement.deleteConfirm.title')}
+                </Dialog.Title>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Are you sure you want to delete this material? This action cannot be undone.
+                  {t('materialManagement.deleteConfirm.message')}
                 </p>
                 <div className="flex justify-end space-x-3">
                   <button
@@ -462,7 +474,7 @@ const MaterialManagement: React.FC = () => {
                     onClick={() => setIsDeleteModalOpen(false)}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
                   >
-                    Cancel
+                    {t('materialManagement.deleteConfirm.cancel')}
                   </button>
                   <button
                     type="button"
@@ -470,7 +482,9 @@ const MaterialManagement: React.FC = () => {
                     disabled={deleteMaterialMutation.isPending}
                     className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {deleteMaterialMutation.isPending ? 'Deleting...' : 'Delete'}
+                    {deleteMaterialMutation.isPending
+                      ? t('materialManagement.deleteConfirm.deleting')
+                      : t('materialManagement.deleteConfirm.delete')}
                   </button>
                 </div>
               </Dialog.Panel>
@@ -483,14 +497,14 @@ const MaterialManagement: React.FC = () => {
         <MaterialDetailModal
           isOpen={isDetailModalOpen}
           onClose={() => {
-            setIsDetailModalOpen(false);
-            setSelectedMaterial(null);
+            setIsDetailModalOpen(false)
+            setSelectedMaterial(null)
           }}
           material={selectedMaterial}
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default MaterialManagement;
+export default MaterialManagement

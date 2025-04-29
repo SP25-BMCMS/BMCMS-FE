@@ -8,12 +8,15 @@ import buildingDetailsApi from '@/services/buildingDetails'
 import { deleteMaintenanceCycle, getMaintenanceCycles, getMaintenanceCycleHistory } from '@/services/maintenanceCycle'
 import schedulesApi, { CycleConfig } from '@/services/schedules'
 import { MaintenanceCycle } from '@/types'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { motion } from 'framer-motion'
 import { AlertTriangle, Calendar, Edit, Plus, Settings, Trash2, X, History } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
+import { AxiosError } from 'axios'
+import maintenanceApi from '@/services/maintenance'
 
 // Delete Confirmation Modal Component
 const DeleteConfirmationModal = ({
@@ -27,6 +30,7 @@ const DeleteConfirmationModal = ({
   onConfirm: () => void
   cycleName: string
 }) => {
+  const { t } = useTranslation()
   if (!isOpen) return null
 
   return (
@@ -35,6 +39,7 @@ const DeleteConfirmationModal = ({
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          title={t('common.close')}
         >
           <X size={20} />
         </button>
@@ -43,12 +48,10 @@ const DeleteConfirmationModal = ({
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">
             <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Confirm Deletion</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('maintenanceCycle.confirmDeletion')}</h3>
           <div className="mt-2">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Are you sure you want to delete the maintenance cycle for{' '}
-              <span className="font-semibold text-gray-700 dark:text-gray-300">{cycleName}</span>?
-              This action cannot be undone.
+              {t('maintenanceCycle.deleteConfirmation', { cycleName })}
             </p>
           </div>
         </div>
@@ -59,14 +62,14 @@ const DeleteConfirmationModal = ({
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none"
           >
-            Delete
+            {t('common.delete')}
           </button>
         </div>
       </div>
@@ -75,6 +78,7 @@ const DeleteConfirmationModal = ({
 }
 
 const MaintenanceCycleManagement: React.FC = () => {
+  const { t } = useTranslation()
   // State for pagination
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -321,12 +325,12 @@ const MaintenanceCycleManagement: React.FC = () => {
 
   const handleGenerateSchedule = async () => {
     if (selectedCycles.length === 0) {
-      toast.error('Please select at least one maintenance cycle')
+      toast.error(t('maintenanceCycle.schedule.selectAtLeastOneCycle'))
       return
     }
 
     if (selectedBuildingDetails.length === 0) {
-      toast.error('Please select at least one building detail')
+      toast.error(t('maintenanceCycle.schedule.selectAtLeastOneBuilding'))
       return
     }
 
@@ -336,14 +340,14 @@ const MaintenanceCycleManagement: React.FC = () => {
         buildingDetails: selectedBuildingDetails,
       })
 
-      if (response.statusCode === 200) {
-        toast.success('Schedules generated successfully')
+      if (response.success) {
+        toast.success(t('maintenanceCycle.schedule.success'))
         handleCloseGenerateScheduleModal()
       } else {
-        throw new Error(response.message || 'Failed to generate schedules')
+        throw new Error(response.message || t('maintenanceCycle.schedule.error'))
       }
     } catch (error) {
-      toast.error('Failed to generate schedules')
+      toast.error(t('maintenanceCycle.schedule.error'))
       console.error('Error generating schedules:', error)
     }
   }
@@ -364,7 +368,7 @@ const MaintenanceCycleManagement: React.FC = () => {
   const columns: Column<MaintenanceCycle>[] = [
     {
       key: 'index',
-      title: 'No',
+      title: t('maintenanceCycle.table.no'),
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {(pagination.currentPage - 1) * pagination.itemsPerPage + index + 1}
@@ -374,34 +378,38 @@ const MaintenanceCycleManagement: React.FC = () => {
     },
     {
       key: 'frequency',
-      title: 'Frequency',
+      title: t('maintenanceCycle.table.frequency'),
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
           <Settings className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
-          {item.frequency}
+          {t(`maintenanceCycle.filterOptions.frequency.${item.frequency.toLowerCase()}`)}
         </div>
       ),
     },
     {
       key: 'basis',
-      title: 'Basis',
+      title: t('maintenanceCycle.table.basis'),
       render: item => {
-        // Format the basis string to be more readable
-        const formattedBasis = item.basis.replace(/([A-Z])/g, ' $1').trim()
-
-        return <div className="text-sm text-gray-700 dark:text-gray-300">{formattedBasis}</div>
+        const basisKey = item.basis.toLowerCase()
+        return (
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            {t(`maintenanceCycle.filterOptions.basis.${basisKey}`)}
+          </div>
+        )
       },
     },
     {
       key: 'device_type',
-      title: 'Device Type',
+      title: t('maintenanceCycle.table.deviceType'),
       render: item => (
-        <div className="text-sm text-gray-700 dark:text-gray-300">{item.device_type}</div>
+        <div className="text-sm text-gray-700 dark:text-gray-300">
+          {t(`maintenanceCycle.filterOptions.deviceType.${item.device_type.toLowerCase()}`)}
+        </div>
       ),
     },
     {
       key: 'actions',
-      title: 'Actions',
+      title: t('maintenanceCycle.table.actions'),
       render: item => (
         <div className="flex justify-center gap-2">
           <button
@@ -410,7 +418,7 @@ const MaintenanceCycleManagement: React.FC = () => {
               handleOpenHistoryModal(item.cycle_id)
             }}
             className="p-2 bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 rounded-md hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
-            title="View History"
+            title={t('maintenanceCycle.viewHistory')}
           >
             <History size={16} />
           </button>
@@ -420,7 +428,7 @@ const MaintenanceCycleManagement: React.FC = () => {
               handleEditCycle(item)
             }}
             className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
-            title="Edit Cycle"
+            title={t('maintenanceCycle.editCycle')}
           >
             <Edit size={16} />
           </button>
@@ -430,7 +438,7 @@ const MaintenanceCycleManagement: React.FC = () => {
               openDeleteModal(item)
             }}
             className="p-2 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-md hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
-            title="Delete Cycle"
+            title={t('maintenanceCycle.deleteCycle')}
           >
             <Trash2 size={16} />
           </button>
@@ -456,7 +464,7 @@ const MaintenanceCycleManagement: React.FC = () => {
         animate={loadingVariants}
         className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
       />
-      <p className="text-gray-700 dark:text-gray-300">Loading maintenance cycles...</p>
+      <p className="text-gray-700 dark:text-gray-300">{t('maintenanceCycle.loading')}</p>
     </div>
   )
 
@@ -464,7 +472,7 @@ const MaintenanceCycleManagement: React.FC = () => {
   const HistoryModal = ({ isOpen, onClose, historyData, isLoading }: {
     isOpen: boolean
     onClose: () => void
-    historyData: MaintenanceCycleHistoryResponse | undefined
+    historyData: any | undefined
     isLoading: boolean
   }) => {
     if (!isOpen) return null
@@ -475,7 +483,7 @@ const MaintenanceCycleManagement: React.FC = () => {
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            title="Close"
+            title={t('common.close')}
           >
             <X size={20} />
           </button>
@@ -484,7 +492,7 @@ const MaintenanceCycleManagement: React.FC = () => {
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/20 mb-4">
               <History className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Maintenance Cycle History</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('maintenanceCycle.history')}</h3>
           </div>
 
           {isLoading ? (
@@ -501,25 +509,25 @@ const MaintenanceCycleManagement: React.FC = () => {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {history.device_type} - {history.frequency}
+                        {t(`maintenanceCycle.filterOptions.deviceType.${history.device_type.toLowerCase()}`)} - {t(`maintenanceCycle.filterOptions.frequency.${history.frequency.toLowerCase()}`)}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Changed at: {new Date(history.changed_at).toLocaleString()}
+                        {t('maintenanceCycle.changedAt')}: {new Date(history.changed_at).toLocaleString()}
                       </p>
                     </div>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                      Updated by: {history.updated_by}
+                      {t('maintenanceCycle.updatedBy')}: {history.updated_by}
                     </span>
                   </div>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    Reason: {history.reason}
+                    {t('maintenanceCycle.reason')}: {history.reason}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              No history found
+              {t('maintenanceCycle.noHistory')}
             </div>
           )}
 
@@ -529,7 +537,7 @@ const MaintenanceCycleManagement: React.FC = () => {
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
             >
-              Close
+              {t('common.close')}
             </button>
           </div>
         </div>
@@ -543,13 +551,13 @@ const MaintenanceCycleManagement: React.FC = () => {
         <div className="flex justify-end mb-6 gap-3">
           <AddButton
             onClick={handleOpenGenerateScheduleModal}
-            label="Generate Schedule"
+            label={t('maintenanceCycle.generateSchedule.title')}
             icon={<Calendar />}
             className="w-auto"
           />
           <AddButton
             onClick={handleCreateCycle}
-            label="Create Cycle"
+            label={t('maintenanceCycle.createCycle')}
             icon={<Plus />}
             className="w-auto"
           />
@@ -571,7 +579,7 @@ const MaintenanceCycleManagement: React.FC = () => {
             <LoadingIndicator />
           ) : isError ? (
             <div className="text-center py-8 px-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400">
-              <p>Error loading maintenance cycles. Please try again.</p>
+              <p>{t('maintenanceCycle.error')}</p>
             </div>
           ) : (
             <>
@@ -580,7 +588,7 @@ const MaintenanceCycleManagement: React.FC = () => {
                 columns={columns}
                 keyExtractor={item => item.cycle_id}
                 isLoading={isLoading}
-                emptyText="No maintenance cycles found"
+                emptyText={t('maintenanceCycle.noData')}
                 animated={true}
                 tableClassName="w-full"
                 className="w-full mx-auto"

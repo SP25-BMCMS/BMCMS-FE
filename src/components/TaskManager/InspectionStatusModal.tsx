@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import inspectionsApi from '@/services/inspections';
-import { Inspection } from '@/types';
-import toast from 'react-hot-toast';
-import { FaThumbsUp, FaThumbsDown, FaTimes } from 'react-icons/fa';
-import { STATUS_COLORS } from '@/constants/colors';
-import { useAuth } from '@/hooks/useAuth'; // Import auth hook to get current user
+import React, { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import inspectionsApi from '@/services/inspections'
+import { Inspection } from '@/types'
+import toast from 'react-hot-toast'
+import { FaThumbsUp, FaThumbsDown, FaTimes } from 'react-icons/fa'
+import { STATUS_COLORS } from '@/constants/colors'
+import { useAuth } from '@/hooks/useAuth' // Import auth hook to get current user
+import { useTranslation } from 'react-i18next'
 
 // Type for report status
-type ReportStatus = 'NoPending' | 'Pending' | 'Rejected' | 'Approved';
+type ReportStatus = 'NoPending' | 'Pending' | 'Rejected' | 'Approved'
 
 interface InspectionStatusModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  inspection: Inspection;
+  isOpen: boolean
+  onClose: () => void
+  inspection: Inspection
 }
 
 const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
@@ -21,16 +22,17 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
   onClose,
   inspection,
 }) => {
-  const queryClient = useQueryClient();
-  const { user } = useAuth(); // Get current user from auth context
-  
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const { user } = useAuth() // Get current user from auth context
+
   // Use 'Approved' for display but keep 'NoPending' for API
   const [selectedStatus, setSelectedStatus] = useState<'NoPending' | 'Rejected'>(
     inspection.report_status === 'Pending' || inspection.report_status === 'Rejected'
       ? 'Rejected'
       : 'NoPending'
-  );
-  const [reason, setReason] = useState<string>('');
+  )
+  const [reason, setReason] = useState<string>('')
 
   // Mutation for updating inspection status
   const updateStatusMutation = useMutation({
@@ -40,30 +42,30 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
       userId,
       reason,
     }: {
-      inspectionId: string;
-      status: 'NoPending' | 'Rejected';
-      userId: string;
-      reason: string;
+      inspectionId: string
+      status: 'NoPending' | 'Rejected'
+      userId: string
+      reason: string
     }) => inspectionsApi.updateInspectionReportStatus(inspectionId, status, userId, reason),
     onSuccess: () => {
-      const successMessage = selectedStatus === 'NoPending' 
-        ? 'Inspection approved successfully' 
-        : 'Inspection rejected successfully';
-      toast.success(successMessage);
+      const successMessage = selectedStatus === 'NoPending'
+        ? t('taskManagement.inspection.status.success.approved')
+        : t('taskManagement.inspection.status.success.rejected')
+      toast.success(successMessage)
       // Invalidate inspections query to refresh data
-      queryClient.invalidateQueries({ queryKey: ['inspections'] });
-      onClose();
+      queryClient.invalidateQueries({ queryKey: ['inspections'] })
+      onClose()
     },
     onError: error => {
-      console.error('Failed to update inspection status:', error);
-      toast.error('Failed to update inspection status');
+      console.error('Failed to update inspection status:', error)
+      toast.error(t('taskManagement.inspection.status.error.updateFailed'))
     },
-  });
+  })
 
   const handleSubmit = () => {
     if (!user?.userId) {
-      toast.error('User information is missing. Please login again.');
-      return;
+      toast.error(t('taskManagement.inspection.status.error.missingUser'))
+      return
     }
 
     updateStatusMutation.mutate({
@@ -71,31 +73,31 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
       status: selectedStatus,
       userId: user.userId,
       reason: reason,
-    });
-  };
+    })
+  }
 
   // Display a more user-friendly status text
   const getDisplayStatus = (status: ReportStatus | string): string => {
     switch (status) {
       case 'NoPending':
-        return 'Approved';
+        return 'Approved'
       case 'Pending':
-        return 'Pending';
+        return 'Pending'
       case 'Rejected':
-        return 'Rejected';
+        return 'Rejected'
       case 'Approved':
-        return 'Approved';
+        return 'Approved'
       default:
-        return status;
+        return status
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   // Display value for the current status
-  const currentDisplayStatus = getDisplayStatus(inspection.report_status);
+  const currentDisplayStatus = getDisplayStatus(inspection.report_status)
   // Display value for the selected status (for buttons, labels, etc.)
-  const displaySelectedStatus = selectedStatus === 'NoPending' ? 'Approved' : 'Rejected';
+  const displaySelectedStatus = selectedStatus === 'NoPending' ? 'Approved' : 'Rejected'
 
   return (
     <>
@@ -110,10 +112,11 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
           onClick={e => e.stopPropagation()}
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold dark:text-white">Update Inspection Status</h3>
+            <h3 className="text-lg font-semibold dark:text-white">{t('taskManagement.inspection.status.title')}</h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              title={t('taskManagement.inspection.close')}
             >
               <FaTimes />
             </button>
@@ -121,10 +124,10 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
 
           <div className="mb-6">
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-              Inspection ID: {inspection.inspection_id.substring(0, 8)}
+              {t('taskManagement.inspection.modal.id')}: {inspection.inspection_id.substring(0, 8)}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Current Status:{' '}
+              {t('taskManagement.inspection.status.currentStatus')}:{' '}
               <span className="font-medium">{currentDisplayStatus}</span>
             </p>
 
@@ -150,7 +153,7 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
                 onClick={() => setSelectedStatus('NoPending')}
               >
                 <FaThumbsUp className="mr-2" />
-                Approve
+                {t('taskManagement.inspection.status.buttons.approve')}
               </button>
 
               {/* Reject Button using STATUS_COLORS */}
@@ -174,14 +177,14 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
                 onClick={() => setSelectedStatus('Rejected')}
               >
                 <FaThumbsDown className="mr-2" />
-                Reject
+                {t('taskManagement.inspection.status.buttons.reject')}
               </button>
             </div>
 
             {/* Selected status indicator */}
             <div className="mt-3 text-sm text-center">
-              <span className="font-medium">Selected action:</span>{' '}
-              <span 
+              <span className="font-medium">{t('taskManagement.inspection.status.selectedAction')}:</span>{' '}
+              <span
                 className="px-2 py-1 rounded-full text-xs font-medium"
                 style={{
                   backgroundColor: selectedStatus === 'NoPending' ? STATUS_COLORS.RESOLVED.BG : STATUS_COLORS.INACTIVE.BG,
@@ -198,18 +201,18 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
             {/* Reason field */}
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Reason {selectedStatus === 'Rejected' && <span className="text-red-500">*</span>}
+                {t('taskManagement.inspection.status.reason')} {selectedStatus === 'Rejected' && <span className="text-red-500">*</span>}
               </label>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder={selectedStatus === 'Rejected' ? "Please provide a reason for rejection" : "Optional notes for approval"}
+                placeholder={selectedStatus === 'Rejected' ? t('taskManagement.inspection.status.rejectionReason') : t('taskManagement.inspection.status.optionalNotes')}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 rows={3}
                 required={selectedStatus === 'Rejected'}
               />
               {selectedStatus === 'Rejected' && !reason && (
-                <p className="mt-1 text-xs text-red-500">Reason is required for rejection</p>
+                <p className="mt-1 text-xs text-red-500">{t('taskManagement.inspection.status.reasonRequired')}</p>
               )}
             </div>
           </div>
@@ -219,7 +222,7 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
               onClick={onClose}
             >
-              Cancel
+              {t('taskManagement.inspection.status.buttons.cancel')}
             </button>
             <button
               className="px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
@@ -241,15 +244,17 @@ const InspectionStatusModal: React.FC<InspectionStatusModalProps> = ({
               onClick={handleSubmit}
               disabled={updateStatusMutation.isPending || (selectedStatus === 'Rejected' && !reason)}
             >
-              {updateStatusMutation.isPending 
-                ? 'Updating...' 
-                : `${displaySelectedStatus} Inspection`}
+              {updateStatusMutation.isPending
+                ? t('taskManagement.inspection.status.buttons.updating')
+                : selectedStatus === 'NoPending'
+                  ? t('taskManagement.inspection.status.buttons.approveInspection')
+                  : t('taskManagement.inspection.status.buttons.rejectInspection')}
             </button>
           </div>
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default InspectionStatusModal;
+export default InspectionStatusModal

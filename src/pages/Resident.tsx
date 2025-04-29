@@ -17,6 +17,7 @@ import { toast } from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import ViewDetailResident from '@/components/Residents/ViewDetailResident'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 
 interface ResidentsResponse {
   data: Residents[]
@@ -27,6 +28,7 @@ interface ResidentsResponse {
 }
 
 const Resident: React.FC = () => {
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState<boolean>(false)
   const [residentToChangeStatus, setResidentToChangeStatus] = useState<Residents | null>(null)
@@ -71,8 +73,7 @@ const Resident: React.FC = () => {
         const result = await updateResidentStatus(userId, newStatus)
         return { userId, newStatus, result }
       } catch (error: any) {
-        // Lấy thông báo lỗi cụ thể từ API (nếu có)
-        const errorMessage = error.response?.data?.message || 'Failed to update resident status'
+        const errorMessage = error.response?.data?.message || t('residentManagement.statusUpdateError')
         throw new Error(errorMessage)
       }
     },
@@ -94,10 +95,10 @@ const Resident: React.FC = () => {
       if (context?.previousResidents) {
         queryClient.setQueryData(['residents'], context.previousResidents)
       }
-      toast.error(error.message || 'Failed to update resident status!')
+      toast.error(error.message || t('residentManagement.statusUpdateError'))
     },
     onSuccess: data => {
-      toast.success(`Resident status updated to ${data.newStatus} successfully!`)
+      toast.success(t('residentManagement.statusUpdateSuccess', { status: data.newStatus }))
       queryClient.invalidateQueries({ queryKey: ['residents'] })
     },
   })
@@ -184,8 +185,8 @@ const Resident: React.FC = () => {
       render: item => (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === 'Male'
-              ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
-              : 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]'
+            ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
+            : 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]'
             }`}
         >
           {item.gender}
@@ -252,8 +253,8 @@ const Resident: React.FC = () => {
       render: item => (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.accountStatus === 'Active'
-              ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
-              : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+            ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
+            : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
             }`}
         >
           {item.accountStatus}
@@ -267,7 +268,7 @@ const Resident: React.FC = () => {
         <DropdownMenu
           onViewDetail={() => handleViewDetail(item)}
           onChangeStatus={() => openStatusChangeModal(item)}
-          // onRemove={() => openRemoveModal(item)}
+        // onRemove={() => openRemoveModal(item)}
         />
       ),
       width: '80px',

@@ -1,96 +1,99 @@
-import React, { useState } from 'react';
-import { addNewArea } from '@/services/areas';
-import toast from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
+import React, { useState } from 'react'
+import { addNewArea } from '@/services/areas'
+import toast from 'react-hot-toast'
+import { Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface AddAreaModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  isLoading?: boolean;
+  isOpen: boolean
+  onClose: () => void
+  onSuccess: () => void
+  isLoading?: boolean
 }
 
 const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     createdDate: new Date().toLocaleDateString('en-CA'),
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  })
+  const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<{
-    [key: string]: string;
-  }>({});
+    [key: string]: string
+  }>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
 
     // Clear error when user types
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: undefined,
-      }));
+      }))
     }
-  };
+  }
 
   const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
+    const newErrors: { [key: string]: string } = {}
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Area name is required';
+      newErrors.name = t('area.add.nameRequired')
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (!validateForm()) {
-      return;
+      return
     }
 
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       await addNewArea({
         name: formData.name,
         description: formData.description,
-      });
+      })
 
-      toast.success('Area added successfully!');
+      toast.success(t('area.add.success'))
 
       setFormData({
         name: '',
         description: '',
         createdDate: new Date().toLocaleDateString('en-CA'),
-      });
+      })
 
-      onSuccess();
-      onClose();
+      onSuccess()
+      onClose()
     } catch (err) {
-      console.error('Error adding area:', err);
-      toast.error('Error adding new area!');
+      console.error('Error adding area:', err)
+      toast.error(t('area.add.error'))
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-full max-w-[600px] shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Add New Area</h2>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{t('area.add.title')}</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Fill in the information below to add a new area
+              {t('area.add.subtitle')}
             </p>
           </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+            aria-label={t('area.add.cancel')}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -107,19 +110,18 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Area Name
+                {t('area.add.name')}
               </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Enter area name"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.name
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
+                placeholder={t('area.add.namePlaceholder')}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.name
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                  : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
               />
               {errors.name && (
                 <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.name}</p>
@@ -128,7 +130,7 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess 
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Created Date
+                {t('area.add.createdDate')}
               </label>
               <input
                 type="text"
@@ -137,24 +139,24 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess 
                 className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm 
                          bg-gray-50 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
                 disabled
+                aria-label={t('area.add.createdDate')}
               />
             </div>
 
             {/* Description - Full Width */}
             <div className="col-span-2 space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description
+                {t('area.add.description')}
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Enter area description"
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.description
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
+                placeholder={t('area.add.descriptionPlaceholder')}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.description
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                  : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
                 rows={4}
               />
               {errors.description && (
@@ -169,7 +171,7 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess 
               onClick={onClose}
               className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-gray-600 transition-colors"
             >
-              Cancel
+              {t('area.add.cancel')}
             </button>
             <button
               type="submit"
@@ -179,17 +181,17 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess 
               {isLoading ? (
                 <span className="flex items-center">
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
+                  {t('area.add.processing')}
                 </span>
               ) : (
-                'Add Area'
+                t('area.add.addButton')
               )}
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddAreaModal;
+export default AddAreaModal

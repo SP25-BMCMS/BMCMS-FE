@@ -16,6 +16,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 import Pagination from '@/components/Pagination'
 import FilterDropdown from '@/components/FilterDropdown'
+import { useTranslation } from 'react-i18next'
 
 interface StaffResponse {
   isSuccess: boolean
@@ -29,6 +30,7 @@ interface StaffResponse {
 }
 
 const StaffManagement: React.FC = () => {
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
   const [isDeptPosModalOpen, setIsDeptPosModalOpen] = useState(false)
@@ -41,21 +43,17 @@ const StaffManagement: React.FC = () => {
 
   // Define role filter options
   const roleOptions = [
-    { value: 'all', label: 'All Roles' },
-    { value: 'Staff', label: 'Staff' },
-    { value: 'Manager', label: 'Manager' },
-    { value: 'Admin', label: 'Admin' },
+    { value: 'all', label: t('staffManagement.filterOptions.all') },
+    { value: 'Staff', label: t('staffManagement.filterOptions.staff') },
+    { value: 'Manager', label: t('staffManagement.filterOptions.manager') },
+    { value: 'Admin', label: t('staffManagement.filterOptions.admin') },
   ]
 
   // Fetch staff with React Query
   const { data: staffResponse, isLoading: isLoadingStaff } = useQuery<StaffResponse>({
     queryKey: ['staff', searchTerm, currentPage, itemsPerPage, selectedRole],
     queryFn: async () => {
-      // In a real implementation, you would pass page, limit, and role to your API
       const response = await getAllStaff()
-
-      // If the API doesn't support pagination, you can implement it client-side
-      // This is a simplified example
       return {
         ...response,
         pagination: response.pagination || {
@@ -133,36 +131,26 @@ const StaffManagement: React.FC = () => {
       staffId: string
       updatedData: Partial<Staff>
     }) => {
-      // Here you would call your API to update the staff
-      // For now, we'll just simulate a successful update
       return { staffId, updatedData }
     },
     onMutate: async ({ staffId, updatedData }) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['staff'] })
-
-      // Snapshot the previous value
       const previousStaff = queryClient.getQueryData(['staff'])
-
-      // Optimistically update to the new value
       queryClient.setQueryData(['staff'], (old: StaffResponse) => ({
         ...old,
         data: old.data.map((staff: StaffData) =>
           staff.userId === staffId ? { ...staff, ...updatedData } : staff
         ),
       }))
-
       return { previousStaff }
     },
     onError: (err, variables, context) => {
-      // Revert back to the previous value
       if (context?.previousStaff) {
         queryClient.setQueryData(['staff'], context.previousStaff)
       }
-      toast.error('Failed to update staff!')
+      toast.error(t('staffManagement.updateError'))
     },
     onSettled: () => {
-      // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ['staff'] })
     },
   })
@@ -170,7 +158,7 @@ const StaffManagement: React.FC = () => {
   const columns: Column<Staff>[] = [
     {
       key: 'index',
-      title: 'No',
+      title: t('staffManagement.table.no'),
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
@@ -180,24 +168,24 @@ const StaffManagement: React.FC = () => {
     },
     {
       key: 'name',
-      title: 'Staff Name',
+      title: t('staffManagement.table.name'),
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
       ),
     },
     {
       key: 'email',
-      title: 'Email',
+      title: t('staffManagement.table.email'),
       render: item => <div className="text-sm text-gray-500 dark:text-gray-400">{item.email}</div>,
     },
     {
       key: 'phone',
-      title: 'Phone',
+      title: t('staffManagement.table.phone'),
       render: item => <div className="text-sm text-gray-500 dark:text-gray-400">{item.phone}</div>,
     },
     {
       key: 'role',
-      title: 'Role',
+      title: t('staffManagement.table.role'),
       render: item => {
         const roleColors = {
           Leader: 'bg-[#0eeffe] bg-opacity-30 border border-[#0eeffe] text-[#0084FF]',
@@ -218,7 +206,7 @@ const StaffManagement: React.FC = () => {
     },
     {
       key: 'department',
-      title: 'Department',
+      title: t('staffManagement.table.department'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {item.userDetails?.department?.departmentName || '-'}
@@ -227,12 +215,12 @@ const StaffManagement: React.FC = () => {
     },
     {
       key: 'Gender',
-      title: 'Gender',
+      title: t('staffManagement.table.gender'),
       render: item => (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === 'Male'
-              ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
-              : 'bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]'
+            ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
+            : 'bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]'
             }`}
         >
           {item.gender}
@@ -241,21 +229,21 @@ const StaffManagement: React.FC = () => {
     },
     {
       key: 'dateOfBirth',
-      title: 'Date Of Birth',
+      title: t('staffManagement.table.dateOfBirth'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.dateOfBirth}</div>
       ),
     },
     {
       key: 'action',
-      title: 'Action',
+      title: t('staffManagement.table.action'),
       render: item => (
         <div onClick={e => e.stopPropagation()}>
           <DropdownMenu
             onViewDetail={() => handleViewDetail(item)}
             onChangeStatus={() => handleOpenDeptPosModal(item)}
             onRemove={() => console.log('Remove clicked', item)}
-            changeStatusTitle="Change Department"
+            changeStatusTitle={t('staffManagement.changeDepartment')}
           />
         </div>
       ),
@@ -296,7 +284,7 @@ const StaffManagement: React.FC = () => {
         animate={loadingVariants}
         className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
       />
-      <p className="text-gray-700 dark:text-gray-300">Loading staff data...</p>
+      <p className="text-gray-700 dark:text-gray-300">{t('staffManagement.loading')}</p>
     </div>
   )
 
@@ -310,7 +298,7 @@ const StaffManagement: React.FC = () => {
 
       <div className="flex justify-between mb-4 ml-[90px] mr-[132px]">
         <SearchInput
-          placeholder="Search by name or ID"
+          placeholder={t('staffManagement.searchPlaceholder')}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="w-[20rem] max-w-xs"
@@ -321,10 +309,10 @@ const StaffManagement: React.FC = () => {
             options={roleOptions}
             onSelect={handleRoleChange}
             selectedValue={selectedRole}
-            label="Filter by Role"
+            label={t('staffManagement.filterByRole')}
             buttonClassName="w-[150px]"
           />
-          <AddButton label="Add Staff" icon={<FiUserPlus />} onClick={openModal} />
+          <AddButton label={t('staffManagement.addStaff')} icon={<FiUserPlus />} onClick={openModal} />
         </div>
       </div>
 
@@ -336,7 +324,7 @@ const StaffManagement: React.FC = () => {
         className="w-[95%] mx-auto"
         tableClassName="w-full"
         isLoading={isLoadingStaff}
-        emptyText="No staff data found"
+        emptyText={t('staffManagement.noData')}
       />
 
       <div className="w-[95%] mx-auto mt-4">

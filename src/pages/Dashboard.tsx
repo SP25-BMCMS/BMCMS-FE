@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import {
   FaTasks,
   FaClipboardCheck,
@@ -18,7 +19,7 @@ import {
   FaTag,
   FaStar,
   FaComments,
-} from 'react-icons/fa';
+} from 'react-icons/fa'
 import {
   BarChart,
   Bar,
@@ -34,15 +35,15 @@ import {
   Line,
   CartesianGrid,
   TooltipProps,
-} from 'recharts';
+} from 'recharts'
 import dashboardService, {
   DashboardSummary,
   Feedback,
   FeedbacksResponse,
-} from '@/services/dashboard';
-import { FORMAT_DATE_TIME } from '@/utils/format';
-import { useNavigate } from 'react-router-dom';
-import { Tooltip as UITooltip } from '@/components/Tooltip';
+} from '@/services/dashboard'
+import { FORMAT_DATE_TIME } from '@/utils/format'
+import { useNavigate } from 'react-router-dom'
+import { Tooltip as UITooltip } from '@/components/Tooltip'
 
 // Custom tooltip component for Recharts
 const CustomTooltip = ({ active, payload, label, valueLabel = 'Count' }: any) => {
@@ -52,14 +53,15 @@ const CustomTooltip = ({ active, payload, label, valueLabel = 'Count' }: any) =>
         <p className="font-medium">{`${payload[0].name || label}: ${payload[0].value}`}</p>
         <p className="text-xs text-gray-300">{valueLabel}</p>
       </div>
-    );
+    )
   }
-  return null;
-};
+  return null
+}
 
 const Dashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const navigate = useNavigate()
+  const { t } = useTranslation()
+  const [errorMessage, setErrorMessage] = useState<string>('')
 
   const {
     data: dashboardData,
@@ -70,7 +72,7 @@ const Dashboard: React.FC = () => {
     queryKey: ['dashboardSummary'],
     queryFn: dashboardService.getDashboardSummary,
     retry: 1,
-  });
+  })
 
   const {
     data: feedbacksData,
@@ -81,57 +83,56 @@ const Dashboard: React.FC = () => {
     queryKey: ['feedbacks'],
     queryFn: () => dashboardService.getFeedbacks({ limit: 5 }),
     retry: 1,
-  });
+  })
 
   useEffect(() => {
     if (dashboardError) {
-      console.error('Dashboard error:', dashboardError);
-      const err = dashboardError as any;
+      console.error('Dashboard error:', dashboardError)
+      const err = dashboardError as any
       if (err.response?.status === 401) {
-        setErrorMessage('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-        // Có thể redirect về trang login sau 3 giây
+        setErrorMessage(t('common.sessionExpired'))
         setTimeout(() => {
-          localStorage.removeItem('bmcms_token');
-          navigate('/login');
-        }, 3000);
+          localStorage.removeItem('bmcms_token')
+          navigate('/login')
+        }, 3000)
       } else {
-        setErrorMessage(err.message || 'Không thể tải dữ liệu bảng điều khiển.');
+        setErrorMessage(err.message || t('common.dashboardLoadError'))
       }
     }
-  }, [dashboardError, navigate]);
+  }, [dashboardError, navigate, t])
 
   // Colors for charts
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
   const STATUS_COLORS = {
     Pending: '#FFBB28',
     InProgress: '#0088FE',
     Completed: '#00C49F',
     Assigned: '#FF8042',
     default: '#8884d8',
-  };
+  }
 
   if (isDashboardLoading) {
     return (
       <div className="flex justify-center items-center min-h-[70vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
-    );
+    )
   }
 
   if (isDashboardError || !dashboardData) {
     return (
       <div className="bg-red-100 text-red-700 p-8 rounded-lg text-center max-w-md mx-auto mt-12">
         <FaExclamationCircle className="text-5xl mx-auto mb-4" />
-        <p className="font-semibold text-xl mb-2">Connection Error</p>
-        <p className="mb-4">{errorMessage || 'Không thể tải dữ liệu bảng điều khiển'}</p>
+        <p className="font-semibold text-xl mb-2">{t('common.connectionError')}</p>
+        <p className="mb-4">{errorMessage || t('common.dashboardLoadError')}</p>
         <button
           onClick={() => navigate('/login')}
           className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
         >
-          Đăng nhập lại
+          {t('common.login')}
         </button>
       </div>
-    );
+    )
   }
 
   // Tạo dữ liệu cho biểu đồ từ API thực tế
@@ -140,7 +141,7 @@ const Dashboard: React.FC = () => {
     { status: 'InProgress', count: dashboardData.taskStats?.tasksByStatus?.inProgress || 0 },
     { status: 'Completed', count: dashboardData.taskStats?.tasksByStatus?.completed || 0 },
     { status: 'Assigned', count: dashboardData.taskStats?.tasksByStatus?.assigned || 0 },
-  ];
+  ]
 
   // Dữ liệu về mức độ nghiêm trọng của vết nứt
   const crackSeverityData = [
@@ -148,7 +149,7 @@ const Dashboard: React.FC = () => {
     { name: 'Medium', value: dashboardData.crackStats?.cracksBySeverity?.medium || 0 },
     { name: 'High', value: dashboardData.crackStats?.cracksBySeverity?.high || 0 },
     { name: 'Critical', value: dashboardData.crackStats?.cracksBySeverity?.critical || 0 },
-  ].filter(item => item.value > 0);
+  ].filter(item => item.value > 0)
 
   // Custom label cho biểu đồ tròn
   const renderCustomizedLabel = ({
@@ -160,12 +161,12 @@ const Dashboard: React.FC = () => {
     percent,
     name,
   }: any) => {
-    if (percent <= 0.05) return null;
+    if (percent <= 0.05) return null
 
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 1.2;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const RADIAN = Math.PI / 180
+    const radius = outerRadius * 1.2
+    const x = cx + radius * Math.cos(-midAngle * RADIAN)
+    const y = cy + radius * Math.sin(-midAngle * RADIAN)
 
     return (
       <text
@@ -182,8 +183,8 @@ const Dashboard: React.FC = () => {
       >
         {`${name}: ${(percent * 100).toFixed(0)}%`}
       </text>
-    );
-  };
+    )
+  }
 
   // Tạo dữ liệu phân bố lịch trình theo tháng từ dữ liệu mẫu
   const scheduleDistribution = [
@@ -193,11 +194,11 @@ const Dashboard: React.FC = () => {
     { month: 'Apr', count: 15 },
     { month: 'May', count: 10 },
     { month: 'Jun', count: 18 },
-  ];
+  ]
 
   const getStatusColor = (status: string) => {
-    return STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.default;
-  };
+    return STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.default
+  }
 
   return (
     <div className="space-y-6">
@@ -207,7 +208,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-transform duration-300 hover:transform hover:scale-105">
           <div className="flex justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Tasks Pending</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('dashboard.tasksPending')}</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {dashboardData.taskStats?.tasksByStatus?.pending || '0'}
               </p>
@@ -231,7 +232,7 @@ const Dashboard: React.FC = () => {
           <div className="flex justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Tasks Completed
+                {t('dashboard.tasksCompleted')}
               </p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {dashboardData.taskStats?.tasksByStatus?.completed || '0'}
@@ -255,7 +256,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-transform duration-300 hover:transform hover:scale-105">
           <div className="flex justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">In Progress</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('dashboard.tasksInProgress')}</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {dashboardData.taskStats?.tasksByStatus?.inProgress || '0'}
               </p>
@@ -278,7 +279,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-transform duration-300 hover:transform hover:scale-105">
           <div className="flex justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Cracks</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('dashboard.totalCracks')}</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {dashboardData.crackStats?.cracksByStatus?.total || '0'}
               </p>
@@ -301,7 +302,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-transform duration-300 hover:transform hover:scale-105">
           <div className="flex justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Schedule Jobs</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('dashboard.scheduleJobs')}</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {dashboardData.taskStats?.tasksByStatus?.total || '0'}
               </p>
@@ -324,7 +325,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-transform duration-300 hover:transform hover:scale-105">
           <div className="flex justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Staff</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('dashboard.totalStaff')}</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 {dashboardData.staffStats?.totalStaff || '0'}
               </p>
@@ -348,13 +349,13 @@ const Dashboard: React.FC = () => {
           <div className="flex justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Feedback Rating
+                {t('dashboard.feedbackRating')}
               </p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1 flex items-center">
                 {isFeedbacksLoading ? (
                   <span className="flex items-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-purple-500 mr-2"></div>
-                    Loading...
+                    {t('common.loading')}
                   </span>
                 ) : isFeedbacksError ? (
                   'N/A'
@@ -369,7 +370,7 @@ const Dashboard: React.FC = () => {
                     </span>
                   </>
                 ) : (
-                  'No data'
+                  t('common.noData')
                 )}
               </p>
             </div>
@@ -384,9 +385,9 @@ const Dashboard: React.FC = () => {
                 style={{
                   width:
                     isFeedbacksLoading ||
-                    isFeedbacksError ||
-                    !feedbacksData?.data ||
-                    feedbacksData.data.length === 0
+                      isFeedbacksError ||
+                      !feedbacksData?.data ||
+                      feedbacksData.data.length === 0
                       ? '0%'
                       : `${(feedbacksData.data.reduce((sum, item) => sum + item.rating, 0) / feedbacksData.data.length / 5) * 100}%`,
                 }}
@@ -401,7 +402,7 @@ const Dashboard: React.FC = () => {
         {/* Task Status Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Task Status Distribution
+            {t('dashboard.taskStatusDistribution')}
           </h2>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -425,7 +426,7 @@ const Dashboard: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={getStatusColor(entry.status)} />
                     ))}
                 </Pie>
-                <Tooltip content={<CustomTooltip valueLabel="tasks" />} />
+                <Tooltip content={<CustomTooltip valueLabel={t('dashboard.tasks')} />} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -435,7 +436,7 @@ const Dashboard: React.FC = () => {
         {/* Crack Severity Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Crack Severity Distribution
+            {t('dashboard.crackSeverityDistribution')}
           </h2>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -458,16 +459,16 @@ const Dashboard: React.FC = () => {
                       Medium: '#FFBB28',
                       High: '#FF8042',
                       Critical: '#FF0000',
-                    };
+                    }
                     return (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[entry.name as keyof typeof COLORS]}
                       />
-                    );
+                    )
                   })}
                 </Pie>
-                <Tooltip content={<CustomTooltip valueLabel="cracks" />} />
+                <Tooltip content={<CustomTooltip valueLabel={t('dashboard.cracks')} />} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -478,7 +479,7 @@ const Dashboard: React.FC = () => {
       {/* Schedule Distribution Chart */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Monthly Schedule Distribution
+          {t('dashboard.monthlyScheduleDistribution')}
         </h2>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -486,8 +487,8 @@ const Dashboard: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="month" stroke="#9CA3AF" />
               <YAxis stroke="#9CA3AF" />
-              <Tooltip content={<CustomTooltip valueLabel="schedules" />} />
-              <Bar dataKey="count" name="Schedules" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+              <Tooltip content={<CustomTooltip valueLabel={t('dashboard.schedules')} />} />
+              <Bar dataKey="count" name={t('dashboard.schedules')} fill="#3B82F6" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -498,7 +499,7 @@ const Dashboard: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <FaRegFileAlt className="text-blue-500 dark:text-blue-400" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Tasks</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('dashboard.recentTasks')}</h2>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -508,25 +509,25 @@ const Dashboard: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center space-x-1">
                     <FaRegFileAlt className="text-gray-400" />
-                    <span>Task</span>
+                    <span>{t('dashboard.task')}</span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center space-x-1">
                     <FaTag className="text-gray-400" />
-                    <span>Status</span>
+                    <span>{t('common.status')}</span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center space-x-1">
                     <FaCalendarDay className="text-gray-400" />
-                    <span>Created</span>
+                    <span>{t('common.createdDate')}</span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center space-x-1">
                     <FaHistory className="text-gray-400" />
-                    <span>Updated</span>
+                    <span>{t('common.updated')}</span>
                   </div>
                 </th>
               </tr>
@@ -549,33 +550,33 @@ const Dashboard: React.FC = () => {
                     </UITooltip>
                   </td>
                   <td className="px-6 py-4">
-                    <UITooltip content={`Status: ${task.status}`} position="right">
+                    <UITooltip content={`${t('common.status')}: ${task.status}`} position="right">
                       {task.status === 'Completed' ? (
                         <div className="flex items-center">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
                             <FaCheckCircle className="mr-1" />
-                            Completed
+                            {t('taskManagement.status.completed')}
                           </span>
                         </div>
                       ) : task.status === 'InProgress' ? (
                         <div className="flex items-center">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
                             <FaSpinner className="mr-1 animate-spin" />
-                            In Progress
+                            {t('taskManagement.status.inProgress')}
                           </span>
                         </div>
                       ) : task.status === 'Assigned' ? (
                         <div className="flex items-center">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
                             <FaUser className="mr-1" />
-                            Assigned
+                            {t('taskManagement.status.assigned')}
                           </span>
                         </div>
                       ) : (
                         <div className="flex items-center">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
                             <FaClock className="mr-1" />
-                            Pending
+                            {t('taskManagement.status.pending')}
                           </span>
                         </div>
                       )}
@@ -583,7 +584,7 @@ const Dashboard: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                     <UITooltip
-                      content={`Created: ${FORMAT_DATE_TIME(task.created_at)}`}
+                      content={`${t('common.created')}: ${FORMAT_DATE_TIME(task.created_at)}`}
                       position="left"
                     >
                       <div className="flex flex-col">
@@ -598,7 +599,7 @@ const Dashboard: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                     <UITooltip
-                      content={`Last updated: ${FORMAT_DATE_TIME(task.updated_at)}`}
+                      content={`${t('common.lastUpdated')}: ${FORMAT_DATE_TIME(task.updated_at)}`}
                       position="left"
                     >
                       <div className="flex flex-col">
@@ -615,15 +616,15 @@ const Dashboard: React.FC = () => {
               ))}
               {(!dashboardData.taskStats?.recentTasks ||
                 dashboardData.taskStats?.recentTasks.length === 0) && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
-                  >
-                    No recent tasks found
-                  </td>
-                </tr>
-              )}
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
+                    >
+                      {t('dashboard.noRecentTasks')}
+                    </td>
+                  </tr>
+                )}
             </tbody>
           </table>
         </div>
@@ -635,7 +636,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center space-x-2">
             <FaComments className="text-purple-500 dark:text-purple-400" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Recent Feedbacks
+              {t('dashboard.recentFeedbacks')}
             </h2>
           </div>
         </div>
@@ -646,31 +647,31 @@ const Dashboard: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center space-x-1">
                     <FaRegFileAlt className="text-gray-400" />
-                    <span>Task</span>
+                    <span>{t('dashboard.task')}</span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center space-x-1">
                     <FaComments className="text-gray-400" />
-                    <span>Comments</span>
+                    <span>{t('dashboard.comments')}</span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center space-x-1">
                     <FaUser className="text-gray-400" />
-                    <span>By</span>
+                    <span>{t('dashboard.by')}</span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center space-x-1">
                     <FaStar className="text-gray-400" />
-                    <span>Rating</span>
+                    <span>{t('dashboard.rating')}</span>
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center space-x-1">
                     <FaCalendarDay className="text-gray-400" />
-                    <span>Created</span>
+                    <span>{t('common.createdDate')}</span>
                   </div>
                 </th>
               </tr>
@@ -687,7 +688,7 @@ const Dashboard: React.FC = () => {
               ) : isFeedbacksError ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-4 text-center text-red-500">
-                    Failed to load feedbacks
+                    {t('dashboard.feedbacksLoadError')}
                   </td>
                 </tr>
               ) : feedbacksData?.data && feedbacksData.data.length > 0 ? (
@@ -698,7 +699,7 @@ const Dashboard: React.FC = () => {
                   >
                     <td className="px-6 py-4">
                       <UITooltip
-                        content={feedback.task?.description || 'No task description'}
+                        content={feedback.task?.description || t('dashboard.noTaskDescription')}
                         position="top"
                       >
                         <div className="flex items-center">
@@ -722,7 +723,7 @@ const Dashboard: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900 dark:text-white">
-                        {feedback.user?.username || 'Unknown user'}
+                        {feedback.user?.username || t('dashboard.unknownUser')}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -730,18 +731,17 @@ const Dashboard: React.FC = () => {
                         {[...Array(5)].map((_, index) => (
                           <FaStar
                             key={index}
-                            className={`${
-                              index < feedback.rating
-                                ? 'text-yellow-400'
-                                : 'text-gray-300 dark:text-gray-600'
-                            } w-4 h-4`}
+                            className={`${index < feedback.rating
+                              ? 'text-yellow-400'
+                              : 'text-gray-300 dark:text-gray-600'
+                              } w-4 h-4`}
                           />
                         ))}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                       <UITooltip
-                        content={`Created: ${FORMAT_DATE_TIME(feedback.created_at)}`}
+                        content={`${t('common.created')}: ${FORMAT_DATE_TIME(feedback.created_at)}`}
                         position="left"
                       >
                         <div className="flex flex-col">
@@ -762,7 +762,7 @@ const Dashboard: React.FC = () => {
                     colSpan={5}
                     className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
                   >
-                    No feedbacks found
+                    {t('dashboard.noFeedbacks')}
                   </td>
                 </tr>
               )}
@@ -774,7 +774,7 @@ const Dashboard: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
           <FaStar className="text-yellow-400 mr-2" />
-          Feedback Ratings
+          {t('dashboard.feedbackRatings')}
         </h2>
         <div className="h-auto">
           {isFeedbacksLoading ? (
@@ -783,23 +783,22 @@ const Dashboard: React.FC = () => {
             </div>
           ) : isFeedbacksError ? (
             <div className="flex justify-center items-center h-32 text-red-500">
-              Failed to load feedback data
+              {t('dashboard.feedbackDataLoadError')}
             </div>
           ) : feedbacksData?.data && feedbacksData.data.length > 0 ? (
             <div className="max-w-lg mx-auto space-y-3 py-2">
               {[5, 4, 3, 2, 1].map(rating => {
-                const count = feedbacksData.data.filter(feedback => feedback.rating === rating).length;
-                const percent = Math.round((count / feedbacksData.data.length) * 100) || 0;
-                
+                const count = feedbacksData.data.filter(feedback => feedback.rating === rating).length
+                const percent = Math.round((count / feedbacksData.data.length) * 100) || 0
+
                 return (
                   <div key={rating} className="flex items-center">
                     <div className="flex items-center mr-3 w-24">
                       {[...Array(5)].map((_, i) => (
                         <FaStar
                           key={i}
-                          className={`${
-                            i < rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
-                          } w-4 h-4`}
+                          className={`${i < rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
+                            } w-4 h-4`}
                         />
                       ))}
                     </div>
@@ -810,9 +809,9 @@ const Dashboard: React.FC = () => {
                           style={{
                             width: `${percent}%`,
                             backgroundColor: rating === 5 ? '#8B5CF6' :
-                                            rating === 4 ? '#A78BFA' :
-                                            rating === 3 ? '#C4B5FD' :
-                                            rating === 2 ? '#DDD6FE' : '#EDE9FE'
+                              rating === 4 ? '#A78BFA' :
+                                rating === 3 ? '#C4B5FD' :
+                                  rating === 2 ? '#DDD6FE' : '#EDE9FE'
                           }}
                         ></div>
                       </div>
@@ -821,22 +820,22 @@ const Dashboard: React.FC = () => {
                       {count} ({percent}%)
                     </div>
                   </div>
-                );
+                )
               })}
               <div className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
-                Total: {feedbacksData.data.length} feedbacks | Average: {(feedbacksData.data.reduce((sum, item) => sum + item.rating, 0) / feedbacksData.data.length).toFixed(1)}
+                {t('dashboard.totalFeedbacks')}: {feedbacksData.data.length} | {t('dashboard.average')}: {(feedbacksData.data.reduce((sum, item) => sum + item.rating, 0) / feedbacksData.data.length).toFixed(1)}
                 <FaStar className="text-yellow-400 inline-block ml-1 mb-1" />
               </div>
             </div>
           ) : (
             <div className="flex justify-center items-center h-32 text-gray-500">
-              No feedback data available
+              {t('dashboard.noFeedbackData')}
             </div>
           )}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

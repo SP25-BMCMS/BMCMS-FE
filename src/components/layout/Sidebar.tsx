@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   RiDashboardLine,
   RiTeamLine,
@@ -10,115 +10,132 @@ import {
   RiMenuUnfoldLine,
   RiLogoutBoxRLine,
   RiSettings4Line,
-} from 'react-icons/ri';
-import { IoIosArrowDown } from 'react-icons/io';
-import { FaRegBuilding } from 'react-icons/fa';
-import { FaHouseCrack } from 'react-icons/fa6';
-import { FaBoxes } from 'react-icons/fa';
-import toast from 'react-hot-toast';
-import { GetCurrentUserAPIResponse } from '../../types';
-import '@/assets/css/Sidebar.css';
+} from 'react-icons/ri'
+import { IoIosArrowDown } from 'react-icons/io'
+import { FaRegBuilding } from 'react-icons/fa'
+import { FaHouseCrack } from 'react-icons/fa6'
+import { FaBoxes } from 'react-icons/fa'
+import toast from 'react-hot-toast'
+import { GetCurrentUserAPIResponse } from '../../types'
+import '@/assets/css/Sidebar.css'
+import { useTranslation } from 'react-i18next'
 
 export const sidebarItems = [
   {
-    title: 'Dashboard',
+    title: 'sidebar.dashboard',
     path: '/dashboard',
     icon: <RiDashboardLine />,
     roles: ['Admin', 'Manager'],
   },
-  { title: 'Residents', path: '/resident', icon: <RiTeamLine />, roles: ['Admin'] },
-  { title: 'Staff Manager', path: '/staff', icon: <RiUserSettingsLine />, roles: ['Admin'] },
-  { title: 'Task Management', path: '/tasks', icon: <RiTaskLine />, roles: ['Manager'] },
   {
-    title: 'Building Management',
+    title: 'sidebar.residentManagement',
+    path: '/resident',
+    icon: <RiTeamLine />,
+    roles: ['Admin'],
+  },
+  {
+    title: 'sidebar.staffManagement',
+    path: '/staff',
+    icon: <RiUserSettingsLine />,
+    roles: ['Admin'],
+  },
+  {
+    title: 'sidebar.taskManagement',
+    path: '/tasks',
+    icon: <RiTaskLine />,
+    roles: ['Manager'],
+  },
+  {
+    title: 'sidebar.buildingManagement',
     path: '/building',
     icon: <FaRegBuilding />,
     roles: ['Admin'],
   },
   {
-    title: 'My Buildings',
+    title: 'sidebar.myBuildings',
     path: '/buildings-for-manager',
     icon: <FaRegBuilding />,
     roles: ['Manager'],
   },
   {
-    title: 'Crack Management',
+    title: 'sidebar.crackManagement',
     path: '/crack',
     icon: <FaHouseCrack />,
     roles: ['Manager'],
   },
   {
-    title: 'Material Management',
+    title: 'sidebar.materialManagement',
     path: '/materials',
     icon: <FaBoxes />,
     roles: ['Manager'],
   },
   {
-    title: 'Maintenance Cycles',
+    title: 'sidebar.maintenanceCycle',
     path: '/maintenance-cycles',
     icon: <RiSettings4Line />,
     roles: ['Manager'],
   },
   {
-    title: 'TimeSheet',
+    title: 'sidebar.timesheet.title',
     icon: <RiTimeLine />,
     roles: ['Manager'],
     children: [
-      { title: 'Work Log', path: '/worklog' },
-      { title: 'Calendar', path: '/calendar' },
+      { title: 'sidebar.timesheet.workLog', path: '/worklog' },
+      { title: 'sidebar.timesheet.calendar', path: '/calendar' },
     ],
   },
-];
+]
 
 interface SidebarProps {
-  onToggle?: (isCollapsed: boolean) => void;
+  onToggle?: (isCollapsed: boolean) => void
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [openDropdown, setOpenDropdown] = useState('');
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [openDropdown, setOpenDropdown] = useState('')
   const user = useState<GetCurrentUserAPIResponse | null>(() => {
-    const storedUser = localStorage.getItem('bmcms_user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  })[0];
+    const storedUser = localStorage.getItem('bmcms_user')
+    return storedUser ? JSON.parse(storedUser) : null
+  })[0]
+  const { t } = useTranslation()
 
   useEffect(() => {
     const parentItem = sidebarItems.find(item =>
       item.children?.some(child => child.path === location.pathname)
-    );
-    setOpenDropdown(parentItem?.title || '');
-  }, [location.pathname]);
+    )
+    setOpenDropdown(parentItem?.title || '')
+  }, [location.pathname])
 
   const toggleSidebar = () => {
-    const newState = !isCollapsed;
-    setIsCollapsed(newState);
+    const newState = !isCollapsed
+    setIsCollapsed(newState)
 
     if (onToggle) {
-      onToggle(newState);
+      onToggle(newState)
     }
-  };
+  }
 
   const toggleDropdown = (title: string) => {
-    setOpenDropdown(prev => (prev === title ? '' : title));
-  };
+    setOpenDropdown(prev => (prev === title ? '' : title))
+  }
 
   const isActive = (path?: string, children?: { path: string }[]) => {
-    return path === location.pathname || children?.some(child => child.path === location.pathname);
-  };
+    return path === location.pathname || children?.some(child => child.path === location.pathname)
+  }
 
   const handleLogout = () => {
-    localStorage.removeItem('bmcms_token');
-    localStorage.removeItem('bmcms_refresh_token');
-    localStorage.removeItem('bmcms_user');
-    toast.success('Logout successful');
-    navigate('/');
-  };
+    localStorage.removeItem('bmcms_token')
+    localStorage.removeItem('bmcms_refresh_token')
+    localStorage.removeItem('bmcms_user')
+    toast.success('Logout successful')
+    navigate('/')
+  }
 
   const hasAccess = (roles: string[]) => {
-    return user?.role && roles.includes(user.role);
-  };
+    return user?.role && roles.includes(user.role)
+  }
 
   return (
     <div
@@ -152,25 +169,23 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                     }
                     className={`flex items-center p-3 rounded-lg cursor-pointer
                     transition-all duration-200 group
-                    ${
-                      isActive(item.path, item.children)
+                    ${isActive(item.path, item.children)
                         ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 font-semibold'
                         : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }
+                      }
                     ${!isCollapsed ? 'justify-between' : 'justify-center'}`}
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xl text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                         {item.icon}
                       </span>
-                      {!isCollapsed && <span className="text-sm">{item.title}</span>}
+                      {!isCollapsed && <span className="text-sm">{t(item.title)}</span>}
                     </div>
 
                     {!isCollapsed && item.children && (
                       <IoIosArrowDown
-                        className={`transition-transform duration-300 ${
-                          openDropdown === item.title ? 'rotate-180' : ''
-                        } text-gray-400 dark:text-gray-500`}
+                        className={`transition-transform duration-300 ${openDropdown === item.title ? 'rotate-180' : ''
+                          } text-gray-400 dark:text-gray-500`}
                       />
                     )}
                   </div>
@@ -184,13 +199,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
                           onClick={() => navigate(child.path)}
                           className={`py-2 px-3 rounded-lg cursor-pointer text-sm
                           transition-colors duration-200
-                          ${
-                            location.pathname === child.path
+                          ${location.pathname === child.path
                               ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
+                            }`}
                         >
-                          {child.title}
+                          {t(child.title)}
                         </div>
                       ))}
                     </div>
@@ -208,13 +222,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
           >
             <div className="flex items-center gap-3">
               <RiLogoutBoxRLine size={20} />
-              {!isCollapsed && <span className="text-sm">Logout</span>}
+              {!isCollapsed && <span className="text-sm">{t('common.logout')}</span>}
             </div>
           </div>
         </nav>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

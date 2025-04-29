@@ -10,6 +10,7 @@ import { toast } from 'react-hot-toast'
 import schedulesApi, { CycleConfig } from '@/services/schedules'
 import { motion } from 'framer-motion'
 import { Calendar, Building2, Clock, CheckCircle2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface GenerateScheduleModalProps {
     isOpen: boolean
@@ -17,6 +18,7 @@ interface GenerateScheduleModalProps {
 }
 
 const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, onClose }) => {
+    const { t } = useTranslation()
     const [selectedCycles, setSelectedCycles] = useState<CycleConfig[]>([])
     const [selectedBuildingDetails, setSelectedBuildingDetails] = useState<string[]>([])
     const [activeTab, setActiveTab] = useState<'cycles' | 'buildings'>('cycles')
@@ -97,12 +99,12 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
 
     const handleSubmit = async () => {
         if (selectedCycles.length === 0) {
-            toast.error('Please select at least one maintenance cycle')
+            toast.error(t('maintenanceCycle.generateSchedule.errors.selectCycle'))
             return
         }
 
         if (selectedBuildingDetails.length === 0) {
-            toast.error('Please select at least one building detail')
+            toast.error(t('maintenanceCycle.generateSchedule.errors.selectBuilding'))
             return
         }
 
@@ -120,15 +122,15 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                 // Close modal first
                 onClose()
                 // Then show success message
-                toast.success(response.message || 'Schedules generated successfully')
+                toast.success(response.message || t('maintenanceCycle.generateSchedule.success'))
             } else {
                 // Handle case where response doesn't have expected structure
-                toast.error(response.message || 'Failed to generate schedules')
+                toast.error(response.message || t('maintenanceCycle.generateSchedule.errors.generateFailed'))
                 console.error('Invalid response structure:', response)
             }
         } catch (error) {
             // Handle network errors or other exceptions
-            toast.error('Failed to generate schedules')
+            toast.error(t('maintenanceCycle.generateSchedule.errors.generateFailed'))
             console.error('Error generating schedules:', error)
         }
     }
@@ -147,7 +149,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Generate Maintenance Schedules"
+            title={t('maintenanceCycle.generateSchedule.title')}
             size="xl"
             showBackdrop={false}
         >
@@ -162,7 +164,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                             }`}
                     >
                         <Calendar className="w-4 h-4 mr-2" />
-                        Maintenance Cycles
+                        {t('maintenanceCycle.generateSchedule.tabs.cycles')}
                         {selectedCycles.length > 0 && (
                             <span className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
                                 {selectedCycles.length}
@@ -177,7 +179,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                             }`}
                     >
                         <Building2 className="w-4 h-4 mr-2" />
-                        Building Details
+                        {t('maintenanceCycle.generateSchedule.tabs.buildings')}
                         {selectedBuildingDetails.length > 0 && (
                             <span className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
                                 {selectedBuildingDetails.length}
@@ -215,15 +217,15 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                                         ? 'bg-blue-500 text-white hover:bg-blue-600'
                                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                         }`}
-                                                    aria-label={selectedCycles.find(c => c.cycle_id === cycle.cycle_id) ? 'Deselect cycle' : 'Select cycle'}
+                                                    aria-label={selectedCycles.find(c => c.cycle_id === cycle.cycle_id) ? t('maintenanceCycle.generateSchedule.selected') : t('maintenanceCycle.generateSchedule.select')}
                                                 >
                                                     {selectedCycles.find(c => c.cycle_id === cycle.cycle_id) ? (
                                                         <span className="flex items-center">
                                                             <CheckCircle2 className="w-4 h-4 mr-1" />
-                                                            Selected
+                                                            {t('maintenanceCycle.generateSchedule.selected')}
                                                         </span>
                                                     ) : (
-                                                        'Select'
+                                                        t('maintenanceCycle.generateSchedule.select')
                                                     )}
                                                 </button>
                                             </div>
@@ -236,7 +238,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                                 >
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Duration (days)
+                                                            {t('maintenanceCycle.generateSchedule.duration.label')}
                                                         </label>
                                                         <div className="relative">
                                                             <input
@@ -250,7 +252,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                                                     handleDurationChange(cycle.cycle_id, parseInt(e.target.value))
                                                                 }
                                                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                                aria-label="Duration in days"
+                                                                aria-label={t('maintenanceCycle.generateSchedule.duration.label')}
                                                             />
                                                             <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                                                         </div>
@@ -258,7 +260,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
 
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Start Date
+                                                            {t('maintenanceCycle.generateSchedule.startDate.label')}
                                                         </label>
                                                         <div className="relative">
                                                             <input
@@ -271,7 +273,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                                                     handleStartDateChange(cycle.cycle_id, e.target.value)
                                                                 }
                                                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                                aria-label="Start date"
+                                                                aria-label={t('maintenanceCycle.generateSchedule.startDate.label')}
                                                             />
                                                             <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                                                         </div>
@@ -288,10 +290,10 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                                                 handleAutoCreateChange(cycle.cycle_id, e.target.checked)
                                                             }
                                                             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                            aria-label="Auto create tasks"
+                                                            aria-label={t('maintenanceCycle.generateSchedule.autoCreateTasks.label')}
                                                         />
                                                         <label className="ml-2 block text-sm text-gray-900">
-                                                            Auto create tasks
+                                                            {t('maintenanceCycle.generateSchedule.autoCreateTasks.label')}
                                                         </label>
                                                     </div>
                                                 </motion.div>
@@ -331,28 +333,30 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                                     <h4 className="font-medium text-gray-900">{buildingDetail.name}</h4>
                                                     <div className="mt-1 space-y-1">
                                                         <p className="text-sm text-gray-500">
-                                                            <span className="font-medium">Building:</span> {buildingDetail.building?.name || 'N/A'}
+                                                            <span className="font-medium">{t('maintenanceCycle.generateSchedule.building')}:</span> {buildingDetail.building?.name || 'N/A'}
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            <span className="font-medium">Area:</span> {buildingDetail.building?.area?.name || 'N/A'}
+                                                            <span className="font-medium">{t('maintenanceCycle.generateSchedule.area')}:</span> {buildingDetail.building?.area?.name || 'N/A'}
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            <span className="font-medium">Total Apartments:</span> {buildingDetail.total_apartments || 0}
+                                                            <span className="font-medium">{t('maintenanceCycle.generateSchedule.totalApartments')}:</span> {buildingDetail.total_apartments || 0}
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            <span className="font-medium">Number of Floors:</span> {buildingDetail.building?.numberFloor || 'N/A'}
+                                                            <span className="font-medium">{t('maintenanceCycle.generateSchedule.numberOfFloors')}:</span> {buildingDetail.building?.numberFloor || 'N/A'}
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            <span className="font-medium">Status:</span>{' '}
+                                                            <span className="font-medium">{t('maintenanceCycle.generateSchedule.status')}:</span>{' '}
                                                             <span className={`px-2 py-0.5 rounded-full text-xs ${buildingDetail.building?.Status === 'operational'
                                                                 ? 'bg-green-100 text-green-800'
                                                                 : 'bg-gray-100 text-gray-800'
                                                                 }`}>
-                                                                {buildingDetail.building?.Status || 'N/A'}
+                                                                {buildingDetail.building?.Status === 'operational'
+                                                                    ? t('maintenanceCycle.generateSchedule.operational')
+                                                                    : t('maintenanceCycle.generateSchedule.underConstruction')}
                                                             </span>
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            <span className="font-medium">Location Details:</span> {buildingDetail.locationDetails?.length || 0} locations
+                                                            <span className="font-medium">{t('maintenanceCycle.generateSchedule.locationDetails')}:</span> {buildingDetail.locationDetails?.length || 0} {t('maintenanceCycle.generateSchedule.locations')}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -365,7 +369,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                 </div>
                             ) : (
                                 <div className="text-center py-8 text-gray-500">
-                                    No building details found. Please try again later.
+                                    {t('maintenanceCycle.generateSchedule.noBuildingDetails')}
                                 </div>
                             )}
                         </div>
@@ -378,13 +382,13 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                         onClick={onClose}
                         className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                        Cancel
+                        {t('maintenanceCycle.generateSchedule.buttons.cancel')}
                     </button>
                     <button
                         onClick={handleSubmit}
                         className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
                     >
-                        Generate Schedules
+                        {t('maintenanceCycle.generateSchedule.buttons.generate')}
                     </button>
                 </div>
             </div>
