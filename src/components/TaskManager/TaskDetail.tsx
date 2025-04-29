@@ -122,7 +122,6 @@ const TaskDetail: React.FC = () => {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   })
-  console.log("🚀 Kha ne ~ taskData:", taskData)
 
   // Fetch inspections for selected assignment only when modal is open
   const {

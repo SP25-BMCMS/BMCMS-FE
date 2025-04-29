@@ -6,6 +6,7 @@ import {
   TaskAssignmentResponse,
   TaskAssignmentDetailResponse,
   InspectionResponse,
+  TaskListByTypeParams,
 } from '@/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { getStaffDetail } from '@/services/staffs'
@@ -37,6 +38,20 @@ const getTasks = async (params: TaskListParams = {}): Promise<TaskListPagination
   try {
     const { data } = await apiInstance.get<TaskListPaginationResponse>(
       import.meta.env.VITE_VIEW_TASK_LIST,
+      { params }
+    )
+    return data
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch tasks')
+  }
+}
+
+const getTasksByType = async (
+  params: TaskListByTypeParams = { taskType: 'all' }
+): Promise<TaskListPaginationResponse> => {
+  try {
+    const { data } = await apiInstance.get<TaskListPaginationResponse>(
+      import.meta.env.VITE_GET_TASK_LIST_BY_TYPE,
       { params }
     )
     return data
@@ -263,6 +278,7 @@ export const useSendNotificationToResident = () => {
 
 const tasksApi = {
   getTasks,
+  getTasksByType,
   createTask,
   getTaskAssignmentsByTaskId,
   getTaskAssignmentDetail,

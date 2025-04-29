@@ -40,37 +40,41 @@ const TaskManagement: React.FC = () => {
   const queryClient = useQueryClient()
 
   // Fetch tasks with React Query
-  const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
+  const { data: tasksData, isLoading: isLoadingTasks, error: tasksError } = useQuery({
     queryKey: ['tasks', currentPage, itemsPerPage, searchTerm, selectedStatus, taskType],
     queryFn: async () => {
       const params: Record<string, string | number | undefined> = {
         page: currentPage,
         limit: itemsPerPage,
-        search: searchTerm || undefined,
-        ...(selectedStatus !== 'all' && { status: selectedStatus }),
+        // search: searchTerm || undefined,
+        ...(selectedStatus !== 'all' && { statusFilter: selectedStatus }),
+        taskType: taskType
       }
-      const response = await tasksApi.getTasks(params)
+      const response = await tasksApi.getTasksByType(params)
 
       // Lọc dữ liệu dựa trên loại task
       if (response.data && Array.isArray(response.data)) {
         const filteredData = response.data.filter(task => {
           if (taskType === 'crack') {
-            // Hiển thị các task có crack_id
             return !!task.crack_id
           } else {
-            // Hiển thị các task không có crack_id (schedule tasks)
             return !task.crack_id
           }
         })
 
+        // Cập nhật pagination dựa trên response từ API
+        const updatedPagination = {
+          ...response.pagination,
+          total: response.pagination.total,
+          totalPages: response.pagination.totalPages,
+          page: currentPage,
+          limit: itemsPerPage
+        }
+
         return {
           ...response,
           data: filteredData,
-          pagination: {
-            ...response.pagination,
-            total: filteredData.length,
-            totalPages: Math.ceil(filteredData.length / itemsPerPage),
-          },
+          pagination: updatedPagination
         }
       }
 
@@ -192,6 +196,7 @@ const TaskManagement: React.FC = () => {
   const toggleTaskType = () => {
     setTaskType(prev => (prev === 'crack' ? 'schedule' : 'crack'))
     setCurrentPage(1) // Reset to first page when switching views
+    setItemsPerPage(10) // Reset items per page to default
   }
 
   // Loading animation
@@ -205,19 +210,37 @@ const TaskManagement: React.FC = () => {
   }
 
   const LoadingIndicator = () => (
-    <div className="flex flex-col justify-center items-center h-48 md:h-56 lg:h-64">
+    <div className="flex flex-col justify-center items-center h-48 md:h-56 lg:h-64 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
       <motion.div
         animate={loadingVariants}
-        className="w-10 h-10 md:w-12 md:h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-3 md:mb-4"
+        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
       />
-      <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">Loading tasks data...</p>
+      <p className="text-gray-600 dark:text-gray-300">Loading tasks...</p>
+    </div>
+  )
+
+  const ErrorMessage = () => (
+    <div className="flex flex-col items-center justify-center h-48 md:h-56 lg:h-64 bg-red-50 dark:bg-red-900/10 rounded-lg">
+      <div className="text-red-500 dark:text-red-400 mb-2">
+        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <p className="text-red-600 dark:text-red-400 text-center px-4">
+        {tasksError instanceof Error ? tasksError.message : 'Failed to load tasks'}
+      </p>
+      <button
+        onClick={() => queryClient.invalidateQueries({ queryKey: ['tasks'] })}
+        className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+      >
+        Try Again
+      </button>
     </div>
   )
 
   const filterOptions = [
     { value: 'all', label: 'All' },
     { value: 'Assigned', label: 'Assigned' },
-    { value: 'In Progress', label: 'In Progress' },
     { value: 'Completed', label: 'Completed' },
   ]
 
@@ -249,8 +272,8 @@ const TaskManagement: React.FC = () => {
       title: 'Description',
       render: item => {
         // Only show tooltip if description is longer than 60 characters
-        const shortDescription = item.description?.substring(0, 60) || '';
-        const needsTooltip = (item.description?.length || 0) > 60;
+        const shortDescription = item.description?.substring(0, 60) || ''
+        const needsTooltip = (item.description?.length || 0) > 60
 
         return (
           <Tooltip content={item.description || ''} position="bottom">
@@ -302,7 +325,7 @@ const TaskManagement: React.FC = () => {
                   </div>
                 </div>
               </Tooltip>
-            );
+            )
           }
         }
 
@@ -388,28 +411,28 @@ const TaskManagement: React.FC = () => {
               ? new Date(scheduleData.run_date).toLocaleDateString()
               : 'N/A'
 
-              return (
-                <Tooltip content={`${scheduleName} - ${deviceType} - ${runDate}`} position="bottom">
-                  <div className="text-sm">
-                    <div className="font-medium text-gray-700 dark:text-gray-300 truncate max-w-[80px] xs:max-w-[100px] sm:max-w-[120px] md:max-w-[140px]">
-                      {scheduleName}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[80px] xs:max-w-[100px] sm:max-w-[120px] md:max-w-[140px]">
-                      {deviceType} - {runDate}
-                    </div>
+            return (
+              <Tooltip content={`${scheduleName} - ${deviceType} - ${runDate}`} position="bottom">
+                <div className="text-sm">
+                  <div className="font-medium text-gray-700 dark:text-gray-300 truncate max-w-[80px] xs:max-w-[100px] sm:max-w-[120px] md:max-w-[140px]">
+                    {scheduleName}
                   </div>
-                </Tooltip>
-              );
-            },
-            width: '110px xs:140px sm:160px',
+                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[80px] xs:max-w-[100px] sm:max-w-[120px] md:max-w-[140px]">
+                    {deviceType} - {runDate}
+                  </div>
+                </div>
+              </Tooltip>
+            )
           },
-          {
-            key: 'schedule_status',
-            title: 'Schedule Status',
-            render: item => {
-              if (!item.schedulesjobInfo?.isSuccess) {
-                return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>;
-              }
+          width: '110px xs:140px sm:160px',
+        },
+        {
+          key: 'schedule_status',
+          title: 'Schedule Status',
+          render: item => {
+            if (!item.schedulesjobInfo?.isSuccess) {
+              return <div className="text-sm text-gray-500 dark:text-gray-400">-</div>
+            }
 
             const scheduleStatus = item.schedulesjobInfo.data?.status || ''
             let bgColor = ''
@@ -573,11 +596,14 @@ const TaskManagement: React.FC = () => {
         </p>
       </div>
 
-      {isLoadingTasks ? (
-        <LoadingIndicator />
-      ) : (
-        <>
-          <div className="w-full overflow-x-auto rounded-lg shadow-sm border border-gray-100 dark:border-gray-800">
+      {/* Main Content */}
+      <div className="w-full overflow-x-auto rounded-lg shadow-sm border border-gray-100 dark:border-gray-800">
+        {isLoadingTasks ? (
+          <LoadingIndicator />
+        ) : tasksError ? (
+          <ErrorMessage />
+        ) : (
+          <>
             <Table<TaskResponse>
               data={tasksData?.data || []}
               columns={columns}
@@ -586,19 +612,19 @@ const TaskManagement: React.FC = () => {
               className="w-full"
               tableClassName="w-full min-w-[640px] sm:min-w-[768px] md:min-w-[900px]"
             />
-          </div>
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={tasksData?.pagination.totalPages || 1}
-            onPageChange={handlePageChange}
-            totalItems={tasksData?.pagination.total || 0}
-            itemsPerPage={itemsPerPage}
-            onLimitChange={handleLimitChange}
-            className="w-full mt-3 md:mt-4"
-          />
-        </>
-      )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={tasksData?.pagination?.totalPages || 1}
+              onPageChange={handlePageChange}
+              totalItems={tasksData?.pagination?.total || 0}
+              itemsPerPage={itemsPerPage}
+              onLimitChange={handleLimitChange}
+              className="w-full mt-3 md:mt-4"
+            />
+          </>
+        )}
+      </div>
 
       {/* Change Status Modal */}
       {selectedTask && (
