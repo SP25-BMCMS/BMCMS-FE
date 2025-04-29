@@ -25,7 +25,7 @@ const markNotificationAsRead = async (notificationId: string): Promise<Notificat
 const markAllAsRead = async (userId: string): Promise<Notification[]> => {
   try {
     const { data } = await apiInstance.put<NotificationResponse>(
-      `/notifications/mark-read-all/${userId}`
+      `/notifications/mark-all-read/${userId}`
     )
     return data.data
   } catch (error: any) {
