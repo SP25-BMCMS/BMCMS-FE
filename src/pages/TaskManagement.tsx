@@ -55,6 +55,7 @@ const TaskManagement: React.FC = () => {
         ...(selectedStatus !== 'all' && { statusFilter: selectedStatus }),
         taskType: taskType
       }
+      // @ts-ignore
       const response = await tasksApi.getTasksByType(params)
 
       // Lọc dữ liệu dựa trên loại task

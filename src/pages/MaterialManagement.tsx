@@ -24,6 +24,7 @@ import UpdateStatusModal from '@/components/materialManager/UpdateStatusModal'
 import MaterialDetailModal from '@/components/materialManager/MaterialDetailModal'
 import AddButton from '@/components/AddButton'
 import { Plus } from 'lucide-react'
+import Tooltip from '@/components/Tooltip'
 
 // Rename to MaterialColumn to avoid conflict with imported Column
 interface MaterialColumn<T> {
@@ -270,23 +271,36 @@ const MaterialManagement: React.FC = () => {
       key: 'name',
       title: t('materialManagement.table.name'),
       render: item => (
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
+        <Tooltip content={item.name}>
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
+            {item.name}
+          </div>
+        </Tooltip>
       ),
     },
     {
       key: 'description',
       title: t('materialManagement.table.description'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.description}</div>
+        <Tooltip content={item.description}>
+          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[300px]">
+            {item.description}
+          </div>
+        </Tooltip>
       ),
     },
     {
       key: 'unit_price',
       title: t('materialManagement.table.unitPrice'),
       render: (item: Material) => {
-        // Format giá tiền VND với dấu phân cách hàng nghìn
         const formattedPrice = parseInt(item.unit_price).toLocaleString('vi-VN')
-        return `${formattedPrice} VND`
+        return (
+          <Tooltip content={`${formattedPrice} VND`}>
+            <div className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+              {formattedPrice} VND
+            </div>
+          </Tooltip>
+        )
       },
       width: 'w-32',
     },
@@ -294,7 +308,11 @@ const MaterialManagement: React.FC = () => {
       key: 'stockQuantity',
       title: t('materialManagement.table.stockQuantity'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.stock_quantity}</div>
+        <Tooltip content={item.stock_quantity.toString()}>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            {item.stock_quantity}
+          </div>
+        </Tooltip>
       ),
     },
     {
@@ -334,28 +352,28 @@ const MaterialManagement: React.FC = () => {
   ]
 
   return (
-    <div className="w-full mt-[60px]">
-      <div className="flex flex-col space-y-4 mb-4 ml-[90px] mr-[132px]">
-        <div className="flex justify-between">
+    <div className="w-full mt-[60px] p-4">
+      <div className="flex flex-col space-y-4 mb-4">
+        <div className="flex flex-col lg:flex-row justify-between gap-4">
           <SearchInput
             placeholder={t('materialManagement.searchPlaceholder')}
             value={searchTerm}
             onChange={e => handleSearch(e.target.value)}
-            className="w-[20rem] max-w-xs"
+            className="w-full lg:w-[280px]"
           />
 
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-2 lg:gap-4">
             <FilterDropdown
               options={priceRangeOptions}
               onSelect={handlePriceRangeChange}
-              buttonClassName="w-[300px]"
+              buttonClassName="w-full sm:w-[200px] lg:w-[250px]"
               selectedValue={selectedPriceRange}
               label={t('materialManagement.filterOptions.price.all')}
             />
             <FilterDropdown
               options={statusOptions}
               onSelect={handleStatusChange}
-              buttonClassName="w-[160px]"
+              buttonClassName="w-full sm:w-[150px]"
               selectedValue={selectedStatus}
               label={t('materialManagement.filterOptions.status.all')}
             />
@@ -363,13 +381,13 @@ const MaterialManagement: React.FC = () => {
               onClick={() => setIsCreateModalOpen(true)}
               label={t('materialManagement.createMaterial')}
               icon={<Plus />}
-              className="w-auto"
+              className="w-full sm:w-auto"
             />
           </div>
         </div>
 
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="flex flex-wrap gap-4">
             {/* Active Status */}
             <div className="flex items-center">
               <span className="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>
@@ -397,18 +415,22 @@ const MaterialManagement: React.FC = () => {
         </div>
       </div>
 
-      <Table<Material>
-        data={filteredMaterials}
-        columns={columns}
-        keyExtractor={item => item.material_id || Math.random().toString()}
-        className="w-[95%] mx-auto"
-        tableClassName="w-full"
-        isLoading={isLoading || isFetching}
-        emptyText={t('materialManagement.noData')}
-      />
+      <div className="overflow-x-auto">
+        <div className="min-w-[800px]">
+          <Table<Material>
+            data={filteredMaterials}
+            columns={columns}
+            keyExtractor={item => item.material_id || Math.random().toString()}
+            className="w-full"
+            tableClassName="w-full"
+            isLoading={isLoading || isFetching}
+            emptyText={t('materialManagement.noData')}
+          />
+        </div>
+      </div>
 
       {!isLoading && materialsData?.data?.pagination && (
-        <div className="w-[95%] mx-auto">
+        <div className="mt-4">
           <Pagination
             currentPage={currentPage}
             totalPages={materialsData.data.pagination.totalPages}
