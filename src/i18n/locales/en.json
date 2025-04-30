@@ -26,6 +26,11 @@
     "export": "Export",
     "changeStatus": "Change Status",
     "noData": "No Data",
+    "apartments": "apartments",
+    "floors": "floors",
+    "type": "Type",
+    "manufacturer": "Manufacturer",
+    "model": "Model",
     "logout": "Logout",
     "login": "Login",
     "register": "Register",
@@ -254,7 +259,8 @@
         "to": "to",
         "ofTotal": "of total",
         "itemsPerPageTitle": "Select number of items per page"
-      }
+      },
+      "other": "Other"
     },
     "dropdown": {
       "viewDetail": "View Detail",
@@ -498,6 +504,346 @@
         "title": "Confirm Cancellation",
         "message": "Are you sure you want to cancel this job? This action cannot be undone."
       }
+    }
+  },
+  "buildingManagement": {
+    "title": "Building Management",
+    "noBuildingDetails": "No building details available",
+    "loading": "Loading buildings...",
+    "noData": "No buildings found",
+    "notAssigned": "Not Assigned",
+    "searchPlaceholder": "Search buildings...",
+    "viewDetails": "View Details",
+    "technicalRecords": "Technical Records",
+    "status": {
+      "operational": "Operational",
+      "under_construction": "Under Construction"
+    },
+    "table": {
+      "no": "No.",
+      "buildingName": "Building Name",
+      "areaName": "Area Name",
+      "floor": "Floor",
+      "status": "Status",
+      "createdDate": "Created Date",
+      "completionDate": "Completion Date",
+      "action": "Action"
+    }
+  },
+  "crackManagement": {
+    "title": "Crack Management",
+    "severity": "Severity",
+    "totalCracks": "Total Cracks: {{count}}",
+    "searchPlaceholder": "Search cracks...",
+    "noData": "No cracks found",
+    "loading": "Loading cracks...",
+    "errorLoading": "Error loading cracks",
+    "filterOptions": {
+      "all": "All",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "reviewing": "Reviewing",
+      "resolved": "Resolved",
+      "current": "Current Status"
+    },
+    "table": {
+      "no": "No.",
+      "description": "Description",
+      "reportedBy": "Reported By",
+      "createdDate": "Created Date",
+      "status": "Status",
+      "action": "Action"
+    },
+    "crackDetails": "Crack Details",
+    "detailView": "Detail View",
+    "reportInformation": "Report Information",
+    "reportingDetails": "Reporting Details",
+    "assetType": "Asset Type",
+    "privateAsset": "Private Asset",
+    "publicAsset": "Public Asset",
+    "location": "Location",
+    "notSpecified": "Not Specified",
+    "verifiedBy": "Verified By",
+    "notVerified": "Not Verified",
+    "notVerifiedYet": "Not Verified Yet",
+    "crackImages": "Crack Images",
+    "image": "Image",
+    "originalImage": "Original Image",
+    "aiDetected": "AI Detected",
+    "imageLoadError": "Failed to load image",
+    "noImages": "No images available",
+    "statusUpdateSuccess": "Status updated successfully",
+    "error": "An error occurred"
+  },
+  "materialManagement": {
+    "title": "Material Management",
+    "createMaterial": "Create Material",
+    "searchPlaceholder": "Search by name or description...",
+    "noData": "No materials found",
+    "totalMaterials": "Total Materials: {{filtered}} / {{total}}",
+    "filterOptions": {
+      "status": {
+        "all": "All Status",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "price": {
+        "all": "All Prices",
+        "under100k": "Under 100,000 VND",
+        "100k-500k": "100,000 - 500,000 VND",
+        "500k-1m": "500,000 - 1,000,000 VND",
+        "above1m": "Above 1,000,000 VND"
+      }
+    },
+    "table": {
+      "no": "No.",
+      "name": "Name",
+      "description": "Description",
+      "unitPrice": "Unit Price",
+      "stockQuantity": "Stock Quantity",
+      "status": "Status",
+      "action": "Action"
+    },
+    "createSuccess": "Material created successfully",
+    "createError": "Failed to create material",
+    "unitPriceUpdateSuccess": "Unit price updated successfully",
+    "unitPriceUpdateError": "Failed to update unit price",
+    "stockQuantityUpdateSuccess": "Stock quantity updated successfully",
+    "stockQuantityUpdateError": "Failed to update stock quantity",
+    "statusUpdateSuccess": "Status updated successfully",
+    "statusUpdateError": "Failed to update status",
+    "deleteSuccess": "Material deleted successfully",
+    "deleteError": "Failed to delete material",
+    "updateStatus": {
+      "title": "Update Status",
+      "material": "Material",
+      "currentStatus": "Current Status",
+      "newStatus": "New Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "cancel": "Cancel",
+      "update": "Update",
+      "updating": "Updating..."
+    },
+    "deleteConfirm": {
+      "title": "Delete Material",
+      "message": "Are you sure you want to delete this material? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    }
+  },
+  "maintenanceCycle": {
+    "title": "Maintenance Cycle",
+    "createCycle": "Create Cycle",
+    "editCycle": "Edit Cycle",
+    "deleteCycle": "Delete Cycle",
+    "viewHistory": "View History",
+    "confirmDeletion": "Confirm Deletion",
+    "deleteConfirmation": "Are you sure you want to delete the maintenance cycle for {{cycleName}}? This action cannot be undone.",
+    "loading": "Loading maintenance cycles...",
+    "error": "Failed to load maintenance cycles",
+    "noData": "No maintenance cycles found",
+    "history": "Maintenance Cycle History",
+    "changedAt": "Changed at",
+    "updatedBy": "Updated by",
+    "reason": "Reason",
+    "noHistory": "No history available",
+    "table": {
+      "no": "No.",
+      "frequency": "Frequency",
+      "basis": "Basis",
+      "deviceType": "Device Type",
+      "actions": "Actions"
+    },
+    "filterOptions": {
+      "frequency": {
+        "all": "All Frequencies",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "specific": "Specific"
+      },
+      "basis": {
+        "all": "All Bases",
+        "manufacturerrecommendation": "Manufacturer Recommendation",
+        "legalstandard": "Legal Standard",
+        "operationalexperience": "Operational Experience",
+        "other": "Other"
+      },
+      "deviceType": {
+        "all": "All Devices",
+        "elevator": "Elevator",
+        "fireprotection": "Fire Protection",
+        "electrical": "Electrical",
+        "plumbing": "Plumbing",
+        "hvac": "HVAC",
+        "cctv": "CCTV",
+        "generator": "Generator",
+        "lighting": "Lighting",
+        "automaticdoor": "Automatic Door",
+        "fireextinguisher": "Fire Extinguisher",
+        "other": "Other"
+      }
+    },
+    "filter": {
+      "frequency": "Frequency",
+      "basis": "Basis",
+      "deviceType": "Device Type",
+      "reset": "Reset",
+      "apply": "Apply"
+    },
+    "generateSchedule": {
+      "title": "Generate Schedule",
+      "tabs": {
+        "cycles": "Maintenance Cycles",
+        "buildings": "Buildings"
+      },
+      "select": "Select",
+      "selected": "Selected",
+      "duration": {
+        "label": "Duration (days)"
+      },
+      "startDate": {
+        "label": "Start Date"
+      },
+      "autoCreateTasks": {
+        "label": "Auto Create Tasks"
+      },
+      "building": "Building",
+      "area": "Area",
+      "totalApartments": "Total Apartments",
+      "numberOfFloors": "Number of Floors",
+      "status": "Status",
+      "operational": "Operational",
+      "underConstruction": "Under Construction",
+      "locationDetails": "Location Details",
+      "locations": "locations",
+      "noBuildingDetails": "No building details found",
+      "buttons": {
+        "cancel": "Cancel",
+        "generate": "Generate Schedule"
+      },
+      "errors": {
+        "selectCycle": "Please select at least one maintenance cycle",
+        "selectBuilding": "Please select at least one building",
+        "generateFailed": "Failed to generate schedule"
+      },
+      "success": "Schedule generated successfully"
+    },
+    "modal": {
+      "title": {
+        "create": "Create Maintenance Cycle",
+        "edit": "Edit Maintenance Cycle"
+      },
+      "deviceType": {
+        "label": "Device Type",
+        "required": "Please select a device type"
+      },
+      "frequency": {
+        "label": "Frequency",
+        "required": "Please select a frequency"
+      },
+      "basis": {
+        "label": "Basis",
+        "required": "Please select a basis"
+      },
+      "reason": {
+        "label": "Change Reason",
+        "required": "Please enter a reason for the change",
+        "placeholder": "Enter reason for change..."
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update",
+        "creating": "Creating...",
+        "updating": "Updating..."
+      }
+    }
+  },
+  "calendar": {
+    "title": "Schedule Management",
+    "viewMode": {
+      "table": "Table",
+      "calendar": "Calendar"
+    },
+    "status": {
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancel": "Cancelled",
+      "pending": "Pending"
+    },
+    "statusLabels": {
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancel": "Cancelled",
+      "pending": "Pending"
+    },
+    "createSchedule": "Create Schedule",
+    "scheduleDetails": "Schedule Details",
+    "backToCalendar": "Back to Calendar",
+    "loading": "Loading...",
+    "buttons": {
+      "create": "Create Schedule",
+      "today": "Today",
+      "month": "Month",
+      "week": "Week",
+      "day": "Day",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "table": {
+      "scheduleName": "Schedule Name",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "status": "Status",
+      "buildings": "Buildings",
+      "actions": "Actions"
+    },
+    "tooltips": {
+      "viewDetails": "View Details"
+    },
+    "buildings": {
+      "building": "Building"
+    },
+    "errors": {
+      "noTitle": "Please enter a schedule name",
+      "noStartDate": "Please select a start date",
+      "noEndDate": "Please select an end date",
+      "noBuilding": "Please select at least one building",
+      "noCycle": "Please select a maintenance cycle",
+      "pastDate": "Cannot create events in the past",
+      "endBeforeStart": "End date must be after start date"
+    }
+  },
+  "workLog": {
+    "title": "Work Log Management",
+    "description": "Track and manage all work logs for tasks and assignments",
+    "workLogs": "Work Logs",
+    "searchPlaceholder": "Search by title or description...",
+    "showingRecords": "Showing {{count}} of {{total}} records",
+    "noData": "No work logs found",
+    "error": "Error!",
+    "errorLoading": "Failed to load work logs",
+    "created": "Created at",
+    "table": {
+      "title": "Title",
+      "task": "Task",
+      "status": "Status",
+      "createdAt": "Created At"
+    },
+    "status": {
+      "execute_cracks": "Execute Crack Repairs",
+      "confirm_no_pending_issues": "Confirm No Pending Issues",
+      "final_review": "Final Review",
+      "wait_for_deposit": "Wait for Deposit"
     }
   }
 }

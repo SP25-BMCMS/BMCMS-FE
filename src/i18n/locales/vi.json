@@ -432,46 +432,27 @@
   },
   "buildingManagement": {
     "title": "Quản lý tòa nhà",
-    "addBuilding": "Thêm tòa nhà",
-    "editBuilding": "Sửa tòa nhà",
-    "deleteBuilding": "Xóa tòa nhà",
-    "buildingDetails": "Chi tiết tòa nhà",
-    "buildingName": "Tên tòa nhà",
-    "buildingAddress": "Địa chỉ",
-    "buildingType": "Loại tòa nhà",
-    "buildingStatus": "Trạng thái",
-    "buildingManager": "Quản lý tòa nhà",
-    "table": {
-      "no": "STT",
-      "buildingName": "Tên tòa nhà",
-      "areaName": "Tên khu vực",
-      "manager": "Quản lý",
-      "floor": "Số tầng",
-      "createdDate": "Ngày tạo",
-      "completionDate": "Ngày hoàn thành",
-      "status": "Trạng thái",
-      "action": "Thao tác"
-    },
+    "noBuildingDetails": "Không có thông tin chi tiết tòa nhà",
+    "loading": "Đang tải dữ liệu tòa nhà...",
+    "noData": "Không tìm thấy tòa nhà nào",
+    "notAssigned": "Chưa được gán",
+    "searchPlaceholder": "Tìm kiếm tòa nhà...",
+    "viewDetails": "Xem chi tiết",
+    "technicalRecords": "Hồ sơ kỹ thuật",
     "status": {
       "operational": "Đang hoạt động",
       "under_construction": "Đang xây dựng"
     },
-    "filterOptions": {
-      "all": "Tất cả",
-      "operational": "Đang hoạt động",
-      "under_construction": "Đang xây dựng"
-    },
-    "searchPlaceholder": "Tìm kiếm theo tên tòa nhà hoặc mô tả",
-    "loading": "Đang tải dữ liệu tòa nhà...",
-    "error": "Không thể tải dữ liệu tòa nhà",
-    "tryAgain": "Thử lại",
-    "noData": "Không có dữ liệu",
-    "addArea": "Thêm khu vực",
-    "addBuilding": "Thêm tòa nhà",
-    "deleteSuccess": "Đã xóa tòa nhà thành công",
-    "deleteError": "Không thể xóa tòa nhà",
-    "notAssigned": "Chưa phân công",
-    "unknown": "Không xác định"
+    "table": {
+      "no": "STT",
+      "buildingName": "Tên tòa nhà",
+      "areaName": "Tên khu vực",
+      "floor": "Số tầng",
+      "status": "Trạng thái",
+      "createdDate": "Ngày tạo",
+      "completionDate": "Ngày hoàn thành",
+      "action": "Thao tác"
+    }
   },
   "residentManagement": {
     "title": "Quản lý cư dân",
@@ -555,65 +536,15 @@
   },
   "maintenanceCycle": {
     "title": "Chu kỳ bảo trì",
-    "addCycle": "Thêm chu kỳ",
+    "createCycle": "Tạo chu kỳ",
     "editCycle": "Sửa chu kỳ",
     "deleteCycle": "Xóa chu kỳ",
-    "cycleDetails": "Chi tiết chu kỳ",
-    "cycleName": "Tên chu kỳ",
-    "cycleType": "Loại chu kỳ",
-    "cycleFrequency": "Tần suất",
-    "cycleStatus": "Trạng thái",
-    "cycleStartDate": "Ngày bắt đầu",
-    "cycleEndDate": "Ngày kết thúc",
-    "loading": "Đang tải dữ liệu chu kỳ bảo trì...",
-    "error": "Lỗi tải dữ liệu chu kỳ bảo trì",
-    "noData": "Không tìm thấy chu kỳ bảo trì nào",
+    "viewHistory": "Xem lịch sử",
     "confirmDeletion": "Xác nhận xóa",
     "deleteConfirmation": "Bạn có chắc chắn muốn xóa chu kỳ bảo trì cho {{cycleName}}? Hành động này không thể hoàn tác.",
-    "generateSchedule": {
-      "title": "Tạo lịch trình bảo trì",
-      "tabs": {
-        "cycles": "Chu kỳ bảo trì",
-        "buildings": "Tòa nhà"
-      },
-      "select": "Chọn",
-      "buttons": {
-        "cancel": "Hủy",
-        "generate": "Tạo lịch trình"
-      },
-      "deviceTypes": {
-        "hvac": "Hệ thống điều hòa không khí",
-        "electrical": "Hệ thống điện",
-        "generator": "Máy phát điện",
-        "plumbing": "Hệ thống ống nước",
-        "lighting": "Hệ thống chiếu sáng",
-        "elevator": "Thang máy",
-        "automaticDoor": "Cửa tự động",
-        "fireProtection": "Hệ thống phòng cháy",
-        "fireExtinguisher": "Bình chữa cháy"
-      },
-      "building": "Tòa nhà",
-      "area": "Khu vực",
-      "totalApartments": "Tổng số căn hộ",
-      "numberOfFloors": "Số tầng",
-      "status": "Trạng thái",
-      "operational": "Đang hoạt động",
-      "underConstruction": "Đang xây dựng",
-      "locationDetails": "Chi tiết vị trí",
-      "locations": "vị trí",
-      "selected": "Đã chọn",
-      "duration": {
-        "label": "Thời gian (ngày)"
-      },
-      "startDate": {
-        "label": "Ngày bắt đầu"
-      },
-      "autoCreateTasks": {
-        "label": "Tự động tạo nhiệm vụ"
-      }
-    },
-    "createCycle": "Tạo chu kỳ",
-    "viewHistory": "Xem lịch sử",
+    "loading": "Đang tải dữ liệu chu kỳ bảo trì...",
+    "error": "Không thể tải dữ liệu chu kỳ bảo trì",
+    "noData": "Không tìm thấy chu kỳ bảo trì nào",
     "history": "Lịch sử chu kỳ bảo trì",
     "changedAt": "Thay đổi lúc",
     "updatedBy": "Cập nhật bởi",
@@ -625,54 +556,6 @@
       "basis": "Cơ sở",
       "deviceType": "Loại thiết bị",
       "actions": "Thao tác"
-    },
-    "schedule": {
-      "title": "Tạo lịch trình bảo trì",
-      "tabs": {
-        "cycles": "Chu kỳ bảo trì",
-        "buildings": "Chi tiết tòa nhà"
-      },
-      "duration": {
-        "label": "Thời gian (ngày)",
-        "placeholder": "Nhập số ngày"
-      },
-      "startDate": {
-        "label": "Ngày bắt đầu",
-        "placeholder": "Chọn ngày bắt đầu"
-      },
-      "autoCreateTasks": {
-        "label": "Tự động tạo nhiệm vụ"
-      },
-      "buttons": {
-        "cancel": "Hủy",
-        "generate": "Tạo lịch trình"
-      },
-      "errors": {
-        "selectCycle": "Vui lòng chọn ít nhất một chu kỳ bảo trì",
-        "selectBuilding": "Vui lòng chọn ít nhất một tòa nhà",
-        "generateFailed": "Không thể tạo lịch trình"
-      },
-      "success": "Tạo lịch trình thành công",
-      "noBuildingDetails": "Không tìm thấy chi tiết tòa nhà. Vui lòng thử lại sau.",
-      "select": "Chọn",
-      "selected": "Đã chọn",
-      "building": "Tòa nhà",
-      "area": "Khu vực",
-      "totalApartments": "Tổng số căn hộ",
-      "numberOfFloors": "Số tầng",
-      "status": "Trạng thái",
-      "locationDetails": "Chi tiết vị trí",
-      "locations": "vị trí",
-      "operational": "Đang hoạt động",
-      "underConstruction": "Đang xây dựng",
-      "other": "Khác",
-      "moreDevices": "+{{count}} thiết bị khác",
-      "noEquipment": "Không có thiết bị được gán",
-      "equipmentDetails": {
-        "type": "Loại",
-        "manufacturer": "Nhà sản xuất",
-        "model": "Model"
-      }
     },
     "filterOptions": {
       "frequency": {
@@ -705,6 +588,51 @@
         "other": "Khác"
       }
     },
+    "filter": {
+      "frequency": "Tần suất",
+      "basis": "Cơ sở",
+      "deviceType": "Loại thiết bị",
+      "reset": "Đặt lại",
+      "apply": "Áp dụng"
+    },
+    "generateSchedule": {
+      "title": "Tạo lịch trình",
+      "tabs": {
+        "cycles": "Chu kỳ bảo trì",
+        "buildings": "Tòa nhà"
+      },
+      "select": "Chọn",
+      "selected": "Đã chọn",
+      "duration": {
+        "label": "Thời gian (ngày)"
+      },
+      "startDate": {
+        "label": "Ngày bắt đầu"
+      },
+      "autoCreateTasks": {
+        "label": "Tự động tạo nhiệm vụ"
+      },
+      "building": "Tòa nhà",
+      "area": "Khu vực",
+      "totalApartments": "Tổng số căn hộ",
+      "numberOfFloors": "Số tầng",
+      "status": "Trạng thái",
+      "operational": "Đang hoạt động",
+      "underConstruction": "Đang xây dựng",
+      "locationDetails": "Chi tiết vị trí",
+      "locations": "vị trí",
+      "noBuildingDetails": "Không tìm thấy chi tiết tòa nhà",
+      "buttons": {
+        "cancel": "Hủy",
+        "generate": "Tạo lịch trình"
+      },
+      "errors": {
+        "selectCycle": "Vui lòng chọn ít nhất một chu kỳ bảo trì",
+        "selectBuilding": "Vui lòng chọn ít nhất một tòa nhà",
+        "generateFailed": "Không thể tạo lịch trình"
+      },
+      "success": "Tạo lịch trình thành công"
+    },
     "modal": {
       "title": {
         "create": "Tạo chu kỳ bảo trì",
@@ -734,55 +662,28 @@
         "creating": "Đang tạo...",
         "updating": "Đang cập nhật..."
       }
-    },
-    "filter": {
-      "reset": "Đặt lại",
-      "apply": "Áp dụng"
-    },
-    "deviceTypes": {
-      "Other": "Khác",
-      "Generator": "Máy phát điện",
-      "HVAC": "Hệ thống điều hòa",
-      "Lighting": "Hệ thống chiếu sáng",
-      "AutomaticDoor": "Cửa tự động",
-      "CCTV": "Camera giám sát",
-      "Plumbing": "Hệ thống cấp thoát nước",
-      "FireProtection": "Hệ thống phòng cháy",
-      "Elevator": "Thang máy",
-      "Electrical": "Hệ thống điện"
     }
   },
   "crackManagement": {
     "title": "Quản lý vết nứt",
-    "addCrack": "Thêm vết nứt",
-    "editCrack": "Sửa thông tin vết nứt",
-    "deleteCrack": "Xóa vết nứt",
-    "crackDetails": "Chi tiết vết nứt",
-    "crackLocation": "Vị trí",
-    "crackSeverity": "Mức độ nghiêm trọng",
-    "crackStatus": "Trạng thái",
-    "crackReport": "Báo cáo vết nứt",
-    "crackHistory": "Lịch sử vết nứt",
-    "searchPlaceholder": "Tìm kiếm theo ID hoặc mô tả",
     "severity": "Mức độ nghiêm trọng",
     "totalCracks": "Tổng số vết nứt: {{count}}",
-    "loading": "Đang tải dữ liệu vết nứt...",
+    "searchPlaceholder": "Tìm kiếm vết nứt...",
     "noData": "Không tìm thấy vết nứt nào",
-    "errorLoading": "Lỗi tải dữ liệu vết nứt",
-    "status": {
-      "pending": "Chờ xử lý",
-      "inProgress": "Đang thực hiện",
-      "inprogress": "Đang thực hiện",
-      "reviewing": "Đang xem xét",
-      "resolved": "Đã giải quyết",
-      "current": "Trạng thái hiện tại"
-    },
+    "loading": "Đang tải dữ liệu...",
+    "errorLoading": "Lỗi khi tải dữ liệu",
     "filterOptions": {
-      "all": "Tất cả mức độ",
+      "all": "Tất cả",
       "low": "Thấp",
       "medium": "Trung bình",
-      "high": "Cao",
-      "unknown": "Không xác định"
+      "high": "Cao"
+    },
+    "status": {
+      "pending": "Chờ xử lý",
+      "inProgress": "Đang xử lý",
+      "reviewing": "Đang kiểm tra",
+      "resolved": "Đã xử lý",
+      "current": "Trạng thái hiện tại"
     },
     "table": {
       "no": "STT",
@@ -792,83 +693,44 @@
       "status": "Trạng thái",
       "action": "Thao tác"
     },
+    "crackDetails": "Chi tiết vết nứt",
+    "detailView": "Xem chi tiết",
     "reportInformation": "Thông tin báo cáo",
     "reportingDetails": "Chi tiết báo cáo",
+    "assetType": "Loại tài sản",
+    "privateAsset": "Tài sản cá nhân",
+    "publicAsset": "Tài sản công cộng",
+    "location": "Vị trí",
+    "notSpecified": "Chưa xác định",
+    "verifiedBy": "Người xác nhận",
+    "notVerified": "Chưa xác nhận",
+    "notVerifiedYet": "Chưa được xác nhận",
     "crackImages": "Hình ảnh vết nứt",
     "image": "Hình ảnh",
     "originalImage": "Hình ảnh gốc",
-    "aiDetected": "Phát hiện AI",
+    "aiDetected": "Phát hiện bởi AI",
     "imageLoadError": "Không thể tải hình ảnh",
-    "noImages": "Không có hình ảnh vết nứt",
-    "notVerified": "Chưa xác minh",
-    "notVerifiedYet": "Chưa xác minh",
-    "notFound": "Không tìm thấy vết nứt với ID: {{id}}",
-    "detailView": "Xem chi tiết",
-    "assetType": "Loại tài sản",
-    "privateAsset": "Tài sản riêng",
-    "publicAsset": "Tài sản công",
-    "location": "Vị trí",
-    "notSpecified": "Không xác định",
+    "noImages": "Không có hình ảnh",
     "statusUpdateSuccess": "Cập nhật trạng thái thành công",
-    "error": "Lỗi khi cập nhật trạng thái",
-    "reportedBy": "Người báo cáo",
-    "verifiedBy": "Người xác minh",
-    "severityLabel": "Mức độ nghiêm trọng",
-    "imageNumber": "Hình ảnh #{{number}}",
-    "uploadedAt": "Đã tải lên lúc",
-    "imageId": "ID: {{id}}"
+    "error": "Đã xảy ra lỗi"
   },
   "materialManagement": {
-    "title": "Quản lý vật liệu",
-    "addMaterial": "Thêm vật liệu",
-    "editMaterial": "Sửa vật liệu",
-    "deleteMaterial": "Xóa vật liệu",
-    "materialDetails": "Chi tiết vật liệu",
-    "materialName": "Tên vật liệu",
-    "materialType": "Loại vật liệu",
-    "materialQuantity": "Số lượng",
-    "materialUnit": "Đơn vị",
-    "materialStatus": "Trạng thái",
-    "details": "Chi tiết vật liệu",
-    "backToList": "Quay lại danh sách",
-    "basicInfo": "Thông tin cơ bản",
-    "additionalInfo": "Thông tin bổ sung",
-    "materialId": "Mã vật liệu",
-    "name": "Tên",
-    "description": "Mô tả",
-    "unitPrice": "Đơn giá",
-    "stockQuantity": "Số lượng tồn kho",
-    "createdAt": "Ngày tạo",
-    "updatedAt": "Ngày cập nhật",
-    "edit": "Chỉnh sửa",
-    "errorLoadingDetails": "Lỗi khi tải thông tin chi tiết",
-    "updateSuccess": "Cập nhật vật liệu thành công",
-    "updateError": "Lỗi khi cập nhật vật liệu",
-    "unitPriceUpdateSuccess": "Cập nhật đơn giá thành công",
-    "unitPriceUpdateError": "Lỗi khi cập nhật đơn giá",
-    "stockQuantityUpdateSuccess": "Cập nhật số lượng tồn kho thành công",
-    "stockQuantityUpdateError": "Lỗi khi cập nhật số lượng tồn kho",
-    "statusUpdateSuccess": "Cập nhật trạng thái thành công",
-    "statusUpdateError": "Lỗi khi cập nhật trạng thái",
-    "createSuccess": "Tạo vật liệu thành công",
-    "createError": "Không thể tạo vật liệu",
-    "deleteSuccess": "Xóa vật liệu thành công",
-    "deleteError": "Không thể xóa vật liệu",
-    "searchPlaceholder": "Tìm kiếm theo tên hoặc mô tả",
-    "loading": "Đang tải dữ liệu vật liệu...",
-    "noData": "Không tìm thấy vật liệu nào",
-    "totalMaterials": "Tổng số vật liệu: {{filtered}} / {{total}}",
+    "title": "Quản lý vật tư",
+    "createMaterial": "Thêm vật tư",
+    "searchPlaceholder": "Tìm kiếm theo tên hoặc mô tả...",
+    "noData": "Không tìm thấy vật tư nào",
+    "totalMaterials": "Tổng số vật tư: {{filtered}} / {{total}}",
     "filterOptions": {
       "status": {
-        "all": "Tất cả",
+        "all": "Tất cả trạng thái",
         "active": "Đang hoạt động",
         "inactive": "Không hoạt động"
       },
       "price": {
         "all": "Tất cả giá",
         "under100k": "Dưới 100.000 VND",
-        "100k-500k": "Từ 100.000 - 500.000 VND",
-        "500k-1m": "Từ 500.000 - 1.000.000 VND",
+        "100k-500k": "100.000 - 500.000 VND",
+        "500k-1m": "500.000 - 1.000.000 VND",
         "above1m": "Trên 1.000.000 VND"
       }
     },
@@ -881,31 +743,16 @@
       "status": "Trạng thái",
       "action": "Thao tác"
     },
-    "deleteConfirm": {
-      "title": "Xóa vật liệu",
-      "message": "Bạn có chắc chắn muốn xóa vật liệu này? Hành động này không thể hoàn tác.",
-      "cancel": "Hủy",
-      "delete": "Xóa",
-      "deleting": "Đang xóa..."
-    },
-    "create": {
-      "title": "Tạo vật tư mới",
-      "name": "Tên vật tư",
-      "namePlaceholder": "Nhập tên vật tư",
-      "description": "Mô tả",
-      "descriptionPlaceholder": "Nhập mô tả vật tư",
-      "unitPrice": "Đơn giá",
-      "unitPricePlaceholder": "0.00",
-      "stockQuantity": "Số lượng tồn kho",
-      "stockQuantityPlaceholder": "0",
-      "status": "Trạng thái",
-      "statusActive": "Đang hoạt động",
-      "statusInactive": "Không hoạt động",
-      "cancel": "Hủy",
-      "create": "Tạo vật tư",
-      "creating": "Đang tạo..."
-    },
-    "createMaterial": "Tạo vật tư",
+    "createSuccess": "Tạo vật tư thành công",
+    "createError": "Không thể tạo vật tư",
+    "unitPriceUpdateSuccess": "Cập nhật đơn giá thành công",
+    "unitPriceUpdateError": "Không thể cập nhật đơn giá",
+    "stockQuantityUpdateSuccess": "Cập nhật số lượng tồn kho thành công",
+    "stockQuantityUpdateError": "Không thể cập nhật số lượng tồn kho",
+    "statusUpdateSuccess": "Cập nhật trạng thái thành công",
+    "statusUpdateError": "Không thể cập nhật trạng thái",
+    "deleteSuccess": "Xóa vật tư thành công",
+    "deleteError": "Không thể xóa vật tư",
     "updateStatus": {
       "title": "Cập nhật trạng thái",
       "material": "Vật tư",
@@ -917,21 +764,12 @@
       "update": "Cập nhật",
       "updating": "Đang cập nhật..."
     },
-    "updateStockQuantity": {
-      "title": "Cập nhật số lượng tồn kho",
-      "stockQuantity": "Số lượng tồn kho",
-      "stockQuantityPlaceholder": "Nhập số lượng tồn kho",
+    "deleteConfirm": {
+      "title": "Xóa vật tư",
+      "message": "Bạn có chắc chắn muốn xóa vật tư này? Hành động này không thể hoàn tác.",
       "cancel": "Hủy",
-      "update": "Cập nhật",
-      "updating": "Đang cập nhật..."
-    },
-    "updateUnitPrice": {
-      "title": "Cập nhật đơn giá",
-      "unitPrice": "Đơn giá",
-      "unitPricePlaceholder": "Nhập đơn giá",
-      "cancel": "Hủy",
-      "update": "Cập nhật",
-      "updating": "Đang cập nhật..."
+      "delete": "Xóa",
+      "deleting": "Đang xóa..."
     }
   },
   "timesheet": {
@@ -1495,39 +1333,39 @@
   },
   "scheduleDetail": {
     "ScheduleJob": {
-      "backToCalendar": "Quay lại Lịch",
-      "scheduleOverview": "Tổng quan Lịch",
-      "maintenanceJobs": "Công việc Bảo trì",
+      "backToCalendar": "Quay lại lịch",
+      "scheduleOverview": "Tổng quan lịch trình",
+      "maintenanceJobs": "Công việc bảo trì",
       "showingJobs": "Hiển thị {{count}} trên tổng số {{total}} công việc",
-      "newJob": "Công việc Mới",
+      "newJob": "Công việc mới",
       "noJobsFound": "Không tìm thấy công việc bảo trì",
       "noJobsDescription": "Chưa có công việc nào được liên kết với lịch này. Nhấp vào bên dưới để tạo công việc bảo trì đầu tiên.",
-      "createFirstJob": "Tạo Công việc Đầu tiên",
-      "locationDetails": "Chi tiết Vị trí",
+      "createFirstJob": "Tạo công việc đầu tiên",
+      "locationDetails": "Chi tiết vị trí",
       "equipment": "Thiết bị",
       "status": "Trạng thái",
-      "schedule": "Lịch",
+      "schedule": "Lịch trình",
       "actions": "Thao tác",
       "noEquipment": "Chưa gán thiết bị",
       "moreDevices": "+{{count}} thiết bị khác",
       "updated": "Cập nhật: {{date}}",
       "runDate": "Ngày thực hiện: {{date}}",
-      "period": "Kỳ hạn: {{start}} - {{end}}",
+      "period": "Thời gian: {{start}} - {{end}}",
       "cancelled": "Đã hủy",
       "completed": "Hoàn thành",
       "loading": "Đang tải chi tiết lịch...",
-      "schedulePeriod": "Kỳ hạn Lịch: {{start}} - {{end}}",
+      "schedulePeriod": "Thời gian lịch trình: {{start}} - {{end}}",
       "description": "Mô tả",
       "noDescription": "Không có mô tả",
-      "maintenanceCycle": "Chu kỳ Bảo trì",
-      "totalJobs": "Tổng số Công việc",
+      "maintenanceCycle": "Chu kỳ bảo trì",
+      "totalJobs": "Tổng số công việc",
       "created": "Ngày tạo",
       "lastUpdated": "Cập nhật lần cuối",
       "tooltips": {
-        "updateStatus": "Cập nhật Trạng thái",
-        "cancelJob": "Hủy Công việc",
-        "sendEmail": "Gửi Email Bảo trì",
-        "createTask": "Tạo Công việc"
+        "updateStatus": "Cập nhật trạng thái",
+        "cancelJob": "Hủy công việc",
+        "sendEmail": "Gửi email bảo trì",
+        "createTask": "Tạo công việc"
       },
       "deleteConfirm": {
         "title": "Xác nhận hủy",

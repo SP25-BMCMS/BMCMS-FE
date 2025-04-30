@@ -430,9 +430,11 @@ const MaterialManagement: React.FC = () => {
       {/* Update Material Modal */}
       {selectedMaterial && (
         <>
+         
           <UpdateUnitPriceModal
             isOpen={isUnitPriceModalOpen}
             onClose={() => setIsUnitPriceModalOpen(false)}
+            // @ts-ignore
             onSubmit={handleUpdateUnitPrice}
             material={selectedMaterial}
             isLoading={updateUnitPriceMutation.isPending}
