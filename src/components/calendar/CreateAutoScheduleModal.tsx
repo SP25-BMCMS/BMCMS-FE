@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getMaintenanceCycles } from '@/services/maintenanceCycle';
-import { toast } from 'react-hot-toast';
+import React, { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { getMaintenanceCycles } from '@/services/maintenanceCycle'
+import { toast } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import {
   RiCloseLine,
   RiCalendarLine,
@@ -10,20 +11,20 @@ import {
   RiSearchLine,
   RiInformationLine,
   RiErrorWarningLine,
-} from 'react-icons/ri';
+} from 'react-icons/ri'
 
 interface CreateAutoScheduleModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  buildingDetails: any[] | undefined;
+  isOpen: boolean
+  onClose: () => void
+  buildingDetails: any[] | undefined
   onSubmit: (data: {
-    schedule_name: string;
-    description: string;
-    cycle_id: string;
-    buildingDetailIds: string[];
-    start_date: string;
-    end_date: string;
-  }) => void;
+    schedule_name: string
+    description: string
+    cycle_id: string
+    buildingDetailIds: string[]
+    start_date: string
+    end_date: string
+  }) => void
 }
 
 const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
@@ -32,6 +33,7 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
   buildingDetails = [],
   onSubmit,
 }) => {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     schedule_name: '',
     description: '',
@@ -39,16 +41,16 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
     buildingDetailIds: [] as string[],
     start_date: '',
     end_date: '',
-  });
+  })
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTab, setSelectedTab] = useState<'all' | 'selected'>('all');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedTab, setSelectedTab] = useState<'all' | 'selected'>('all')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [dateErrors, setDateErrors] = useState({
     start_date: '',
     end_date: '',
-  });
+  })
 
   // Fetch maintenance cycles
   const { data: cyclesData, isLoading: isLoadingCycles } = useQuery({
@@ -58,96 +60,95 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
         page: 1,
         limit: 99999,
       }),
-  });
+  })
 
   const validateDates = () => {
     const errors = {
       start_date: '',
       end_date: '',
-    };
+    }
 
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
 
     if (formData.start_date) {
-      const startDate = new Date(formData.start_date);
-      startDate.setHours(0, 0, 0, 0);
+      const startDate = new Date(formData.start_date)
+      startDate.setHours(0, 0, 0, 0)
 
       if (startDate < now) {
-        errors.start_date = 'Start date cannot be in the past';
+        errors.start_date = t('autoSchedule.errors.startDatePast')
       }
     }
 
     if (formData.end_date) {
-      const endDate = new Date(formData.end_date);
-      endDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(formData.end_date)
+      endDate.setHours(0, 0, 0, 0)
 
       if (formData.start_date) {
-        const startDate = new Date(formData.start_date);
-        startDate.setHours(0, 0, 0, 0);
+        const startDate = new Date(formData.start_date)
+        startDate.setHours(0, 0, 0, 0)
 
         if (endDate < startDate) {
-          errors.end_date = 'End date must be after start date';
+          errors.end_date = t('autoSchedule.errors.endDateBeforeStart')
         }
       }
     }
 
-    setDateErrors(errors);
-    return !errors.start_date && !errors.end_date;
-  };
+    setDateErrors(errors)
+    return !errors.start_date && !errors.end_date
+  }
 
   useEffect(() => {
-    validateDates();
-  }, [formData.start_date, formData.end_date]);
+    validateDates()
+  }, [formData.start_date, formData.end_date])
 
   const handleDateChange = (field: 'start_date' | 'end_date', value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
-    }));
-  };
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
 
     try {
-      // Validate form data
       if (!formData.schedule_name.trim()) {
-        toast.error('Please enter schedule name');
-        return;
+        toast.error(t('autoSchedule.errors.scheduleNameRequired'))
+        return
       }
       if (!formData.cycle_id) {
-        toast.error('Please select a maintenance cycle');
-        return;
+        toast.error(t('autoSchedule.errors.cycleRequired'))
+        return
       }
       if (formData.buildingDetailIds.length === 0) {
-        toast.error('Please select at least one building detail');
-        return;
+        toast.error(t('autoSchedule.errors.buildingRequired'))
+        return
       }
       if (!formData.start_date) {
-        toast.error('Please select start date');
-        return;
+        toast.error(t('autoSchedule.errors.startDateRequired'))
+        return
       }
       if (!formData.end_date) {
-        toast.error('Please select end date');
-        return;
+        toast.error(t('autoSchedule.errors.endDateRequired'))
+        return
       }
 
       if (!validateDates()) {
-        toast.error('Please fix date errors before submitting');
-        return;
+        toast.error(t('autoSchedule.errors.fixDateErrors'))
+        return
       }
 
-      await onSubmit(formData);
-      toast.success('Schedule created successfully');
-      onClose();
+      await onSubmit(formData)
+      toast.success(t('autoSchedule.success'))
+      onClose()
     } catch (error) {
-      toast.error('Failed to create schedule');
+      toast.error(t('autoSchedule.errors.createFailed'))
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const handleBuildingDetailToggle = (id: string) => {
     setFormData(prev => ({
@@ -155,22 +156,22 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
       buildingDetailIds: prev.buildingDetailIds.includes(id)
         ? prev.buildingDetailIds.filter(buildingId => buildingId !== id)
         : [...prev.buildingDetailIds, id],
-    }));
-  };
+    }))
+  }
 
   const filteredBuildingDetails = buildingDetails?.filter(buildingDetail => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchTerm.toLowerCase()
     return (
       buildingDetail.building?.name?.toLowerCase().includes(searchLower) ||
       buildingDetail.name?.toLowerCase().includes(searchLower)
-    );
-  });
+    )
+  })
 
   const selectedBuildingDetails = buildingDetails?.filter(buildingDetail =>
     formData.buildingDetailIds.includes(buildingDetail.buildingDetailId)
-  );
+  )
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -182,20 +183,19 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-2">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-              Create Automatic Maintenance Schedule
+              {t('autoSchedule.title')}
             </h2>
             <div className="group relative">
               <RiInformationLine className="w-5 h-5 text-gray-400 cursor-help" />
               <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                Create a new maintenance schedule that will automatically generate jobs based on the
-                selected cycle and buildings.
+                {t('autoSchedule.description')}
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-            title="Close modal"
+            title={t('common.close')}
           >
             <RiCloseLine className="w-6 h-6" />
           </button>
@@ -210,14 +210,14 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Schedule Name
+                  {t('autoSchedule.form.scheduleName.label')}
                 </label>
                 <input
                   type="text"
                   value={formData.schedule_name}
                   onChange={e => setFormData(prev => ({ ...prev, schedule_name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200"
-                  placeholder="Enter schedule name"
+                  placeholder={t('autoSchedule.form.scheduleName.placeholder')}
                   disabled={isSubmitting}
                 />
               </div>
@@ -225,16 +225,16 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                   <RiSettings3Line className="w-4 h-4 mr-2 text-blue-500" />
-                  Maintenance Cycle
+                  {t('autoSchedule.form.maintenanceCycle.label')}
                 </label>
                 <select
                   value={formData.cycle_id}
                   onChange={e => setFormData(prev => ({ ...prev, cycle_id: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200"
-                  title="Select maintenance cycle"
+                  title={t('autoSchedule.form.maintenanceCycle.placeholder')}
                   disabled={isSubmitting}
                 >
-                  <option value="">Select a maintenance cycle</option>
+                  <option value="">{t('autoSchedule.form.maintenanceCycle.placeholder')}</option>
                   {cyclesData?.data?.map((cycle: any) => (
                     <option key={cycle.cycle_id} value={cycle.cycle_id}>
                       {cycle.device_type} - {cycle.frequency} ({cycle.basis})
@@ -246,13 +246,13 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description
+                {t('autoSchedule.form.description.label')}
               </label>
               <textarea
                 value={formData.description}
                 onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200"
-                placeholder="Enter description"
+                placeholder={t('autoSchedule.form.description.placeholder')}
                 rows={3}
                 disabled={isSubmitting}
               />
@@ -262,11 +262,11 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                   <RiCalendarLine className="w-4 h-4 mr-2 text-blue-500" />
-                  Start Date
+                  {t('autoSchedule.form.startDate.label')}
                   <div className="group relative ml-2">
                     <RiInformationLine className="w-4 h-4 text-gray-400 cursor-help" />
                     <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                      Select the start date for the maintenance schedule. Cannot be in the past.
+                      {t('autoSchedule.form.startDate.tooltip')}
                     </div>
                   </div>
                 </label>
@@ -275,12 +275,11 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                     type="datetime-local"
                     value={formData.start_date}
                     onChange={e => handleDateChange('start_date', e.target.value)}
-                    className={`w-full px-3 py-2 border ${
-                      dateErrors.start_date
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                    } rounded-md shadow-sm focus:ring-2 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200`}
-                    title="Select start date and time"
+                    className={`w-full px-3 py-2 border ${dateErrors.start_date
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                      } rounded-md shadow-sm focus:ring-2 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200`}
+                    title={t('autoSchedule.form.startDate.label')}
                     disabled={isSubmitting}
                     min={new Date().toISOString().slice(0, 16)}
                   />
@@ -298,12 +297,11 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                   <RiCalendarLine className="w-4 h-4 mr-2 text-blue-500" />
-                  End Date
+                  {t('autoSchedule.form.endDate.label')}
                   <div className="group relative ml-2">
                     <RiInformationLine className="w-4 h-4 text-gray-400 cursor-help" />
                     <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                      Select the end date for the maintenance schedule. Must be after the start
-                      date.
+                      {t('autoSchedule.form.endDate.tooltip')}
                     </div>
                   </div>
                 </label>
@@ -312,12 +310,11 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                     type="datetime-local"
                     value={formData.end_date}
                     onChange={e => handleDateChange('end_date', e.target.value)}
-                    className={`w-full px-3 py-2 border ${
-                      dateErrors.end_date
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                    } rounded-md shadow-sm focus:ring-2 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200`}
-                    title="Select end date and time"
+                    className={`w-full px-3 py-2 border ${dateErrors.end_date
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                      } rounded-md shadow-sm focus:ring-2 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200`}
+                    title={t('autoSchedule.form.endDate.label')}
                     disabled={isSubmitting}
                     min={formData.start_date || new Date().toISOString().slice(0, 16)}
                   />
@@ -336,7 +333,7 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                 <RiBuilding2Line className="w-4 h-4 mr-2 text-blue-500" />
-                Building Details
+                {t('autoSchedule.form.buildingDetails.label')}
               </label>
 
               <div className="flex items-center space-x-4 mb-4">
@@ -347,7 +344,7 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200"
-                    placeholder="Search buildings..."
+                    placeholder={t('autoSchedule.form.buildingDetails.searchPlaceholder')}
                     disabled={isSubmitting}
                   />
                 </div>
@@ -355,26 +352,24 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setSelectedTab('all')}
-                    className={`px-4 py-2 rounded-md transition-all duration-200 ${
-                      selectedTab === 'all'
-                        ? 'bg-blue-500 text-white shadow-md'
-                        : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                    }`}
+                    className={`px-4 py-2 rounded-md transition-all duration-200 ${selectedTab === 'all'
+                      ? 'bg-blue-500 text-white shadow-md'
+                      : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
                     disabled={isSubmitting}
                   >
-                    All ({buildingDetails?.length || 0})
+                    {t('autoSchedule.form.buildingDetails.all')} ({buildingDetails?.length || 0})
                   </button>
                   <button
                     type="button"
                     onClick={() => setSelectedTab('selected')}
-                    className={`px-4 py-2 rounded-md transition-all duration-200 ${
-                      selectedTab === 'selected'
-                        ? 'bg-blue-500 text-white shadow-md'
-                        : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                    }`}
+                    className={`px-4 py-2 rounded-md transition-all duration-200 ${selectedTab === 'selected'
+                      ? 'bg-blue-500 text-white shadow-md'
+                      : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
                     disabled={isSubmitting}
                   >
-                    Selected ({formData.buildingDetailIds.length})
+                    {t('autoSchedule.form.buildingDetails.selected')} ({formData.buildingDetailIds.length})
                   </button>
                 </div>
               </div>
@@ -413,7 +408,7 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                       ))
                     ) : (
                       <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                        No building details found
+                        {t('autoSchedule.form.buildingDetails.noResults')}
                       </div>
                     )
                   ) : selectedBuildingDetails?.length > 0 ? (
@@ -447,7 +442,7 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                     ))
                   ) : (
                     <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                      No building details selected
+                      {t('autoSchedule.form.buildingDetails.noSelected')}
                     </div>
                   )}
                 </div>
@@ -461,7 +456,7 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
               >
-                Cancel
+                {t('autoSchedule.buttons.cancel')}
               </button>
               <button
                 type="submit"
@@ -471,10 +466,10 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Creating...</span>
+                    <span>{t('autoSchedule.buttons.creating')}</span>
                   </>
                 ) : (
-                  'Create Schedule'
+                  t('autoSchedule.buttons.create')
                 )}
               </button>
             </div>
@@ -482,7 +477,7 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CreateAutoScheduleModal;
+export default CreateAutoScheduleModal

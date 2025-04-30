@@ -34,6 +34,7 @@ import { getMaintenanceCycles } from '@/services/maintenanceCycle'
 import { createPortal } from 'react-dom'
 import ConfirmModal from '@/components/ConfirmModal'
 import apiInstance from '@/lib/axios'
+import { useTranslation } from 'react-i18next'
 
 const ScheduleJob: React.FC = () => {
   const { scheduleId } = useParams<{ scheduleId: string }>()
@@ -50,6 +51,7 @@ const ScheduleJob: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState(false)
   const [currentDevice, setCurrentDevice] = useState<any>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const { t } = useTranslation()
 
   // Fetch schedule details
   const { data: schedule, isLoading: isScheduleLoading } = useQuery({
@@ -284,7 +286,7 @@ const ScheduleJob: React.FC = () => {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading schedule details...</p>
+        <p className="text-gray-600 dark:text-gray-300">{t('scheduleDetail.ScheduleJob.loading')}</p>
       </div>
     )
   }
@@ -306,7 +308,7 @@ const ScheduleJob: React.FC = () => {
           className="flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors mb-6"
         >
           <RiArrowLeftLine className="mr-2" />
-          <span>Back to Calendar</span>
+          <span>{t('scheduleDetail.ScheduleJob.backToCalendar')}</span>
         </button>
 
         {schedule && (
@@ -332,8 +334,10 @@ const ScheduleJob: React.FC = () => {
                     <div className="flex items-center text-gray-600 dark:text-gray-300">
                       <RiCalendarCheckLine className="mr-2 text-blue-500" />
                       <span>
-                        Schedule Period: {formatDate(schedule.start_date)} -{' '}
-                        {formatDate(schedule.end_date)}
+                        {t('scheduleDetail.ScheduleJob.schedulePeriod', {
+                          start: formatDate(schedule.start_date),
+                          end: formatDate(schedule.end_date)
+                        })}
                       </span>
                     </div>
                     {schedule.schedule_type && (
@@ -348,10 +352,10 @@ const ScheduleJob: React.FC = () => {
 
                   <div className="mt-4">
                     <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                      Description
+                      {t('scheduleDetail.ScheduleJob.description')}
                     </h3>
                     <p className="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
-                      {schedule.description || 'No description provided'}
+                      {schedule.description || t('scheduleDetail.ScheduleJob.noDescription')}
                     </p>
                   </div>
                 </div>
@@ -359,10 +363,10 @@ const ScheduleJob: React.FC = () => {
                 {/* Right Column - Schedule Statistics */}
                 <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md shadow-sm">
                   <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                    Schedule Overview
+                    {t('scheduleDetail.ScheduleJob.scheduleOverview')}
                   </h3>
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="text-gray-500 dark:text-gray-400">Maintenance Cycle:</div>
+                    <div className="text-gray-500 dark:text-gray-400">{t('scheduleDetail.ScheduleJob.maintenanceCycle')}:</div>
                     <div className="text-gray-700 dark:text-gray-300">
                       {cycleData ? (
                         <div className="flex flex-col gap-1">
@@ -379,15 +383,15 @@ const ScheduleJob: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="text-gray-500 dark:text-gray-400">Total Jobs:</div>
+                    <div className="text-gray-500 dark:text-gray-400">{t('scheduleDetail.ScheduleJob.totalJobs')}:</div>
                     <div className="text-gray-700 dark:text-gray-300">{totalItems}</div>
 
-                    <div className="text-gray-500 dark:text-gray-400">Created:</div>
+                    <div className="text-gray-500 dark:text-gray-400">{t('scheduleDetail.ScheduleJob.created')}:</div>
                     <div className="text-gray-700 dark:text-gray-300">
                       {formatDate(schedule.created_at)}
                     </div>
 
-                    <div className="text-gray-500 dark:text-gray-400">Last Updated:</div>
+                    <div className="text-gray-500 dark:text-gray-400">{t('scheduleDetail.ScheduleJob.lastUpdated')}:</div>
                     <div className="text-gray-700 dark:text-gray-300">
                       {formatDate(schedule.updated_at)}
                     </div>
@@ -406,19 +410,19 @@ const ScheduleJob: React.FC = () => {
             <div className="flex items-center">
               <RiBuilding2Line className="text-blue-500 mr-2 w-5 h-5" />
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Maintenance Jobs
+                {t('scheduleDetail.ScheduleJob.maintenanceJobs')}
               </h2>
             </div>
             <div className="flex items-center space-x-3">
               <div className="text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-md shadow-sm">
-                Showing {scheduleJobs.length} of {totalItems} jobs
+                {t('scheduleDetail.ScheduleJob.showingJobs', { count: scheduleJobs.length, total: totalItems })}
               </div>
               <button
                 onClick={handleOpenCreateJobModal}
                 className="flex items-center space-x-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm"
               >
                 <RiAddLine className="w-4 h-4" />
-                <span>New Job</span>
+                <span>{t('scheduleDetail.ScheduleJob.newJob')}</span>
               </button>
             </div>
           </div>
@@ -431,18 +435,17 @@ const ScheduleJob: React.FC = () => {
                 <RiInformationLine className="w-full h-full" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No maintenance jobs found
+                {t('scheduleDetail.ScheduleJob.noJobsFound')}
               </h3>
               <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
-                There are no jobs associated with this schedule yet. Click below to create your
-                first maintenance job.
+                {t('scheduleDetail.ScheduleJob.noJobsDescription')}
               </p>
               <button
                 onClick={handleOpenCreateJobModal}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
               >
                 <RiAddLine className="w-5 h-5" />
-                <span>Create First Job</span>
+                <span>{t('scheduleDetail.ScheduleJob.createFirstJob')}</span>
               </button>
             </div>
           </div>
@@ -452,19 +455,19 @@ const ScheduleJob: React.FC = () => {
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Location Details
+                    {t('scheduleDetail.ScheduleJob.locationDetails')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Equipment
+                    {t('scheduleDetail.ScheduleJob.equipment')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Status
+                    {t('scheduleDetail.ScheduleJob.status')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Schedule
+                    {t('scheduleDetail.ScheduleJob.schedule')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
+                    {t('scheduleDetail.ScheduleJob.actions')}
                   </th>
                 </tr>
               </thead>
@@ -489,8 +492,8 @@ const ScheduleJob: React.FC = () => {
                               {job.buildingDetail?.building?.area?.name}
                             </div>
                             <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {job.buildingDetail?.total_apartments} apartments •{' '}
-                              {job.buildingDetail?.building?.numberFloor} floors
+                              {job.buildingDetail?.total_apartments} {t('common.apartments')} •{' '}
+                              {job.buildingDetail?.building?.numberFloor} {t('common.floors')}
                             </div>
                           </div>
                         </div>
@@ -506,7 +509,7 @@ const ScheduleJob: React.FC = () => {
                                 return (
                                   <div className="relative">
                                     <button className="text-xs px-2 py-1 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/30 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full transition-colors flex items-center">
-                                      Other
+                                      {t('common.other')}
                                     </button>
                                   </div>
                                 )
@@ -527,7 +530,7 @@ const ScheduleJob: React.FC = () => {
                                   ))}
                                   {matchingDevices.length > 2 && (
                                     <div className="text-xs text-gray-500">
-                                      +{matchingDevices.length - 2} more devices
+                                      {t('scheduleDetail.ScheduleJob.moreDevices', { count: matchingDevices.length - 2 })}
                                     </div>
                                   )}
                                 </>
@@ -536,7 +539,7 @@ const ScheduleJob: React.FC = () => {
                           </div>
                         ) : (
                           <span className="text-xs text-gray-500 italic">
-                            No equipment assigned
+                            {t('scheduleDetail.ScheduleJob.noEquipment')}
                           </span>
                         )}
                       </td>
@@ -547,16 +550,19 @@ const ScheduleJob: React.FC = () => {
                           {statusInfo.icon} {job.status}
                         </span>
                         <div className="text-xs text-gray-500 mt-1">
-                          Updated: {formatDate(job.updated_at)}
+                          {t('scheduleDetail.ScheduleJob.updated', { date: formatDate(job.updated_at) })}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 dark:text-white">
-                          Run Date: {formatDate(job.run_date)}
+                          {t('scheduleDetail.ScheduleJob.runDate', { date: formatDate(job.run_date) })}
                         </div>
                         {job.start_date && job.end_date && (
                           <div className="text-xs text-gray-500 mt-1">
-                            Period: {formatDate(job.start_date)} - {formatDate(job.end_date)}
+                            {t('scheduleDetail.ScheduleJob.period', {
+                              start: formatDate(job.start_date),
+                              end: formatDate(job.end_date)
+                            })}
                           </div>
                         )}
                       </td>
@@ -568,14 +574,14 @@ const ScheduleJob: React.FC = () => {
                                 <button
                                   onClick={() => handleEditJob(job)}
                                   className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
-                                  title="Update Status"
+                                  title={t('scheduleDetail.ScheduleJob.tooltips.updateStatus')}
                                 >
                                   <RiEditLine className="w-5 h-5" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteJob(job.schedule_job_id)}
                                   className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                  title="Cancel Job"
+                                  title={t('scheduleDetail.ScheduleJob.tooltips.cancelJob')}
                                 >
                                   <RiDeleteBinLine className="w-5 h-5" />
                                 </button>
@@ -583,14 +589,14 @@ const ScheduleJob: React.FC = () => {
                                   onClick={() => handleSendEmail(job.schedule_job_id)}
                                   disabled={sendEmailMutation.isPending}
                                   className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded-full hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                  title="Send Maintenance Email"
+                                  title={t('scheduleDetail.ScheduleJob.tooltips.sendEmail')}
                                 >
                                   <RiMailLine className="w-5 h-5" />
                                 </button>
                                 <button
                                   onClick={() => handleCreateTask(job)}
                                   className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 p-1 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
-                                  title="Create Task"
+                                  title={t('scheduleDetail.ScheduleJob.tooltips.createTask')}
                                 >
                                   <RiTaskLine className="w-5 h-5" />
                                 </button>
@@ -598,12 +604,12 @@ const ScheduleJob: React.FC = () => {
                             )}
                           {job.status.toLowerCase() === 'cancel' && (
                             <span className="text-gray-400 dark:text-gray-500 text-xs italic">
-                              Cancelled
+                              {t('scheduleDetail.ScheduleJob.cancelled')}
                             </span>
                           )}
                           {job.status.toLowerCase() === 'completed' && (
                             <span className="text-green-600 dark:text-green-400 text-xs italic flex items-center">
-                              <RiCheckboxCircleLine className="w-4 h-4 mr-1" /> Completed
+                              <RiCheckboxCircleLine className="w-4 h-4 mr-1" /> {t('scheduleDetail.ScheduleJob.completed')}
                             </span>
                           )}
                         </div>
@@ -660,8 +666,8 @@ const ScheduleJob: React.FC = () => {
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
-        title="Cancel Schedule Job"
-        message="Are you sure you want to cancel this schedule job? This action cannot be undone."
+        title={t('scheduleDetail.ScheduleJob.deleteConfirm.title')}
+        message={t('scheduleDetail.ScheduleJob.deleteConfirm.message')}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setShowDeleteConfirm(false)
@@ -685,13 +691,13 @@ const ScheduleJob: React.FC = () => {
             </h4>
             <div className="space-y-1 text-gray-600 dark:text-gray-400">
               <p>
-                <span className="font-medium">Type:</span> {currentDevice.type}
+                <span className="font-medium">{t('common.type')}:</span> {currentDevice.type}
               </p>
               <p>
-                <span className="font-medium">Manufacturer:</span> {currentDevice.manufacturer}
+                <span className="font-medium">{t('common.manufacturer')}:</span> {currentDevice.manufacturer}
               </p>
               <p>
-                <span className="font-medium">Model:</span> {currentDevice.model}
+                <span className="font-medium">{t('common.model')}:</span> {currentDevice.model}
               </p>
             </div>
           </div>,

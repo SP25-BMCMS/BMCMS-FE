@@ -1,36 +1,39 @@
-import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { TechnicalRecord } from '@/services/technicalRecord';
-import { Download, Eye, FileText, FileIcon, BookOpen, Upload, Plus, X } from 'lucide-react';
-import { motion } from 'framer-motion';
-import apiInstance from '@/lib/axios';
-import { toast } from 'react-hot-toast';
+import React, { useState, useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { TechnicalRecord } from '@/services/technicalRecord'
+import { Download, Eye, FileText, FileIcon, BookOpen, Upload, Plus, X } from 'lucide-react'
+import { motion } from 'framer-motion'
+import apiInstance from '@/lib/axios'
+import { toast } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  children: React.ReactNode;
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  children: React.ReactNode
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, size = 'md', children }) => {
-  if (!isOpen) return null;
+  const { t } = useTranslation()
+
+  if (!isOpen) return null
 
   const getMaxWidth = () => {
     switch (size) {
       case 'sm':
-        return 'max-w-md';
+        return 'max-w-md'
       case 'md':
-        return 'max-w-2xl';
+        return 'max-w-2xl'
       case 'lg':
-        return 'max-w-4xl';
+        return 'max-w-4xl'
       case 'xl':
-        return 'max-w-6xl';
+        return 'max-w-6xl'
       default:
-        return 'max-w-2xl';
+        return 'max-w-2xl'
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
@@ -42,6 +45,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, size = 'md', chil
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
+            title={t('common.close')}
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -58,37 +62,37 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, size = 'md', chil
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Interface for device data
 interface Device {
-  device_id: string;
-  name: string;
-  type: string;
+  device_id: string
+  name: string
+  type: string
   buildingDetail: {
-    buildingDetailId: string;
-    name: string;
-  };
+    buildingDetailId: string
+    name: string
+  }
 }
 
 // Interface for device response
 interface DeviceResponse {
-  data: Device[];
+  data: Device[]
   meta?: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
 }
 
 // Interface for technical record upload form
 interface UploadTechnicalRecordFormProps {
-  buildingId: string;
-  buildingDetailId: string | null;
-  onSuccess: () => void;
-  onCancel: () => void;
+  buildingId: string
+  buildingDetailId: string | null
+  onSuccess: () => void
+  onCancel: () => void
 }
 
 // Technical Record Upload Form Component
@@ -98,85 +102,86 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
   onSuccess,
   onCancel,
 }) => {
-  const [deviceId, setDeviceId] = useState<string>('');
-  const [fileType, setFileType] = useState<string>('');
-  const [file, setFile] = useState<File | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const queryClient = useQueryClient();
+  const { t } = useTranslation()
+  const [deviceId, setDeviceId] = useState<string>('')
+  const [fileType, setFileType] = useState<string>('')
+  const [file, setFile] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const queryClient = useQueryClient()
 
   // Fetch technical records for the building to find devices that already have records
   const { data: existingRecords } = useQuery({
     queryKey: ['technicalRecordsByBuilding', buildingId],
     queryFn: async () => {
-      if (!buildingId) return [];
+      if (!buildingId) return []
 
       const url = import.meta.env.VITE_GET_TECHNICAL_RECORD_BY_BUILDING_ID.replace(
         '{buildingId}',
         buildingId
-      );
-      const response = await apiInstance.get<TechnicalRecordsByBuildingResponse>(url);
-      return response.data.data || [];
+      )
+      const response = await apiInstance.get<TechnicalRecordsByBuildingResponse>(url)
+      return response.data.data || []
     },
     enabled: !!buildingId,
-  });
+  })
 
   // Fetch devices for the building detail
   const { data: devices, isLoading: isLoadingDevices } = useQuery({
     queryKey: ['devices', buildingDetailId],
     queryFn: async () => {
-      if (!buildingDetailId) return { data: [] };
+      if (!buildingDetailId) return { data: [] }
 
       const url = import.meta.env.VITE_GET_DEVICE_BY_BUILDING_DETAIL_ID.replace(
         '{buildingDetailId}',
         buildingDetailId
-      );
-      const response = await apiInstance.get<DeviceResponse>(url);
-      return response.data;
+      )
+      const response = await apiInstance.get<DeviceResponse>(url)
+      return response.data
     },
     enabled: !!buildingDetailId,
-  });
+  })
 
   // Filter out devices that already have technical records
   const availableDevices = useMemo(() => {
-    if (!devices?.data || !existingRecords) return [];
+    if (!devices?.data || !existingRecords) return []
 
     // Get all device IDs that already have technical records
-    const usedDeviceIds = new Set(existingRecords.map(record => record.device_id));
+    const usedDeviceIds = new Set(existingRecords.map(record => record.device_id))
 
     // Filter devices that don't have technical records yet
-    return devices.data.filter(device => !usedDeviceIds.has(device.device_id));
-  }, [devices, existingRecords]);
+    return devices.data.filter(device => !usedDeviceIds.has(device.device_id))
+  }, [devices, existingRecords])
 
   // File type options
   const fileTypeOptions = [
-    { value: 'Manual', label: 'User Manual' },
-    { value: 'Specification', label: 'Technical Specification' },
-    { value: 'Certificate', label: 'Certificate' },
-    { value: 'Warranty', label: 'Warranty Document' },
-    { value: 'Maintenance', label: 'Maintenance Guide' },
-  ];
+    { value: 'Manual', label: t('buildingManager.technicalRecord.upload.documentType.options.manual') },
+    { value: 'Specification', label: t('buildingManager.technicalRecord.upload.documentType.options.specification') },
+    { value: 'Certificate', label: t('buildingManager.technicalRecord.upload.documentType.options.certificate') },
+    { value: 'Warranty', label: t('buildingManager.technicalRecord.upload.documentType.options.warranty') },
+    { value: 'Maintenance', label: t('buildingManager.technicalRecord.upload.documentType.options.maintenance') },
+  ]
 
   // Handle file change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
+    const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       // Check if file is PDF
       if (selectedFile.type !== 'application/pdf') {
-        toast.error('Only PDF files are allowed');
-        e.target.value = '';
-        return;
+        toast.error(t('buildingManager.technicalRecord.upload.file.invalidType'))
+        e.target.value = ''
+        return
       }
 
       // Check file size (10MB = 10 * 1024 * 1024 bytes)
       if (selectedFile.size > 10 * 1024 * 1024) {
-        toast.error('File size should not exceed 10MB');
-        e.target.value = '';
-        return;
+        toast.error(t('buildingManager.technicalRecord.upload.file.fileTooLarge'))
+        e.target.value = ''
+        return
       }
 
-      setFile(selectedFile);
+      setFile(selectedFile)
     }
-  };
+  }
 
   // Create technical record mutation
   const createTechnicalRecord = useMutation({
@@ -189,54 +194,54 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
             'Content-Type': 'multipart/form-data',
           },
         }
-      );
-      return response.data;
+      )
+      return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['technicalRecordsByBuilding', buildingId] });
-      toast.success('Technical record uploaded successfully');
-      onSuccess();
+      queryClient.invalidateQueries({ queryKey: ['technicalRecordsByBuilding', buildingId] })
+      toast.success('Technical record uploaded successfully')
+      onSuccess()
     },
     onError: (error: any) => {
-      toast.error(`Failed to upload: ${error.message || 'Unknown error'}`);
-      setIsSubmitting(false);
+      toast.error(`Failed to upload: ${error.message || 'Unknown error'}`)
+      setIsSubmitting(false)
     },
-  });
+  })
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!deviceId) {
-      toast.error('Please select a device');
-      return;
+      toast.error('Please select a device')
+      return
     }
 
     if (!fileType) {
-      toast.error('Please select a file type');
-      return;
+      toast.error('Please select a file type')
+      return
     }
 
     if (!file) {
-      toast.error('Please select a file to upload');
-      return;
+      toast.error('Please select a file to upload')
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
-    const formData = new FormData();
-    formData.append('device_id', deviceId);
-    formData.append('file_type', fileType);
-    formData.append('recordFile', file);
+    const formData = new FormData()
+    formData.append('device_id', deviceId)
+    formData.append('file_type', fileType)
+    formData.append('recordFile', file)
 
-    createTechnicalRecord.mutate(formData);
-  };
+    createTechnicalRecord.mutate(formData)
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Device <span className="text-red-500">*</span>
+          {t('buildingManager.technicalRecord.upload.device.label')} <span className="text-red-500">*</span>
         </label>
         {isLoadingDevices ? (
           <div className="animate-pulse h-10 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
@@ -245,8 +250,9 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
             value={deviceId}
             onChange={e => setDeviceId(e.target.value)}
             className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
+            title={t('buildingManager.technicalRecord.upload.device.label')}
           >
-            <option value="">Select a device</option>
+            <option value="">{t('buildingManager.technicalRecord.upload.device.select')}</option>
             {availableDevices.map(device => (
               <option key={device.device_id} value={device.device_id}>
                 {device.name} ({device.type})
@@ -255,23 +261,23 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
           </select>
         ) : (
           <div className="text-sm text-red-500 py-2 bg-red-50 dark:bg-red-900/20 px-3 rounded-md">
-            All devices in this building already have technical records. You can only upload one
-            technical record per device.
+            {t('buildingManager.technicalRecord.upload.device.allDevicesHaveRecords')}
           </div>
         )}
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Document Type <span className="text-red-500">*</span>
+          {t('buildingManager.technicalRecord.upload.documentType.label')} <span className="text-red-500">*</span>
         </label>
         <select
           value={fileType}
           onChange={e => setFileType(e.target.value)}
           className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white"
           disabled={availableDevices.length === 0}
+          title={t('buildingManager.technicalRecord.upload.documentType.label')}
         >
-          <option value="">Select document type</option>
+          <option value="">{t('buildingManager.technicalRecord.upload.documentType.select')}</option>
           {fileTypeOptions.map(option => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -282,7 +288,7 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          File Upload <span className="text-red-500">*</span>
+          {t('buildingManager.technicalRecord.upload.file.label')} <span className="text-red-500">*</span>
         </label>
         <div
           className={`border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 ${availableDevices.length === 0 ? 'opacity-50 pointer-events-none' : ''}`}
@@ -299,6 +305,7 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
                   onClick={() => setFile(null)}
                   className="text-red-500 hover:text-red-700"
                   disabled={availableDevices.length === 0}
+                  title={t('buildingManager.technicalRecord.upload.file.removeFile')}
                 >
                   <X size={18} />
                 </button>
@@ -311,7 +318,7 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
                     htmlFor="file-upload"
                     className={`relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 ${availableDevices.length === 0 ? 'pointer-events-none' : ''}`}
                   >
-                    <span>Upload a file</span>
+                    <span>{t('buildingManager.technicalRecord.upload.file.uploadButton')}</span>
                     <input
                       id="file-upload"
                       name="file-upload"
@@ -322,9 +329,9 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
                       disabled={availableDevices.length === 0}
                     />
                   </label>
-                  <p className="pl-1">or drag and drop</p>
+                  <p className="pl-1">{t('buildingManager.technicalRecord.upload.file.dragDrop')}</p>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">PDF only, up to 10MB</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('buildingManager.technicalRecord.upload.file.pdfOnly')}</p>
               </>
             )}
           </div>
@@ -338,43 +345,42 @@ const UploadTechnicalRecordForm: React.FC<UploadTechnicalRecordFormProps> = ({
           disabled={isSubmitting}
           className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
         >
-          Cancel
+          {t('buildingManager.technicalRecord.upload.buttons.cancel')}
         </button>
         <button
           type="submit"
           disabled={
             isSubmitting || !deviceId || !fileType || !file || availableDevices.length === 0
           }
-          className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none ${
-            isSubmitting || !deviceId || !fileType || !file || availableDevices.length === 0
-              ? 'opacity-70 cursor-not-allowed'
-              : ''
-          }`}
+          className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none ${isSubmitting || !deviceId || !fileType || !file || availableDevices.length === 0
+            ? 'opacity-70 cursor-not-allowed'
+            : ''
+            }`}
         >
-          {isSubmitting ? 'Uploading...' : 'Upload Document'}
+          {isSubmitting ? t('buildingManager.technicalRecord.upload.buttons.uploading') : t('buildingManager.technicalRecord.upload.buttons.upload')}
         </button>
       </div>
     </form>
-  );
-};
+  )
+}
 
 interface TechnicalRecordModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  buildingId: string;
-  buildingDetailId: string | null;
-  buildingName: string;
+  isOpen: boolean
+  onClose: () => void
+  buildingId: string
+  buildingDetailId: string | null
+  buildingName: string
 }
 
 // Response type for the technical records API
 interface TechnicalRecordsByBuildingResponse {
-  data: TechnicalRecord[];
+  data: TechnicalRecord[]
   meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }
 }
 
 const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
@@ -384,7 +390,8 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
   buildingDetailId,
   buildingName,
 }) => {
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const { t } = useTranslation()
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
   // Function to fetch technical records by building ID using the new API endpoint
   const fetchTechnicalRecordsByBuildingId = async (buildingId: string) => {
@@ -392,14 +399,14 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
       const url = import.meta.env.VITE_GET_TECHNICAL_RECORD_BY_BUILDING_ID.replace(
         '{buildingId}',
         buildingId
-      );
-      const response = await apiInstance.get<TechnicalRecordsByBuildingResponse>(url);
-      return response.data.data;
+      )
+      const response = await apiInstance.get<TechnicalRecordsByBuildingResponse>(url)
+      return response.data.data
     } catch (error) {
-      console.error('Error fetching technical records for building:', error);
-      throw error;
+      console.error('Error fetching technical records for building:', error)
+      throw error
     }
-  };
+  }
 
   // Get technical records for the building
   const {
@@ -412,66 +419,66 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
     queryKey: ['technicalRecordsByBuilding', buildingId],
     queryFn: () => fetchTechnicalRecordsByBuildingId(buildingId),
     enabled: !!buildingId && isOpen,
-  });
+  })
 
   // Format date
   const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return 'N/A'
 
     try {
-      const date = new Date(dateString);
+      const date = new Date(dateString)
       return date.toLocaleDateString('en-US', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
-      });
+      })
     } catch (error) {
-      return 'Invalid date';
+      return 'Invalid date'
     }
-  };
+  }
 
   // Get file type icon
   const getFileTypeIcon = (fileType: string) => {
-    const type = fileType.toLowerCase();
+    const type = fileType.toLowerCase()
     if (type.includes('manual')) {
-      return <BookOpen className="h-5 w-5 text-blue-500" />;
+      return <BookOpen className="h-5 w-5 text-blue-500" />
     } else if (type.includes('technical') || type.includes('specification')) {
-      return <FileText className="h-5 w-5 text-green-500" />;
+      return <FileText className="h-5 w-5 text-green-500" />
     } else if (type.includes('certificate')) {
-      return <FileIcon className="h-5 w-5 text-yellow-500" />;
+      return <FileIcon className="h-5 w-5 text-yellow-500" />
     }
-    return <FileText className="h-5 w-5 text-gray-500" />;
-  };
+    return <FileText className="h-5 w-5 text-gray-500" />
+  }
 
   // Extract filename from URL
   const extractFilename = (path: string) => {
     // Try to extract filename from URL or path
-    if (!path) return 'Unnamed Document';
+    if (!path) return 'Unnamed Document'
 
     // Check if it contains a slash and get the part after the last slash
     if (path.includes('/')) {
-      const parts = path.split('/');
-      return parts[parts.length - 1];
+      const parts = path.split('/')
+      return parts[parts.length - 1]
     }
 
-    return path;
-  };
+    return path
+  }
 
   // Open upload modal
   const handleOpenUploadModal = () => {
-    setIsUploadModalOpen(true);
-  };
+    setIsUploadModalOpen(true)
+  }
 
   // Close upload modal
   const handleCloseUploadModal = () => {
-    setIsUploadModalOpen(false);
-  };
+    setIsUploadModalOpen(false)
+  }
 
   // Handle successful upload
   const handleUploadSuccess = () => {
-    handleCloseUploadModal();
-    refetch();
-  };
+    handleCloseUploadModal()
+    refetch()
+  }
 
   // Animation variants
   const containerVariants = {
@@ -482,7 +489,7 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
         staggerChildren: 0.1,
       },
     },
-  };
+  }
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -491,7 +498,7 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
       opacity: 1,
       transition: { type: 'spring', stiffness: 100 },
     },
-  };
+  }
 
   // If upload modal is open, show it instead of the main content
   if (isUploadModalOpen) {
@@ -499,7 +506,7 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title={`Upload Technical Record - ${buildingName}`}
+        title={t('buildingManager.technicalRecord.upload.title')}
         size="md"
       >
         <UploadTechnicalRecordForm
@@ -509,14 +516,14 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
           onCancel={handleCloseUploadModal}
         />
       </Modal>
-    );
+    )
   }
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Technical Records - ${buildingName}`}
+      title={t('buildingManager.technicalRecord.list.title', { buildingName })}
       size="lg"
     >
       {!buildingId ? (
@@ -529,10 +536,10 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
             <FileText className="h-8 w-8" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Building ID Required
+            {t('buildingManager.technicalRecord.errors.buildingIdRequired.title')}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            A building ID is required to view the technical records.
+            {t('buildingManager.technicalRecord.errors.buildingIdRequired.description')}
           </p>
         </motion.div>
       ) : isLoading ? (
@@ -562,10 +569,10 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Unable to load technical records
+            {t('buildingManager.technicalRecord.errors.loadFailed.title')}
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            {error instanceof Error ? error.message : 'An unknown error occurred.'}
+            {error instanceof Error ? error.message : t('buildingManager.technicalRecord.errors.loadFailed.description')}
           </p>
         </motion.div>
       ) : (
@@ -577,15 +584,14 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
         >
           <div className="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700">
             <h4 className="text-lg font-medium text-gray-900 dark:text-white">
-              Found {technicalRecords?.length || 0} Technical Document
-              {technicalRecords?.length !== 1 ? 's' : ''}
+              {t('buildingManager.technicalRecord.list.count', { count: technicalRecords?.length || 0 })}
             </h4>
             <button
               onClick={handleOpenUploadModal}
               className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-4 h-4 mr-1.5" />
-              Upload New
+              {t('buildingManager.technicalRecord.list.uploadNew')}
             </button>
           </div>
 
@@ -599,10 +605,10 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
                 <FileText className="h-8 w-8" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No Technical Records
+                {t('buildingManager.technicalRecord.list.noRecords.title')}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                There are no technical records available for this building at the moment.
+                {t('buildingManager.technicalRecord.list.noRecords.description')}
               </p>
             </motion.div>
           ) : (
@@ -624,7 +630,7 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
                           <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded-md text-xs font-medium mr-2">
                             {record.file_type}
                           </span>
-                          <span>Uploaded on {formatDate(record.upload_date)}</span>
+                          <span>{t('buildingManager.technicalRecord.list.uploadDate', { date: formatDate(record.upload_date) })}</span>
                         </div>
                       </div>
                     </div>
@@ -632,26 +638,25 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
 
                   <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-4">
                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Device Information
+                      {t('buildingManager.technicalRecord.list.deviceInfo.title')}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="flex items-center">
-                        <span className="text-gray-500 dark:text-gray-400 mr-2">Device:</span>
+                        <span className="text-gray-500 dark:text-gray-400 mr-2">{t('buildingManager.technicalRecord.list.deviceInfo.device')}</span>
                         <span className="text-gray-900 dark:text-white font-medium">
                           {record.device.name}
                         </span>
                       </div>
                       <div className="flex items-center">
-                        <span className="text-gray-500 dark:text-gray-400 mr-2">Type:</span>
+                        <span className="text-gray-500 dark:text-gray-400 mr-2">{t('buildingManager.technicalRecord.list.deviceInfo.type')}</span>
                         <span className="text-gray-900 dark:text-white font-medium">
                           {record.device.type}
                         </span>
                       </div>
                       <div className="flex items-center md:col-span-2">
-                        <span className="text-gray-500 dark:text-gray-400 mr-2">Building:</span>
+                        <span className="text-gray-500 dark:text-gray-400 mr-2">{t('buildingManager.technicalRecord.list.deviceInfo.building')}</span>
                         <span className="text-gray-900 dark:text-white font-medium">
-                          {record.device.buildingDetail.building.name} (
-                          {record.device.buildingDetail.name})
+                          {record.device.buildingDetail.building.name} ({record.device.buildingDetail.name})
                         </span>
                       </div>
                     </div>
@@ -665,7 +670,7 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
                       className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
                     >
                       <Download className="w-4 h-4 mr-1.5" />
-                      Download
+                      {t('buildingManager.technicalRecord.list.actions.download')}
                     </a>
                   </div>
                 </motion.div>
@@ -675,7 +680,7 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
         </motion.div>
       )}
     </Modal>
-  );
-};
+  )
+}
 
-export default TechnicalRecordModal;
+export default TechnicalRecordModal

@@ -209,7 +209,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <h4 className="font-medium text-gray-900">{cycle.cycle_name}</h4>
-                                                    <p className="text-sm text-gray-500">{cycle.device_type}</p>
+                                                    <p className="text-sm text-gray-500">{t(`maintenanceCycle.deviceTypes.${cycle.device_type}`)}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleCycleSelect(cycle)}

@@ -17,6 +17,7 @@ import ConfirmModal from './ConfirmModal'
 import { BuildingDetail } from '@/types/buildingDetail'
 import { MaintenanceCycle } from '@/types'
 import { useTranslation } from 'react-i18next'
+import { RiSearchLine } from 'react-icons/ri'
 
 registerLocale('vi', vi)
 
@@ -85,6 +86,8 @@ const EventModal: React.FC<EventModalProps> = ({
   })
   const [showBuildingModal, setShowBuildingModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [selectedTab, setSelectedTab] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     if (isCreateMode && initialFormData) {
@@ -243,6 +246,11 @@ const EventModal: React.FC<EventModalProps> = ({
 
   console.log('Current Cycle:', currentCycle) // Debug log
 
+  // Filter building details based on search term
+  const filteredBuildingDetails = buildingDetails.filter(buildingDetail =>
+    buildingDetail.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
@@ -257,7 +265,7 @@ const EventModal: React.FC<EventModalProps> = ({
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            aria-label="Close modal"
+            aria-label={t('common.close')}
           >
             <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
           </button>
@@ -266,8 +274,8 @@ const EventModal: React.FC<EventModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <DocumentTextIcon className="w-4 h-4 inline-block mr-2" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                <DocumentTextIcon className="w-4 h-4 mr-2 text-blue-500" />
                 {t('calendar.eventModal.title')}
               </label>
               <input
@@ -276,35 +284,34 @@ const EventModal: React.FC<EventModalProps> = ({
                 onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 required
-                aria-label="Schedule title"
                 placeholder={t('calendar.eventModal.titlePlaceholder')}
               />
             </div>
 
-            {!isCreateMode && (
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  <TagIcon className="w-4 h-4 inline-block mr-2" />
-                  {t('calendar.eventModal.scheduleType')}
-                </label>
-                <select
-                  value={formData.schedule_type}
-                  onChange={e => setFormData(prev => ({ ...prev, schedule_type: e.target.value }))}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  aria-label="Schedule type"
-                >
-                  <option value="Daily">Daily</option>
-                  <option value="Weekly">Weekly</option>
-                  <option value="Monthly">Monthly</option>
-                  <option value="Yearly">Yearly</option>
-                  <option value="Specific">Specific</option>
-                </select>
-              </div>
-            )}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                <CogIcon className="w-4 h-4 mr-2 text-blue-500" />
+                {t('calendar.eventModal.maintenanceCycle')}
+              </label>
+              <select
+                value={formData.cycle_id || ''}
+                onChange={e => setFormData(prev => ({ ...prev, cycle_id: e.target.value }))}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                required
+              >
+                <option value="">{t('calendar.eventModal.selectCycle')}</option>
+                {Array.isArray(cyclesArray) &&
+                  cyclesArray.map(cycle => (
+                    <option key={cycle.cycle_id} value={cycle.cycle_id}>
+                      {cycle.device_type} - {cycle.frequency} ({cycle.basis})
+                    </option>
+                  ))}
+              </select>
+            </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <CalendarIcon className="w-4 h-4 inline-block mr-2" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
                 {t('calendar.eventModal.startDate')}
               </label>
               <DatePicker
@@ -320,13 +327,12 @@ const EventModal: React.FC<EventModalProps> = ({
                 dateFormat="dd/MM/yyyy HH:mm"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 locale="vi"
-                aria-label="Start date"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <CalendarIcon className="w-4 h-4 inline-block mr-2" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
                 {t('calendar.eventModal.endDate')}
               </label>
               <DatePicker
@@ -343,41 +349,13 @@ const EventModal: React.FC<EventModalProps> = ({
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 locale="vi"
                 minDate={formData.start_date}
-                aria-label="End date"
               />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <CogIcon className="w-4 h-4 inline-block mr-2" />
-                {t('calendar.eventModal.maintenanceCycle')}
-              </label>
-              <select
-                value={formData.cycle_id || ''}
-                onChange={e => setFormData(prev => ({ ...prev, cycle_id: e.target.value }))}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                aria-label="Maintenance Cycle"
-                required
-              >
-                <option value="">{t('calendar.eventModal.selectCycle')}</option>
-                {Array.isArray(cyclesArray) &&
-                  cyclesArray.map(cycle => (
-                    <option key={cycle.cycle_id} value={cycle.cycle_id}>
-                      {cycle.device_type} - {cycle.frequency} ({cycle.basis})
-                    </option>
-                  ))}
-              </select>
-              {!isCreateMode && formData.cycle_id && formData.cycle_id.trim() !== '' && (
-                <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {t('calendar.eventModal.currentCycle')}: {getCycleLabel(formData.cycle_id)}
-                </div>
-              )}
             </div>
 
             {!isCreateMode && (
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  <CheckCircleIcon className="w-4 h-4 inline-block mr-2" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                  <CheckCircleIcon className="w-4 h-4 mr-2 text-blue-500" />
                   {t('calendar.eventModal.status')}
                 </label>
                 <select
@@ -385,15 +363,10 @@ const EventModal: React.FC<EventModalProps> = ({
                   onChange={e =>
                     setFormData(prev => ({
                       ...prev,
-                      schedule_status: e.target.value as
-                        | 'Pending'
-                        | 'InProgress'
-                        | 'Completed'
-                        | 'Cancel',
+                      schedule_status: e.target.value as 'Pending' | 'InProgress' | 'Completed' | 'Cancel',
                     }))
                   }
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  aria-label="Schedule status"
                 >
                   {statusOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -403,64 +376,130 @@ const EventModal: React.FC<EventModalProps> = ({
                 </select>
               </div>
             )}
+          </div>
 
-            <div className="md:col-span-2 space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <BuildingOfficeIcon className="w-4 h-4 inline-block mr-2" />
-                {t('calendar.eventModal.buildingDetails')}
-              </label>
-              <button
-                type="button"
-                onClick={handleOpenBuildingModal}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600 transition"
-                aria-label="Select building details"
-              >
-                {selectedBuildingDetails.length > 0
-                  ? t('calendar.eventModal.buildingDetailsSelected', { count: selectedBuildingDetails.length })
-                  : t('calendar.eventModal.selectBuildingDetails')}
-              </button>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+              <BuildingOfficeIcon className="w-4 h-4 mr-2 text-blue-500" />
+              {t('calendar.buildings.title')}
+            </label>
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="flex-1 relative">
+                <RiSearchLine className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200"
+                  placeholder={t('calendar.buildings.search')}
+                />
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTab('all')}
+                  className={`px-4 py-2 rounded-lg transition-all duration-200 ${selectedTab === 'all'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                    }`}
+                >
+                  {t('calendar.buildings.all')} ({buildingDetails?.length || 0})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTab('selected')}
+                  className={`px-4 py-2 rounded-lg transition-all duration-200 ${selectedTab === 'selected'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                    }`}
+                >
+                  {t('calendar.buildings.selected')} ({selectedBuildingDetails.length})
+                </button>
+              </div>
+            </div>
 
-              {selectedBuildingDetails.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedBuildingDetails.map((buildingDetailId, index) => {
+            <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+              <div className="max-h-60 overflow-y-auto p-2 space-y-2">
+                {selectedTab === 'all' ? (
+                  filteredBuildingDetails?.length > 0 ? (
+                    filteredBuildingDetails.map(buildingDetail => (
+                      <div
+                        key={buildingDetail.buildingDetailId}
+                        className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+                      >
+                        <input
+                          type="checkbox"
+                          id={`building-${buildingDetail.buildingDetailId}`}
+                          checked={selectedBuildingDetails.includes(buildingDetail.buildingDetailId)}
+                          onChange={() => onBuildingDetailSelect(buildingDetail.buildingDetailId)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-all duration-200"
+                        />
+                        <label
+                          htmlFor={`building-${buildingDetail.buildingDetailId}`}
+                          className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer flex-1"
+                        >
+                          <div className="font-medium">{buildingDetail.building?.name}</div>
+                          <div className="text-gray-500 dark:text-gray-400">
+                            {buildingDetail.name}
+                          </div>
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                      {t('calendar.buildings.noResults')}
+                    </div>
+                  )
+                ) : selectedBuildingDetails.length > 0 ? (
+                  selectedBuildingDetails.map(buildingDetailId => {
                     const buildingDetail = buildingDetails.find(
                       b => b.buildingDetailId === buildingDetailId
                     )
                     return buildingDetail ? (
                       <div
-                        key={`${buildingDetailId}-${index}`}
-                        className="flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full"
+                        key={buildingDetailId}
+                        className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
                       >
-                        <span>{buildingDetail.name}</span>
-                        <button
-                          type="button"
-                          onClick={() => onBuildingDetailSelect(buildingDetailId)}
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
-                          aria-label={`Remove ${buildingDetail.name}`}
+                        <input
+                          type="checkbox"
+                          id={`selected-building-${buildingDetailId}`}
+                          checked={true}
+                          onChange={() => onBuildingDetailSelect(buildingDetailId)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-all duration-200"
+                        />
+                        <label
+                          htmlFor={`selected-building-${buildingDetailId}`}
+                          className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer flex-1"
                         >
-                          <XMarkIcon className="w-4 h-4" />
-                        </button>
+                          <div className="font-medium">{buildingDetail.building?.name}</div>
+                          <div className="text-gray-500 dark:text-gray-400">
+                            {buildingDetail.name}
+                          </div>
+                        </label>
                       </div>
                     ) : null
-                  })}
-                </div>
-              )}
+                  })
+                ) : (
+                  <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    {t('calendar.buildings.noSelected')}
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
 
-            <div className="md:col-span-2 space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                <DocumentTextIcon className="w-4 h-4 inline-block mr-2" />
-                {t('calendar.eventModal.description')}
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                rows={4}
-                aria-label="Schedule description"
-                placeholder={t('calendar.eventModal.descriptionPlaceholder')}
-              />
-            </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+              <DocumentTextIcon className="w-4 h-4 mr-2 text-blue-500" />
+              {t('calendar.eventModal.description')}
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              rows={4}
+              placeholder={t('calendar.eventModal.descriptionPlaceholder')}
+            />
           </div>
 
           <div className="flex justify-end gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">

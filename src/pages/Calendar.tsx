@@ -847,7 +847,7 @@ const Calendar: React.FC = () => {
 
                       return (
                         <span className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                          {buildingCount} {buildingCount === 1 ? t('calendar.building') : t('calendar.buildings')}
+                          {buildingCount} {buildingCount === 1 ? t('calendar.buildings.building') : t('calendar.buildings.building')}
                         </span>
                       )
                     },

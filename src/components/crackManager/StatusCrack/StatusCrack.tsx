@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import Modal from './Modal'
 import crackApi from '@/services/cracks'
-import { getAllStaff } from '@/services/staffs'
-import { StaffData, StaffDetailResponse } from '@/types'
+import { StaffData } from '@/types'
 import { toast } from 'react-hot-toast'
-import { getStaffDetail } from '@/services/staffs'
 import { useTranslation } from 'react-i18next'
 
 interface StaffWithPosition extends Omit<StaffData, 'userDetails'> {
@@ -43,8 +41,7 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
   onUpdateSuccess,
 }) => {
   const { t } = useTranslation()
-  const [staffList, setStaffList] = useState<StaffWithPosition[]>([])
-  const [filteredStaffList, setFilteredStaffList] = useState<StaffWithPosition[]>([])
+  const [staffLeader, setStaffLeader] = useState<StaffWithPosition | null>(null)
   const [selectedStaffId, setSelectedStaffId] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSaving, setIsSaving] = useState<boolean>(false)
@@ -66,40 +63,26 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
     return statusMapping[crackStatus as keyof typeof statusMapping]?.label || crackStatus
   }
 
-  // Fetch staff list when modal is opened
+  // Fetch staff leader when modal is opened
   useEffect(() => {
     if (isOpen) {
-      fetchStaffList()
+      fetchStaffLeader()
     }
   }, [isOpen])
 
-  // Fetch staff list from API
-  const fetchStaffList = async () => {
+  // Fetch staff leader from API
+  const fetchStaffLeader = async () => {
     setIsLoading(true)
     try {
-      const response = await getAllStaff()
+      const response = await crackApi.getStaffLeaderByCrackId(crackId)
       if (response.isSuccess && response.data) {
-        // Filter to only include staff with the "Staff" role
-        const staffMembers = response.data.filter(staff => staff.role === 'Staff')
-        setStaffList(staffMembers)
-
-        // Get detailed info for each staff to check position
-        const staffDetailsPromises = staffMembers.map(staff => getStaffDetail(staff.userId))
-
-        const staffDetailsResponses = await Promise.all(staffDetailsPromises)
-
-        // Filter staff to only include those with "Leader" position
-        const leadersOnly = staffMembers.filter((staff, index) => {
-          const details = staffDetailsResponses[index]
-          return details.isSuccess && details.data.userDetails?.position?.positionName === 'Leader'
-        })
-
-        setFilteredStaffList(leadersOnly)
+        setStaffLeader(response.data)
+        setSelectedStaffId(response.data.userId)
       } else {
         toast.error(t('staffManagement.error'))
       }
     } catch (error) {
-      console.error('Error fetching staff list:', error)
+      console.error('Error fetching staff leader:', error)
       toast.error(t('staffManagement.error'))
     } finally {
       setIsLoading(false)
@@ -167,8 +150,8 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
       // Call API to update crack status with staff assignment
       const response = await crackApi.updateCrackStatus(
         crackId,
-        apiStatus as any,
-        selectedStaffId // This is the staff's userId that will be sent as staffId in the request body
+        apiStatus,
+        selectedStaffId
       )
 
       if (response.isSuccess) {
@@ -221,7 +204,7 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
             <div className="flex justify-center py-4">
               <div className="animate-spin h-6 w-6 border-2 border-blue-500 rounded-full border-t-transparent"></div>
             </div>
-          ) : filteredStaffList.length === 0 ? (
+          ) : !staffLeader ? (
             <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg text-yellow-700 dark:text-yellow-400">
               {t('staffManagement.noLeadersAvailable')}
             </div>
@@ -234,11 +217,9 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
               disabled={isSaving}
             >
               <option value="">{t('staffManagement.selectLeader')}</option>
-              {filteredStaffList.map(staff => (
-                <option key={staff.userId} value={staff.userId}>
-                  {staff.username} ({t('staffManagement.leader')})
-                </option>
-              ))}
+              <option value={staffLeader.userId}>
+                {staffLeader.username} ({t('staffManagement.leader')})
+              </option>
             </select>
           )}
         </div>

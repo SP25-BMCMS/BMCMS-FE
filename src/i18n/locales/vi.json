@@ -1,5 +1,7 @@
 {
   "common": {
+    "apartments": "Căn hộ",
+    "floors": "Tầng",
     "search": "Tìm kiếm",
     "filter": "Lọc",
     "all": "Tất cả",
@@ -50,6 +52,7 @@
     "success": "Thành công",
     "warning": "Cảnh báo",
     "info": "Thông tin",
+    "other": "Khác",
     "tooltip": {
       "loading": "Đang tải...",
       "error": "Lỗi",
@@ -422,7 +425,7 @@
     "crackManagement": "Quản lý vết nứt",
     "materialManagement": "Quản lý vật liệu",
     "timesheet": {
-      "title": "Bảng chấm công",
+      "title": "Bảng Lịch Bảo Trì",
       "workLog": "Nhật ký công việc",
       "calendar": "Lịch"
     }
@@ -507,6 +510,7 @@
   },
   "staffManagement": {
     "title": "Quản lý nhân viên",
+    "error": "Lỗi khi lấy thông tin nhân viên",
     "addStaff": "Thêm nhân viên",
     "editStaff": "Sửa thông tin nhân viên",
     "deleteStaff": "Xóa nhân viên",
@@ -596,7 +600,17 @@
       "operational": "Đang hoạt động",
       "underConstruction": "Đang xây dựng",
       "locationDetails": "Chi tiết vị trí",
-      "locations": "vị trí"
+      "locations": "vị trí",
+      "selected": "Đã chọn",
+      "duration": {
+        "label": "Thời gian (ngày)"
+      },
+      "startDate": {
+        "label": "Ngày bắt đầu"
+      },
+      "autoCreateTasks": {
+        "label": "Tự động tạo nhiệm vụ"
+      }
     },
     "createCycle": "Tạo chu kỳ",
     "viewHistory": "Xem lịch sử",
@@ -724,6 +738,18 @@
     "filter": {
       "reset": "Đặt lại",
       "apply": "Áp dụng"
+    },
+    "deviceTypes": {
+      "Other": "Khác",
+      "Generator": "Máy phát điện",
+      "HVAC": "Hệ thống điều hòa",
+      "Lighting": "Hệ thống chiếu sáng",
+      "AutomaticDoor": "Cửa tự động",
+      "CCTV": "Camera giám sát",
+      "Plumbing": "Hệ thống cấp thoát nước",
+      "FireProtection": "Hệ thống phòng cháy",
+      "Elevator": "Thang máy",
+      "Electrical": "Hệ thống điện"
     }
   },
   "crackManagement": {
@@ -755,7 +781,8 @@
       "all": "Tất cả mức độ",
       "low": "Thấp",
       "medium": "Trung bình",
-      "high": "Cao"
+      "high": "Cao",
+      "unknown": "Không xác định"
     },
     "table": {
       "no": "STT",
@@ -908,7 +935,7 @@
     }
   },
   "timesheet": {
-    "title": "Bảng chấm công",
+    "title": "Bảng Lịch Bảo Trì",
     "workLog": "Nhật ký công việc",
     "calendar": "Lịch",
     "addWorkLog": "Thêm nhật ký",
@@ -970,6 +997,20 @@
     "maintenanceHistory": "Lịch sử bảo trì",
     "crackRecords": "Bản ghi vết nứt",
     "status": "Trạng thái",
+    "selection": {
+      "title": "Chọn Chi Tiết Tòa Nhà",
+      "subtitle": "Chọn một hoặc nhiều chi tiết tòa nhà cho lịch trình của bạn",
+      "selectedCount": "{{count}} tòa nhà đã chọn",
+      "searchPlaceholder": "Tìm kiếm chi tiết tòa nhà...",
+      "selectedBuildings": "Tòa Nhà Đã Chọn",
+      "availableBuildings": "Tòa Nhà Có Sẵn",
+      "clearAll": "Xóa Tất Cả Đã Chọn",
+      "noResults": "Không tìm thấy chi tiết tòa nhà nào phù hợp với \"{{query}}\"",
+      "allSelected": "Tất cả chi tiết tòa nhà đã được chọn",
+      "noAvailable": "Không có chi tiết tòa nhà nào có sẵn.",
+      "done": "Xong",
+      "apartments": "căn hộ"
+    },
     "table": {
       "no": "STT",
       "deviceName": "Tên thiết bị",
@@ -1016,7 +1057,8 @@
     "status": {
       "execute_cracks": "Thực hiện sửa chữa vết nứt",
       "confirm_no_pending_issues": "Xác nhận không có vấn đề tồn đọng",
-      "final_review": "Xem xét cuối cùng"
+      "final_review": "Xem xét cuối cùng",
+      "wait_for_deposit": "Chờ đặt cọc"
     }
   },
   "calendar": {
@@ -1167,6 +1209,61 @@
         "message": "Bạn có chắc chắn muốn xóa lịch trình này? Hành động này không thể hoàn tác.",
         "cancel": "Hủy",
         "confirm": "Xóa"
+      }
+    },
+    "buildings": {
+      "building": "Tòa nhà",
+      "title": "Danh sách tòa nhà",
+      "search": "Tìm kiếm tòa nhà...",
+      "noResults": "Không tìm thấy tòa nhà nào",
+      "all": "Tất cả",
+      "selected": "Đã chọn",
+      "selectAll": "Chọn tất cả",
+      "deselectAll": "Bỏ chọn tất cả",
+      "buildingName": "Tên tòa nhà",
+      "buildingDetails": "Chi tiết tòa nhà",
+      "status": {
+        "active": "Đang hoạt động",
+        "inactive": "Không hoạt động",
+        "maintenance": "Đang bảo trì"
+      }
+    },
+    "schedule": {
+      "scheduleJob": {
+        "backToCalendar": "Quay lại Lịch",
+        "scheduleOverview": "Tổng quan Lịch",
+        "maintenanceJobs": "Công việc Bảo trì",
+        "showingJobs": "Hiển thị {{count}} trên tổng số {{total}} công việc",
+        "newJob": "Công việc Mới",
+        "noJobsFound": "Không tìm thấy công việc bảo trì",
+        "noJobsDescription": "Chưa có công việc nào được liên kết với lịch này. Nhấp vào bên dưới để tạo công việc bảo trì đầu tiên.",
+        "createFirstJob": "Tạo Công việc Đầu tiên",
+        "locationDetails": "Chi tiết Vị trí",
+        "equipment": "Thiết bị",
+        "status": "Trạng thái",
+        "schedule": "Lịch",
+        "actions": "Thao tác",
+        "noEquipment": "Chưa gán thiết bị",
+        "moreDevices": "+{{count}} thiết bị khác",
+        "updated": "Cập nhật: {{date}}",
+        "runDate": "Ngày thực hiện: {{date}}",
+        "period": "Kỳ hạn: {{start}} - {{end}}",
+        "cancelled": "Đã hủy",
+        "completed": "Hoàn thành",
+        "loading": "Đang tải chi tiết lịch...",
+        "schedulePeriod": "Kỳ hạn Lịch: {{start}} - {{end}}",
+        "description": "Mô tả",
+        "noDescription": "Không có mô tả",
+        "maintenanceCycle": "Chu kỳ Bảo trì",
+        "totalJobs": "Tổng số Công việc",
+        "created": "Ngày tạo",
+        "lastUpdated": "Cập nhật lần cuối",
+        "tooltips": {
+          "updateStatus": "Cập nhật Trạng thái",
+          "cancelJob": "Hủy Công việc",
+          "sendEmail": "Gửi Email Bảo trì",
+          "createTask": "Tạo Công việc"
+        }
       }
     }
   },
@@ -1333,6 +1430,179 @@
       "cancel": "Hủy",
       "update": "Cập nhật",
       "updating": "Đang cập nhật..."
+    }
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "markAllAsRead": "Đánh dấu tất cả đã đọc",
+    "loading": "Đang tải...",
+    "noNotifications": "Không có thông báo",
+    "ariaLabels": {
+      "notifications": "Thông báo",
+      "markAllAsRead": "Đánh dấu tất cả đã đọc"
+    }
+  },
+  "autoSchedule": {
+    "title": "Tạo lịch trình bảo trì thủ công",
+    "description": "Tạo một lịch trình bảo trì mới sẽ tự động tạo các công việc dựa trên chu kỳ và tòa nhà đã chọn.",
+    "form": {
+      "scheduleName": {
+        "label": "Tên lịch trình",
+        "placeholder": "Nhập tên lịch trình"
+      },
+      "maintenanceCycle": {
+        "label": "Chu kỳ bảo trì",
+        "placeholder": "Chọn chu kỳ bảo trì"
+      },
+      "description": {
+        "label": "Mô tả",
+        "placeholder": "Nhập mô tả"
+      },
+      "startDate": {
+        "label": "Ngày bắt đầu",
+        "tooltip": "Chọn ngày bắt đầu cho lịch trình bảo trì. Không thể chọn ngày trong quá khứ."
+      },
+      "endDate": {
+        "label": "Ngày kết thúc",
+        "tooltip": "Chọn ngày kết thúc cho lịch trình bảo trì. Phải sau ngày bắt đầu."
+      },
+      "buildingDetails": {
+        "label": "Chi tiết tòa nhà",
+        "searchPlaceholder": "Tìm kiếm tòa nhà...",
+        "all": "Tất cả",
+        "selected": "Đã chọn",
+        "noResults": "Không tìm thấy chi tiết tòa nhà",
+        "noSelected": "Chưa chọn chi tiết tòa nhà nào"
+      }
+    },
+    "buttons": {
+      "cancel": "Hủy",
+      "create": "Tạo lịch trình",
+      "creating": "Đang tạo..."
+    },
+    "errors": {
+      "scheduleNameRequired": "Vui lòng nhập tên lịch trình",
+      "cycleRequired": "Vui lòng chọn chu kỳ bảo trì",
+      "buildingRequired": "Vui lòng chọn ít nhất một chi tiết tòa nhà",
+      "startDateRequired": "Vui lòng chọn ngày bắt đầu",
+      "endDateRequired": "Vui lòng chọn ngày kết thúc",
+      "startDatePast": "Ngày bắt đầu không thể là ngày trong quá khứ",
+      "endDateBeforeStart": "Ngày kết thúc phải sau ngày bắt đầu",
+      "fixDateErrors": "Vui lòng sửa lỗi ngày tháng trước khi gửi",
+      "createFailed": "Không thể tạo lịch trình"
+    },
+    "success": "Tạo lịch trình thành công"
+  },
+  "scheduleDetail": {
+    "ScheduleJob": {
+      "backToCalendar": "Quay lại Lịch",
+      "scheduleOverview": "Tổng quan Lịch",
+      "maintenanceJobs": "Công việc Bảo trì",
+      "showingJobs": "Hiển thị {{count}} trên tổng số {{total}} công việc",
+      "newJob": "Công việc Mới",
+      "noJobsFound": "Không tìm thấy công việc bảo trì",
+      "noJobsDescription": "Chưa có công việc nào được liên kết với lịch này. Nhấp vào bên dưới để tạo công việc bảo trì đầu tiên.",
+      "createFirstJob": "Tạo Công việc Đầu tiên",
+      "locationDetails": "Chi tiết Vị trí",
+      "equipment": "Thiết bị",
+      "status": "Trạng thái",
+      "schedule": "Lịch",
+      "actions": "Thao tác",
+      "noEquipment": "Chưa gán thiết bị",
+      "moreDevices": "+{{count}} thiết bị khác",
+      "updated": "Cập nhật: {{date}}",
+      "runDate": "Ngày thực hiện: {{date}}",
+      "period": "Kỳ hạn: {{start}} - {{end}}",
+      "cancelled": "Đã hủy",
+      "completed": "Hoàn thành",
+      "loading": "Đang tải chi tiết lịch...",
+      "schedulePeriod": "Kỳ hạn Lịch: {{start}} - {{end}}",
+      "description": "Mô tả",
+      "noDescription": "Không có mô tả",
+      "maintenanceCycle": "Chu kỳ Bảo trì",
+      "totalJobs": "Tổng số Công việc",
+      "created": "Ngày tạo",
+      "lastUpdated": "Cập nhật lần cuối",
+      "tooltips": {
+        "updateStatus": "Cập nhật Trạng thái",
+        "cancelJob": "Hủy Công việc",
+        "sendEmail": "Gửi Email Bảo trì",
+        "createTask": "Tạo Công việc"
+      },
+      "deleteConfirm": {
+        "title": "Xác nhận hủy",
+        "message": "Bạn có chắc chắn muốn hủy công việc này? Hành động này không thể hoàn tác."
+      }
+    }
+  },
+  "buildingManager": {
+    "technicalRecord": {
+      "title": "Hồ sơ Kỹ thuật",
+      "upload": {
+        "title": "Tải lên Hồ sơ Kỹ thuật",
+        "device": {
+          "label": "Thiết bị",
+          "required": "Vui lòng chọn thiết bị",
+          "select": "Chọn thiết bị",
+          "allDevicesHaveRecords": "Tất cả thiết bị trong tòa nhà này đã có hồ sơ kỹ thuật. Bạn chỉ có thể tải lên một hồ sơ kỹ thuật cho mỗi thiết bị."
+        },
+        "documentType": {
+          "label": "Loại tài liệu",
+          "required": "Vui lòng chọn loại tài liệu",
+          "select": "Chọn loại tài liệu",
+          "options": {
+            "manual": "Hướng dẫn sử dụng",
+            "specification": "Thông số kỹ thuật",
+            "certificate": "Chứng chỉ",
+            "warranty": "Tài liệu bảo hành",
+            "maintenance": "Hướng dẫn bảo trì"
+          }
+        },
+        "file": {
+          "label": "Tải lên tệp",
+          "required": "Vui lòng chọn tệp để tải lên",
+          "dragDrop": "hoặc kéo và thả",
+          "pdfOnly": "Chỉ chấp nhận PDF, tối đa 10MB",
+          "uploadButton": "Tải lên tệp",
+          "removeFile": "Xóa tệp",
+          "fileTooLarge": "Kích thước tệp không được vượt quá 10MB",
+          "invalidType": "Chỉ chấp nhận tệp PDF"
+        },
+        "buttons": {
+          "cancel": "Hủy",
+          "upload": "Tải lên Tài liệu",
+          "uploading": "Đang tải lên..."
+        }
+      },
+      "list": {
+        "title": "Hồ sơ Kỹ thuật - {{buildingName}}",
+        "count": "Tìm thấy {{count}} Tài liệu Kỹ thuật",
+        "uploadNew": "Tải lên Mới",
+        "noRecords": {
+          "title": "Không có Hồ sơ Kỹ thuật",
+          "description": "Hiện không có hồ sơ kỹ thuật nào cho tòa nhà này."
+        },
+        "deviceInfo": {
+          "title": "Thông tin Thiết bị",
+          "device": "Thiết bị:",
+          "type": "Loại:",
+          "building": "Tòa nhà:"
+        },
+        "actions": {
+          "download": "Tải xuống"
+        },
+        "uploadDate": "Tải lên vào {{date}}"
+      },
+      "errors": {
+        "buildingIdRequired": {
+          "title": "Yêu cầu ID Tòa nhà",
+          "description": "Cần có ID tòa nhà để xem hồ sơ kỹ thuật."
+        },
+        "loadFailed": {
+          "title": "Không thể tải hồ sơ kỹ thuật",
+          "description": "Đã xảy ra lỗi khi tải hồ sơ kỹ thuật."
+        }
+      }
     }
   }
 }

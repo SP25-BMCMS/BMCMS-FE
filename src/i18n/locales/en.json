@@ -457,5 +457,47 @@
     "totalFeedbacks": "Total",
     "average": "Average",
     "noFeedbackData": "No feedback data available"
+  },
+  "scheduleDetail": {
+    "ScheduleJob": {
+      "backToCalendar": "Back to Calendar",
+      "scheduleOverview": "Schedule Overview",
+      "maintenanceJobs": "Maintenance Jobs",
+      "showingJobs": "Showing {{count}} of {{total}} jobs",
+      "newJob": "New Job",
+      "noJobsFound": "No maintenance jobs found",
+      "noJobsDescription": "No jobs have been linked to this schedule yet. Click below to create the first maintenance job.",
+      "createFirstJob": "Create First Job",
+      "locationDetails": "Location Details",
+      "equipment": "Equipment",
+      "status": "Status",
+      "schedule": "Schedule",
+      "actions": "Actions",
+      "noEquipment": "No equipment assigned",
+      "moreDevices": "+{{count}} more devices",
+      "updated": "Updated: {{date}}",
+      "runDate": "Run Date: {{date}}",
+      "period": "Period: {{start}} - {{end}}",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "loading": "Loading schedule details...",
+      "schedulePeriod": "Schedule Period: {{start}} - {{end}}",
+      "description": "Description",
+      "noDescription": "No description",
+      "maintenanceCycle": "Maintenance Cycle",
+      "totalJobs": "Total Jobs",
+      "created": "Created",
+      "lastUpdated": "Last Updated",
+      "tooltips": {
+        "updateStatus": "Update Status",
+        "cancelJob": "Cancel Job",
+        "sendEmail": "Send Maintenance Email",
+        "createTask": "Create Task"
+      },
+      "deleteConfirm": {
+        "title": "Confirm Cancellation",
+        "message": "Are you sure you want to cancel this job? This action cannot be undone."
+      }
+    }
   }
 }
