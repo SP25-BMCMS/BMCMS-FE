@@ -257,6 +257,21 @@
         "to": "đến",
         "ofTotal": "trên tổng số",
         "itemsPerPageTitle": "Chọn số mục hiển thị trên mỗi trang"
+      },
+      "modal": {
+        "close": "Đóng"
+      },
+      "statusCrack": {
+        "title": "Cập nhật trạng thái vết nứt",
+        "currentStatus": "Trạng thái hiện tại",
+        "updateSuccess": "Cập nhật trạng thái thành công",
+        "updateError": "Không thể cập nhật trạng thái",
+        "processing": "Đang xử lý...",
+        "status": {
+          "pending": "Chờ xử lý",
+          "inProgress": "Đang xử lý",
+          "resolved": "Đã xử lý"
+        }
       }
     },
     "dropdown": {
@@ -443,7 +458,7 @@
       "operational": "Đang hoạt động",
       "under_construction": "Đang xây dựng"
     },
-    "table": {
+    "table1": {
       "no": "STT",
       "buildingName": "Tên tòa nhà",
       "areaName": "Tên khu vực",
@@ -451,8 +466,14 @@
       "status": "Trạng thái",
       "createdDate": "Ngày tạo",
       "completionDate": "Ngày hoàn thành",
-      "action": "Thao tác"
-    }
+      "action": "Thao tác",
+      "manager": "Quản lý"
+    },
+    "filterOptions": {
+        "all": "Tất cả trạng thái",
+        "operational": "Đang hoạt động",
+        "under_construction": "Đang xây dựng"
+      }
   },
   "residentManagement": {
     "title": "Quản lý cư dân",
@@ -532,7 +553,57 @@
     "selectLeader": "Chọn nhân viên lãnh đạo",
     "noLeadersAvailable": "Không có nhân viên lãnh đạo nào để phân công. Vui lòng thêm nhân viên có vai trò 'Nhân viên' và vị trí 'Lãnh đạo' trước.",
     "leader": "Lãnh đạo",
-    "processing": "Đang xử lý..."
+    "processing": "Đang xử lý...",
+    "viewDetail": {
+      "title": "Hồ sơ nhân viên",
+      "personalInfo": "Thông tin cá nhân",
+      "workInfo": "Thông tin công việc",
+      "loading": "Đang tải thông tin nhân viên...",
+      "error": {
+        "title": "Lỗi tải thông tin nhân viên",
+        "loadFailed": "Không thể tải thông tin nhân viên"
+      },
+      "noData": "Không có dữ liệu nhân viên",
+      "labels": {
+        "gender": "Giới tính",
+        "dateOfBirth": "Ngày sinh",
+        "userId": "Mã nhân viên",
+        "lastUpdated": "Cập nhật lần cuối",
+        "position": "Vị trí",
+        "department": "Phòng ban",
+        "area": "Khu vực"
+      },
+      "noDepartment": "Chưa được phân công phòng ban hoặc vị trí.",
+      "close": "Đóng"
+    },
+    "departmentPosition": {
+      "title": "Cập nhật phòng ban và vị trí cho {name}",
+      "updateTitle": "Cập nhật phòng ban và vị trí",
+      "department": "Phòng ban",
+      "position": "Vị trí",
+      "selectDepartment": "-- Chọn phòng ban --",
+      "selectPosition": "-- Chọn vị trí --",
+      "noArea": "Không có khu vực",
+      "buttons": {
+        "cancel": "Hủy",
+        "save": "Lưu thay đổi",
+        "saving": "Đang lưu..."
+      },
+      "messages": {
+        "selectBoth": "Vui lòng chọn phòng ban và vị trí",
+        "updateSuccess": "Cập nhật phòng ban và vị trí thành công",
+        "updateFailed": "Cập nhật thất bại",
+        "error": "Đã xảy ra lỗi khi cập nhật",
+        "loadError": "Không thể tải danh sách phòng ban và vị trí"
+      },
+      "positions": {
+        "leader": "Trưởng nhóm",
+        "maintenance": "Bảo trì",
+        "staff": "Nhân viên",
+        "manager": "Quản lý",
+        "unknown": "Vị trí {value}"
+      }
+    }
   },
   "maintenanceCycle": {
     "title": "Chu kỳ bảo trì",

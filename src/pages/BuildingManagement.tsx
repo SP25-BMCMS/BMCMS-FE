@@ -21,6 +21,7 @@ import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import Tooltip from '@/components/Tooltip'
 
 const Building: React.FC = () => {
   const { t } = useTranslation()
@@ -143,6 +144,14 @@ const Building: React.FC = () => {
     return managerNames[managerId] || t('buildingManagement.unknown')
   }
 
+  const getTruncatedManagerName = (managerId?: string): string => {
+    const fullName = getManagerName(managerId)
+    if (fullName.length > 10) {
+      return `${fullName.substring(0, 8)}...`
+    }
+    return fullName
+  }
+
   const handleViewBuildingDetail = (building: BuildingResponse) => {
     setSelectedBuilding(building)
     setIsViewBuildingModalOpen(true)
@@ -183,7 +192,7 @@ const Building: React.FC = () => {
   const columns: Column<BuildingResponse>[] = [
     {
       key: 'index',
-      title: t('buildingManagement.table.no'),
+      title: t('buildingManagement.table1.no'),
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
       ),
@@ -191,77 +200,102 @@ const Building: React.FC = () => {
     },
     {
       key: 'name',
-      title: t('buildingManagement.table.buildingName'),
+      title: t('buildingManagement.table1.buildingName'),
       render: item => (
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</div>
+        <Tooltip content={item.name} position="bottom" delay={200}>
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px]">
+            {item.name}
+          </div>
+        </Tooltip>
       ),
     },
     {
       key: 'areaId',
-      title: t('buildingManagement.table.areaName'),
+      title: t('buildingManagement.table1.areaName'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{getAreaName(item.areaId)}</div>
+        <Tooltip content={getAreaName(item.areaId)} position="bottom" delay={200}>
+          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
+            {getAreaName(item.areaId)}
+          </div>
+        </Tooltip>
       ),
     },
     {
       key: 'manager',
-      title: t('buildingManagement.table.manager'),
+      title: t('buildingManagement.table1.manager'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-          <User className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
-          {getManagerName(item.manager_id)}
-        </div>
+        <Tooltip content={getManagerName(item.manager_id)} position="bottom" delay={200}>
+          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center truncate max-w-[100px]">
+            <User className="h-3.5 w-3.5 mr-1.5 text-blue-500 flex-shrink-0" />
+            <span className="truncate">{getTruncatedManagerName(item.manager_id)}</span>
+          </div>
+        </Tooltip>
       ),
     },
     {
       key: 'Floor',
-      title: t('buildingManagement.table.floor'),
+      title: t('buildingManagement.table1.floor'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.numberFloor}</div>
+        <Tooltip content={item.numberFloor.toString()} position="bottom" delay={200}>
+          <div className="text-sm text-gray-500 dark:text-gray-400">{item.numberFloor}</div>
+        </Tooltip>
       ),
     },
     {
       key: 'createdAt',
-      title: t('buildingManagement.table.createdDate'),
+      title: t('buildingManagement.table1.createdDate'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {new Date(item.createdAt).toLocaleDateString()}
-        </div>
+        <Tooltip content={new Date(item.createdAt).toLocaleDateString()} position="bottom" delay={200}>
+          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[100px]">
+            {new Date(item.createdAt).toLocaleDateString()}
+          </div>
+        </Tooltip>
       ),
     },
     {
       key: 'completion Date',
-      title: t('buildingManagement.table.completionDate'),
+      title: t('buildingManagement.table1.completionDate'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {item.completion_date ? new Date(item.completion_date).toLocaleDateString() : 'N/A'}
-        </div>
+        <Tooltip 
+          content={item.completion_date ? new Date(item.completion_date).toLocaleDateString() : 'N/A'} 
+          position="bottom" 
+          delay={200}
+        >
+          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[100px]">
+            {item.completion_date ? new Date(item.completion_date).toLocaleDateString() : 'N/A'}
+          </div>
+        </Tooltip>
       ),
     },
     {
       key: 'status',
-      title: t('buildingManagement.table.status'),
+      title: t('buildingManagement.table1.status'),
       render: item => (
-        <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.Status === 'operational'
-            ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
-            : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+        <Tooltip content={t(`buildingManagement.status.${item.Status}`)} position="bottom" delay={200}>
+          <span
+            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+              item.Status === 'operational'
+                ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
+                : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
             }`}
-        >
-          {t(`buildingManagement.status.${item.Status}`)}
-        </span>
+          >
+            {t(`buildingManagement.status.${item.Status}`)}
+          </span>
+        </Tooltip>
       ),
     },
     {
       key: 'action',
-      title: t('buildingManagement.table.action'),
+      title: t('buildingManagement.table1.action'),
       render: item => (
-        <DropdownMenu
-          onViewDetail={() => handleViewBuildingDetail(item)}
-          onChangeStatus={() => handleEditBuilding(item)}
-          onRemove={() => handleRemoveBuilding(item)}
-          changeStatusTitle={t('buildingManagement.editBuilding')}
-        />
+        <div onClick={e => e.stopPropagation()}>
+          <DropdownMenu
+            onViewDetail={() => handleViewBuildingDetail(item)}
+            onChangeStatus={() => handleEditBuilding(item)}
+            onRemove={() => handleRemoveBuilding(item)}
+            changeStatusTitle={t('buildingManagement.editBuilding')}
+          />
+        </div>
       ),
       width: '80px',
     },

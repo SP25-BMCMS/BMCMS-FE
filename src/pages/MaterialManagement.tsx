@@ -417,15 +417,15 @@ const MaterialManagement: React.FC = () => {
 
       <div className="overflow-x-auto">
         <div className="min-w-[800px]">
-          <Table<Material>
-            data={filteredMaterials}
-            columns={columns}
-            keyExtractor={item => item.material_id || Math.random().toString()}
+      <Table<Material>
+        data={filteredMaterials}
+        columns={columns}
+        keyExtractor={item => item.material_id || Math.random().toString()}
             className="w-full"
-            tableClassName="w-full"
-            isLoading={isLoading || isFetching}
-            emptyText={t('materialManagement.noData')}
-          />
+        tableClassName="w-full"
+        isLoading={isLoading || isFetching}
+        emptyText={t('materialManagement.noData')}
+      />
         </div>
       </div>
 

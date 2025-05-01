@@ -17,6 +17,7 @@ import { toast } from 'react-hot-toast'
 import Pagination from '@/components/Pagination'
 import FilterDropdown from '@/components/FilterDropdown'
 import { useTranslation } from 'react-i18next'
+import Tooltip from '@/components/Tooltip'
 
 interface StaffResponse {
   isSuccess: boolean
@@ -176,7 +177,17 @@ const StaffManagement: React.FC = () => {
     {
       key: 'email',
       title: t('staffManagement.table.email'),
-      render: item => <div className="text-sm text-gray-500 dark:text-gray-400">{item.email}</div>,
+      render: item => {
+        const [username, domain] = item.email.split('@')
+        const truncatedEmail = domain ? `${username}@${domain.substring(0, 3)}...` : item.email
+        return (
+          <Tooltip content={item.email}>
+            <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
+              {truncatedEmail}
+            </div>
+          </Tooltip>
+        )
+      },
     },
     {
       key: 'phone',
@@ -199,7 +210,7 @@ const StaffManagement: React.FC = () => {
               'text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
               }`}
           >
-            {item.role}
+            {t(`staffManagement.roles.${item.role.toLowerCase()}`)}
           </span>
         )
       },

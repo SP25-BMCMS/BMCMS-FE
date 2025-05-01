@@ -168,7 +168,6 @@
       "minimize": "Minimize",
       "maximize": "Maximize",
       "restore": "Restore",
-      "close": "Close",
       "back": "Back",
       "next": "Next",
       "previous": "Previous",
@@ -268,6 +267,21 @@
       "exportPdf": "Export PDF",
       "changeStatus": "Change Status",
       "remove": "Remove"
+    },
+    "modal": {
+      "close": "Close"
+    },
+    "statusCrack": {
+      "title": "Update Crack Status",
+      "currentStatus": "Current Status",
+      "updateSuccess": "Status updated successfully",
+      "updateError": "Failed to update status",
+      "processing": "Processing...",
+      "status": {
+        "pending": "Pending",
+        "inProgress": "In Progress", 
+        "resolved": "Resolved"
+      }
     }
   },
   "taskManagement": {
@@ -519,7 +533,7 @@
       "operational": "Operational",
       "under_construction": "Under Construction"
     },
-    "table": {
+    "table1": {
       "no": "No.",
       "buildingName": "Building Name",
       "areaName": "Area Name",
@@ -527,7 +541,23 @@
       "status": "Status",
       "createdDate": "Created Date",
       "completionDate": "Completion Date",
-      "action": "Action"
+      "action": "Action",
+      "manager": "Manager"
+    },
+    "addArea": "Add Area",
+    "addBuilding": "Add Building",
+    "editBuilding": "Edit Building",
+    "deleteBuilding": "Delete Building",
+    "unknown": "Unknown",
+    "filterOptions": {
+      "all": "All Status",
+      "operational": "Operational",
+      "under_construction": "Under Construction"
+    },
+    "deleteSuccess": "Building deleted successfully",
+    "deleteError": "Failed to delete building",
+    "table": {
+      "manager": "Manager"
     }
   },
   "crackManagement": {
@@ -844,6 +874,91 @@
       "confirm_no_pending_issues": "Confirm No Pending Issues",
       "final_review": "Final Review",
       "wait_for_deposit": "Wait for Deposit"
+    }
+  },
+  "staffManagement": {
+    "roles": {
+      "leader": "Leader",
+      "staff": "Staff",
+      "manager": "Manager",
+      "admin": "Admin"
+    },
+    "addStaff": "Add Staff",
+    "editStaff": "Edit Staff",
+    "deleteStaff": "Delete Staff",
+    "changeDepartment": "Change Department",
+    "filterByRole": "Filter by Role",
+    "updateSuccess": "Staff updated successfully",
+    "updateError": "Failed to update staff",
+    "deleteSuccess": "Staff deleted successfully",
+    "deleteError": "Failed to delete staff",
+    "filterOptions": {
+      "all": "All Roles",
+      "staff": "Staff",
+      "manager": "Manager",
+      "admin": "Admin"
+    },
+    "table": {
+      "no": "No.",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "department": "Department",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
+      "action": "Action"
+    },
+    "searchPlaceholder": "Search by name or ID",
+    "viewDetail": {
+      "title": "Staff Profile",
+      "personalInfo": "Personal Information",
+      "workInfo": "Work Information",
+      "loading": "Loading staff details...",
+      "error": {
+        "title": "Error Loading Staff Details",
+        "loadFailed": "Failed to load staff details"
+      },
+      "noData": "No staff data available",
+      "labels": {
+        "gender": "Gender",
+        "dateOfBirth": "Date of Birth",
+        "userId": "User ID",
+        "lastUpdated": "Last Updated",
+        "position": "Position",
+        "department": "Department",
+        "area": "Area"
+      },
+      "noDepartment": "No department or position assigned to this staff member.",
+      "close": "Close"
+    },
+    "departmentPosition": {
+      "title": "Update Department and Position for {name}",
+      "updateTitle": "Update Department and Position",
+      "department": "Department",
+      "position": "Position",
+      "selectDepartment": "-- Select Department --",
+      "selectPosition": "-- Select Position --",
+      "noArea": "No Area",
+      "buttons": {
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving..."
+      },
+      "messages": {
+        "selectBoth": "Please select department and position",
+        "updateSuccess": "Department and position updated successfully",
+        "updateFailed": "Update failed",
+        "error": "An error occurred during update",
+        "loadError": "Could not load departments and positions list"
+      },
+      "positions": {
+        "leader": "Leader",
+        "maintenance": "Maintenance",
+        "staff": "Staff",
+        "manager": "Manager",
+        "unknown": "Position {value}"
+      }
     }
   }
 }
