@@ -182,7 +182,7 @@ const BuildingForManager: React.FC = () => {
   const columns: Column<BuildingWithArea>[] = [
     {
       key: 'index',
-      title: t('buildingManagement.table.no'),
+      title: t('buildingManagement.table1.no'),
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
       ),
@@ -190,7 +190,7 @@ const BuildingForManager: React.FC = () => {
     },
     {
       key: 'name',
-      title: t('buildingManagement.table.buildingName'),
+      title: t('buildingManagement.table1.buildingName'),
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
           <Building2 className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
@@ -200,7 +200,7 @@ const BuildingForManager: React.FC = () => {
     },
     {
       key: 'area',
-      title: t('buildingManagement.table.areaName'),
+      title: t('buildingManagement.table1.areaName'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
           <MapPin className="h-3.5 w-3.5 mr-1.5 text-green-500" />
@@ -210,14 +210,14 @@ const BuildingForManager: React.FC = () => {
     },
     {
       key: 'numberFloor',
-      title: t('buildingManagement.table.floor'),
+      title: t('buildingManagement.table1.floor'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{item.numberFloor}</div>
       ),
     },
     {
       key: 'Status',
-      title: t('buildingManagement.table.status'),
+      title: t('buildingManagement.table1.status'),
       render: item => {
         const statusStyle = getStatusStyle(item.Status)
         return (
@@ -236,7 +236,7 @@ const BuildingForManager: React.FC = () => {
     },
     {
       key: 'createdAt',
-      title: t('buildingManagement.table.createdDate'),
+      title: t('buildingManagement.table1.createdDate'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {new Date(item.createdAt).toLocaleDateString()}
@@ -245,7 +245,7 @@ const BuildingForManager: React.FC = () => {
     },
     {
       key: 'completion_date',
-      title: t('buildingManagement.table.completionDate'),
+      title: t('buildingManagement.table1.completionDate'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {new Date(item.completion_date).toLocaleDateString('vi-VN')}
@@ -254,7 +254,7 @@ const BuildingForManager: React.FC = () => {
     },
     {
       key: 'actions',
-      title: t('buildingManagement.table.action'),
+      title: t('buildingManagement.table1.action'),
       render: item => (
         <div className="flex justify-center gap-2">
           <button
