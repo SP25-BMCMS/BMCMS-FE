@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, Building2, MapPin, FileText } from 'lucide-react'
+import { Eye, Building2, MapPin, FileText, Home, Calendar, Clock } from 'lucide-react'
 import Table, { Column } from '@/components/Table'
 import { BuildingResponse } from '@/types'
 import apiInstance from '@/lib/axios'
@@ -12,6 +12,7 @@ import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import TechnicalRecordModal from '@/components/BuildingManager/buildings/TechnicalRecordModal'
 import { useTranslation } from 'react-i18next'
+import type { ReactNode } from 'react'
 
 interface BuildingWithArea extends BuildingResponse {
   area?: {
@@ -130,16 +131,21 @@ const BuildingForManager: React.FC = () => {
     }
   }
 
-  const handleOpenTechnicalRecordModal = (building: BuildingWithArea) => {
+  const handleOpenTechnicalRecordModal = (buildingDetail: BuildingWithArea['buildingDetails'][0], building: BuildingWithArea) => {
     setSelectedBuildingForTechnicalRecord({
       id: building.buildingId,
-      name: building.name,
-      detailId:
-        building.buildingDetails && building.buildingDetails.length > 0
-          ? building.buildingDetails[0].buildingDetailId
-          : null,
+      name: buildingDetail.name,
+      detailId: buildingDetail.buildingDetailId
     })
     setIsTechnicalRecordModalOpen(true)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
   }
 
   const getStatusStyle = (status: string) => {
@@ -179,7 +185,7 @@ const BuildingForManager: React.FC = () => {
     </div>
   )
 
-  const columns: Column<BuildingWithArea>[] = [
+  const columns: Column<BuildingWithArea['buildingDetails'][0]>[] = [
     {
       key: 'index',
       title: t('buildingManagement.table.no'),
@@ -193,74 +199,36 @@ const BuildingForManager: React.FC = () => {
       title: t('buildingManagement.table.buildingName'),
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-          <Building2 className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+          <Home className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
           {item.name}
         </div>
       ),
     },
     {
-      key: 'area',
-      title: t('buildingManagement.table.areaName'),
+      key: 'total_apartments',
+      title: t('buildingManagement.table.totalApartments'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-          <MapPin className="h-3.5 w-3.5 mr-1.5 text-green-500" />
-          {item.area?.name || t('buildingManagement.notAssigned')}
-        </div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{item.total_apartments}</div>
       ),
-    },
-    {
-      key: 'numberFloor',
-      title: t('buildingManagement.table.floor'),
-      render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.numberFloor}</div>
-      ),
-    },
-    {
-      key: 'Status',
-      title: t('buildingManagement.table.status'),
-      render: item => {
-        const statusStyle = getStatusStyle(item.Status)
-        return (
-          <span
-            style={{
-              backgroundColor: statusStyle.bg,
-              color: statusStyle.text,
-              borderColor: statusStyle.border,
-            }}
-            className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full border"
-          >
-            {statusStyle.label}
-          </span>
-        )
-      },
     },
     {
       key: 'createdAt',
       title: t('buildingManagement.table.createdDate'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          {new Date(item.createdAt).toLocaleDateString()}
-        </div>
-      ),
-    },
-    {
-      key: 'completion_date',
-      title: t('buildingManagement.table.completionDate'),
-      render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {new Date(item.completion_date).toLocaleDateString('vi-VN')}
+          {formatDate(item.createdAt)}
         </div>
       ),
     },
     {
       key: 'actions',
       title: t('buildingManagement.table.action'),
-      render: item => (
+      render: (item) => (
         <div className="flex justify-center gap-2">
           <button
             onClick={e => {
               e.stopPropagation()
-              handleViewDetail(item)
+              navigate(`/buildingdetails/${item.buildingDetailId}`)
             }}
             className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
             title={t('buildingManagement.viewDetails')}
@@ -270,7 +238,10 @@ const BuildingForManager: React.FC = () => {
           <button
             onClick={e => {
               e.stopPropagation()
-              handleOpenTechnicalRecordModal(item)
+              const building = buildingsData?.data.find(b => b.buildingId === item.buildingId)
+              if (building) {
+                handleOpenTechnicalRecordModal(item, building)
+              }
             }}
             className="p-2 bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 rounded-md hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
             title={t('buildingManagement.technicalRecords')}
@@ -301,17 +272,73 @@ const BuildingForManager: React.FC = () => {
         <LoadingIndicator />
       ) : (
         <>
-          <Table
-            data={buildingsData?.data || []}
-            columns={columns}
-            keyExtractor={item => item.buildingId}
-            isLoading={isLoading}
-            emptyText={t('buildingManagement.noData')}
-            onRowClick={item => handleViewDetail(item)}
-            animated={true}
-            tableClassName="w-full"
-            className="w-[95%] mx-auto"
-          />
+          {buildingsData?.data.map((building) => (
+            <div key={building.buildingId} className="w-[95%] mx-auto mb-8">
+              {/* Building Information Card */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                <div className="flex items-start gap-6">
+                  <div className="w-48 h-48 rounded-lg overflow-hidden flex-shrink-0">
+                    <img
+                      src={building.imageCover}
+                      alt={building.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-grow">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                        <Building2 className="h-6 w-6 mr-2 text-blue-500" />
+                        {building.name}
+                      </h2>
+                      <span
+                        style={{
+                          backgroundColor: getStatusStyle(building.Status).bg,
+                          color: getStatusStyle(building.Status).text,
+                          borderColor: getStatusStyle(building.Status).border,
+                        }}
+                        className="px-3 py-1 text-sm font-semibold rounded-full border"
+                      >
+                        {getStatusStyle(building.Status).label}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">{building.description}</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center text-gray-600 dark:text-gray-400">
+                        <MapPin className="h-5 w-5 mr-2 text-green-500" />
+                        <span>{building.area?.name || t('buildingManagement.notAssigned')}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600 dark:text-gray-400">
+                        <Calendar className="h-5 w-5 mr-2 text-blue-500" />
+                        <span>{t('buildingManagement.completionDate')}: {formatDate(building.completion_date)}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600 dark:text-gray-400">
+                        <Clock className="h-5 w-5 mr-2 text-purple-500" />
+                        <span>{t('buildingManagement.warrantyDate')}: {formatDate(building.Warranty_date)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Building Details Table */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {t('buildingManagement.buildingDetails')}
+                  </h3>
+                </div>
+                <Table<BuildingWithArea['buildingDetails'][0]>
+                  data={building.buildingDetails || []}
+                  columns={columns}
+                  keyExtractor={item => item.buildingDetailId}
+                  isLoading={isLoading}
+                  emptyText={t('buildingManagement.noData')}
+                  animated={true}
+                  tableClassName="w-full"
+                />
+              </div>
+            </div>
+          ))}
 
           {(buildingsData?.data?.length || 0) > 0 && (
             <Pagination

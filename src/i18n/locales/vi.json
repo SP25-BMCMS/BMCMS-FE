@@ -451,8 +451,12 @@
       "status": "Trạng thái",
       "createdDate": "Ngày tạo",
       "completionDate": "Ngày hoàn thành",
-      "action": "Thao tác"
-    }
+      "action": "Thao tác",
+      "totalApartments": "Tổng số căn hộ"
+    },
+    "warrantyDate": "Ngày bảo hành",
+    "completionDate": "Ngày hoàn thành",
+    "buildingDetails": "Chi tiết tòa nhà"
   },
   "residentManagement": {
     "title": "Quản lý cư dân",
