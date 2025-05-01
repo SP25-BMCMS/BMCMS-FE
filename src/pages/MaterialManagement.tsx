@@ -373,7 +373,7 @@ const MaterialManagement: React.FC = () => {
             <FilterDropdown
               options={statusOptions}
               onSelect={handleStatusChange}
-              buttonClassName="w-full sm:w-[150px]"
+              buttonClassName="w-full sm:w-[180px]"
               selectedValue={selectedStatus}
               label={t('materialManagement.filterOptions.status.all')}
             />
@@ -452,7 +452,7 @@ const MaterialManagement: React.FC = () => {
       {/* Update Material Modal */}
       {selectedMaterial && (
         <>
-         
+
           <UpdateUnitPriceModal
             isOpen={isUnitPriceModalOpen}
             onClose={() => setIsUnitPriceModalOpen(false)}
