@@ -41,7 +41,7 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
   onUpdateSuccess,
 }) => {
   const { t } = useTranslation()
-  const [staffLeader, setStaffLeader] = useState<StaffWithPosition | null>(null)
+  const [staffLeaders, setStaffLeaders] = useState<StaffWithPosition[]>([])
   const [selectedStaffId, setSelectedStaffId] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSaving, setIsSaving] = useState<boolean>(false)
@@ -85,8 +85,12 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
     try {
       const response = await crackApi.getStaffLeaderByCrackId(crackId)
       if (response.isSuccess && response.data) {
-        setStaffLeader(response.data)
-        setSelectedStaffId(response.data.userId)
+        // Handle both array and single object responses
+        const leaders = Array.isArray(response.data) ? response.data : [response.data]
+        setStaffLeaders(leaders)
+        if (leaders.length > 0) {
+          setSelectedStaffId(leaders[0].userId)
+        }
       } else {
         toast.error(t('staffManagement.error'))
       }
@@ -211,7 +215,7 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
             <div className="flex justify-center py-4">
               <div className="animate-spin h-6 w-6 border-2 border-blue-500 rounded-full border-t-transparent"></div>
             </div>
-          ) : !staffLeader ? (
+          ) : staffLeaders.length === 0 ? (
             <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg text-yellow-700 dark:text-yellow-400">
               {t('staffManagement.noLeadersAvailable')}
             </div>
@@ -224,9 +228,11 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
               disabled={isSaving}
             >
               <option value="">{t('staffManagement.selectLeader')}</option>
-              <option value={staffLeader.userId}>
-                {staffLeader.username} ({t('staffManagement.leader')})
-              </option>
+              {staffLeaders.map((leader) => (
+                <option key={leader.userId} value={leader.userId}>
+                  {leader.username} ({t('staffManagement.leader')})
+                </option>
+              ))}
             </select>
           )}
         </div>

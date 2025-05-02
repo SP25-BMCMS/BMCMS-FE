@@ -495,27 +495,24 @@ const BuildingDetail: React.FC = () => {
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-1 flex items-center">
                 <Clock className="h-3.5 w-3.5 mr-1.5 text-gray-400 dark:text-gray-500" />
-                <span className="font-medium">{t('buildingDetail.created')}:</span> {formatDate(buildingDetail.createdAt)}
+                <span className="font-medium">{t('buildingDetail.created')}: {formatDate(buildingDetail.createdAt)}</span>
               </p>
               {buildingDetail.building?.construction_date && (
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-1 flex items-center">
                   <Calendar className="h-3.5 w-3.5 mr-1.5 text-orange-500 dark:text-orange-400" />
-                  <span className="font-medium">{t('buildingDetail.construction')}:</span>{' '}
-                  {formatDate(buildingDetail.building.construction_date)}
+                  <span className="font-medium">{t('buildingDetail.construction')}: {formatDate(buildingDetail.building.construction_date)}</span>
                 </p>
               )}
               {buildingDetail.building?.completion_date && (
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-1 flex items-center">
                   <Calendar className="h-3.5 w-3.5 mr-1.5 text-green-500 dark:text-green-400" />
-                  <span className="font-medium">{t('buildingDetail.completion')}:</span>{' '}
-                  {formatDate(buildingDetail.building.completion_date)}
+                  <span className="font-medium">{t('buildingDetail.completion')}: {formatDate(buildingDetail.building.completion_date)}</span>
                 </p>
               )}
               {buildingDetail.building?.Warranty_date && (
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-1 flex items-center">
                   <ShieldCheck className="h-3.5 w-3.5 mr-1.5 text-blue-500 dark:text-blue-400" />
-                  <span className="font-medium">{t('buildingDetail.warrantyUntil')}:</span>{' '}
-                  {formatDate(buildingDetail.building.Warranty_date)}
+                  <span className="font-medium">{t('buildingDetail.warrantyUntil')}: {formatDate(buildingDetail.building.Warranty_date)}</span>
                 </p>
               )}
             </div>

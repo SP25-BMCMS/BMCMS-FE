@@ -1,65 +1,68 @@
 // src/routes/AppRoutes.tsx
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from '@/pages/auth/login';
-import DashboardLayout from '@/layouts/DashboardLayout';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import PublicRoute from '@/components/auth/PublicRoute';
-import Resident from '@/pages/Resident';
-import StaffManagement from '@/pages/StaffManagement';
-import Building from '@/pages/BuildingManagement';
-import BuildingForManager from '@/pages/BuildingForManager';
-import BuildingDetail from '@/pages/BuildingDetail';
-import CrackManagement from '@/pages/CrackManagement';
-import DetailCrack from '@/components/crackManager/DetailCrack/DetailCrack';
-import DetailLayout from '@/layouts/DetailLayout';
-import BuildingDetailLayout from '@/layouts/BuildingDetailLayout';
-import TaskManagement from '@/pages/TaskManagement';
-import TaskDetail from '@/components/TaskManager/TaskDetail';
-import Calendar from '@/pages/Calendar';
-import ScheduleJob from '@/pages/scheduleManager/ScheduleJob';
-import MaterialManagement from '@/pages/MaterialManagement';
-import MaterialDetail from '@/pages/MaterialDetail';
-import { useAuth } from '@/hooks/useAuth';
-import WorkLog from '@/pages/WorkLog';
-import Dashboard from '@/pages/Dashboard';
-import MaintenanceCycleManagement from '@/pages/MaintenanceCycle';
+import React from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import Login from '@/pages/auth/login'
+import DashboardLayout from '@/layouts/DashboardLayout'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import PublicRoute from '@/components/auth/PublicRoute'
+import Resident from '@/pages/Resident'
+import StaffManagement from '@/pages/StaffManagement'
+import Building from '@/pages/BuildingManagement'
+import BuildingForManager from '@/pages/BuildingForManager'
+import BuildingDetail from '@/pages/BuildingDetail'
+import CrackManagement from '@/pages/CrackManagement'
+import DetailCrack from '@/components/crackManager/DetailCrack/DetailCrack'
+import DetailLayout from '@/layouts/DetailLayout'
+import BuildingDetailLayout from '@/layouts/BuildingDetailLayout'
+import TaskManagement from '@/pages/TaskManagement'
+import TaskDetail from '@/components/TaskManager/TaskDetail'
+import Calendar from '@/pages/Calendar'
+import ScheduleJob from '@/pages/scheduleManager/ScheduleJob'
+import MaterialManagement from '@/pages/MaterialManagement'
+import MaterialDetail from '@/pages/MaterialDetail'
+import { useAuth } from '@/hooks/useAuth'
+import WorkLog from '@/pages/WorkLog'
+import Dashboard from '@/pages/Dashboard'
+import MaintenanceCycleManagement from '@/pages/MaintenanceCycle'
+import MainLayout from '@/layouts/MainLayout'
 
 interface RoleBasedRouteProps {
-  children: React.ReactNode;
-  allowedRoles: string[];
+  children: React.ReactNode
+  allowedRoles: string[]
 }
 
 const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({ children, allowedRoles }) => {
-  const { user, loading } = useAuth();
-  const token = localStorage.getItem('bmcms_token');
+  const { user, loading } = useAuth()
+  const token = localStorage.getItem('bmcms_token')
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>
   }
 
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
   if (!allowedRoles.includes(user.role)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dashboard" replace />
   }
 
-  return <>{children}</>;
-};
+  return <>{children}</>
+}
 
 function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes - Các đường dẫn không yêu cầu xác thực */}
       <Route element={<PublicRoute />}>
+        {/* <Route element={<MainLayout />}> */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        {/* </Route> */}
       </Route>
 
       {/* Protected Routes - Các đường dẫn yêu cầu xác thực */}
@@ -219,7 +222,7 @@ function AppRoutes() {
         }
       />
     </Routes>
-  );
+  )
 }
 
-export default AppRoutes;
+export default AppRoutes

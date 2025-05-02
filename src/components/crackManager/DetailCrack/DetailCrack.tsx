@@ -603,7 +603,7 @@ const DetailCrack: React.FC = () => {
                                       'https://via.placeholder.com/400x300?text=No+AI+Detection'
                                     }
                                     alt=""
-                                    className="absolute inset-0 w-full h-full object-cover filter blur-xl scale-110"
+                                    className=" w-full h-full"
                                     loading="lazy"
                                   />
 

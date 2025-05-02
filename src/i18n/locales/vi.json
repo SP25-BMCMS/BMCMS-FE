@@ -1,5 +1,25 @@
 {
   "common": {
+    "pagination": {
+      "itemsPerPage": "Hiển thị:",
+      "of": "trên tổng số",
+      "items": "mục",
+      "previousPage": "Trang trước",
+      "nextPage": "Trang sau",
+      "page": "Trang",
+      "currentPage": "Trang hiện tại",
+      "showing": "Hiển thị",
+      "to": "đến",
+      "ofTotal": "trên tổng số",
+      "itemsPerPageTitle": "Chọn số mục hiển thị trên mỗi trang"
+    },
+    "username": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "rememberPassword": "Ghi nhớ mật khẩu",
+    "forgotPassword": "Quên mật khẩu",
+    "loginSuccess": "Đăng nhập thành công",
+    "loginFailed": "Đăng nhập thất bại",
+    "loginButton": "ĐĂNG NHẬP",
     "apartments": "Căn hộ",
     "floors": "Tầng",
     "search": "Tìm kiếm",
@@ -29,6 +49,7 @@
     "changeStatus": "Thay đổi trạng thái",
     "noData": "Không có dữ liệu",
     "logout": "Đăng xuất",
+    "logoutSuccess": "Đăng xuất thành công",
     "login": "Đăng nhập",
     "register": "Đăng ký",
     "profile": "Hồ sơ",
@@ -245,33 +266,17 @@
       "seventy": "Bảy mươi",
       "eighty": "Tám mươi",
       "ninety": "Chín mươi",
-      "pagination": {
-        "itemsPerPage": "Hiển thị:",
-        "of": "trên tổng số",
-        "items": "mục",
-        "previousPage": "Trang trước",
-        "nextPage": "Trang sau",
-        "page": "Trang",
-        "currentPage": "Trang hiện tại",
-        "showing": "Hiển thị",
-        "to": "đến",
-        "ofTotal": "trên tổng số",
-        "itemsPerPageTitle": "Chọn số mục hiển thị trên mỗi trang"
-      },
-      "modal": {
-        "close": "Đóng"
-      },
-      "statusCrack": {
-        "title": "Cập nhật trạng thái vết nứt",
-        "currentStatus": "Trạng thái hiện tại",
-        "updateSuccess": "Cập nhật trạng thái thành công",
-        "updateError": "Không thể cập nhật trạng thái",
-        "processing": "Đang xử lý...",
-        "status": {
-          "pending": "Chờ xử lý",
-          "inProgress": "Đang xử lý",
-          "resolved": "Đã xử lý"
-        }
+      "loginSuccess": "Đăng nhập thành công",
+      "login": {
+        "title": "ĐĂNG NHẬP",
+        "username": "Tên đăng nhập",
+        "password": "Mật khẩu",
+        "rememberPassword": "Ghi nhớ mật khẩu",
+        "forgotPassword": "Quên mật khẩu",
+        "loginButton": "ĐĂNG NHẬP",
+        "loginFailed": "Đăng nhập thất bại",
+        "usernamePlaceholder": "John_Doe",
+        "passwordPlaceholder": "****************"
       }
     },
     "dropdown": {
@@ -329,7 +334,7 @@
     "error": "Không thể tải nhiệm vụ",
     "tryAgain": "Thử lại",
     "noData": "Không có dữ liệu",
-    "crackRepair": "Sửa chữa vết nứt",
+    "crackRepair": "Báo cáo vết nứt",
     "scheduledMaintenance": "Bảo trì định kỳ",
     "displayingCrackTasks": "Hiển thị nhiệm vụ sửa chữa vết nứt",
     "displayingMaintenanceTasks": "Hiển thị nhiệm vụ bảo trì định kỳ",
@@ -467,13 +472,11 @@
       "createdDate": "Ngày tạo",
       "completionDate": "Ngày hoàn thành",
       "action": "Thao tác",
-      "manager": "Quản lý"
+      "totalApartments": "Tổng số căn hộ"
     },
-    "filterOptions": {
-        "all": "Tất cả trạng thái",
-        "operational": "Đang hoạt động",
-        "under_construction": "Đang xây dựng"
-      }
+    "warrantyDate": "Ngày bảo hành",
+    "completionDate": "Ngày hoàn thành",
+    "buildingDetails": "Chi tiết tòa nhà"
   },
   "residentManagement": {
     "title": "Quản lý cư dân",
@@ -545,7 +548,7 @@
       "dateOfBirth": "Ngày sinh",
       "action": "Thao tác"
     },
-    "assignLeader": "Phân công nhân viên trưởng",
+    "assignLeader": "Phân công nhân viên trưởng nhóm",
     "assignNote": "Phân công nhân viên sẽ tự động cập nhật trạng thái vết nứt thành",
     "leaderNote": "Lưu ý: Chỉ người dùng có vai trò 'Nhân viên' và vị trí 'Trưởng nhóm' mới có thể được phân công xử lý báo cáo vết nứt.",
     "responsibilityNote": "Nhân viên được chọn sẽ chịu trách nhiệm xử lý báo cáo vết nứt này.",
@@ -553,57 +556,7 @@
     "selectLeader": "Chọn nhân viên trưởng nhóm",
     "noLeadersAvailable": "Không có nhân viên trưởng nhóm nào để phân công. Vui lòng thêm nhân viên có vai trò 'Nhân viên' và vị trí 'Trưởng nhóm' trước.",
     "leader": "Trưởng nhóm",
-    "processing": "Đang xử lý...",
-    "viewDetail": {
-      "title": "Hồ sơ nhân viên",
-      "personalInfo": "Thông tin cá nhân",
-      "workInfo": "Thông tin công việc",
-      "loading": "Đang tải thông tin nhân viên...",
-      "error": {
-        "title": "Lỗi tải thông tin nhân viên",
-        "loadFailed": "Không thể tải thông tin nhân viên"
-      },
-      "noData": "Không có dữ liệu nhân viên",
-      "labels": {
-        "gender": "Giới tính",
-        "dateOfBirth": "Ngày sinh",
-        "userId": "Mã nhân viên",
-        "lastUpdated": "Cập nhật lần cuối",
-        "position": "Vị trí",
-        "department": "Phòng ban",
-        "area": "Khu vực"
-      },
-      "noDepartment": "Chưa được phân công phòng ban hoặc vị trí.",
-      "close": "Đóng"
-    },
-    "departmentPosition": {
-      "title": "Cập nhật phòng ban và vị trí cho {name}",
-      "updateTitle": "Cập nhật phòng ban và vị trí",
-      "department": "Phòng ban",
-      "position": "Vị trí",
-      "selectDepartment": "-- Chọn phòng ban --",
-      "selectPosition": "-- Chọn vị trí --",
-      "noArea": "Không có khu vực",
-      "buttons": {
-        "cancel": "Hủy",
-        "save": "Lưu thay đổi",
-        "saving": "Đang lưu..."
-      },
-      "messages": {
-        "selectBoth": "Vui lòng chọn phòng ban và vị trí",
-        "updateSuccess": "Cập nhật phòng ban và vị trí thành công",
-        "updateFailed": "Cập nhật thất bại",
-        "error": "Đã xảy ra lỗi khi cập nhật",
-        "loadError": "Không thể tải danh sách phòng ban và vị trí"
-      },
-      "positions": {
-        "leader": "Trưởng nhóm",
-        "maintenance": "Bảo trì",
-        "staff": "Nhân viên",
-        "manager": "Quản lý",
-        "unknown": "Vị trí {value}"
-      }
-    }
+    "processing": "Đang xử lý..."
   },
   "maintenanceCycle": {
     "title": "Chu kỳ bảo trì",
@@ -621,6 +574,22 @@
     "updatedBy": "Cập nhật bởi",
     "reason": "Lý do",
     "noHistory": "Không có lịch sử",
+    "deviceTypes": {
+      "All": "Tất cả thiết bị",
+      "Elevator": "Thang máy",
+      "Fireprotection": "Phòng cháy",
+      "Electrical": "Điện",
+      "Plumbing": "Ống nước",
+      "HVAC": "HVAC",
+      "CCTV": "CCTV",
+      "Generator": "Máy phát điện",
+      "Lighting": "Chiếu sáng",
+      "Automaticdoor": "Cửa tự động",
+      "Fireextinguisher": "Bình chữa cháy",
+      "Other": "Khác",
+      "FireProtection": "Phòng cháy",
+      "AutomaticDoor": "Cửa tự động"
+    },
     "table": {
       "no": "STT",
       "frequency": "Tần suất",
@@ -630,33 +599,34 @@
     },
     "filterOptions": {
       "frequency": {
-        "all": "Tất cả tần suất",
-        "daily": "Hàng ngày",
-        "weekly": "Hàng tuần",
-        "monthly": "Hàng tháng",
-        "yearly": "Hàng năm",
-        "specific": "Cụ thể"
+        "All": "Tất cả tần suất",
+        "Daily": "Hàng ngày",
+        "Weekly": "Hàng tuần",
+        "Monthly": "Hàng tháng",
+        "Yearly": "Hàng năm",
+        "Specific": "Cụ thể"
       },
       "basis": {
-        "all": "Tất cả cơ sở",
-        "manufacturerrecommendation": "Khuyến nghị của nhà sản xuất",
-        "legalstandard": "Tiêu chuẩn pháp luật",
-        "operationalexperience": "Kinh nghiệm vận hành",
-        "other": "Khác"
+        "All": "Tất cả cơ sở",
+        "ManufacturerRecommendation": "Khuyến nghị của nhà sản xuất",
+        "LegalStandard": "Tiêu chuẩn pháp luật",
+        "OperationalExperience": "Kinh nghiệm vận hành",
+        "Other": "Khác"
       },
       "deviceType": {
-        "all": "Tất cả thiết bị",
-        "elevator": "Thang máy",
-        "fireprotection": "Phòng cháy",
-        "electrical": "Điện",
-        "plumbing": "Ống nước",
-        "hvac": "HVAC",
-        "cctv": "CCTV",
-        "generator": "Máy phát điện",
-        "lighting": "Chiếu sáng",
-        "automaticdoor": "Cửa tự động",
-        "fireextinguisher": "Bình chữa cháy",
-        "other": "Khác"
+        "All": "Tất cả thiết bị",
+        "Elevator": "Thang máy",
+        "Fireprotection": "Phòng cháy",
+        "Electrical": "Điện",
+        "Plumbing": "Ống nước",
+        "HVAC": "HVAC",
+        "CCTV": "CCTV",
+        "Generator": "Máy phát điện",
+        "Lighting": "Chiếu sáng",
+        "AutomaticDoor": "Cửa tự động",
+        "FireExtinguisher": "Bình chữa cháy",
+        "FireProtection": "Phòng cháy",
+        "Other": "Khác"
       }
     },
     "filter": {
@@ -695,6 +665,7 @@
       "noBuildingDetails": "Không tìm thấy chi tiết tòa nhà",
       "buttons": {
         "cancel": "Hủy",
+        "generating": "Đang tạo...",
         "generate": "Tạo lịch trình"
       },
       "errors": {
@@ -804,6 +775,28 @@
         "500k-1m": "500.000 - 1.000.000 VND",
         "above1m": "Trên 1.000.000 VND"
       }
+    },
+    "create": {
+      "title": "Tạo vật tư",
+      "name": "Tên vật tư",
+      "namePlaceholder": "Nhập tên vật tư",
+      "description": "Mô tả",
+      "descriptionPlaceholder": "Nhập mô tả vật tư",
+      "unitPrice": "Đơn giá",
+      "unitPricePlaceholder": "0.00",
+      "stockQuantity": "Số lượng tồn kho",
+      "stockQuantityPlaceholder": "0",
+      "status": "Trạng thái",
+      "statusActive": "Đang hoạt động",
+      "statusInactive": "Không hoạt động",
+      "cancel": "Hủy",
+      "create": "Tạo",
+      "createSuccess": "Tạo vật tư thành công",
+      "createError": "Không thể tạo vật tư",
+      "unitPriceUpdateSuccess": "Cập nhật đơn giá thành công",
+      "unitPriceUpdateError": "Không thể cập nhật đơn giá",
+      "stockQuantityUpdateSuccess": "Cập nhật số lượng tồn kho thành công",
+      "stockQuantityUpdateError": "Không thể cập nhật số lượng tồn kho"
     },
     "table": {
       "no": "STT",
@@ -977,10 +970,10 @@
       "calendar": "Lịch"
     },
     "status": {
+      "pending": "Chờ xử lý",
       "inProgress": "Đang thực hiện",
       "completed": "Hoàn thành",
-      "cancel": "Đã hủy",
-      "pending": "Chờ xử lý"
+      "cancel": "Đã hủy"
     },
     "statusLabels": {
       "inProgress": "Đang thực hiện",
@@ -1118,6 +1111,23 @@
         "message": "Bạn có chắc chắn muốn xóa lịch trình này? Hành động này không thể hoàn tác.",
         "cancel": "Hủy",
         "confirm": "Xóa"
+      },
+      "buildings": {
+        "building": "Tòa nhà",
+        "title": "Danh sách tòa nhà",
+        "search": "Tìm kiếm tòa nhà...",
+        "noResults": "Không tìm thấy tòa nhà nào",
+        "all": "Tất cả",
+        "selected": "Đã chọn",
+        "selectAll": "Chọn tất cả",
+        "deselectAll": "Bỏ chọn tất cả",
+        "buildingName": "Tên tòa nhà",
+        "buildingDetails": "Chi tiết tòa nhà",
+        "status": {
+          "active": "Đang hoạt động",
+          "inactive": "Không hoạt động",
+          "maintenance": "Đang bảo trì"
+        }
       }
     },
     "buildings": {
@@ -1174,6 +1184,64 @@
           "createTask": "Tạo Công việc"
         }
       }
+    },
+    "updateStatusModal": {
+      "title": "Cập nhật trạng thái công việc",
+      "currentStatus": "Trạng thái hiện tại",
+      "selectNewStatus": "Chọn trạng thái mới",
+      "jobDetails": "Chi tiết công việc",
+      "building": "Tòa nhà",
+      "detail": "Chi tiết",
+      "runDate": "Ngày thực hiện",
+      "confirmStatusChange": "Xác nhận thay đổi trạng thái",
+      "confirmMessage": "Bạn có chắc chắn muốn thay đổi trạng thái từ {{currentStatus}} thành {{newStatus}}?",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận"
+    },
+    "confirmModal": {
+      "cancel": "Hủy",
+      "delete": "Xóa",
+      "confirm": "Xác nhận",
+      "cancelJob": {
+        "title": "Xác nhận hủy",
+        "message": "Bạn có chắc chắn muốn hủy công việc này? Hành động này không thể hoàn tác."
+      },
+      "sendEmail": {
+        "title": "Xác nhận gửi email",
+        "message": "Bạn có chắc chắn muốn gửi email bảo trì cho cư dân ở chung cư này?",
+        "confirm": "Gửi email",
+        "cancel": "Hủy"
+      }
+    },
+    "taskModal": {
+      "title": {
+        "create": "Tạo nhiệm vụ",
+        "details": "Chi tiết nhiệm vụ"
+      },
+      "scheduleJobDetails": "Chi tiết công việc theo lịch",
+      "building": "Tòa nhà",
+      "schedule": "Lịch trình",
+      "runDate": "Ngày thực hiện",
+      "status": "Trạng thái",
+      "taskInformation": "Thông tin nhiệm vụ",
+      "created": "Ngày tạo",
+      "lastUpdated": "Cập nhật lần cuối",
+      "description": "Mô tả",
+      "assignmentInformation": "Thông tin phân công",
+      "assignedTo": "Phân công cho",
+      "noAssignment": "Không có thông tin phân công cho nhiệm vụ này",
+      "assignLeader": "Phân công trưởng nhóm",
+      "assignLeaderRequired": "Vui lòng chọn trưởng nhóm",
+      "descriptionRequired": "Vui lòng nhập mô tả",
+      "noLeadersAvailable": "Không có trưởng nhóm nào để phân công. Vui lòng thêm nhân viên có vai trò 'Nhân viên' và vị trí 'Trưởng nhóm' trước.",
+      "loadingStaff": "Đang tải nhân viên...",
+      "buttons": {
+        "close": "Đóng",
+        "cancel": "Hủy",
+        "createTask": "Tạo nhiệm vụ",
+        "creating": "Đang tạo..."
+      },
+      "taskExists": "Đã tồn tại nhiệm vụ cho công việc theo lịch này"
     }
   },
   "building": {
@@ -1441,6 +1509,13 @@
       "deleteConfirm": {
         "title": "Xác nhận hủy",
         "message": "Bạn có chắc chắn muốn hủy công việc này? Hành động này không thể hoàn tác."
+      },
+      "status": {
+        "title": "Trạng thái",
+        "pending": "Chờ xử lý",
+        "inprogress": "Đang thực hiện",
+        "completed": "Đã hoàn thành",
+        "cancel": "Đã hủy"
       }
     }
   },

@@ -69,6 +69,36 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
       .sort((a, b) => a.name.localeCompare(b.name))
   }, [unselectedDetailObjects, searchQuery])
 
+  // Helper function to render status badges
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'operational':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+            {t('building.status.operational')}
+          </span>
+        )
+      case 'maintenance':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+            {t('building.status.maintenance')}
+          </span>
+        )
+      case 'inactive':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
+            {t('building.status.inactive')}
+          </span>
+        )
+      default:
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
+            {status}
+          </span>
+        )
+    }
+  }
+
   // Các hàm xử lý event - thêm useCallback để tránh render không cần thiết
   const handleBuildingDetailSelect = useCallback(
     (buildingDetailId: string, e: React.MouseEvent) => {
@@ -284,39 +314,6 @@ const BuildingDetailSelectionModal: React.FC<BuildingDetailSelectionModalProps> 
       </div>
     </div>
   )
-}
-
-// Helper function to render status badges
-function getStatusBadge(status: string) {
-  let bgColor = ''
-  let textColor = ''
-
-  switch (status.toLowerCase()) {
-    case 'operational':
-      return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-          Operational
-        </span>
-      )
-    case 'maintenance':
-      return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-          Maintenance
-        </span>
-      )
-    case 'inactive':
-      return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
-          Inactive
-        </span>
-      )
-    default:
-      return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
-          {status}
-        </span>
-      )
-  }
 }
 
 // Add some global styles for custom scrollbars

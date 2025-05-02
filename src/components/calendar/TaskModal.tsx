@@ -5,6 +5,7 @@ import { ScheduleJob } from '@/services/scheduleJobs'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import apiInstance from '@/lib/axios'
 import { toast } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 interface TaskModalProps {
   isOpen: boolean
@@ -68,6 +69,7 @@ interface TasksResponse {
 }
 
 const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [selectedStaffId, setSelectedStaffId] = useState<string>('')
   const [description, setDescription] = useState<string>('')
@@ -95,7 +97,12 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
   const { data: tasksData, isLoading: tasksLoading } = useQuery<TasksResponse>({
     queryKey: ['tasks', scheduleJob?.schedule_job_id],
     queryFn: async () => {
-      const response = await apiInstance.get(import.meta.env.VITE_VIEW_TASK_LIST)
+      const response = await apiInstance.get(import.meta.env.VITE_VIEW_TASK_LIST, {
+        params: {
+          page: 1,
+          limit: 999999
+        }
+      })
       return response.data
     },
     enabled: isOpen && !!scheduleJob?.schedule_job_id,
@@ -125,8 +132,10 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
       return await apiInstance.post(url, { description })
     },
     onSuccess: () => {
+      // Invalidate both scheduleJobs and tasks queries
       queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', scheduleJob?.schedule_job_id] })
       toast.success('Task created successfully')
       setIsSubmitting(false)
       onClose()
@@ -206,7 +215,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
         <div className="flex justify-between items-center bg-blue-600 dark:bg-blue-800 px-6 py-4">
           <h2 className="text-xl font-semibold text-white flex items-center">
             <ClipboardIcon className="w-5 h-5 mr-2" />
-            {existingTask ? 'Task Details' : 'Create Task'}
+            {existingTask ? t('calendar.taskModal.title.details') : t('calendar.taskModal.title.create')}
           </h2>
           <button onClick={onClose} className="text-white hover:text-gray-200" title="Close">
             <XMarkIcon className="w-6 h-6" />
@@ -216,25 +225,24 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
         {isLoading ? (
           <div className="p-6 flex flex-col items-center justify-center">
             <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+            <p className="text-gray-600 dark:text-gray-300">{t('calendar.taskModal.loadingStaff')}</p>
           </div>
         ) : existingTask ? (
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-center bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 p-4 rounded-md border border-green-200 dark:border-green-700">
               <CheckCircleIcon className="w-6 h-6 mr-2 flex-shrink-0" />
-              <p>Task existing for this schedule job</p>
+              <p>{t('calendar.taskModal.taskExists')}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Cột trái - Thông tin Schedule Job và Task */}
               <div className="space-y-6">
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                    Schedule Job Details
+                    {t('calendar.taskModal.scheduleJobDetails')}
                   </h3>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Building:{' '}
+                      {t('calendar.taskModal.building')}:{' '}
                       {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
                       {scheduleJob?.buildingDetail?.building && (
                         <span className="ml-1 text-gray-500 dark:text-gray-400">
@@ -243,10 +251,10 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                       )}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Schedule: {scheduleJob?.schedule?.schedule_name || 'N/A'}
+                      {t('calendar.taskModal.schedule')}: {scheduleJob?.schedule?.schedule_name || 'N/A'}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Run Date: {new Date(scheduleJob?.run_date || '').toLocaleString()}
+                      {t('calendar.taskModal.runDate')}: {new Date(scheduleJob?.run_date || '').toLocaleString()}
                     </p>
                     <div className="mt-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -258,11 +266,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
 
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                    Task Information
+                    {t('calendar.taskModal.taskInformation')}
                   </h3>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4 space-y-3">
                     <div className="grid grid-cols-3 gap-2">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Status:</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{t('calendar.taskModal.status')}:</span>
                       <div className="col-span-2">
                         <span
                           className={`text-sm font-medium px-2 py-0.5 rounded-full text-center inline-block ${existingTask.status === 'Completed'
@@ -270,19 +278,19 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                             : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
                             }`}
                         >
-                          {existingTask.status}
+                          {t(`taskManagement.status.${existingTask.status.toLowerCase()}`)}
                         </span>
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Created:</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{t('calendar.taskModal.created')}:</span>
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300 col-span-2">
                         {formatDate(existingTask.created_at)}
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Last Updated:
+                        {t('calendar.taskModal.lastUpdated')}:
                       </span>
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300 col-span-2">
                         {formatDate(existingTask.updated_at)}
@@ -290,7 +298,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                     </div>
                     <div className="pt-2">
                       <span className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
-                        Description:
+                        {t('calendar.taskModal.description')}:
                       </span>
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300 p-3 bg-white dark:bg-gray-600 rounded border border-gray-200 dark:border-gray-600">
                         {existingTask.description}
@@ -300,12 +308,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                 </div>
               </div>
 
-              {/* Cột phải - Thông tin Assignment */}
               <div>
                 {existingTask.taskAssignments && existingTask.taskAssignments.length > 0 ? (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                      Assignment Information
+                      {t('calendar.taskModal.assignmentInformation')}
                     </h3>
                     <div className="space-y-4">
                       {existingTask.taskAssignments.map((assignment, index) => (
@@ -316,7 +323,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                           <div className="space-y-3">
                             <div className="grid grid-cols-3 gap-2">
                               <span className="text-sm text-gray-500 dark:text-gray-400">
-                                Status:
+                                {t('calendar.taskModal.status')}:
                               </span>
                               <div className="col-span-2">
                                 <span
@@ -325,13 +332,13 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                                     : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
                                     }`}
                                 >
-                                  {assignment.status}
+                                  {t(`taskManagement.crackStatus.${assignment.status.toLowerCase()}`)}
                                 </span>
                               </div>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                               <span className="text-sm text-gray-500 dark:text-gray-400">
-                                Assigned To:
+                                {t('calendar.taskModal.assignedTo')}:
                               </span>
                               <span className="text-sm font-medium text-gray-700 dark:text-gray-300 col-span-2">
                                 {staffData?.data?.find(
@@ -347,9 +354,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                 ) : (
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
-                      <p className="text-gray-500 dark:text-gray-400">
-                        No assignment information for this task
-                      </p>
+                      <p className="text-gray-500 dark:text-gray-400">{t('calendar.taskModal.noAssignment')}</p>
                     </div>
                   </div>
                 )}
@@ -362,7 +367,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                 onClick={onClose}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                Close
+                {t('calendar.taskModal.buttons.close')}
               </button>
             </div>
           </div>
@@ -370,11 +375,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div>
               <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                Schedule Job Details
+                {t('calendar.taskModal.scheduleJobDetails')}
               </h3>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Building:{' '}
+                  {t('calendar.taskModal.building')}:{' '}
                   {scheduleJob?.buildingDetail?.name || scheduleJob?.building?.name || 'N/A'}
                   {scheduleJob?.buildingDetail?.building && (
                     <span className="ml-1 text-gray-500 dark:text-gray-400">
@@ -383,10 +388,10 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                   )}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Schedule: {scheduleJob?.schedule?.schedule_name || 'N/A'}
+                  {t('calendar.taskModal.schedule')}: {scheduleJob?.schedule?.schedule_name || 'N/A'}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Run Date: {new Date(scheduleJob?.run_date || '').toLocaleString()}
+                  {t('calendar.taskModal.runDate')}: {new Date(scheduleJob?.run_date || '').toLocaleString()}
                 </p>
                 <div className="mt-2">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -401,13 +406,13 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                 htmlFor="staff"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Assign Leader <span className="text-red-500">*</span>
+                {t('calendar.taskModal.assignLeader')} <span className="text-red-500">*</span>
               </label>
               {staffLoading ? (
                 <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                   <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
-                    Loading staff...
+                    {t('calendar.taskModal.loadingStaff')}
                   </span>
                 </div>
               ) : leaderStaff.length > 0 ? (
@@ -419,7 +424,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                     onChange={e => setSelectedStaffId(e.target.value)}
                     required
                   >
-                    <option value="">-- Select a Leader --</option>
+                    <option value="">-- {t('calendar.taskModal.assignLeader')} --</option>
                     {leaderStaff.map((staff: Staff) => (
                       <option key={staff.userId} value={staff.userId}>
                         {staff.username} - {staff.userDetails?.department?.area || 'N/A'}
@@ -438,7 +443,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                 </div>
               ) : (
                 <div className="text-sm text-red-500 border border-red-200 dark:border-red-800 rounded-md p-3 bg-red-50 dark:bg-red-900/20">
-                  No Leader staff members available.
+                  {t('calendar.taskModal.noLeadersAvailable')}
                 </div>
               )}
             </div>
@@ -448,7 +453,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                 htmlFor="description"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Description <span className="text-red-500">*</span>
+                {t('calendar.taskModal.description')} <span className="text-red-500">*</span>
               </label>
               <textarea
                 id="description"
@@ -456,7 +461,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 rows={4}
-                placeholder="Enter task description..."
+                placeholder={t('calendar.taskModal.description')}
                 required
               />
             </div>
@@ -468,7 +473,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
               >
-                Cancel
+                {t('calendar.taskModal.buttons.cancel')}
               </button>
               <button
                 type="submit"
@@ -478,10 +483,10 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, scheduleJob }) =
                 {isSubmitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Creating...
+                    {t('calendar.taskModal.buttons.creating')}
                   </>
                 ) : (
-                  'Create Task'
+                  t('calendar.taskModal.buttons.createTask')
                 )}
               </button>
             </div>

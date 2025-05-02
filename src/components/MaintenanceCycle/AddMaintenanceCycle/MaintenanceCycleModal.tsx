@@ -14,32 +14,32 @@ interface MaintenanceCycleModalProps {
 }
 
 const frequencyOptions = [
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly', label: 'Yearly' },
-  { value: 'specific', label: 'Specific' },
+  { value: 'Daily', label: 'Daily' },
+  { value: 'Weekly', label: 'Weekly' },
+  { value: 'Monthly', label: 'Monthly' },
+  { value: 'Yearly', label: 'Yearly' },
+  { value: 'Specific', label: 'Specific' },
 ]
 
 const basisOptions = [
-  { value: 'manufacturerrecommendation', label: 'Manufacturer Recommendation' },
-  { value: 'legalstandard', label: 'Legal Standard' },
-  { value: 'operationalexperience', label: 'Operational Experience' },
-  { value: 'other', label: 'Other' },
+  { value: 'ManufacturerRecommendation', label: 'Manufacturer Recommendation' },
+  { value: 'LegalStandard', label: 'Legal Standard' },
+  { value: 'OperationalExperience', label: 'Operational Experience' },
+  { value: 'Other', label: 'Other' },
 ]
 
 const deviceTypeOptions = [
-  { value: 'elevator', label: 'Elevator' },
-  { value: 'fireprotection', label: 'Fire Protection' },
-  { value: 'electrical', label: 'Electrical' },
-  { value: 'plumbing', label: 'Plumbing' },
-  { value: 'hvac', label: 'HVAC' },
-  { value: 'cctv', label: 'CCTV' },
-  { value: 'generator', label: 'Generator' },
-  { value: 'lighting', label: 'Lighting' },
-  { value: 'automaticdoor', label: 'Automatic Door' },
-  { value: 'fireextinguisher', label: 'Fire Extinguisher' },
-  { value: 'other', label: 'Other' },
+  { value: 'Elevator', label: 'Elevator' },
+  { value: 'FireProtection', label: 'Fire Protection' },
+  { value: 'Electrical', label: 'Electrical' },
+  { value: 'Plumbing', label: 'Plumbing' },
+  { value: 'HVAC', label: 'HVAC' },
+  { value: 'CCTV', label: 'CCTV' },
+  { value: 'Generator', label: 'Generator' },
+  { value: 'Lighting', label: 'Lighting' },
+  { value: 'AutomaticDoor', label: 'Automatic Door' },
+  { value: 'FireExtinguisher', label: 'Fire Extinguisher' },
+  { value: 'Other', label: 'Other' },
 ]
 
 const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({

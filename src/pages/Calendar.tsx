@@ -16,6 +16,7 @@ import { TaskEvent, ApiSchedule } from '@/types/calendar'
 import Table from '@/components/Table'
 import Pagination from '@/components/Pagination'
 import { Calendar as CalendarIcon, List, Eye, Clock } from 'lucide-react'
+import { RiEditLine } from 'react-icons/ri'
 import { format } from 'date-fns'
 import { STATUS_COLORS } from '@/constants/colors'
 import buildingDetailsApi, { BuildingDetail } from '@/services/buildingDetails'
@@ -57,6 +58,7 @@ const Calendar: React.FC = () => {
   const deletionTimersRef = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({})
   const [buildingDetails, setBuildingDetails] = useState<BuildingDetail[]>([])
   const [showCreateAutoScheduleModal, setShowCreateAutoScheduleModal] = useState(false)
+  const [isViewChanging, setIsViewChanging] = useState(false)
 
   // Fetch current user for manager ID
   const { data: currentUser } = useQuery({
@@ -103,51 +105,47 @@ const Calendar: React.FC = () => {
 
   // Fetch schedules using React Query with pagination
   const { data: schedulesData, isLoading } = useQuery({
-    queryKey: ['schedules', { page, limit }],
+    queryKey: ['schedules', { page, limit, viewMode }],
     queryFn: async () => {
+      // For calendar view, fetch all schedules with high limit
       if (viewMode === 'calendar') {
-        // For calendar view, fetch all schedules with high limit
         const response = await schedulesApi.getSchedules()
         return response
-      } else {
-        // For table view, respect pagination
-        const response = await schedulesApi.getSchedules(page, limit)
-        return response
       }
+      // For table view, respect pagination
+      const response = await schedulesApi.getSchedules(page, limit)
+      return response
     },
   })
 
   // Fetch schedule jobs for building count in table view
   const scheduleJobsQuery = useQuery({
-    queryKey: ['scheduleJobs', 'allCounts'],
+    queryKey: ['scheduleJobs', 'allCounts', schedulesData?.data?.map(s => s.schedule_id)],
     queryFn: async () => {
-      // Only fetch if we're in table view to avoid unnecessary API calls
-      if (viewMode !== 'table') return null
+      // Only fetch if we're in table view and have schedule data
+      if (viewMode !== 'table' || !schedulesData?.data) return null
 
       // Create an object to store the counts for each schedule
       const buildingCountsBySchedule: { [scheduleId: string]: number } = {}
 
       // For each schedule, fetch the jobs to count buildings
-      if (schedulesData?.data) {
-        const promises = schedulesData.data.map(async schedule => {
-          try {
-            const response = await scheduleJobsApi.fetchScheduleJobsByScheduleId(
-              schedule.schedule_id
-            )
-            // Count only non-cancelled jobs
-            const activeJobs = response.data.filter(job => job.status.toLowerCase() !== 'cancel')
-            // Use Set to count unique building details
-            const uniqueBuildingDetailIds = new Set(activeJobs.map(job => job.buildingDetailId))
-            buildingCountsBySchedule[schedule.schedule_id] = uniqueBuildingDetailIds.size
-          } catch (error) {
-            console.error(`Error fetching jobs for schedule ${schedule.schedule_id}:`, error)
-            buildingCountsBySchedule[schedule.schedule_id] = 0
-          }
-        })
+      const promises = schedulesData.data.map(async schedule => {
+        try {
+          const response = await scheduleJobsApi.fetchScheduleJobsByScheduleId(
+            schedule.schedule_id
+          )
+          // Count only non-cancelled jobs
+          const activeJobs = response.data.filter(job => job.status.toLowerCase() !== 'cancel')
+          // Use Set to count unique building details
+          const uniqueBuildingDetailIds = new Set(activeJobs.map(job => job.buildingDetailId))
+          buildingCountsBySchedule[schedule.schedule_id] = uniqueBuildingDetailIds.size
+        } catch (error) {
+          console.error(`Error fetching jobs for schedule ${schedule.schedule_id}:`, error)
+          buildingCountsBySchedule[schedule.schedule_id] = 0
+        }
+      })
 
-        await Promise.all(promises)
-      }
-
+      await Promise.all(promises)
       return buildingCountsBySchedule
     },
     enabled: viewMode === 'table' && !!schedulesData?.data,
@@ -187,7 +185,14 @@ const Calendar: React.FC = () => {
   // Format date for the table view
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'MMM dd, yyyy HH:mm')
+      return new Date(dateString).toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
     } catch (error) {
       return dateString
     }
@@ -644,6 +649,16 @@ const Calendar: React.FC = () => {
     }
   }
 
+  // Add view change handler
+  const handleViewChange = (newView: 'calendar' | 'table') => {
+    setIsViewChanging(true)
+    setViewMode(newView)
+    // Add a small delay to show loading state
+    setTimeout(() => {
+      setIsViewChanging(false)
+    }, 500)
+  }
+
   return (
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-6">
@@ -670,7 +685,7 @@ const Calendar: React.FC = () => {
 
           <div className="flex rounded-md shadow-sm overflow-hidden">
             <button
-              onClick={() => setViewMode('table')}
+              onClick={() => handleViewChange('table')}
               className={`px-4 py-2 flex items-center gap-2 transition-colors ${viewMode === 'table'
                 ? 'bg-blue-500 text-white'
                 : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -680,7 +695,7 @@ const Calendar: React.FC = () => {
               <span>{t('calendar.viewMode.table')}</span>
             </button>
             <button
-              onClick={() => setViewMode('calendar')}
+              onClick={() => handleViewChange('calendar')}
               className={`px-4 py-2 flex items-center gap-2 transition-colors ${viewMode === 'calendar'
                 ? 'bg-blue-500 text-white'
                 : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -701,7 +716,12 @@ const Calendar: React.FC = () => {
         </div>
       </div>
 
-      {viewMode === 'calendar' ? (
+      {isViewChanging ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <span className="ml-3 text-gray-600 dark:text-gray-300">{t('calendar.loading')}</span>
+        </div>
+      ) : viewMode === 'calendar' ? (
         <div className="calendar-container custom-calendar-view">
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -856,16 +876,45 @@ const Calendar: React.FC = () => {
                     key: 'actions',
                     title: t('calendar.table.actions'),
                     render: item => (
-                      <div className="flex justify-center">
+                      <div className="flex justify-center gap-2">
                         <button
                           onClick={e => {
                             e.stopPropagation()
                             navigate(`/schedule-job/${item.schedule_id}`)
                           }}
-                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors group relative"
                           title={t('calendar.tooltips.viewDetails')}
                         >
                           <Eye size={18} />
+                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            {t('calendar.tooltips.viewDetails')}
+                          </span>
+                        </button>
+                        <button
+                          onClick={e => {
+                            e.stopPropagation()
+                            setSelectedEvent({
+                              id: item.schedule_id,
+                              title: item.schedule_name,
+                              start: item.start_date,
+                              end: item.end_date,
+                              allDay: true,
+                              status: item.schedule_status.toLowerCase(),
+                              description: item.description,
+                              buildingDetailIds: item.buildingDetailIds || [],
+                              cycle_id: item.cycle_id || '',
+                              schedule_type: item.schedule_type || 'Daily',
+                            })
+                            setIsCreateMode(false)
+                            setIsModalOpen(true)
+                          }}
+                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors group relative"
+                          title={t('calendar.tooltips.edit')}
+                        >
+                          <RiEditLine className="w-5 h-5" />
+                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            {t('calendar.tooltips.edit')}
+                          </span>
                         </button>
                       </div>
                     ),
