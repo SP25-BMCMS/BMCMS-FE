@@ -48,14 +48,23 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
 
   // Status title mapping
   const statusMapping = {
-    pending: { title: t('crackManagement.status.pending'), label: t('crackManagement.status.pending') },
-    InProgress: { title: t('crackManagement.status.inProgress'), label: t('crackManagement.status.inProgress') },
-    resolved: { title: t('crackManagement.status.resolved'), label: t('crackManagement.status.resolved') },
+    pending: { 
+      title: t('common.statusCrack.status.pending'), 
+      label: t('common.statusCrack.status.pending') 
+    },
+    InProgress: { 
+      title: t('common.statusCrack.status.inProgress'), 
+      label: t('common.statusCrack.status.inProgress') 
+    },
+    resolved: { 
+      title: t('common.statusCrack.status.resolved'), 
+      label: t('common.statusCrack.status.resolved') 
+    },
   }
 
   // Get the status title
   const getStatusTitle = () => {
-    return statusMapping[crackStatus as keyof typeof statusMapping]?.title || t('crackManagement.status.pending')
+    return statusMapping[crackStatus as keyof typeof statusMapping]?.title || t('common.statusCrack.status.pending')
   }
 
   // Get the status label
@@ -143,7 +152,6 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
 
     setIsSaving(true)
     try {
-      // Convert UI status to API status format
       const apiStatus =
         crackStatus === 'InProgress'
           ? 'InProgress'
@@ -151,7 +159,6 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
             ? 'Resolved'
             : 'Pending'
 
-      // Call API to update crack status with staff assignment
       const response = await crackApi.updateCrackStatus(
         crackId,
         apiStatus,
@@ -159,15 +166,15 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
       )
 
       if (response.isSuccess) {
-        toast.success(t('crackManagement.statusUpdateSuccess'))
+        toast.success(t('common.statusCrack.updateSuccess'))
         onUpdateSuccess()
         onClose()
       } else {
-        toast.error(response.message || t('crackManagement.error'))
+        toast.error(response.message || t('common.statusCrack.updateError'))
       }
     } catch (error: any) {
       console.error('Failed to update crack status:', error)
-      toast.error(error.message || t('crackManagement.error'))
+      toast.error(error.message || t('common.statusCrack.updateError'))
     } finally {
       setIsSaving(false)
     }
@@ -262,7 +269,7 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
             {isSaving ? (
               <span className="flex items-center">
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-                {t('common.processing')}
+                {t('common.statusCrack.processing')}
               </span>
             ) : (
               t('staffManagement.assignAndUpdate')

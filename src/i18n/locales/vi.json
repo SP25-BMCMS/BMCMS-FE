@@ -463,7 +463,7 @@
       "operational": "Đang hoạt động",
       "under_construction": "Đang xây dựng"
     },
-    "table": {
+    "table1": {
       "no": "STT",
       "buildingName": "Tên tòa nhà",
       "areaName": "Tên khu vực",

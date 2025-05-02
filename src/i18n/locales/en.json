@@ -187,7 +187,6 @@
       "minimize": "Minimize",
       "maximize": "Maximize",
       "restore": "Restore",
-      "close": "Close",
       "back": "Back",
       "next": "Next",
       "previous": "Previous",
@@ -551,7 +550,7 @@
       "createSuccess": "Building created successfully",
       "createError": "Unable to create building"
     },
-    "table": {
+    "table1": {
       "no": "No.",
       "name": "Name",
       "address": "Address",

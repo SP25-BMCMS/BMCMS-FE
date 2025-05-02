@@ -3,6 +3,7 @@ import Modal from './Modal';
 import { getStaffDetail } from '@/services/staffs';
 import { StaffDetailData } from '@/types';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import {
   User,
   Phone,
@@ -23,6 +24,7 @@ interface ViewDetailStaffProps {
 }
 
 const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staffId }) => {
+  const { t } = useTranslation();
   const [staffDetail, setStaffDetail] = useState<StaffDetailData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,13 +44,13 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
       if (response.isSuccess && response.data) {
         setStaffDetail(response.data);
       } else {
-        setError(response.message || 'Failed to load staff details');
-        toast.error(response.message || 'Failed to load staff details');
+        setError(response.message || t('staffManagement.viewDetail.error.loadFailed'));
+        toast.error(response.message || t('staffManagement.viewDetail.error.loadFailed'));
       }
     } catch (error: any) {
       console.error('Error fetching staff detail:', error);
-      setError(error.message || 'An error occurred');
-      toast.error(error.message || 'Could not load staff details');
+      setError(error.message || t('staffManagement.viewDetail.error.loadFailed'));
+      toast.error(error.message || t('staffManagement.viewDetail.error.loadFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +123,12 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Staff Profile" size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t('staffManagement.viewDetail.title')}
+      size="lg"
+    >
       {isLoading ? (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
@@ -145,7 +152,7 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Error Loading Staff Details
+            {t('staffManagement.viewDetail.error.title')}
           </h3>
           <p className="text-gray-500 dark:text-gray-400">{error}</p>
         </div>
@@ -188,7 +195,7 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              Personal Information
+              {t('staffManagement.viewDetail.personalInfo')}
             </button>
             <button
               onClick={() => setActiveTab('work')}
@@ -198,7 +205,7 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              Work Information
+              {t('staffManagement.viewDetail.workInfo')}
             </button>
           </div>
 
@@ -212,29 +219,20 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <InfoItem
                     icon={<User className="h-5 w-5" />}
-                    label="Gender"
+                    label={t('staffManagement.viewDetail.labels.gender')}
                     value={staffDetail.gender}
                   />
 
                   <InfoItem
                     icon={<CalendarDays className="h-5 w-5" />}
-                    label="Date of Birth"
+                    label={t('staffManagement.viewDetail.labels.dateOfBirth')}
                     value={formatDate(staffDetail.dateOfBirth)}
                   />
 
                   <InfoItem
-                    icon={<UserCheck className="h-5 w-5" />}
-                    label="User ID"
-                    value={staffDetail.userId}
-                    isFullWidth
-                  />
-
-                  <InfoItem
                     icon={<Clock className="h-5 w-5" />}
-                    label="Last Updated"
-                    value={formatDate(
-                      staffDetail.dateOfBirth
-                    )} /* Using DOB as fallback since createdAt isn't available */
+                    label={t('staffManagement.viewDetail.labels.lastUpdated')}
+                    value={formatDate(staffDetail.dateOfBirth)}
                   />
                 </div>
               </div>
@@ -249,7 +247,7 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
                   <div className="grid grid-cols-1 gap-6">
                     <InfoItem
                       icon={<Briefcase className="h-5 w-5" />}
-                      label="Position"
+                      label={t('staffManagement.viewDetail.labels.position')}
                       value={
                         <>
                           {staffDetail.userDetails.position.positionName}
@@ -265,7 +263,7 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
 
                     <InfoItem
                       icon={<Building2 className="h-5 w-5" />}
-                      label="Department"
+                      label={t('staffManagement.viewDetail.labels.department')}
                       value={
                         <>
                           <div>{staffDetail.userDetails.department.departmentName}</div>
@@ -279,7 +277,7 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
 
                     <InfoItem
                       icon={<MapPin className="h-5 w-5" />}
-                      label="Area"
+                      label={t('staffManagement.viewDetail.labels.area')}
                       value={staffDetail.userDetails.department.area}
                       isFullWidth
                     />
@@ -287,7 +285,7 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                  No department or position assigned to this staff member.
+                  {t('staffManagement.viewDetail.noDepartment')}
                 </div>
               )}
             </div>
@@ -299,14 +297,14 @@ const ViewDetailStaff: React.FC<ViewDetailStaffProps> = ({ isOpen, onClose, staf
               onClick={onClose}
               className="px-5 py-2.5 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
             >
-              Close
+              {t('staffManagement.viewDetail.close')}
             </button>
           </div>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-gray-700 dark:text-gray-300 transition-colors">
           <User className="h-14 w-14 mb-4 text-gray-400 dark:text-gray-600" strokeWidth={1.5} />
-          <p className="text-lg">No staff data available</p>
+          <p className="text-lg">{t('staffManagement.viewDetail.noData')}</p>
         </div>
       )}
     </Modal>

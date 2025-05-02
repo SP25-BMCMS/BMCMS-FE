@@ -33,7 +33,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
           <button
             onClick={onClose}
             className="text-white hover:text-gray-300 focus:outline-none"
-            aria-label={t('common.close')}
+            aria-label={t('common.modal.close')}
           >
             <XIcon className="h-6 w-6" />
           </button>

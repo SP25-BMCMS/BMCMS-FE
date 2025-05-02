@@ -188,7 +188,7 @@ const BuildingForManager: React.FC = () => {
   const columns: Column<BuildingWithArea['buildingDetails'][0]>[] = [
     {
       key: 'index',
-      title: t('buildingManagement.table.no'),
+      title: t('buildingManagement.table1.no'),
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">{index + 1}</div>
       ),
@@ -196,7 +196,7 @@ const BuildingForManager: React.FC = () => {
     },
     {
       key: 'name',
-      title: t('buildingManagement.table.buildingName'),
+      title: t('buildingManagement.table1.buildingName'),
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
           <Home className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
@@ -213,7 +213,7 @@ const BuildingForManager: React.FC = () => {
     },
     {
       key: 'createdAt',
-      title: t('buildingManagement.table.createdDate'),
+      title: t('buildingManagement.table1.createdDate'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {formatDate(item.createdAt)}
