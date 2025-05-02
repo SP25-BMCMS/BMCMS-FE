@@ -774,6 +774,20 @@
         "above1m": "Trên 1.000.000 VND"
       }
     },
+    "create": {
+      "name": "Material Name",
+      "namePlaceholder": "Enter material name",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter material description",
+      "unitPrice": "Unit Price",
+      "unitPricePlaceholder": "0.00",
+      "stockQuantity": "Stock Quantity",
+      "stockQuantityPlaceholder": "0",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "cancel": "Cancel"
+    },
     "table": {
       "no": "STT",
       "name": "Tên",
