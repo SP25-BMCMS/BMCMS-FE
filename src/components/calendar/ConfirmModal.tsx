@@ -1,12 +1,13 @@
-import React from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import React from 'react'
+import { XMarkIcon } from '@heroicons/react/24/outline'
+import { useTranslation } from 'react-i18next'
 
 interface ConfirmModalProps {
-  isOpen: boolean;
-  title: string;
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
+  isOpen: boolean
+  title: string
+  message: string
+  onConfirm: () => void
+  onCancel: () => void
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -16,7 +17,9 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  if (!isOpen) return null;
+  const { t } = useTranslation()
+
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -38,18 +41,18 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             onClick={onCancel}
             className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
-            Cancel
+            {t('calendar.confirmModal.cancel')}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
           >
-            Delete
+            {t('calendar.confirmModal.confirm')}
           </button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ConfirmModal;
+export default ConfirmModal

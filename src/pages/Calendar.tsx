@@ -16,6 +16,7 @@ import { TaskEvent, ApiSchedule } from '@/types/calendar'
 import Table from '@/components/Table'
 import Pagination from '@/components/Pagination'
 import { Calendar as CalendarIcon, List, Eye, Clock } from 'lucide-react'
+import { RiEditLine } from 'react-icons/ri'
 import { format } from 'date-fns'
 import { STATUS_COLORS } from '@/constants/colors'
 import buildingDetailsApi, { BuildingDetail } from '@/services/buildingDetails'
@@ -184,7 +185,14 @@ const Calendar: React.FC = () => {
   // Format date for the table view
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'MMM dd, yyyy HH:mm')
+      return new Date(dateString).toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
     } catch (error) {
       return dateString
     }
@@ -868,7 +876,7 @@ const Calendar: React.FC = () => {
                     key: 'actions',
                     title: t('calendar.table.actions'),
                     render: item => (
-                      <div className="flex justify-center">
+                      <div className="flex justify-center gap-2">
                         <button
                           onClick={e => {
                             e.stopPropagation()
@@ -880,6 +888,32 @@ const Calendar: React.FC = () => {
                           <Eye size={18} />
                           <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                             {t('calendar.tooltips.viewDetails')}
+                          </span>
+                        </button>
+                        <button
+                          onClick={e => {
+                            e.stopPropagation()
+                            setSelectedEvent({
+                              id: item.schedule_id,
+                              title: item.schedule_name,
+                              start: item.start_date,
+                              end: item.end_date,
+                              allDay: true,
+                              status: item.schedule_status.toLowerCase(),
+                              description: item.description,
+                              buildingDetailIds: item.buildingDetailIds || [],
+                              cycle_id: item.cycle_id || '',
+                              schedule_type: item.schedule_type || 'Daily',
+                            })
+                            setIsCreateMode(false)
+                            setIsModalOpen(true)
+                          }}
+                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors group relative"
+                          title={t('calendar.tooltips.edit')}
+                        >
+                          <RiEditLine className="w-5 h-5" />
+                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            {t('calendar.tooltips.edit')}
                           </span>
                         </button>
                       </div>

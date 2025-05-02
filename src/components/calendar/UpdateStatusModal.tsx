@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ScheduleJob } from '@/services/scheduleJobs';
+import React, { useState } from 'react'
+import { ScheduleJob } from '@/services/scheduleJobs'
 import {
   RiCheckboxCircleLine,
   RiTimeLine,
@@ -7,13 +7,14 @@ import {
   RiCloseCircleLine,
   RiArrowLeftLine,
   RiQuestionLine,
-} from 'react-icons/ri';
+} from 'react-icons/ri'
+import { useTranslation } from 'react-i18next'
 
 interface UpdateStatusModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  job: ScheduleJob | null;
-  onUpdateStatus: (jobId: string, status: string) => void;
+  isOpen: boolean
+  onClose: () => void
+  job: ScheduleJob | null
+  onUpdateStatus: (jobId: string, status: string) => void
 }
 
 const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
@@ -22,58 +23,59 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
   job,
   onUpdateStatus,
 }) => {
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const { t } = useTranslation()
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState<string>('')
 
-  if (!isOpen || !job) return null;
+  if (!isOpen || !job) return null
 
   const statusOptions = [
     {
       value: 'Pending',
-      label: 'Pending',
+      label: t('calendar.statusLabels.pending'),
       icon: <RiAlertLine className="w-5 h-5" />,
       color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
       hoverColor: 'hover:bg-yellow-200 dark:hover:bg-yellow-800/50',
     },
     {
       value: 'InProgress',
-      label: 'In Progress',
+      label: t('calendar.statusLabels.inProgress'),
       icon: <RiTimeLine className="w-5 h-5" />,
       color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
       hoverColor: 'hover:bg-blue-200 dark:hover:bg-blue-800/50',
     },
     {
       value: 'Completed',
-      label: 'Completed',
+      label: t('calendar.statusLabels.completed'),
       icon: <RiCheckboxCircleLine className="w-5 h-5" />,
       color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
       hoverColor: 'hover:bg-green-200 dark:hover:bg-green-800/50',
     },
     {
       value: 'Cancel',
-      label: 'Cancel',
+      label: t('calendar.statusLabels.cancel'),
       icon: <RiCloseCircleLine className="w-5 h-5" />,
       color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
       hoverColor: 'hover:bg-red-200 dark:hover:bg-red-800/50',
     },
-  ];
+  ]
 
   const handleStatusChange = (newStatus: string) => {
-    setSelectedStatus(newStatus);
-    setShowConfirmModal(true);
-  };
+    setSelectedStatus(newStatus)
+    setShowConfirmModal(true)
+  }
 
   const handleConfirm = () => {
-    onUpdateStatus(job.schedule_job_id, selectedStatus);
-    setShowConfirmModal(false);
-    onClose();
-  };
+    onUpdateStatus(job.schedule_job_id, selectedStatus)
+    setShowConfirmModal(false)
+    onClose()
+  }
 
   const getCurrentStatusInfo = () => {
-    return statusOptions.find(option => option.value === job.status) || statusOptions[0];
-  };
+    return statusOptions.find(option => option.value === job.status) || statusOptions[0]
+  }
 
-  const currentStatus = getCurrentStatusInfo();
+  const currentStatus = getCurrentStatusInfo()
 
   return (
     <>
@@ -82,7 +84,7 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
         <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-              Update Job Status
+              {t('calendar.updateStatusModal.title')}
             </h2>
             <button
               onClick={onClose}
@@ -94,7 +96,9 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
           </div>
 
           <div className="mb-6">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Current Status</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              {t('calendar.updateStatusModal.currentStatus')}
+            </p>
             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${currentStatus.color}`}>
               {currentStatus.icon}
               <span className="font-medium">{currentStatus.label}</span>
@@ -102,14 +106,15 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Select New Status</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              {t('calendar.updateStatusModal.selectNewStatus')}
+            </p>
             {statusOptions.map(option => (
               <button
                 key={option.value}
                 onClick={() => handleStatusChange(option.value)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${option.color} ${option.hoverColor} ${
-                  job.status === option.value ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${option.color} ${option.hoverColor} ${job.status === option.value ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 disabled={job.status === option.value}
               >
                 {option.icon}
@@ -119,16 +124,18 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
           </div>
 
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Job Details</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              {t('calendar.updateStatusModal.jobDetails')}
+            </p>
             <div className="space-y-1">
               <p className="text-sm text-gray-800 dark:text-gray-200">
-                Building: {job.buildingDetail?.building?.name}
+                {t('calendar.updateStatusModal.building')}: {job.buildingDetail?.building?.name}
               </p>
               <p className="text-sm text-gray-800 dark:text-gray-200">
-                Detail: {job.buildingDetail?.name}
+                {t('calendar.updateStatusModal.detail')}: {job.buildingDetail?.name}
               </p>
               <p className="text-sm text-gray-800 dark:text-gray-200">
-                Run Date: {new Date(job.run_date).toLocaleDateString()}
+                {t('calendar.updateStatusModal.runDate')}: {new Date(job.run_date).toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -147,32 +154,33 @@ const UpdateStatusModal: React.FC<UpdateStatusModalProps> = ({
               <RiQuestionLine className="w-12 h-12 text-blue-500" />
             </div>
             <h3 className="text-lg font-semibold text-center text-gray-800 dark:text-gray-100 mb-2">
-              Confirm Status Change
+              {t('calendar.updateStatusModal.confirmStatusChange')}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
-              Are you sure you want to change the status from{' '}
-              <span className="font-medium">{job.status}</span> to{' '}
-              <span className="font-medium">{selectedStatus}</span>?
+              {t('calendar.updateStatusModal.confirmMessage', {
+                currentStatus: t(`scheduleDetail.ScheduleJob.status.${job.status.toLowerCase()}`),
+                newStatus: t(`scheduleDetail.ScheduleJob.status.${selectedStatus.toLowerCase()}`)
+              })}
             </p>
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setShowConfirmModal(false)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
               >
-                Cancel
+                {t('calendar.updateStatusModal.cancel')}
               </button>
               <button
                 onClick={handleConfirm}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600"
               >
-                Confirm
+                {t('calendar.updateStatusModal.confirm')}
               </button>
             </div>
           </div>
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
-export default UpdateStatusModal;
+export default UpdateStatusModal

@@ -1,5 +1,18 @@
 {
   "common": {
+    "pagination": {
+      "itemsPerPage": "Show:",
+      "of": "of",
+      "items": "items",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "page": "Page",
+      "currentPage": "Current page",
+      "showing": "Showing",
+      "to": "to",
+      "ofTotal": "of total",
+      "itemsPerPageTitle": "Select number of items to display per page"
+    },
     "username": "Username",
     "password": "Password",
     "rememberPassword": "Remember password",
@@ -59,7 +72,7 @@
     "area": "Area",
     "success": "Success",
     "warning": "Warning",
-    "info": "Information",
+    "info": "Info",
     "other": "Other",
     "tooltip": {
       "loading": "Loading...",
@@ -163,6 +176,8 @@
       "unmute": "Unmute",
       "follow": "Follow",
       "unfollow": "Unfollow",
+      "subscribe": "Subscribe",
+      "unsubscribe": "Unsubscribe",
       "like": "Like",
       "unlike": "Unlike",
       "comment": "Comment",
@@ -251,19 +266,6 @@
       "seventy": "Seventy",
       "eighty": "Eighty",
       "ninety": "Ninety",
-      "pagination": {
-        "itemsPerPage": "Show:",
-        "of": "of",
-        "items": "items",
-        "previousPage": "Previous page",
-        "nextPage": "Next page",
-        "page": "Page",
-        "currentPage": "Current page",
-        "showing": "Showing",
-        "to": "to",
-        "ofTotal": "of",
-        "itemsPerPageTitle": "Select number of items to display per page"
-      },
       "loginSuccess": "Login successful",
       "login": {
         "title": "LOGIN",
@@ -278,11 +280,83 @@
       }
     },
     "dropdown": {
-      "viewDetail": "View details",
+      "viewDetail": "View detail",
       "notAvailable": "Not available",
       "exportPdf": "Export PDF",
       "changeStatus": "Change status",
       "remove": "Remove"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "failed": "Failed",
+      "error": "Error",
+      "success": "Success",
+      "warning": "Warning",
+      "info": "Information"
+    },
+    "messages": {
+      "loading": "Loading...",
+      "processing": "Processing...",
+      "saving": "Saving...",
+      "deleting": "Deleting...",
+      "uploading": "Uploading...",
+      "downloading": "Downloading...",
+      "confirmDelete": "Are you sure you want to delete this item?",
+      "noData": "No data available",
+      "required": "This field is required",
+      "invalidInput": "Invalid input",
+      "successCreate": "Created successfully",
+      "successUpdate": "Updated successfully",
+      "successDelete": "Deleted successfully",
+      "errorCreate": "Failed to create",
+      "errorUpdate": "Failed to update",
+      "errorDelete": "Failed to delete",
+      "errorNetwork": "Network error",
+      "errorServer": "Server error",
+      "sessionExpired": "Session expired",
+      "unauthorized": "Unauthorized access",
+      "forbidden": "Access forbidden",
+      "notFound": "Not found",
+      "conflict": "Conflict occurred",
+      "serverError": "Internal server error"
+    },
+    "labels": {
+      "name": "Name",
+      "description": "Description",
+      "type": "Type",
+      "category": "Category",
+      "status": "Status",
+      "date": "Date",
+      "time": "Time",
+      "from": "From",
+      "to": "To",
+      "total": "Total",
+      "details": "Details",
+      "notes": "Notes",
+      "comments": "Comments",
+      "attachments": "Attachments",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "createdBy": "Created By",
+      "updatedBy": "Updated By"
+    },
+    "validation": {
+      "required": "This field is required",
+      "email": "Invalid email address",
+      "phone": "Invalid phone number",
+      "minLength": "Must be at least {{min}} characters",
+      "maxLength": "Must be at most {{max}} characters",
+      "passwordMatch": "Passwords do not match",
+      "invalidDate": "Invalid date",
+      "invalidTime": "Invalid time",
+      "invalidNumber": "Invalid number",
+      "invalidFormat": "Invalid format",
+      "fileSize": "File size must be less than {{size}}",
+      "fileType": "Invalid file type"
     }
   },
   "taskManagement": {
@@ -332,18 +406,18 @@
     "error": "Unable to load tasks",
     "tryAgain": "Try again",
     "noData": "No data",
-    "crackRepair": "Crack Report",
+    "crackRepair": "Crack Repair Report",
     "scheduledMaintenance": "Scheduled Maintenance",
     "displayingCrackTasks": "Displaying crack repair tasks",
-    "displayingMaintenanceTasks": "Displaying scheduled maintenance tasks",
+    "displayingMaintenanceTasks": "Displaying maintenance tasks",
     "changeCrackStatus": "Change crack status",
-    "viewDetail": "View details",
+    "viewDetail": "View detail",
     "changeStatus": "Change status",
     "remove": "Remove",
     "exportPdf": "Export PDF",
     "pdfExported": "PDF exported successfully",
     "pdfExportError": "Unable to export PDF",
-    "crackInfoNotAvailable": "Crack information not available",
+    "crackInfoNotAvailable": "No crack information available",
     "detail": {
       "title": "Task Details",
       "backButton": "Back",
@@ -432,7 +506,7 @@
     }
   },
   "sidebar": {
-    "dashboard": "Overview",
+    "dashboard": "Dashboard",
     "taskManagement": "Task Management",
     "maintenanceCycle": "Maintenance Cycle",
     "buildingManagement": "Building Management",
@@ -443,43 +517,95 @@
     "crackManagement": "Crack Management",
     "materialManagement": "Material Management",
     "timesheet": {
-      "title": "Maintenance Schedule",
+      "title": "Maintenance Timesheet",
       "workLog": "Work Log",
       "calendar": "Calendar"
     }
   },
   "buildingManagement": {
     "title": "Building Management",
-    "noBuildingDetails": "No building details available",
-    "loading": "Loading building data...",
+    "createBuilding": "Add Building",
+    "searchPlaceholder": "Search by name or address...",
     "noData": "No buildings found",
-    "notAssigned": "Not assigned",
-    "searchPlaceholder": "Search buildings...",
-    "viewDetails": "View details",
-    "technicalRecords": "Technical Records",
-    "status": {
-      "operational": "Operational",
-      "under_construction": "Under Construction"
+    "totalBuildings": "Total buildings: {{count}}",
+    "filterOptions": {
+      "status": {
+        "all": "All statuses",
+        "active": "Active",
+        "inactive": "Inactive",
+        "underConstruction": "Under Construction",
+        "underMaintenance": "Under Maintenance"
+      }
+    },
+    "create": {
+      "title": "Create Building",
+      "name": "Building Name",
+      "namePlaceholder": "Enter building name",
+      "address": "Address",
+      "addressPlaceholder": "Enter building address",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter building description",
+      "status": "Status",
+      "cancel": "Cancel",
+      "create": "Create",
+      "createSuccess": "Building created successfully",
+      "createError": "Unable to create building"
     },
     "table": {
       "no": "No.",
-      "buildingName": "Building Name",
-      "areaName": "Area Name",
+      "name": "Name",
+      "address": "Address",
+      "description": "Description",
+      "status": "Status",
+      "action": "Action"
+    },
+    "details": {
+      "title": "Building Details",
+      "basicInfo": "Basic Information",
+      "maintenanceHistory": "Maintenance History",
+      "residents": "Residents",
+      "staff": "Staff",
+      "assets": "Assets",
+      "reports": "Reports"
+    },
+    "edit": {
+      "title": "Edit Building",
+      "updateSuccess": "Building updated successfully",
+      "updateError": "Unable to update building"
+    },
+    "delete": {
+      "title": "Delete Building",
+      "confirmMessage": "Are you sure you want to delete this building? This action cannot be undone.",
+      "success": "Building deleted successfully",
+      "error": "Unable to delete building"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "underConstruction": "Under Construction",
+      "underMaintenance": "Under Maintenance"
+    },
+    "floors": {
+      "title": "Floors",
+      "addFloor": "Add Floor",
+      "floorNumber": "Floor Number",
+      "description": "Description",
+      "status": "Status",
+      "noData": "No floors found"
+    },
+    "apartments": {
+      "title": "Apartments",
+      "addApartment": "Add Apartment",
+      "apartmentNumber": "Apartment Number",
       "floor": "Floor",
       "status": "Status",
-      "createdDate": "Created Date",
-      "completionDate": "Completion Date",
-      "action": "Action",
-      "totalApartments": "Total Apartments"
-    },
-    "warrantyDate": "Warranty Date",
-    "completionDate": "Completion Date",
-    "buildingDetails": "Building Details"
+      "noData": "No apartments found"
+    }
   },
   "residentManagement": {
     "title": "Resident Management",
     "addResident": "Add Resident",
-    "editResident": "Edit Resident Information",
+    "editResident": "Edit Resident",
     "deleteResident": "Delete Resident",
     "residentDetails": "Resident Details",
     "residentName": "Resident Name",
@@ -513,9 +639,9 @@
   },
   "staffManagement": {
     "title": "Staff Management",
-    "error": "Error loading staff information",
+    "error": "Error retrieving staff information",
     "addStaff": "Add Staff",
-    "editStaff": "Edit Staff Information",
+    "editStaff": "Edit Staff",
     "deleteStaff": "Delete Staff",
     "staffDetails": "Staff Details",
     "staffName": "Staff Name",
@@ -527,10 +653,10 @@
     "noData": "No staff data found",
     "searchPlaceholder": "Search by name or ID",
     "filterByRole": "Filter by role",
-    "changeDepartment": "Change Department",
+    "changeDepartment": "Change department",
     "updateError": "Unable to update staff information",
     "filterOptions": {
-      "all": "All Roles",
+      "all": "All roles",
       "staff": "Staff",
       "manager": "Manager",
       "admin": "Administrator"
@@ -546,12 +672,12 @@
       "dateOfBirth": "Date of Birth",
       "action": "Action"
     },
-    "assignLeader": "Assign Team Leader",
-    "assignNote": "Assigning staff will automatically update crack status to",
+    "assignLeader": "Assign team leader",
+    "assignNote": "Staff assignment will automatically update crack status to",
     "leaderNote": "Note: Only users with 'Staff' role and 'Team Leader' position can be assigned to handle crack reports.",
-    "responsibilityNote": "The selected staff will be responsible for handling this crack report.",
+    "responsibilityNote": "The selected staff member will be responsible for handling this crack report.",
     "assignAndUpdate": "Assign & Update Status",
-    "selectLeader": "Select Team Leader",
+    "selectLeader": "Select team leader",
     "noLeadersAvailable": "No team leaders available for assignment. Please add staff with 'Staff' role and 'Team Leader' position first.",
     "leader": "Team Leader",
     "processing": "Processing..."
@@ -597,33 +723,34 @@
     },
     "filterOptions": {
       "frequency": {
-        "all": "All Frequencies",
-        "daily": "Daily",
-        "weekly": "Weekly",
-        "monthly": "Monthly",
-        "yearly": "Yearly",
-        "specific": "Specific"
+        "All": "All Frequencies",
+        "Daily": "Daily",
+        "Weekly": "Weekly",
+        "Monthly": "Monthly",
+        "Yearly": "Yearly",
+        "Specific": "Specific"
       },
       "basis": {
-        "all": "All Bases",
-        "manufacturerrecommendation": "Manufacturer Recommendation",
-        "legalstandard": "Legal Standard",
-        "operationalexperience": "Operational Experience",
-        "other": "Other"
+        "All": "All Bases",
+        "ManufacturerRecommendation": "Manufacturer Recommendation",
+        "LegalStandard": "Legal Standard",
+        "OperationalExperience": "Operational Experience",
+        "Other": "Other"
       },
       "deviceType": {
-        "all": "All Devices",
-        "elevator": "Elevator",
-        "fireprotection": "Fire Protection",
-        "electrical": "Electrical",
-        "plumbing": "Plumbing",
-        "hvac": "HVAC",
-        "cctv": "CCTV",
-        "generator": "Generator",
-        "lighting": "Lighting",
-        "automaticdoor": "Automatic Door",
-        "fireextinguisher": "Fire Extinguisher",
-        "other": "Other"
+        "All": "All Devices",
+        "Elevator": "Elevator",
+        "Fireprotection": "Fire Protection",
+        "Electrical": "Electrical",
+        "Plumbing": "Plumbing",
+        "HVAC": "HVAC",
+        "CCTV": "CCTV",
+        "Generator": "Generator",
+        "Lighting": "Lighting",
+        "AutomaticDoor": "Automatic Door",
+        "FireExtinguisher": "Fire Extinguisher",
+        "FireProtection": "Fire Protection",
+        "Other": "Other"
       }
     },
     "filter": {
@@ -690,9 +817,9 @@
         "required": "Please select a basis"
       },
       "reason": {
-        "label": "Change Reason",
-        "required": "Please enter the change reason",
-        "placeholder": "Enter change reason..."
+        "label": "Reason for Change",
+        "required": "Please enter a reason for change",
+        "placeholder": "Enter reason for change..."
       },
       "buttons": {
         "cancel": "Cancel",
@@ -706,7 +833,7 @@
   "crackManagement": {
     "title": "Crack Management",
     "severity": "Severity",
-    "totalCracks": "Total Cracks: {{count}}",
+    "totalCracks": "Total cracks: {{count}}",
     "searchPlaceholder": "Search cracks...",
     "noData": "No cracks found",
     "loading": "Loading data...",
@@ -749,7 +876,7 @@
     "originalImage": "Original Image",
     "aiDetected": "AI Detected",
     "imageLoadError": "Unable to load image",
-    "noImages": "No Images",
+    "noImages": "No images",
     "statusUpdateSuccess": "Status updated successfully",
     "error": "An error occurred"
   },
@@ -758,15 +885,15 @@
     "createMaterial": "Add Material",
     "searchPlaceholder": "Search by name or description...",
     "noData": "No materials found",
-    "totalMaterials": "Total Materials: {{filtered}} / {{total}}",
+    "totalMaterials": "Total materials: {{filtered}} / {{total}}",
     "filterOptions": {
       "status": {
-        "all": "All Statuses",
+        "all": "All statuses",
         "active": "Active",
         "inactive": "Inactive"
       },
       "price": {
-        "all": "All Prices",
+        "all": "All prices",
         "under100k": "Under 100,000 VND",
         "100k-500k": "100,000 - 500,000 VND",
         "500k-1m": "500,000 - 1,000,000 VND",
@@ -774,6 +901,7 @@
       }
     },
     "create": {
+      "title": "Create Material",
       "name": "Material Name",
       "namePlaceholder": "Enter material name",
       "description": "Description",
@@ -785,7 +913,14 @@
       "status": "Status",
       "statusActive": "Active",
       "statusInactive": "Inactive",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "create": "Create",
+      "createSuccess": "Material created successfully",
+      "createError": "Unable to create material",
+      "unitPriceUpdateSuccess": "Unit price updated successfully",
+      "unitPriceUpdateError": "Unable to update unit price",
+      "stockQuantityUpdateSuccess": "Stock quantity updated successfully",
+      "stockQuantityUpdateError": "Unable to update stock quantity"
     },
     "table": {
       "no": "No.",
@@ -826,7 +961,7 @@
     }
   },
   "timesheet": {
-    "title": "Maintenance Schedule",
+    "title": "Maintenance Timesheet",
     "workLog": "Work Log",
     "calendar": "Calendar",
     "addWorkLog": "Add Work Log",
@@ -909,7 +1044,7 @@
       "manufacturer": "Manufacturer",
       "model": "Model",
       "crackType": "Crack Type",
-      "dimensions": "Dimensions (L × W × D)",
+      "dimensions": "Dimensions (L × W × H)",
       "description": "Description",
       "recordedDate": "Recorded Date",
       "maintenanceDate": "Maintenance Date",
@@ -924,7 +1059,7 @@
     "errorLoadingMaintenance": "Error loading maintenance history:",
     "unknownError": "Unknown error",
     "noDescription": "No description",
-    "warrantyUntil": "Warranty Until",
+    "warrantyUntil": "Warranty until",
     "created": "Created",
     "construction": "Construction",
     "completion": "Completion"
@@ -946,10 +1081,10 @@
       "createdAt": "Created Date"
     },
     "status": {
-      "execute_cracks": "Execute Crack Repairs",
-      "confirm_no_pending_issues": "Confirm No Pending Issues",
-      "final_review": "Final Review",
-      "wait_for_deposit": "Wait for Deposit"
+      "execute_cracks": "Execute crack repairs",
+      "confirm_no_pending_issues": "Confirm no pending issues",
+      "final_review": "Final review",
+      "wait_for_deposit": "Waiting for deposit"
     }
   },
   "calendar": {
@@ -959,10 +1094,10 @@
       "calendar": "Calendar"
     },
     "status": {
+      "pending": "Pending",
       "inProgress": "In Progress",
       "completed": "Completed",
-      "cancel": "Cancelled",
-      "pending": "Pending"
+      "cancel": "Cancelled"
     },
     "statusLabels": {
       "inProgress": "In Progress",
@@ -1052,7 +1187,7 @@
       "loadFailed": "Unable to load schedule data",
       "pastDate": "Cannot create event in the past",
       "invalidDate": "Invalid date",
-      "noTitle": "Please enter event title",
+      "noTitle": "Please enter event name",
       "noStartDate": "Please select start time",
       "noEndDate": "Please select end time",
       "noBuilding": "Please select at least one building",
@@ -1144,7 +1279,7 @@
         "showingJobs": "Showing {{count}} of {{total}} jobs",
         "newJob": "New Job",
         "noJobsFound": "No maintenance jobs found",
-        "noJobsDescription": "No jobs have been linked to this schedule yet. Click below to create the first maintenance job.",
+        "noJobsDescription": "No jobs are linked to this schedule yet. Click below to create the first maintenance job.",
         "createFirstJob": "Create First Job",
         "locationDetails": "Location Details",
         "equipment": "Equipment",
@@ -1173,6 +1308,64 @@
           "createTask": "Create Task"
         }
       }
+    },
+    "updateStatusModal": {
+      "title": "Update Job Status",
+      "currentStatus": "Current Status",
+      "selectNewStatus": "Select New Status",
+      "jobDetails": "Job Details",
+      "building": "Building",
+      "detail": "Detail",
+      "runDate": "Run Date",
+      "confirmStatusChange": "Confirm Status Change",
+      "confirmMessage": "Are you sure you want to change status from {{currentStatus}} to {{newStatus}}?",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "confirmModal": {
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "confirm": "Confirm",
+      "cancelJob": {
+        "title": "Confirm Cancel",
+        "message": "Are you sure you want to cancel this job? This action cannot be undone."
+      },
+      "sendEmail": {
+        "title": "Confirm Send Email",
+        "message": "Are you sure you want to send maintenance email to residents in this apartment?",
+        "confirm": "Send Email",
+        "cancel": "Cancel"
+      }
+    },
+    "taskModal": {
+      "title": {
+        "create": "Create Task",
+        "details": "Task Details"
+      },
+      "scheduleJobDetails": "Schedule Job Details",
+      "building": "Building",
+      "schedule": "Schedule",
+      "runDate": "Run Date",
+      "status": "Status",
+      "taskInformation": "Task Information",
+      "created": "Created Date",
+      "lastUpdated": "Last Updated",
+      "description": "Description",
+      "assignmentInformation": "Assignment Information",
+      "assignedTo": "Assigned To",
+      "noAssignment": "No assignment information for this task",
+      "assignLeader": "Assign Team Leader",
+      "assignLeaderRequired": "Please select team leader",
+      "descriptionRequired": "Please enter description",
+      "noLeadersAvailable": "No team leaders available for assignment. Please add staff with 'Staff' role and 'Team Leader' position first.",
+      "loadingStaff": "Loading staff...",
+      "buttons": {
+        "close": "Close",
+        "cancel": "Cancel",
+        "createTask": "Create Task",
+        "creating": "Creating..."
+      },
+      "taskExists": "Task already exists for this scheduled job"
     }
   },
   "building": {
@@ -1189,8 +1382,8 @@
       "imageUrl": "Image (URL)",
       "imageUrlPlaceholder": "Enter image URL",
       "area": "Area",
-      "selectArea": "Select area",
-      "areaRequired": "Please select an area",
+      "selectArea": "Select Area",
+      "areaRequired": "Please select area",
       "constructionDate": "Construction Date",
       "constructionDateRequired": "Construction date is required",
       "status": "Status",
@@ -1201,8 +1394,8 @@
       "warrantyDate": "Warranty Date",
       "warrantyDateRequired": "Warranty date is required for operational buildings",
       "manager": "Building Manager",
-      "selectManager": "Select manager",
-      "managerHint": "Select a manager for this building. Can be updated later.",
+      "selectManager": "Select Manager",
+      "managerHint": "Select manager for this building. Can be updated later.",
       "cancel": "Cancel",
       "addButton": "Add Building",
       "processing": "Processing...",
@@ -1211,7 +1404,7 @@
     },
     "edit": {
       "title": "Edit Building",
-      "subtitle": "Update the building information below",
+      "subtitle": "Update building information below",
       "updateButton": "Update Building",
       "updating": "Updating...",
       "success": "Building updated successfully!",
@@ -1253,12 +1446,12 @@
       "upload": {
         "title": "Upload Technical Record",
         "device": "Device",
-        "deviceRequired": "Please select a device",
+        "deviceRequired": "Please select device",
         "documentType": "Document Type",
-        "documentTypeRequired": "Please select a document type",
+        "documentTypeRequired": "Please select document type",
         "fileUpload": "Upload File",
-        "fileRequired": "Please select a file to upload",
-        "pdfOnly": "PDF only, max 10MB",
+        "fileRequired": "Please select file to upload",
+        "pdfOnly": "PDF only, maximum 10MB",
         "uploadButton": "Upload Document",
         "uploading": "Uploading...",
         "success": "Technical record uploaded successfully",
@@ -1268,7 +1461,7 @@
         "title": "Technical Records - {buildingName}",
         "found": "Found {count} technical documents",
         "noRecords": "No technical records",
-        "noRecordsMessage": "There are currently no technical records for this building.",
+        "noRecordsMessage": "Currently no technical records for this building.",
         "uploadNew": "Upload New",
         "deviceInfo": "Device Information",
         "device": "Device",
@@ -1352,7 +1545,7 @@
   },
   "autoSchedule": {
     "title": "Create Manual Maintenance Schedule",
-    "description": "Create a new maintenance schedule that will automatically create tasks based on the cycle and building selected.",
+    "description": "Create a new maintenance schedule that will automatically create jobs based on selected cycle and building.",
     "form": {
       "scheduleName": {
         "label": "Schedule Name",
@@ -1364,15 +1557,15 @@
       },
       "description": {
         "label": "Description",
-        "placeholder": "Enter schedule description"
+        "placeholder": "Enter description"
       },
       "startDate": {
         "label": "Start Date",
-        "tooltip": "Select start date for the maintenance schedule. Cannot select past dates."
+        "tooltip": "Select start date for maintenance schedule. Cannot select past dates."
       },
       "endDate": {
         "label": "End Date",
-        "tooltip": "Select end date for the maintenance schedule. Must be after start date."
+        "tooltip": "Select end date for maintenance schedule. Must be after start date."
       },
       "buildingDetails": {
         "label": "Building Details",
@@ -1390,13 +1583,13 @@
     },
     "errors": {
       "scheduleNameRequired": "Please enter schedule name",
-      "cycleRequired": "Please select a maintenance cycle",
+      "cycleRequired": "Please select maintenance cycle",
       "buildingRequired": "Please select at least one building detail",
       "startDateRequired": "Please select start date",
       "endDateRequired": "Please select end date",
       "startDatePast": "Start date cannot be in the past",
       "endDateBeforeStart": "End date must be after start date",
-      "fixDateErrors": "Please fix date errors before sending",
+      "fixDateErrors": "Please fix date errors before submitting",
       "createFailed": "Unable to create schedule"
     },
     "success": "Schedule created successfully"
@@ -1406,10 +1599,10 @@
       "backToCalendar": "Back to Calendar",
       "scheduleOverview": "Schedule Overview",
       "maintenanceJobs": "Maintenance Jobs",
-      "showingJobs": "Showing {{count}} on {{total}} jobs",
+      "showingJobs": "Showing {{count}} of {{total}} jobs",
       "newJob": "New Job",
       "noJobsFound": "No maintenance jobs found",
-      "noJobsDescription": "No jobs have been linked to this schedule yet. Click below to create the first maintenance job.",
+      "noJobsDescription": "No jobs are linked to this schedule yet. Click below to create the first maintenance job.",
       "createFirstJob": "Create First Job",
       "locationDetails": "Location Details",
       "equipment": "Equipment",
@@ -1438,8 +1631,15 @@
         "createTask": "Create Task"
       },
       "deleteConfirm": {
-        "title": "Confirm Delete",
-        "message": "Are you sure you want to delete this job? This action cannot be undone."
+        "title": "Confirm Cancel",
+        "message": "Are you sure you want to cancel this job? This action cannot be undone."
+      },
+      "status": {
+        "title": "Status",
+        "pending": "Pending",
+        "inprogress": "In Progress",
+        "completed": "Completed",
+        "cancel": "Cancelled"
       }
     }
   },
@@ -1450,30 +1650,30 @@
         "title": "Upload Technical Record",
         "device": {
           "label": "Device",
-          "required": "Please select a device",
+          "required": "Please select device",
           "select": "Select device",
-          "allDevicesHaveRecords": "All devices in this building already have technical records. You can only upload a technical record for each device."
+          "allDevicesHaveRecords": "All devices in this building already have technical records. You can only upload one technical record per device."
         },
         "documentType": {
           "label": "Document Type",
-          "required": "Please select a document type",
+          "required": "Please select document type",
           "select": "Select document type",
           "options": {
-            "manual": "Manual Usage",
-            "specification": "Technical Specification",
+            "manual": "User Manual",
+            "specification": "Specification",
             "certificate": "Certificate",
-            "warranty": "Warranty",
-            "maintenance": "Maintenance"
+            "warranty": "Warranty Document",
+            "maintenance": "Maintenance Guide"
           }
         },
         "file": {
           "label": "Upload File",
-          "required": "Please select a file to upload",
+          "required": "Please select file to upload",
           "dragDrop": "or drag and drop",
-          "pdfOnly": "PDF only, max 10MB",
+          "pdfOnly": "PDF only, maximum 10MB",
           "uploadButton": "Upload File",
           "removeFile": "Remove File",
-          "fileTooLarge": "File size cannot exceed 10MB",
+          "fileTooLarge": "File size must not exceed 10MB",
           "invalidType": "Only PDF files are accepted"
         },
         "buttons": {
@@ -1488,7 +1688,7 @@
         "uploadNew": "Upload New",
         "noRecords": {
           "title": "No Technical Records",
-          "description": "There are currently no technical records for this building."
+          "description": "Currently no technical records for this building."
         },
         "deviceInfo": {
           "title": "Device Information",

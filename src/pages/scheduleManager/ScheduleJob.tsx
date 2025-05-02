@@ -51,6 +51,7 @@ const ScheduleJob: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState(false)
   const [currentDevice, setCurrentDevice] = useState<any>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showEmailConfirm, setShowEmailConfirm] = useState(false)
   const { t } = useTranslation()
 
   // Fetch schedule details
@@ -184,12 +185,21 @@ const ScheduleJob: React.FC = () => {
   }
 
   const handleSendEmail = async (jobId: string) => {
-    try {
-      await sendEmailMutation.mutateAsync(jobId)
-      toast.success('Maintenance email sent successfully')
-      refetchJobs()
-    } catch (error) {
-      toast.error('Failed to send maintenance email')
+    setSelectedJob(scheduleJobsData?.data.find(job => job.schedule_job_id === jobId) || null)
+    setShowEmailConfirm(true)
+  }
+
+  const handleConfirmSendEmail = async () => {
+    if (selectedJob) {
+      try {
+        await sendEmailMutation.mutateAsync(selectedJob.schedule_job_id)
+        toast.success('Maintenance email sent successfully')
+        setShowEmailConfirm(false)
+        setSelectedJob(null)
+        refetchJobs()
+      } catch (error) {
+        toast.error('Failed to send maintenance email')
+      }
     }
   }
 
@@ -200,39 +210,44 @@ const ScheduleJob: React.FC = () => {
           className:
             'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border border-yellow-300',
           icon: <RiAlertLine className="mr-1" />,
+          text: t(`scheduleDetail.ScheduleJob.status.${status.toLowerCase()}`)
         }
       case 'inprogress':
         return {
           className:
             'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border border-blue-300',
           icon: <RiTimeLine className="mr-1" />,
+          text: t(`scheduleDetail.ScheduleJob.status.${status.toLowerCase()}`)
         }
       case 'completed':
         return {
           className:
             'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-300',
           icon: <RiCheckboxCircleLine className="mr-1" />,
+          text: t(`scheduleDetail.ScheduleJob.status.${status.toLowerCase()}`)
         }
       case 'cancel':
         return {
           className:
             'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border border-red-300',
           icon: <RiCloseCircleLine className="mr-1" />,
+          text: t(`scheduleDetail.ScheduleJob.status.${status.toLowerCase()}`)
         }
       default:
         return {
           className:
             'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border border-gray-300',
           icon: <RiInformationLine className="mr-1" />,
+          text: status
         }
     }
   }
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
-      month: 'short',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
@@ -320,7 +335,7 @@ const ScheduleJob: React.FC = () => {
                 <div
                   className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${statusInfo.className}`}
                 >
-                  {statusInfo.icon} {scheduleStatus}
+                  {statusInfo.icon} {statusInfo.text}
                 </div>
               </div>
             </div>
@@ -372,10 +387,10 @@ const ScheduleJob: React.FC = () => {
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center">
                             <RiSettings3Line className="mr-2 text-blue-500" />
-                            {cycleData.device_type}
+                            {t(`maintenanceCycle.filterOptions.deviceType.${cycleData.device_type}`)}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 ml-4">
-                            {cycleData.frequency} ({cycleData.basis})
+                            {t(`maintenanceCycle.filterOptions.frequency.${cycleData.frequency}`)} ({t(`maintenanceCycle.filterOptions.basis.${cycleData.basis}`)})
                           </div>
                         </div>
                       ) : (
@@ -461,7 +476,7 @@ const ScheduleJob: React.FC = () => {
                     {t('scheduleDetail.ScheduleJob.equipment')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    {t('scheduleDetail.ScheduleJob.status')}
+                    {t('scheduleDetail.ScheduleJob.status.title')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('scheduleDetail.ScheduleJob.schedule')}
@@ -547,7 +562,7 @@ const ScheduleJob: React.FC = () => {
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium inline-flex items-center ${statusInfo.className}`}
                         >
-                          {statusInfo.icon} {job.status}
+                          {statusInfo.icon} {statusInfo.text}
                         </span>
                         <div className="text-xs text-gray-500 mt-1">
                           {t('scheduleDetail.ScheduleJob.updated', { date: formatDate(job.updated_at) })}
@@ -588,7 +603,7 @@ const ScheduleJob: React.FC = () => {
                                 <button
                                   onClick={() => handleSendEmail(job.schedule_job_id)}
                                   disabled={sendEmailMutation.isPending}
-                                  className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded-full hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   title={t('scheduleDetail.ScheduleJob.tooltips.sendEmail')}
                                 >
                                   <RiMailLine className="w-5 h-5" />
@@ -666,13 +681,27 @@ const ScheduleJob: React.FC = () => {
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
-        title={t('scheduleDetail.ScheduleJob.deleteConfirm.title')}
-        message={t('scheduleDetail.ScheduleJob.deleteConfirm.message')}
+        title={t('calendar.confirmModal.cancelJob.title')}
+        message={t('calendar.confirmModal.cancelJob.message')}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setShowDeleteConfirm(false)
           setSelectedJob(null)
         }}
+      />
+
+      <ConfirmModal
+        isOpen={showEmailConfirm}
+        title={t('calendar.confirmModal.sendEmail.title')}
+        message={t('calendar.confirmModal.sendEmail.message')}
+        onConfirm={handleConfirmSendEmail}
+        onCancel={() => {
+          setShowEmailConfirm(false)
+          setSelectedJob(null)
+        }}
+        confirmText={t('calendar.confirmModal.sendEmail.confirm')}
+        cancelText={t('calendar.confirmModal.sendEmail.cancel')}
+        confirmButtonClassName="bg-blue-600 hover:bg-blue-700 text-white"
       />
 
       {showTooltip &&

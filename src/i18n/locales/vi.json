@@ -1,5 +1,18 @@
 {
   "common": {
+    "pagination": {
+      "itemsPerPage": "Hiển thị:",
+      "of": "trên tổng số",
+      "items": "mục",
+      "previousPage": "Trang trước",
+      "nextPage": "Trang sau",
+      "page": "Trang",
+      "currentPage": "Trang hiện tại",
+      "showing": "Hiển thị",
+      "to": "đến",
+      "ofTotal": "trên tổng số",
+      "itemsPerPageTitle": "Chọn số mục hiển thị trên mỗi trang"
+    },
     "username": "Tên đăng nhập",
     "password": "Mật khẩu",
     "rememberPassword": "Ghi nhớ mật khẩu",
@@ -253,19 +266,6 @@
       "seventy": "Bảy mươi",
       "eighty": "Tám mươi",
       "ninety": "Chín mươi",
-      "pagination": {
-        "itemsPerPage": "Hiển thị:",
-        "of": "trên tổng số",
-        "items": "mục",
-        "previousPage": "Trang trước",
-        "nextPage": "Trang sau",
-        "page": "Trang",
-        "currentPage": "Trang hiện tại",
-        "showing": "Hiển thị",
-        "to": "đến",
-        "ofTotal": "trên tổng số",
-        "itemsPerPageTitle": "Chọn số mục hiển thị trên mỗi trang"
-      },
       "loginSuccess": "Đăng nhập thành công",
       "login": {
         "title": "ĐĂNG NHẬP",
@@ -970,10 +970,10 @@
       "calendar": "Lịch"
     },
     "status": {
+      "pending": "Chờ xử lý",
       "inProgress": "Đang thực hiện",
       "completed": "Hoàn thành",
-      "cancel": "Đã hủy",
-      "pending": "Chờ xử lý"
+      "cancel": "Đã hủy"
     },
     "statusLabels": {
       "inProgress": "Đang thực hiện",
@@ -1184,6 +1184,64 @@
           "createTask": "Tạo Công việc"
         }
       }
+    },
+    "updateStatusModal": {
+      "title": "Cập nhật trạng thái công việc",
+      "currentStatus": "Trạng thái hiện tại",
+      "selectNewStatus": "Chọn trạng thái mới",
+      "jobDetails": "Chi tiết công việc",
+      "building": "Tòa nhà",
+      "detail": "Chi tiết",
+      "runDate": "Ngày thực hiện",
+      "confirmStatusChange": "Xác nhận thay đổi trạng thái",
+      "confirmMessage": "Bạn có chắc chắn muốn thay đổi trạng thái từ {{currentStatus}} thành {{newStatus}}?",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận"
+    },
+    "confirmModal": {
+      "cancel": "Hủy",
+      "delete": "Xóa",
+      "confirm": "Xác nhận",
+      "cancelJob": {
+        "title": "Xác nhận hủy",
+        "message": "Bạn có chắc chắn muốn hủy công việc này? Hành động này không thể hoàn tác."
+      },
+      "sendEmail": {
+        "title": "Xác nhận gửi email",
+        "message": "Bạn có chắc chắn muốn gửi email bảo trì cho cư dân ở chung cư này?",
+        "confirm": "Gửi email",
+        "cancel": "Hủy"
+      }
+    },
+    "taskModal": {
+      "title": {
+        "create": "Tạo nhiệm vụ",
+        "details": "Chi tiết nhiệm vụ"
+      },
+      "scheduleJobDetails": "Chi tiết công việc theo lịch",
+      "building": "Tòa nhà",
+      "schedule": "Lịch trình",
+      "runDate": "Ngày thực hiện",
+      "status": "Trạng thái",
+      "taskInformation": "Thông tin nhiệm vụ",
+      "created": "Ngày tạo",
+      "lastUpdated": "Cập nhật lần cuối",
+      "description": "Mô tả",
+      "assignmentInformation": "Thông tin phân công",
+      "assignedTo": "Phân công cho",
+      "noAssignment": "Không có thông tin phân công cho nhiệm vụ này",
+      "assignLeader": "Phân công trưởng nhóm",
+      "assignLeaderRequired": "Vui lòng chọn trưởng nhóm",
+      "descriptionRequired": "Vui lòng nhập mô tả",
+      "noLeadersAvailable": "Không có trưởng nhóm nào để phân công. Vui lòng thêm nhân viên có vai trò 'Nhân viên' và vị trí 'Trưởng nhóm' trước.",
+      "loadingStaff": "Đang tải nhân viên...",
+      "buttons": {
+        "close": "Đóng",
+        "cancel": "Hủy",
+        "createTask": "Tạo nhiệm vụ",
+        "creating": "Đang tạo..."
+      },
+      "taskExists": "Đã tồn tại nhiệm vụ cho công việc theo lịch này"
     }
   },
   "building": {
@@ -1451,6 +1509,13 @@
       "deleteConfirm": {
         "title": "Xác nhận hủy",
         "message": "Bạn có chắc chắn muốn hủy công việc này? Hành động này không thể hoàn tác."
+      },
+      "status": {
+        "title": "Trạng thái",
+        "pending": "Chờ xử lý",
+        "inprogress": "Đang thực hiện",
+        "completed": "Đã hoàn thành",
+        "cancel": "Đã hủy"
       }
     }
   },

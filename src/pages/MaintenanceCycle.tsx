@@ -385,28 +385,25 @@ const MaintenanceCycleManagement: React.FC = () => {
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
           <Settings className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
-          {t(`maintenanceCycle.filterOptions.frequency.${item.frequency.toLowerCase()}`)}
+          {t(`maintenanceCycle.filterOptions.frequency.${item.frequency}`)}
         </div>
       ),
     },
     {
       key: 'basis',
       title: t('maintenanceCycle.table.basis'),
-      render: item => {
-        const basisKey = item.basis.toLowerCase()
-        return (
-          <div className="text-sm text-gray-700 dark:text-gray-300">
-            {t(`maintenanceCycle.filterOptions.basis.${basisKey}`)}
-          </div>
-        )
-      },
+      render: item => (
+        <div className="text-sm text-gray-700 dark:text-gray-300">
+          {t(`maintenanceCycle.filterOptions.basis.${item.basis}`)}
+        </div>
+      ),
     },
     {
       key: 'device_type',
       title: t('maintenanceCycle.table.deviceType'),
       render: item => (
         <div className="text-sm text-gray-700 dark:text-gray-300">
-          {t(`maintenanceCycle.filterOptions.deviceType.${item.device_type.toLowerCase()}`)}
+          {t(`maintenanceCycle.filterOptions.deviceType.${item.device_type}`)}
         </div>
       ),
     },
@@ -512,7 +509,7 @@ const MaintenanceCycleManagement: React.FC = () => {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {t(`maintenanceCycle.filterOptions.deviceType.${history.device_type.toLowerCase()}`)} - {t(`maintenanceCycle.filterOptions.frequency.${history.frequency.toLowerCase()}`)}
+                        {t(`maintenanceCycle.filterOptions.deviceType.${history.device_type}`)} - {t(`maintenanceCycle.filterOptions.frequency.${history.frequency}`)}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         {t('maintenanceCycle.changedAt')}: {new Date(history.changed_at).toLocaleString()}

@@ -56,6 +56,47 @@ interface EventModalProps {
   maintenanceCycles: MaintenanceCycle[]
 }
 
+interface BuildingDetail {
+  buildingDetailId: string
+  name: string
+  building?: {
+    name: string
+  }
+  status?: string
+  total_apartments: number
+  area?: number
+}
+
+// Helper function to render status badges
+const getStatusBadge = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'operational':
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+          {t('building.status.operational')}
+        </span>
+      )
+    case 'maintenance':
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+          {t('building.status.maintenance')}
+        </span>
+      )
+    case 'inactive':
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
+          {t('building.status.inactive')}
+        </span>
+      )
+    default:
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
+          {status}
+        </span>
+      )
+  }
+}
+
 const EventModal: React.FC<EventModalProps> = ({
   isOpen,
   isCreateMode,
@@ -175,10 +216,10 @@ const EventModal: React.FC<EventModalProps> = ({
   }
 
   const statusOptions = [
-    { value: 'Pending', label: 'Pending' },
-    { value: 'InProgress', label: 'In Progress' },
-    { value: 'Completed', label: 'Completed' },
-    { value: 'Cancel', label: 'Cancel' },
+    { value: 'Pending', label: t('calendar.statusLabels.pending') },
+    { value: 'InProgress', label: t('calendar.statusLabels.inProgress') },
+    { value: 'Completed', label: t('calendar.statusLabels.completed') },
+    { value: 'Cancel', label: t('calendar.statusLabels.cancel') },
   ]
 
   // Add this function to handle building modal toggling while preserving form data
@@ -221,7 +262,13 @@ const EventModal: React.FC<EventModalProps> = ({
     try {
       const cycle = cyclesArray.find(c => c.cycle_id === cycleId)
       console.log('Found cycle:', cycle)
-      return cycle ? `${cycle.device_type} - ${cycle.frequency} (${cycle.basis})` : ''
+      if (!cycle) return ''
+
+      const deviceType = t(`maintenanceCycle.filterOptions.deviceType.${cycle.device_type}`)
+      const frequency = t(`maintenanceCycle.filterOptions.frequency.${cycle.frequency}`)
+      const basis = t(`maintenanceCycle.filterOptions.basis.${cycle.basis}`)
+
+      return `${deviceType} - ${frequency} (${basis})`
     } catch (error) {
       console.error('Error getting cycle label:', error)
       return ''
@@ -304,7 +351,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 {Array.isArray(cyclesArray) &&
                   cyclesArray.map(cycle => (
                     <option key={cycle.cycle_id} value={cycle.cycle_id}>
-                      {cycle.device_type} - {cycle.frequency} ({cycle.basis})
+                      {getCycleLabel(cycle.cycle_id)}
                     </option>
                   ))}
               </select>
@@ -421,13 +468,16 @@ const EventModal: React.FC<EventModalProps> = ({
             </div>
 
             <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-              <div className="max-h-60 overflow-y-auto p-2 space-y-2">
+              <div className="max-h-60 overflow-y-auto p-2 space-y-2 custom-scrollbar">
                 {selectedTab === 'all' ? (
                   filteredBuildingDetails?.length > 0 ? (
                     filteredBuildingDetails.map(buildingDetail => (
                       <div
                         key={buildingDetail.buildingDetailId}
-                        className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+                        className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 border ${selectedBuildingDetails.includes(buildingDetail.buildingDetailId)
+                          ? 'border-blue-200 dark:border-blue-800/30 bg-blue-50/30 dark:bg-blue-900/10'
+                          : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                          }`}
                       >
                         <input
                           type="checkbox"
@@ -440,15 +490,25 @@ const EventModal: React.FC<EventModalProps> = ({
                           htmlFor={`building-${buildingDetail.buildingDetailId}`}
                           className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer flex-1"
                         >
-                          <div className="font-medium">{buildingDetail.building?.name}</div>
-                          <div className="text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center justify-between">
+                            <div className="font-medium text-base">{buildingDetail.building?.name}</div>
+                            {buildingDetail.status && (
+                              <div className="text-xs">
+                                {getStatusBadge(buildingDetail.status)}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-gray-500 dark:text-gray-400 mt-1">
                             {buildingDetail.name}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {buildingDetail.total_apartments} {t('buildingDetail.selection.apartments')}
                           </div>
                         </label>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    <div className="text-center py-4 text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg">
                       {t('calendar.eventModal.buildings.noResults')}
                     </div>
                   )
@@ -460,7 +520,7 @@ const EventModal: React.FC<EventModalProps> = ({
                     return buildingDetail ? (
                       <div
                         key={buildingDetailId}
-                        className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+                        className="flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 border border-blue-200 dark:border-blue-800/30 bg-blue-50/30 dark:bg-blue-900/10"
                       >
                         <input
                           type="checkbox"
@@ -473,16 +533,26 @@ const EventModal: React.FC<EventModalProps> = ({
                           htmlFor={`selected-building-${buildingDetailId}`}
                           className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer flex-1"
                         >
-                          <div className="font-medium">{buildingDetail.building?.name}</div>
-                          <div className="text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center justify-between">
+                            <div className="font-medium text-base">{buildingDetail.building?.name}</div>
+                            {buildingDetail.status && (
+                              <div className="text-xs">
+                                {getStatusBadge(buildingDetail.status)}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-gray-500 dark:text-gray-400 mt-1">
                             {buildingDetail.name}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {buildingDetail.total_apartments} {t('buildingDetail.selection.apartments')}
                           </div>
                         </label>
                       </div>
                     ) : null
                   })
                 ) : (
-                  <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  <div className="text-center py-4 text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg">
                     {t('calendar.eventModal.buildings.noSelected')}
                   </div>
                 )}
@@ -540,14 +610,14 @@ const EventModal: React.FC<EventModalProps> = ({
         </form>
       </div>
 
-      <BuildingDetailSelectionModal
+      {/* <BuildingDetailSelectionModal
         isOpen={showBuildingModal}
         onClose={() => setShowBuildingModal(false)}
         buildingDetails={buildingDetails}
         selectedBuildingDetails={selectedBuildingDetails}
         onBuildingDetailSelect={onBuildingDetailSelect}
         selectedEvent={selectedEvent}
-      />
+      /> */}
 
       <ConfirmModal
         isOpen={showDeleteConfirm}

@@ -1,5 +1,6 @@
 import React from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import { useTranslation } from 'react-i18next'
 
 interface ConfirmModalProps {
     isOpen: boolean
@@ -24,6 +25,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     confirmButtonClassName = 'bg-red-600 hover:bg-red-700 text-white',
     cancelButtonClassName = 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600',
 }) => {
+    const { t } = useTranslation()
+
     if (!isOpen) return null
 
     return (
@@ -51,13 +54,13 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                         onClick={onCancel}
                         className={`px-4 py-2 rounded-lg transition-colors ${cancelButtonClassName}`}
                     >
-                        {cancelText}
+                        {cancelText || t('calendar.confirmModal.cancel')}
                     </button>
                     <button
                         onClick={onConfirm}
                         className={`px-4 py-2 rounded-lg transition-colors ${confirmButtonClassName}`}
                     >
-                        {confirmText}
+                        {confirmText || t('calendar.confirmModal.confirm')}
                     </button>
                 </div>
             </div>
