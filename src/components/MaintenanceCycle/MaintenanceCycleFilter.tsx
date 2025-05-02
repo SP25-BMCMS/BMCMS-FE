@@ -32,34 +32,34 @@ const MaintenanceCycleFilter: React.FC<MaintenanceCycleFilterProps> = ({
 
   const frequencyOptions: FilterOption[] = [
     { value: '', label: t('maintenanceCycle.filterOptions.frequency.all') },
-    { value: 'daily', label: t('maintenanceCycle.filterOptions.frequency.daily') },
-    { value: 'weekly', label: t('maintenanceCycle.filterOptions.frequency.weekly') },
-    { value: 'monthly', label: t('maintenanceCycle.filterOptions.frequency.monthly') },
-    { value: 'yearly', label: t('maintenanceCycle.filterOptions.frequency.yearly') },
-    { value: 'specific', label: t('maintenanceCycle.filterOptions.frequency.specific') }
+    { value: 'Daily', label: t('maintenanceCycle.filterOptions.frequency.daily') },
+    { value: 'Weekly', label: t('maintenanceCycle.filterOptions.frequency.weekly') },
+    { value: 'Monthly', label: t('maintenanceCycle.filterOptions.frequency.monthly') },
+    { value: 'Yearly', label: t('maintenanceCycle.filterOptions.frequency.yearly') },
+    { value: 'Specific', label: t('maintenanceCycle.filterOptions.frequency.specific') }
   ]
 
   const basisOptions: FilterOption[] = [
     { value: '', label: t('maintenanceCycle.filterOptions.basis.all') },
-    { value: 'manufacturerrecommendation', label: t('maintenanceCycle.filterOptions.basis.manufacturerrecommendation') },
-    { value: 'legalstandard', label: t('maintenanceCycle.filterOptions.basis.legalstandard') },
-    { value: 'operationalexperience', label: t('maintenanceCycle.filterOptions.basis.operationalexperience') },
-    { value: 'other', label: t('maintenanceCycle.filterOptions.basis.other') },
+    { value: 'ManufacturerRecommendation', label: t('maintenanceCycle.filterOptions.basis.manufacturerrecommendation') },
+    { value: 'LegalStandard', label: t('maintenanceCycle.filterOptions.basis.legalstandard') },
+    { value: 'OperationalExperience', label: t('maintenanceCycle.filterOptions.basis.operationalexperience') },
+    { value: 'Other', label: t('maintenanceCycle.filterOptions.basis.other') },
   ]
 
   const deviceTypeOptions: FilterOption[] = [
     { value: '', label: t('maintenanceCycle.filterOptions.deviceType.all') },
-    { value: 'elevator', label: t('maintenanceCycle.filterOptions.deviceType.elevator') },
-    { value: 'fireprotection', label: t('maintenanceCycle.filterOptions.deviceType.fireprotection') },
-    { value: 'electrical', label: t('maintenanceCycle.filterOptions.deviceType.electrical') },
-    { value: 'plumbing', label: t('maintenanceCycle.filterOptions.deviceType.plumbing') },
-    { value: 'hvac', label: t('maintenanceCycle.filterOptions.deviceType.hvac') },
-    { value: 'cctv', label: t('maintenanceCycle.filterOptions.deviceType.cctv') },
-    { value: 'generator', label: t('maintenanceCycle.filterOptions.deviceType.generator') },
-    { value: 'lighting', label: t('maintenanceCycle.filterOptions.deviceType.lighting') },
-    { value: 'automaticdoor', label: t('maintenanceCycle.filterOptions.deviceType.automaticdoor') },
-    { value: 'fireextinguisher', label: t('maintenanceCycle.filterOptions.deviceType.fireextinguisher') },
-    { value: 'other', label: t('maintenanceCycle.filterOptions.deviceType.other') }
+    { value: 'Elevator', label: t('maintenanceCycle.filterOptions.deviceType.elevator') },
+    { value: 'FireProtection', label: t('maintenanceCycle.filterOptions.deviceType.fireprotection') },
+    { value: 'Electrical', label: t('maintenanceCycle.filterOptions.deviceType.electrical') },
+    { value: 'Plumbing', label: t('maintenanceCycle.filterOptions.deviceType.plumbing') },
+    { value: 'HVAC', label: t('maintenanceCycle.filterOptions.deviceType.hvac') },
+    { value: 'CCTV', label: t('maintenanceCycle.filterOptions.deviceType.cctv') },
+    { value: 'Generator', label: t('maintenanceCycle.filterOptions.deviceType.generator') },
+    { value: 'Lighting', label: t('maintenanceCycle.filterOptions.deviceType.lighting') },
+    { value: 'AutomaticDoor', label: t('maintenanceCycle.filterOptions.deviceType.automaticdoor') },
+    { value: 'FireExtinguisher', label: t('maintenanceCycle.filterOptions.deviceType.fireextinguisher') },
+    { value: 'Other', label: t('maintenanceCycle.filterOptions.deviceType.other') }
   ]
 
   return (

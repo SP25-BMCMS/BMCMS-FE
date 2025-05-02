@@ -1,5 +1,12 @@
 {
   "common": {
+    "username": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "rememberPassword": "Ghi nhớ mật khẩu",
+    "forgotPassword": "Quên mật khẩu",
+    "loginSuccess": "Đăng nhập thành công",
+    "loginFailed": "Đăng nhập thất bại",
+    "loginButton": "ĐĂNG NHẬP",
     "apartments": "Căn hộ",
     "floors": "Tầng",
     "search": "Tìm kiếm",
@@ -29,6 +36,7 @@
     "changeStatus": "Thay đổi trạng thái",
     "noData": "Không có dữ liệu",
     "logout": "Đăng xuất",
+    "logoutSuccess": "Đăng xuất thành công",
     "login": "Đăng nhập",
     "register": "Đăng ký",
     "profile": "Hồ sơ",
@@ -257,6 +265,18 @@
         "to": "đến",
         "ofTotal": "trên tổng số",
         "itemsPerPageTitle": "Chọn số mục hiển thị trên mỗi trang"
+      },
+      "loginSuccess": "Đăng nhập thành công",
+      "login": {
+        "title": "ĐĂNG NHẬP",
+        "username": "Tên đăng nhập",
+        "password": "Mật khẩu",
+        "rememberPassword": "Ghi nhớ mật khẩu",
+        "forgotPassword": "Quên mật khẩu",
+        "loginButton": "ĐĂNG NHẬP",
+        "loginFailed": "Đăng nhập thất bại",
+        "usernamePlaceholder": "John_Doe",
+        "passwordPlaceholder": "****************"
       }
     },
     "dropdown": {
@@ -528,14 +548,14 @@
       "dateOfBirth": "Ngày sinh",
       "action": "Thao tác"
     },
-    "assignLeader": "Phân công nhân viên lãnh đạo",
+    "assignLeader": "Phân công nhân viên trưởng nhóm",
     "assignNote": "Phân công nhân viên sẽ tự động cập nhật trạng thái vết nứt thành",
-    "leaderNote": "Lưu ý: Chỉ người dùng có vai trò 'Nhân viên' và vị trí 'Lãnh đạo' mới có thể được phân công xử lý báo cáo vết nứt.",
+    "leaderNote": "Lưu ý: Chỉ người dùng có vai trò 'Nhân viên' và vị trí 'Trưởng nhóm' mới có thể được phân công xử lý báo cáo vết nứt.",
     "responsibilityNote": "Nhân viên được chọn sẽ chịu trách nhiệm xử lý báo cáo vết nứt này.",
     "assignAndUpdate": "Phân công & Cập nhật trạng thái",
-    "selectLeader": "Chọn nhân viên lãnh đạo",
-    "noLeadersAvailable": "Không có nhân viên lãnh đạo nào để phân công. Vui lòng thêm nhân viên có vai trò 'Nhân viên' và vị trí 'Lãnh đạo' trước.",
-    "leader": "Lãnh đạo",
+    "selectLeader": "Chọn nhân viên trưởng nhóm",
+    "noLeadersAvailable": "Không có nhân viên trưởng nhóm nào để phân công. Vui lòng thêm nhân viên có vai trò 'Nhân viên' và vị trí 'Trưởng nhóm' trước.",
+    "leader": "Trưởng nhóm",
     "processing": "Đang xử lý..."
   },
   "maintenanceCycle": {
@@ -554,6 +574,22 @@
     "updatedBy": "Cập nhật bởi",
     "reason": "Lý do",
     "noHistory": "Không có lịch sử",
+    "deviceTypes": {
+      "All": "Tất cả thiết bị",
+      "Elevator": "Thang máy",
+      "Fireprotection": "Phòng cháy",
+      "Electrical": "Điện",
+      "Plumbing": "Ống nước",
+      "HVAC": "HVAC",
+      "CCTV": "CCTV",
+      "Generator": "Máy phát điện",
+      "Lighting": "Chiếu sáng",
+      "Automaticdoor": "Cửa tự động",
+      "Fireextinguisher": "Bình chữa cháy",
+      "Other": "Khác",
+      "FireProtection": "Phòng cháy",
+      "AutomaticDoor": "Cửa tự động"
+    },
     "table": {
       "no": "STT",
       "frequency": "Tần suất",
@@ -1051,6 +1087,23 @@
         "message": "Bạn có chắc chắn muốn xóa lịch trình này? Hành động này không thể hoàn tác.",
         "cancel": "Hủy",
         "confirm": "Xóa"
+      },
+      "buildings": {
+        "building": "Tòa nhà",
+        "title": "Danh sách tòa nhà",
+        "search": "Tìm kiếm tòa nhà...",
+        "noResults": "Không tìm thấy tòa nhà nào",
+        "all": "Tất cả",
+        "selected": "Đã chọn",
+        "selectAll": "Chọn tất cả",
+        "deselectAll": "Bỏ chọn tất cả",
+        "buildingName": "Tên tòa nhà",
+        "buildingDetails": "Chi tiết tòa nhà",
+        "status": {
+          "active": "Đang hoạt động",
+          "inactive": "Không hoạt động",
+          "maintenance": "Đang bảo trì"
+        }
       }
     },
     "buildings": {

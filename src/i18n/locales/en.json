@@ -1,37 +1,42 @@
 {
   "common": {
+    "username": "Username",
+    "password": "Password",
+    "rememberPassword": "Remember password",
+    "forgotPassword": "Forgot password",
+    "loginSuccess": "Login successful",
+    "loginFailed": "Login failed",
+    "loginButton": "LOGIN",
+    "apartments": "Apartments",
+    "floors": "Floors",
     "search": "Search",
     "filter": "Filter",
     "all": "All",
     "status": "Status",
     "action": "Action",
-    "createdDate": "Created Date",
+    "createdDate": "Created date",
     "description": "Description",
     "building": "Building",
     "schedule": "Schedule",
     "maintenance": "Maintenance",
     "repair": "Repair",
     "crack": "Crack",
-    "scheduleInfo": "Schedule Info",
-    "scheduleStatus": "Schedule Status",
-    "crackStatus": "Crack Status",
+    "scheduleInfo": "Schedule information",
+    "scheduleStatus": "Schedule status",
+    "crackStatus": "Crack status",
     "loading": "Loading...",
     "error": "Error",
-    "tryAgain": "Try Again",
+    "tryAgain": "Try again",
     "cancel": "Cancel",
     "save": "Save",
     "edit": "Edit",
     "delete": "Delete",
     "view": "View",
     "export": "Export",
-    "changeStatus": "Change Status",
-    "noData": "No Data",
-    "apartments": "apartments",
-    "floors": "floors",
-    "type": "Type",
-    "manufacturer": "Manufacturer",
-    "model": "Model",
+    "changeStatus": "Change status",
+    "noData": "No data",
     "logout": "Logout",
+    "logoutSuccess": "Logout successful",
     "login": "Login",
     "register": "Register",
     "profile": "Profile",
@@ -39,26 +44,27 @@
     "notifications": "Notifications",
     "language": "Language",
     "theme": "Theme",
-    "darkMode": "Dark Mode",
-    "lightMode": "Light Mode",
-    "sessionExpired": "Your session has expired. Please login again.",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "sessionExpired": "Session expired. Please login again.",
     "dashboardLoadError": "Unable to load dashboard data",
-    "connectionError": "Connection Error",
+    "connectionError": "Connection error",
     "created": "Created",
     "lastUpdated": "Last updated",
     "updated": "Updated",
     "close": "Close",
     "uploaded": "Uploaded",
-    "goBack": "Go Back",
+    "goBack": "Go back",
     "unknown": "Unknown",
     "area": "Area",
     "success": "Success",
     "warning": "Warning",
-    "info": "Info",
+    "info": "Information",
+    "other": "Other",
     "tooltip": {
       "loading": "Loading...",
       "error": "Error",
-      "noData": "No Data"
+      "noData": "No data"
     },
     "actions": {
       "loading": "Loading...",
@@ -157,8 +163,6 @@
       "unmute": "Unmute",
       "follow": "Follow",
       "unfollow": "Unfollow",
-      "subscribe": "Subscribe",
-      "unsubscribe": "Unsubscribe",
       "like": "Like",
       "unlike": "Unlike",
       "comment": "Comment",
@@ -257,16 +261,27 @@
         "currentPage": "Current page",
         "showing": "Showing",
         "to": "to",
-        "ofTotal": "of total",
-        "itemsPerPageTitle": "Select number of items per page"
+        "ofTotal": "of",
+        "itemsPerPageTitle": "Select number of items to display per page"
       },
-      "other": "Other"
+      "loginSuccess": "Login successful",
+      "login": {
+        "title": "LOGIN",
+        "username": "Username",
+        "password": "Password",
+        "rememberPassword": "Remember password",
+        "forgotPassword": "Forgot password",
+        "loginButton": "LOGIN",
+        "loginFailed": "Login failed",
+        "usernamePlaceholder": "John_Doe",
+        "passwordPlaceholder": "****************"
+      }
     },
     "dropdown": {
-      "viewDetail": "View Detail",
-      "notAvailable": "Not Available",
+      "viewDetail": "View details",
+      "notAvailable": "Not available",
       "exportPdf": "Export PDF",
-      "changeStatus": "Change Status",
+      "changeStatus": "Change status",
       "remove": "Remove"
     }
   },
@@ -307,41 +322,41 @@
       "description": "Description",
       "building": "Building",
       "crackStatus": "Crack Status",
-      "scheduleInfo": "Schedule Info",
+      "scheduleInfo": "Schedule Information",
       "scheduleStatus": "Schedule Status",
       "createdDate": "Created Date",
       "status": "Status",
       "action": "Action"
     },
     "loading": "Loading tasks...",
-    "error": "Failed to load tasks",
-    "tryAgain": "Try Again",
-    "noData": "No data available",
-    "crackRepair": "Crack Repair",
+    "error": "Unable to load tasks",
+    "tryAgain": "Try again",
+    "noData": "No data",
+    "crackRepair": "Crack Report",
     "scheduledMaintenance": "Scheduled Maintenance",
-    "displayingCrackTasks": "Displaying tasks for building crack repairs",
-    "displayingMaintenanceTasks": "Displaying tasks for scheduled maintenance activities",
-    "changeCrackStatus": "Change Crack Status",
-    "viewDetail": "View Detail",
-    "changeStatus": "Change Status",
+    "displayingCrackTasks": "Displaying crack repair tasks",
+    "displayingMaintenanceTasks": "Displaying scheduled maintenance tasks",
+    "changeCrackStatus": "Change crack status",
+    "viewDetail": "View details",
+    "changeStatus": "Change status",
     "remove": "Remove",
     "exportPdf": "Export PDF",
     "pdfExported": "PDF exported successfully",
-    "pdfExportError": "Failed to export PDF",
-    "crackInfoNotAvailable": "Crack information is not available",
+    "pdfExportError": "Unable to export PDF",
+    "crackInfoNotAvailable": "Crack information not available",
     "detail": {
       "title": "Task Details",
       "backButton": "Back",
       "taskReference": "Task Reference",
-      "created": "Created",
-      "updated": "Updated",
+      "created": "Created Date",
+      "updated": "Updated Date",
       "reportedBy": "Reported By",
       "verifiedBy": "Verified By",
       "location": "Location",
-      "sendNotification": "Send maintenance notification to resident",
+      "sendNotification": "Send maintenance notification to residents",
       "confirmNotification": {
         "title": "Confirm Notification",
-        "message": "Are you sure you want to send a maintenance notification to the resident and mark this task as completed?",
+        "message": "Are you sure you want to send a maintenance notification to residents and mark this task as completed?",
         "cancel": "Cancel",
         "sendAndComplete": "Send & Complete"
       },
@@ -356,7 +371,7 @@
         "lastUpdated": "Last Updated"
       },
       "loading": "Loading task information...",
-      "error": "Failed to load task information. Please try again later."
+      "error": "Unable to load task information. Please try again later."
     },
     "inspection": {
       "title": "Inspection Details",
@@ -366,7 +381,7 @@
       "updated": "Updated",
       "inspections": "Inspections",
       "noInspections": "No inspection data",
-      "loadError": "Failed to load inspection data",
+      "loadError": "Unable to load inspection data",
       "inspectionNumber": "Inspection #{{number}}",
       "inspectedBy": "Inspected By",
       "description": "Description",
@@ -382,11 +397,11 @@
         "assignmentInfo": "Assignment Information",
         "id": "ID",
         "staffId": "Staff ID",
-        "created": "Created",
-        "updated": "Updated",
+        "created": "Created Date",
+        "updated": "Updated Date",
         "inspectionCount": "Inspections ({{count}})",
         "noData": "No inspection data",
-        "loadError": "Failed to load inspection data",
+        "loadError": "Unable to load inspection data",
         "imageCount": "Images ({{count}})"
       },
       "status": {
@@ -410,14 +425,14 @@
           "rejected": "Inspection rejected successfully"
         },
         "error": {
-          "updateFailed": "Failed to update inspection status",
+          "updateFailed": "Unable to update inspection status",
           "missingUser": "Missing user information. Please login again."
         }
       }
     }
   },
   "sidebar": {
-    "dashboard": "Dashboard",
+    "dashboard": "Overview",
     "taskManagement": "Task Management",
     "maintenanceCycle": "Maintenance Cycle",
     "buildingManagement": "Building Management",
@@ -428,92 +443,19 @@
     "crackManagement": "Crack Management",
     "materialManagement": "Material Management",
     "timesheet": {
-      "title": "Timesheet",
+      "title": "Maintenance Schedule",
       "workLog": "Work Log",
       "calendar": "Calendar"
-    }
-  },
-  "dashboard": {
-    "tasksPending": "Tasks Pending",
-    "tasksCompleted": "Tasks Completed",
-    "tasksInProgress": "In Progress",
-    "totalCracks": "Total Cracks",
-    "scheduleJobs": "Schedule Jobs",
-    "totalStaff": "Total Staff",
-    "feedbackRating": "Feedback Rating",
-    "taskStatusDistribution": "Task Status Distribution",
-    "crackSeverityDistribution": "Crack Severity Distribution",
-    "monthlyScheduleDistribution": "Monthly Schedule Distribution",
-    "recentTasks": "Recent Tasks",
-    "recentFeedbacks": "Recent Feedbacks",
-    "feedbackRatings": "Feedback Ratings",
-    "tasks": "tasks",
-    "cracks": "cracks",
-    "schedules": "schedules",
-    "task": "Task",
-    "comments": "Comments",
-    "by": "By",
-    "rating": "Rating",
-    "noRecentTasks": "No recent tasks found",
-    "feedbacksLoadError": "Failed to load feedbacks",
-    "noTaskDescription": "No task description",
-    "unknownUser": "Unknown user",
-    "noFeedbacks": "No feedbacks found",
-    "feedbackDataLoadError": "Failed to load feedback data",
-    "totalFeedbacks": "Total",
-    "average": "Average",
-    "noFeedbackData": "No feedback data available"
-  },
-  "scheduleDetail": {
-    "ScheduleJob": {
-      "backToCalendar": "Back to Calendar",
-      "scheduleOverview": "Schedule Overview",
-      "maintenanceJobs": "Maintenance Jobs",
-      "showingJobs": "Showing {{count}} of {{total}} jobs",
-      "newJob": "New Job",
-      "noJobsFound": "No maintenance jobs found",
-      "noJobsDescription": "No jobs have been linked to this schedule yet. Click below to create the first maintenance job.",
-      "createFirstJob": "Create First Job",
-      "locationDetails": "Location Details",
-      "equipment": "Equipment",
-      "status": "Status",
-      "schedule": "Schedule",
-      "actions": "Actions",
-      "noEquipment": "No equipment assigned",
-      "moreDevices": "+{{count}} more devices",
-      "updated": "Updated: {{date}}",
-      "runDate": "Run Date: {{date}}",
-      "period": "Period: {{start}} - {{end}}",
-      "cancelled": "Cancelled",
-      "completed": "Completed",
-      "loading": "Loading schedule details...",
-      "schedulePeriod": "Schedule Period: {{start}} - {{end}}",
-      "description": "Description",
-      "noDescription": "No description",
-      "maintenanceCycle": "Maintenance Cycle",
-      "totalJobs": "Total Jobs",
-      "created": "Created",
-      "lastUpdated": "Last Updated",
-      "tooltips": {
-        "updateStatus": "Update Status",
-        "cancelJob": "Cancel Job",
-        "sendEmail": "Send Maintenance Email",
-        "createTask": "Create Task"
-      },
-      "deleteConfirm": {
-        "title": "Confirm Cancellation",
-        "message": "Are you sure you want to cancel this job? This action cannot be undone."
-      }
     }
   },
   "buildingManagement": {
     "title": "Building Management",
     "noBuildingDetails": "No building details available",
-    "loading": "Loading buildings...",
+    "loading": "Loading building data...",
     "noData": "No buildings found",
-    "notAssigned": "Not Assigned",
+    "notAssigned": "Not assigned",
     "searchPlaceholder": "Search buildings...",
-    "viewDetails": "View Details",
+    "viewDetails": "View details",
     "technicalRecords": "Technical Records",
     "status": {
       "operational": "Operational",
@@ -527,116 +469,92 @@
       "status": "Status",
       "createdDate": "Created Date",
       "completionDate": "Completion Date",
-      "action": "Action"
-    }
+      "action": "Action",
+      "totalApartments": "Total Apartments"
+    },
+    "warrantyDate": "Warranty Date",
+    "completionDate": "Completion Date",
+    "buildingDetails": "Building Details"
   },
-  "crackManagement": {
-    "title": "Crack Management",
-    "severity": "Severity",
-    "totalCracks": "Total Cracks: {{count}}",
-    "searchPlaceholder": "Search cracks...",
-    "noData": "No cracks found",
-    "loading": "Loading cracks...",
-    "errorLoading": "Error loading cracks",
+  "residentManagement": {
+    "title": "Resident Management",
+    "addResident": "Add Resident",
+    "editResident": "Edit Resident Information",
+    "deleteResident": "Delete Resident",
+    "residentDetails": "Resident Details",
+    "residentName": "Resident Name",
+    "residentEmail": "Email",
+    "residentPhone": "Phone Number",
+    "residentApartment": "Apartment",
+    "residentStatus": "Status",
+    "loading": "Loading resident data...",
+    "noData": "No resident data found",
+    "searchPlaceholder": "Search by name, email or phone number",
+    "statusUpdateSuccess": "Resident status updated successfully",
+    "statusUpdateError": "Unable to update resident status",
+    "invalidDate": "Invalid date",
+    "error": "Error",
     "filterOptions": {
       "all": "All",
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High"
-    },
-    "status": {
-      "pending": "Pending",
-      "inProgress": "In Progress",
-      "reviewing": "Reviewing",
-      "resolved": "Resolved",
-      "current": "Current Status"
+      "active": "Active",
+      "inactive": "Inactive"
     },
     "table": {
       "no": "No.",
-      "description": "Description",
-      "reportedBy": "Reported By",
+      "name": "Resident Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
       "createdDate": "Created Date",
       "status": "Status",
       "action": "Action"
-    },
-    "crackDetails": "Crack Details",
-    "detailView": "Detail View",
-    "reportInformation": "Report Information",
-    "reportingDetails": "Reporting Details",
-    "assetType": "Asset Type",
-    "privateAsset": "Private Asset",
-    "publicAsset": "Public Asset",
-    "location": "Location",
-    "notSpecified": "Not Specified",
-    "verifiedBy": "Verified By",
-    "notVerified": "Not Verified",
-    "notVerifiedYet": "Not Verified Yet",
-    "crackImages": "Crack Images",
-    "image": "Image",
-    "originalImage": "Original Image",
-    "aiDetected": "AI Detected",
-    "imageLoadError": "Failed to load image",
-    "noImages": "No images available",
-    "statusUpdateSuccess": "Status updated successfully",
-    "error": "An error occurred"
+    }
   },
-  "materialManagement": {
-    "title": "Material Management",
-    "createMaterial": "Create Material",
-    "searchPlaceholder": "Search by name or description...",
-    "noData": "No materials found",
-    "totalMaterials": "Total Materials: {{filtered}} / {{total}}",
+  "staffManagement": {
+    "title": "Staff Management",
+    "error": "Error loading staff information",
+    "addStaff": "Add Staff",
+    "editStaff": "Edit Staff Information",
+    "deleteStaff": "Delete Staff",
+    "staffDetails": "Staff Details",
+    "staffName": "Staff Name",
+    "staffEmail": "Email",
+    "staffPhone": "Phone Number",
+    "staffRole": "Role",
+    "staffStatus": "Status",
+    "loading": "Loading staff data...",
+    "noData": "No staff data found",
+    "searchPlaceholder": "Search by name or ID",
+    "filterByRole": "Filter by role",
+    "changeDepartment": "Change Department",
+    "updateError": "Unable to update staff information",
     "filterOptions": {
-      "status": {
-        "all": "All Status",
-        "active": "Active",
-        "inactive": "Inactive"
-      },
-      "price": {
-        "all": "All Prices",
-        "under100k": "Under 100,000 VND",
-        "100k-500k": "100,000 - 500,000 VND",
-        "500k-1m": "500,000 - 1,000,000 VND",
-        "above1m": "Above 1,000,000 VND"
-      }
+      "all": "All Roles",
+      "staff": "Staff",
+      "manager": "Manager",
+      "admin": "Administrator"
     },
     "table": {
       "no": "No.",
-      "name": "Name",
-      "description": "Description",
-      "unitPrice": "Unit Price",
-      "stockQuantity": "Stock Quantity",
-      "status": "Status",
+      "name": "Staff Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "role": "Role",
+      "department": "Department",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
       "action": "Action"
     },
-    "createSuccess": "Material created successfully",
-    "createError": "Failed to create material",
-    "unitPriceUpdateSuccess": "Unit price updated successfully",
-    "unitPriceUpdateError": "Failed to update unit price",
-    "stockQuantityUpdateSuccess": "Stock quantity updated successfully",
-    "stockQuantityUpdateError": "Failed to update stock quantity",
-    "statusUpdateSuccess": "Status updated successfully",
-    "statusUpdateError": "Failed to update status",
-    "deleteSuccess": "Material deleted successfully",
-    "deleteError": "Failed to delete material",
-    "updateStatus": {
-      "title": "Update Status",
-      "material": "Material",
-      "currentStatus": "Current Status",
-      "newStatus": "New Status",
-      "statusActive": "Active",
-      "statusInactive": "Inactive",
-      "cancel": "Cancel",
-      "update": "Update",
-      "updating": "Updating..."
-    },
-    "deleteConfirm": {
-      "title": "Delete Material",
-      "message": "Are you sure you want to delete this material? This action cannot be undone.",
-      "cancel": "Cancel",
-      "delete": "Delete",
-      "deleting": "Deleting..."
-    }
+    "assignLeader": "Assign Team Leader",
+    "assignNote": "Assigning staff will automatically update crack status to",
+    "leaderNote": "Note: Only users with 'Staff' role and 'Team Leader' position can be assigned to handle crack reports.",
+    "responsibilityNote": "The selected staff will be responsible for handling this crack report.",
+    "assignAndUpdate": "Assign & Update Status",
+    "selectLeader": "Select Team Leader",
+    "noLeadersAvailable": "No team leaders available for assignment. Please add staff with 'Staff' role and 'Team Leader' position first.",
+    "leader": "Team Leader",
+    "processing": "Processing..."
   },
   "maintenanceCycle": {
     "title": "Maintenance Cycle",
@@ -646,14 +564,30 @@
     "viewHistory": "View History",
     "confirmDeletion": "Confirm Deletion",
     "deleteConfirmation": "Are you sure you want to delete the maintenance cycle for {{cycleName}}? This action cannot be undone.",
-    "loading": "Loading maintenance cycles...",
-    "error": "Failed to load maintenance cycles",
+    "loading": "Loading maintenance cycle data...",
+    "error": "Unable to load maintenance cycle data",
     "noData": "No maintenance cycles found",
     "history": "Maintenance Cycle History",
     "changedAt": "Changed at",
     "updatedBy": "Updated by",
     "reason": "Reason",
-    "noHistory": "No history available",
+    "noHistory": "No history",
+    "deviceTypes": {
+      "All": "All Devices",
+      "Elevator": "Elevator",
+      "Fireprotection": "Fire Protection",
+      "Electrical": "Electrical",
+      "Plumbing": "Plumbing",
+      "HVAC": "HVAC",
+      "CCTV": "CCTV",
+      "Generator": "Generator",
+      "Lighting": "Lighting",
+      "Automaticdoor": "Automatic Door",
+      "Fireextinguisher": "Fire Extinguisher",
+      "Other": "Other",
+      "FireProtection": "Fire Protection",
+      "AutomaticDoor": "Automatic Door"
+    },
     "table": {
       "no": "No.",
       "frequency": "Frequency",
@@ -733,7 +667,7 @@
       "errors": {
         "selectCycle": "Please select at least one maintenance cycle",
         "selectBuilding": "Please select at least one building",
-        "generateFailed": "Failed to generate schedule"
+        "generateFailed": "Unable to generate schedule"
       },
       "success": "Schedule generated successfully"
     },
@@ -756,8 +690,8 @@
       },
       "reason": {
         "label": "Change Reason",
-        "required": "Please enter a reason for the change",
-        "placeholder": "Enter reason for change..."
+        "required": "Please enter the change reason",
+        "placeholder": "Enter change reason..."
       },
       "buttons": {
         "cancel": "Cancel",
@@ -766,6 +700,241 @@
         "creating": "Creating...",
         "updating": "Updating..."
       }
+    }
+  },
+  "crackManagement": {
+    "title": "Crack Management",
+    "severity": "Severity",
+    "totalCracks": "Total Cracks: {{count}}",
+    "searchPlaceholder": "Search cracks...",
+    "noData": "No cracks found",
+    "loading": "Loading data...",
+    "errorLoading": "Error loading data",
+    "filterOptions": {
+      "all": "All",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "reviewing": "Reviewing",
+      "resolved": "Resolved",
+      "current": "Current Status"
+    },
+    "table": {
+      "no": "No.",
+      "description": "Description",
+      "reportedBy": "Reported By",
+      "createdDate": "Created Date",
+      "status": "Status",
+      "action": "Action"
+    },
+    "crackDetails": "Crack Details",
+    "detailView": "View Details",
+    "reportInformation": "Report Information",
+    "reportingDetails": "Reporting Details",
+    "assetType": "Asset Type",
+    "privateAsset": "Private Asset",
+    "publicAsset": "Public Asset",
+    "location": "Location",
+    "notSpecified": "Not Specified",
+    "verifiedBy": "Verified By",
+    "notVerified": "Not Verified",
+    "notVerifiedYet": "Not Verified Yet",
+    "crackImages": "Crack Images",
+    "image": "Image",
+    "originalImage": "Original Image",
+    "aiDetected": "AI Detected",
+    "imageLoadError": "Unable to load image",
+    "noImages": "No Images",
+    "statusUpdateSuccess": "Status updated successfully",
+    "error": "An error occurred"
+  },
+  "materialManagement": {
+    "title": "Material Management",
+    "createMaterial": "Add Material",
+    "searchPlaceholder": "Search by name or description...",
+    "noData": "No materials found",
+    "totalMaterials": "Total Materials: {{filtered}} / {{total}}",
+    "filterOptions": {
+      "status": {
+        "all": "All Statuses",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "price": {
+        "all": "All Prices",
+        "under100k": "Under 100,000 VND",
+        "100k-500k": "100,000 - 500,000 VND",
+        "500k-1m": "500,000 - 1,000,000 VND",
+        "above1m": "Above 1,000,000 VND"
+      }
+    },
+    "table": {
+      "no": "No.",
+      "name": "Name",
+      "description": "Description",
+      "unitPrice": "Unit Price",
+      "stockQuantity": "Stock Quantity",
+      "status": "Status",
+      "action": "Action"
+    },
+    "createSuccess": "Material created successfully",
+    "createError": "Unable to create material",
+    "unitPriceUpdateSuccess": "Unit price updated successfully",
+    "unitPriceUpdateError": "Unable to update unit price",
+    "stockQuantityUpdateSuccess": "Stock quantity updated successfully",
+    "stockQuantityUpdateError": "Unable to update stock quantity",
+    "statusUpdateSuccess": "Status updated successfully",
+    "statusUpdateError": "Unable to update status",
+    "deleteSuccess": "Material deleted successfully",
+    "deleteError": "Unable to delete material",
+    "updateStatus": {
+      "title": "Update Status",
+      "material": "Material",
+      "currentStatus": "Current Status",
+      "newStatus": "New Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "cancel": "Cancel",
+      "update": "Update",
+      "updating": "Updating..."
+    },
+    "deleteConfirm": {
+      "title": "Delete Material",
+      "message": "Are you sure you want to delete this material? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    }
+  },
+  "timesheet": {
+    "title": "Maintenance Schedule",
+    "workLog": "Work Log",
+    "calendar": "Calendar",
+    "addWorkLog": "Add Work Log",
+    "editWorkLog": "Edit Work Log",
+    "deleteWorkLog": "Delete Work Log",
+    "workLogDetails": "Work Log Details",
+    "workLogDate": "Date",
+    "workLogHours": "Hours",
+    "workLogDescription": "Work Description",
+    "workLogStatus": "Status"
+  },
+  "dashboard": {
+    "tasksPending": "Pending Tasks",
+    "tasksCompleted": "Completed Tasks",
+    "tasksInProgress": "In Progress",
+    "totalCracks": "Total Cracks",
+    "scheduleJobs": "Scheduled Jobs",
+    "totalStaff": "Total Staff",
+    "feedbackRating": "Feedback Rating",
+    "taskStatusDistribution": "Task Status Distribution",
+    "crackSeverityDistribution": "Crack Severity Distribution",
+    "monthlyScheduleDistribution": "Monthly Schedule Distribution",
+    "recentTasks": "Recent Tasks",
+    "recentFeedbacks": "Recent Feedbacks",
+    "feedbackRatings": "Feedback Ratings",
+    "tasks": "tasks",
+    "cracks": "cracks",
+    "schedules": "schedules",
+    "task": "Task",
+    "comments": "Comments",
+    "by": "By",
+    "rating": "Rating",
+    "noRecentTasks": "No recent tasks",
+    "feedbacksLoadError": "Unable to load feedbacks",
+    "noTaskDescription": "No task description",
+    "unknownUser": "Unknown user",
+    "noFeedbacks": "No feedbacks",
+    "feedbackDataLoadError": "Unable to load feedback data",
+    "totalFeedbacks": "Total",
+    "average": "Average",
+    "noFeedbackData": "No feedback data"
+  },
+  "buildingDetail": {
+    "title": "Building Details",
+    "goBack": "Go Back",
+    "error": "Error loading building details",
+    "notFound": "Building details not found with ID:",
+    "overview": "Overview",
+    "area": "Area",
+    "floors": "Number of Floors",
+    "rooms": "Number of Rooms",
+    "apartments": "Number of Apartments",
+    "construction": "Construction",
+    "completion": "Completion",
+    "buildingInfo": "Building Information",
+    "dates": "Dates",
+    "description": "Description",
+    "devices": "Devices",
+    "maintenanceHistory": "Maintenance History",
+    "crackRecords": "Crack Records",
+    "status": "Status",
+    "selection": {
+      "title": "Select Building Details",
+      "subtitle": "Select one or more building details for your schedule",
+      "selectedCount": "{{count}} buildings selected",
+      "searchPlaceholder": "Search building details...",
+      "selectedBuildings": "Selected Buildings",
+      "availableBuildings": "Available Buildings",
+      "clearAll": "Clear All Selected",
+      "noResults": "No building details found matching \"{{query}}\"",
+      "allSelected": "All building details have been selected",
+      "noAvailable": "No building details available.",
+      "done": "Done",
+      "apartments": "apartments"
+    },
+    "table": {
+      "no": "No.",
+      "deviceName": "Device Name",
+      "type": "Type",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "crackType": "Crack Type",
+      "dimensions": "Dimensions (L × W × D)",
+      "description": "Description",
+      "recordedDate": "Recorded Date",
+      "maintenanceDate": "Maintenance Date",
+      "cost": "Cost"
+    },
+    "loading": "Loading data...",
+    "noDevices": "No devices for this building",
+    "noMaintenance": "No maintenance history for this building",
+    "noCracks": "No crack records for this building",
+    "showingRecords": "Showing {count} records",
+    "errorLoadingCracks": "Error loading crack records:",
+    "errorLoadingMaintenance": "Error loading maintenance history:",
+    "unknownError": "Unknown error",
+    "noDescription": "No description",
+    "warrantyUntil": "Warranty Until",
+    "created": "Created",
+    "construction": "Construction",
+    "completion": "Completion"
+  },
+  "workLog": {
+    "title": "Work Log Management",
+    "description": "Track and manage all work logs for tasks and assignments",
+    "searchPlaceholder": "Search by title or description...",
+    "workLogs": "Work Logs",
+    "showingRecords": "Showing {{count}} of {{total}} records",
+    "noData": "No work logs found",
+    "error": "Error!",
+    "errorLoading": "Unable to load work logs",
+    "created": "Created at",
+    "table": {
+      "title": "Title",
+      "task": "Task",
+      "status": "Status",
+      "createdAt": "Created Date"
+    },
+    "status": {
+      "execute_cracks": "Execute Crack Repairs",
+      "confirm_no_pending_issues": "Confirm No Pending Issues",
+      "final_review": "Final Review",
+      "wait_for_deposit": "Wait for Deposit"
     }
   },
   "calendar": {
@@ -789,15 +958,55 @@
     "createSchedule": "Create Schedule",
     "scheduleDetails": "Schedule Details",
     "backToCalendar": "Back to Calendar",
+    "schedulePeriod": "Schedule Period",
+    "description": "Description",
+    "scheduleOverview": "Schedule Overview",
+    "maintenanceCycle": "Maintenance Cycle",
+    "totalJobs": "Total Jobs",
+    "created": "Created Date",
+    "lastUpdated": "Last Updated",
+    "maintenanceJobs": "Maintenance Jobs",
+    "showingJobs": "Showing {{count}} of {{total}} jobs",
+    "newJob": "New Job",
+    "noJobs": "No maintenance jobs found",
+    "createFirstJob": "Create First Job",
+    "locationDetails": "Location Details",
+    "equipment": "Equipment",
+    "status": "Status",
+    "schedule": "Schedule",
+    "actions": "Actions",
+    "runDate": "Run Date",
+    "period": "Period",
+    "updated": "Updated",
+    "cancelled": "Cancelled",
+    "completed": "Completed",
+    "updateStatus": "Update Status",
+    "cancelJob": "Cancel Job",
+    "sendMaintenanceEmail": "Send Maintenance Email",
+    "createTask": "Create Task",
+    "confirmCancel": "Confirm Cancel",
+    "confirmCancelMessage": "Are you sure you want to cancel this job? This action cannot be undone.",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
     "loading": "Loading...",
-    "buttons": {
-      "create": "Create Schedule",
-      "today": "Today",
-      "month": "Month",
-      "week": "Week",
-      "day": "Day",
-      "prev": "Previous",
-      "next": "Next"
+    "loadingScheduleDetails": "Loading schedule details...",
+    "noDescription": "No description",
+    "building": "Building",
+    "area": "Area",
+    "totalApartments": "Total Apartments",
+    "numberOfFloors": "Number of Floors",
+    "status": "Status",
+    "locationDetails": "Location Details",
+    "locations": "locations",
+    "operational": "Operational",
+    "underConstruction": "Under Construction",
+    "other": "Other",
+    "moreDevices": "+{{count}} more devices",
+    "noEquipment": "No equipment assigned",
+    "equipmentDetails": {
+      "type": "Type",
+      "manufacturer": "Manufacturer",
+      "model": "Model"
     },
     "table": {
       "scheduleName": "Schedule Name",
@@ -807,43 +1016,486 @@
       "buildings": "Buildings",
       "actions": "Actions"
     },
-    "tooltips": {
-      "viewDetails": "View Details"
-    },
-    "buildings": {
-      "building": "Building"
+    "buttons": {
+      "create": "Create Schedule",
+      "update": "Update",
+      "delete": "Delete",
+      "view": "View",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "today": "Today",
+      "month": "Month",
+      "week": "Week",
+      "day": "Day",
+      "prev": "Previous",
+      "next": "Next"
     },
     "errors": {
-      "noTitle": "Please enter a schedule name",
-      "noStartDate": "Please select a start date",
-      "noEndDate": "Please select an end date",
+      "createFailed": "Unable to create schedule",
+      "updateFailed": "Unable to update schedule",
+      "deleteFailed": "Unable to delete schedule",
+      "loadFailed": "Unable to load schedule data",
+      "pastDate": "Cannot create event in the past",
+      "invalidDate": "Invalid date",
+      "noTitle": "Please enter event title",
+      "noStartDate": "Please select start time",
+      "noEndDate": "Please select end time",
       "noBuilding": "Please select at least one building",
-      "noCycle": "Please select a maintenance cycle",
-      "pastDate": "Cannot create events in the past",
-      "endBeforeStart": "End date must be after start date"
+      "noCycle": "Please select maintenance cycle",
+      "endBeforeStart": "End time must be after start time"
+    },
+    "success": {
+      "created": "Schedule created successfully",
+      "updated": "Schedule updated successfully",
+      "deleted": "Schedule deleted successfully",
+      "cancelled": "Schedule cancelled"
+    },
+    "tooltips": {
+      "viewDetails": "View schedule details",
+      "edit": "Edit schedule",
+      "delete": "Delete schedule",
+      "cancel": "Cancel schedule"
+    },
+    "eventModal": {
+      "createTitle": "Create New Schedule",
+      "editTitle": "Edit Schedule",
+      "title": "Title",
+      "titlePlaceholder": "Enter schedule title",
+      "scheduleType": "Schedule Type",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "maintenanceCycle": "Maintenance Cycle",
+      "selectCycle": "Select maintenance cycle",
+      "currentCycle": "Current Cycle",
+      "status": "Status",
+      "buildingDetails": "Building Details",
+      "selectBuildingDetails": "Select building details",
+      "buildingDetailsSelected": "{{count}} building details selected",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter schedule description",
+      "buttons": {
+        "delete": "Delete",
+        "viewDetail": "View Details",
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update"
+      },
+      "deleteConfirm": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this schedule? This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "buildings": {
+        "building": "Building",
+        "title": "Building List",
+        "search": "Search buildings...",
+        "noResults": "No buildings found",
+        "all": "All",
+        "selected": "Selected",
+        "selectAll": "Select All",
+        "deselectAll": "Deselect All",
+        "buildingName": "Building Name",
+        "buildingDetails": "Building Details",
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "maintenance": "Under Maintenance"
+        }
+      }
+    },
+    "buildings": {
+      "building": "Building",
+      "title": "Building List",
+      "search": "Search buildings...",
+      "noResults": "No buildings found",
+      "all": "All",
+      "selected": "Selected",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "buildingName": "Building Name",
+      "buildingDetails": "Building Details",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "maintenance": "Under Maintenance"
+      }
+    },
+    "schedule": {
+      "scheduleJob": {
+        "backToCalendar": "Back to Calendar",
+        "scheduleOverview": "Schedule Overview",
+        "maintenanceJobs": "Maintenance Jobs",
+        "showingJobs": "Showing {{count}} of {{total}} jobs",
+        "newJob": "New Job",
+        "noJobsFound": "No maintenance jobs found",
+        "noJobsDescription": "No jobs have been linked to this schedule yet. Click below to create the first maintenance job.",
+        "createFirstJob": "Create First Job",
+        "locationDetails": "Location Details",
+        "equipment": "Equipment",
+        "status": "Status",
+        "schedule": "Schedule",
+        "actions": "Actions",
+        "noEquipment": "No equipment assigned",
+        "moreDevices": "+{{count}} more devices",
+        "updated": "Updated: {{date}}",
+        "runDate": "Run Date: {{date}}",
+        "period": "Period: {{start}} - {{end}}",
+        "cancelled": "Cancelled",
+        "completed": "Completed",
+        "loading": "Loading schedule details...",
+        "schedulePeriod": "Schedule Period: {{start}} - {{end}}",
+        "description": "Description",
+        "noDescription": "No description",
+        "maintenanceCycle": "Maintenance Cycle",
+        "totalJobs": "Total Jobs",
+        "created": "Created Date",
+        "lastUpdated": "Last Updated",
+        "tooltips": {
+          "updateStatus": "Update Status",
+          "cancelJob": "Cancel Job",
+          "sendEmail": "Send Maintenance Email",
+          "createTask": "Create Task"
+        }
+      }
     }
   },
-  "workLog": {
-    "title": "Work Log Management",
-    "description": "Track and manage all work logs for tasks and assignments",
-    "workLogs": "Work Logs",
-    "searchPlaceholder": "Search by title or description...",
-    "showingRecords": "Showing {{count}} of {{total}} records",
-    "noData": "No work logs found",
-    "error": "Error!",
-    "errorLoading": "Failed to load work logs",
-    "created": "Created at",
-    "table": {
-      "title": "Title",
-      "task": "Task",
+  "building": {
+    "title": "Building Management",
+    "add": {
+      "title": "Add New Building",
+      "subtitle": "Fill in the information below to add a new building",
+      "name": "Building Name",
+      "namePlaceholder": "Enter building name",
+      "nameRequired": "Building name is required",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter building description",
+      "numberFloors": "Number of Floors",
+      "imageUrl": "Image (URL)",
+      "imageUrlPlaceholder": "Enter image URL",
+      "area": "Area",
+      "selectArea": "Select area",
+      "areaRequired": "Please select an area",
+      "constructionDate": "Construction Date",
+      "constructionDateRequired": "Construction date is required",
       "status": "Status",
-      "createdAt": "Created At"
+      "operational": "Operational",
+      "underConstruction": "Under Construction",
+      "completionDate": "Completion Date",
+      "completionDateRequired": "Completion date is required for operational buildings",
+      "warrantyDate": "Warranty Date",
+      "warrantyDateRequired": "Warranty date is required for operational buildings",
+      "manager": "Building Manager",
+      "selectManager": "Select manager",
+      "managerHint": "Select a manager for this building. Can be updated later.",
+      "cancel": "Cancel",
+      "addButton": "Add Building",
+      "processing": "Processing...",
+      "success": "Building added successfully!",
+      "error": "Error adding new building!"
     },
-    "status": {
-      "execute_cracks": "Execute Crack Repairs",
-      "confirm_no_pending_issues": "Confirm No Pending Issues",
-      "final_review": "Final Review",
-      "wait_for_deposit": "Wait for Deposit"
+    "edit": {
+      "title": "Edit Building",
+      "subtitle": "Update the building information below",
+      "updateButton": "Update Building",
+      "updating": "Updating...",
+      "success": "Building updated successfully!",
+      "error": "Error updating building!"
+    },
+    "delete": {
+      "title": "Delete Building",
+      "confirm": "Do you want to delete this building?",
+      "warning": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting...",
+      "success": "Building deleted successfully!",
+      "error": "Error deleting building!"
+    },
+    "view": {
+      "title": "Building Details",
+      "basicInfo": "Basic Information",
+      "area": "Area",
+      "apartments": "Number of Apartments",
+      "floors": "Number of Floors",
+      "completion": "Completion",
+      "buildingInfo": "Building Information",
+      "areaInfo": "Area Information",
+      "areaName": "Area Name",
+      "wingName": "Wing Name",
+      "areaDescription": "Area Description",
+      "areaCreatedAt": "Area Created Date",
+      "locationDetails": "Location Details",
+      "room": "Room",
+      "floor": "Floor",
+      "position": "Position",
+      "type": "Type",
+      "description": "Description",
+      "close": "Close"
+    },
+    "technicalRecord": {
+      "title": "Technical Records",
+      "upload": {
+        "title": "Upload Technical Record",
+        "device": "Device",
+        "deviceRequired": "Please select a device",
+        "documentType": "Document Type",
+        "documentTypeRequired": "Please select a document type",
+        "fileUpload": "Upload File",
+        "fileRequired": "Please select a file to upload",
+        "pdfOnly": "PDF only, max 10MB",
+        "uploadButton": "Upload Document",
+        "uploading": "Uploading...",
+        "success": "Technical record uploaded successfully",
+        "error": "Error uploading: {message}"
+      },
+      "list": {
+        "title": "Technical Records - {buildingName}",
+        "found": "Found {count} technical documents",
+        "noRecords": "No technical records",
+        "noRecordsMessage": "There are currently no technical records for this building.",
+        "uploadNew": "Upload New",
+        "deviceInfo": "Device Information",
+        "device": "Device",
+        "type": "Type",
+        "building": "Building",
+        "download": "Download"
+      }
+    }
+  },
+  "area": {
+    "add": {
+      "title": "Add New Area",
+      "subtitle": "Fill in the information below to add a new area",
+      "name": "Area Name",
+      "namePlaceholder": "Enter area name",
+      "nameRequired": "Area name is required",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter area description",
+      "createdDate": "Created Date",
+      "cancel": "Cancel",
+      "addButton": "Add Area",
+      "processing": "Processing...",
+      "success": "Area added successfully!",
+      "error": "Error adding new area!"
+    }
+  },
+  "material": {
+    "create": {
+      "title": "Create New Material",
+      "name": "Material Name",
+      "namePlaceholder": "Enter material name",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter material description",
+      "unitPrice": "Unit Price",
+      "unitPricePlaceholder": "0.00",
+      "stockQuantity": "Stock Quantity",
+      "stockQuantityPlaceholder": "0",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "cancel": "Cancel",
+      "create": "Create Material",
+      "creating": "Creating..."
+    },
+    "update": {
+      "title": "Update Material",
+      "name": "Material Name",
+      "namePlaceholder": "Enter material name",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter material description",
+      "cancel": "Cancel",
+      "update": "Update",
+      "updating": "Updating..."
+    },
+    "updateStockQuantity": {
+      "title": "Update Stock Quantity",
+      "stockQuantity": "Stock Quantity",
+      "stockQuantityPlaceholder": "Enter stock quantity",
+      "cancel": "Cancel",
+      "update": "Update",
+      "updating": "Updating..."
+    },
+    "updateUnitPrice": {
+      "title": "Update Unit Price",
+      "unitPrice": "Unit Price",
+      "unitPricePlaceholder": "Enter unit price",
+      "cancel": "Cancel",
+      "update": "Update",
+      "updating": "Updating..."
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllAsRead": "Mark all as read",
+    "loading": "Loading...",
+    "noNotifications": "No notifications",
+    "ariaLabels": {
+      "notifications": "Notifications",
+      "markAllAsRead": "Mark all as read"
+    }
+  },
+  "autoSchedule": {
+    "title": "Create Manual Maintenance Schedule",
+    "description": "Create a new maintenance schedule that will automatically create tasks based on the cycle and building selected.",
+    "form": {
+      "scheduleName": {
+        "label": "Schedule Name",
+        "placeholder": "Enter schedule name"
+      },
+      "maintenanceCycle": {
+        "label": "Maintenance Cycle",
+        "placeholder": "Select maintenance cycle"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Enter schedule description"
+      },
+      "startDate": {
+        "label": "Start Date",
+        "tooltip": "Select start date for the maintenance schedule. Cannot select past dates."
+      },
+      "endDate": {
+        "label": "End Date",
+        "tooltip": "Select end date for the maintenance schedule. Must be after start date."
+      },
+      "buildingDetails": {
+        "label": "Building Details",
+        "searchPlaceholder": "Search buildings...",
+        "all": "All",
+        "selected": "Selected",
+        "noResults": "No building details found",
+        "noSelected": "No building details selected"
+      }
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create Schedule",
+      "creating": "Creating..."
+    },
+    "errors": {
+      "scheduleNameRequired": "Please enter schedule name",
+      "cycleRequired": "Please select a maintenance cycle",
+      "buildingRequired": "Please select at least one building detail",
+      "startDateRequired": "Please select start date",
+      "endDateRequired": "Please select end date",
+      "startDatePast": "Start date cannot be in the past",
+      "endDateBeforeStart": "End date must be after start date",
+      "fixDateErrors": "Please fix date errors before sending",
+      "createFailed": "Unable to create schedule"
+    },
+    "success": "Schedule created successfully"
+  },
+  "scheduleDetail": {
+    "ScheduleJob": {
+      "backToCalendar": "Back to Calendar",
+      "scheduleOverview": "Schedule Overview",
+      "maintenanceJobs": "Maintenance Jobs",
+      "showingJobs": "Showing {{count}} on {{total}} jobs",
+      "newJob": "New Job",
+      "noJobsFound": "No maintenance jobs found",
+      "noJobsDescription": "No jobs have been linked to this schedule yet. Click below to create the first maintenance job.",
+      "createFirstJob": "Create First Job",
+      "locationDetails": "Location Details",
+      "equipment": "Equipment",
+      "status": "Status",
+      "schedule": "Schedule",
+      "actions": "Actions",
+      "noEquipment": "No equipment assigned",
+      "moreDevices": "+{{count}} more devices",
+      "updated": "Updated: {{date}}",
+      "runDate": "Run Date: {{date}}",
+      "period": "Period: {{start}} - {{end}}",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "loading": "Loading schedule details...",
+      "schedulePeriod": "Schedule Period: {{start}} - {{end}}",
+      "description": "Description",
+      "noDescription": "No description",
+      "maintenanceCycle": "Maintenance Cycle",
+      "totalJobs": "Total Jobs",
+      "created": "Created Date",
+      "lastUpdated": "Last Updated",
+      "tooltips": {
+        "updateStatus": "Update Status",
+        "cancelJob": "Cancel Job",
+        "sendEmail": "Send Maintenance Email",
+        "createTask": "Create Task"
+      },
+      "deleteConfirm": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this job? This action cannot be undone."
+      }
+    }
+  },
+  "buildingManager": {
+    "technicalRecord": {
+      "title": "Technical Records",
+      "upload": {
+        "title": "Upload Technical Record",
+        "device": {
+          "label": "Device",
+          "required": "Please select a device",
+          "select": "Select device",
+          "allDevicesHaveRecords": "All devices in this building already have technical records. You can only upload a technical record for each device."
+        },
+        "documentType": {
+          "label": "Document Type",
+          "required": "Please select a document type",
+          "select": "Select document type",
+          "options": {
+            "manual": "Manual Usage",
+            "specification": "Technical Specification",
+            "certificate": "Certificate",
+            "warranty": "Warranty",
+            "maintenance": "Maintenance"
+          }
+        },
+        "file": {
+          "label": "Upload File",
+          "required": "Please select a file to upload",
+          "dragDrop": "or drag and drop",
+          "pdfOnly": "PDF only, max 10MB",
+          "uploadButton": "Upload File",
+          "removeFile": "Remove File",
+          "fileTooLarge": "File size cannot exceed 10MB",
+          "invalidType": "Only PDF files are accepted"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "upload": "Upload Document",
+          "uploading": "Uploading..."
+        }
+      },
+      "list": {
+        "title": "Technical Records - {{buildingName}}",
+        "count": "Found {{count}} Technical Documents",
+        "uploadNew": "Upload New",
+        "noRecords": {
+          "title": "No Technical Records",
+          "description": "There are currently no technical records for this building."
+        },
+        "deviceInfo": {
+          "title": "Device Information",
+          "device": "Device:",
+          "type": "Type:",
+          "building": "Building:"
+        },
+        "actions": {
+          "download": "Download"
+        },
+        "uploadDate": "Uploaded on {{date}}"
+      },
+      "errors": {
+        "buildingIdRequired": {
+          "title": "Building ID Required",
+          "description": "Building ID is required to view technical records."
+        },
+        "loadFailed": {
+          "title": "Unable to Load Technical Records",
+          "description": "An error occurred while loading technical records."
+        }
+      }
     }
   }
 }

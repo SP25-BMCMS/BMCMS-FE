@@ -298,6 +298,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 onChange={e => setFormData(prev => ({ ...prev, cycle_id: e.target.value }))}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 required
+                aria-label={t('calendar.eventModal.maintenanceCycle')}
               >
                 <option value="">{t('calendar.eventModal.selectCycle')}</option>
                 {Array.isArray(cyclesArray) &&
@@ -367,6 +368,7 @@ const EventModal: React.FC<EventModalProps> = ({
                     }))
                   }
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  aria-label={t('calendar.eventModal.status')}
                 >
                   {statusOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -381,7 +383,7 @@ const EventModal: React.FC<EventModalProps> = ({
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
               <BuildingOfficeIcon className="w-4 h-4 mr-2 text-blue-500" />
-              {t('calendar.buildings.title')}
+              {t('calendar.eventModal.buildings.title')}
             </label>
             <div className="flex items-center space-x-4 mb-4">
               <div className="flex-1 relative">
@@ -391,7 +393,7 @@ const EventModal: React.FC<EventModalProps> = ({
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200"
-                  placeholder={t('calendar.buildings.search')}
+                  placeholder={t('calendar.eventModal.buildings.search')}
                 />
               </div>
               <div className="flex space-x-2">
@@ -403,7 +405,7 @@ const EventModal: React.FC<EventModalProps> = ({
                     : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                     }`}
                 >
-                  {t('calendar.buildings.all')} ({buildingDetails?.length || 0})
+                  {t('calendar.eventModal.buildings.all')} ({buildingDetails?.length || 0})
                 </button>
                 <button
                   type="button"
@@ -413,7 +415,7 @@ const EventModal: React.FC<EventModalProps> = ({
                     : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                     }`}
                 >
-                  {t('calendar.buildings.selected')} ({selectedBuildingDetails.length})
+                  {t('calendar.eventModal.buildings.selected')} ({selectedBuildingDetails.length})
                 </button>
               </div>
             </div>
@@ -447,7 +449,7 @@ const EventModal: React.FC<EventModalProps> = ({
                     ))
                   ) : (
                     <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                      {t('calendar.buildings.noResults')}
+                      {t('calendar.eventModal.buildings.noResults')}
                     </div>
                   )
                 ) : selectedBuildingDetails.length > 0 ? (
@@ -481,7 +483,7 @@ const EventModal: React.FC<EventModalProps> = ({
                   })
                 ) : (
                   <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                    {t('calendar.buildings.noSelected')}
+                    {t('calendar.eventModal.buildings.noSelected')}
                   </div>
                 )}
               </div>

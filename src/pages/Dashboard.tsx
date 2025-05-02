@@ -186,15 +186,6 @@ const Dashboard: React.FC = () => {
     )
   }
 
-  // Tạo dữ liệu phân bố lịch trình theo tháng từ dữ liệu mẫu
-  const scheduleDistribution = [
-    { month: 'Jan', count: 5 },
-    { month: 'Feb', count: 8 },
-    { month: 'Mar', count: 12 },
-    { month: 'Apr', count: 15 },
-    { month: 'May', count: 10 },
-    { month: 'Jun', count: 18 },
-  ]
 
   const getStatusColor = (status: string) => {
     return STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.default
@@ -396,104 +387,6 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Task Status Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            {t('dashboard.taskStatusDistribution')}
-          </h2>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={taskStatusData.filter(item => item.count > 0)}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={{ stroke: '#888', strokeWidth: 1, strokeDasharray: '2 2' }}
-                  label={renderCustomizedLabel}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
-                  nameKey="status"
-                  minAngle={15}
-                  paddingAngle={4}
-                >
-                  {taskStatusData
-                    .filter(item => item.count > 0)
-                    .map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={getStatusColor(entry.status)} />
-                    ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip valueLabel={t('dashboard.tasks')} />} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Crack Severity Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            {t('dashboard.crackSeverityDistribution')}
-          </h2>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={crackSeverityData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={{ stroke: '#888', strokeWidth: 1, strokeDasharray: '2 2' }}
-                  label={renderCustomizedLabel}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  minAngle={15}
-                  paddingAngle={4}
-                >
-                  {crackSeverityData.map((entry, index) => {
-                    const COLORS = {
-                      Low: '#00C49F',
-                      Medium: '#FFBB28',
-                      High: '#FF8042',
-                      Critical: '#FF0000',
-                    }
-                    return (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[entry.name as keyof typeof COLORS]}
-                      />
-                    )
-                  })}
-                </Pie>
-                <Tooltip content={<CustomTooltip valueLabel={t('dashboard.cracks')} />} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* Schedule Distribution Chart */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          {t('dashboard.monthlyScheduleDistribution')}
-        </h2>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={scheduleDistribution}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="month" stroke="#9CA3AF" />
-              <YAxis stroke="#9CA3AF" />
-              <Tooltip content={<CustomTooltip valueLabel={t('dashboard.schedules')} />} />
-              <Bar dataKey="count" name={t('dashboard.schedules')} fill="#3B82F6" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
       {/* Recent Tasks */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
