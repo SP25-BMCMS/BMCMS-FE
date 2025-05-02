@@ -16,7 +16,6 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import { AxiosError } from 'axios'
-import maintenanceApi from '@/services/maintenance'
 
 // Delete Confirmation Modal Component
 const DeleteConfirmationModal = ({
@@ -106,6 +105,7 @@ const MaintenanceCycleManagement: React.FC = () => {
   const [isGenerateScheduleModalOpen, setIsGenerateScheduleModalOpen] = useState(false)
   const [selectedCycles, setSelectedCycles] = useState<CycleConfig[]>([])
   const [selectedBuildingDetails, setSelectedBuildingDetails] = useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Add state for history modal
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
@@ -334,13 +334,14 @@ const MaintenanceCycleManagement: React.FC = () => {
       return
     }
 
+    setIsSubmitting(true)
     try {
       const response = await schedulesApi.generateSchedules({
         cycle_configs: selectedCycles,
         buildingDetails: selectedBuildingDetails,
       })
 
-      if (response.success) {
+      if (response.isSuccess) {
         toast.success(t('maintenanceCycle.schedule.success'))
         handleCloseGenerateScheduleModal()
       } else {
@@ -349,6 +350,8 @@ const MaintenanceCycleManagement: React.FC = () => {
     } catch (error) {
       toast.error(t('maintenanceCycle.schedule.error'))
       console.error('Error generating schedules:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -549,12 +552,17 @@ const MaintenanceCycleManagement: React.FC = () => {
     <div className="w-full mt-[60px]">
       <div className="w-[95%] mx-auto mb-4">
         <div className="flex justify-end mb-6 gap-3">
-          <AddButton
+          <button
             onClick={handleOpenGenerateScheduleModal}
-            label={t('maintenanceCycle.generateSchedule.title')}
-            icon={<Calendar />}
-            className="w-auto"
-          />
+            disabled={isSubmitting}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${isSubmitting
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
+          >
+            <Calendar size={16} />
+            {t('maintenanceCycle.generateSchedule.title')}
+          </button>
           <AddButton
             onClick={handleCreateCycle}
             label={t('maintenanceCycle.createCycle')}

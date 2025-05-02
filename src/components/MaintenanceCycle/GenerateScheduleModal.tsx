@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getMaintenanceCycles } from '@/services/maintenanceCycle'
 import buildingDetailsApi from '@/services/buildingDetails'
 import { MaintenanceCycle } from '@/types'
-import { BuildingDetail } from '@/types/buildingDetail'
+import { BuildingDetail, BuildingDetailWithBuilding } from '@/types/buildingDetail'
 import { format } from 'date-fns'
 import { toast } from 'react-hot-toast'
 import schedulesApi, { CycleConfig } from '@/services/schedules'
@@ -22,6 +22,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
     const [selectedCycles, setSelectedCycles] = useState<CycleConfig[]>([])
     const [selectedBuildingDetails, setSelectedBuildingDetails] = useState<string[]>([])
     const [activeTab, setActiveTab] = useState<'cycles' | 'buildings'>('cycles')
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Get user ID from localStorage
     const userStr = localStorage.getItem('bmcms_user')
@@ -44,7 +45,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
             return buildingDetailsApi.getBuildingDetailsForManager(userId)
         },
         enabled: !!userId, // Only run query if userId exists
-    })
+    }) as { data: BuildingDetailWithBuilding[] | undefined, isLoading: boolean }
 
     const handleCycleSelect = (cycle: MaintenanceCycle) => {
         setSelectedCycles(prev => {
@@ -108,6 +109,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
             return
         }
 
+        setIsSubmitting(true)
         try {
             const response = await schedulesApi.generateSchedules({
                 cycle_configs: selectedCycles,
@@ -132,6 +134,8 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
             // Handle network errors or other exceptions
             toast.error(t('maintenanceCycle.generateSchedule.errors.generateFailed'))
             console.error('Error generating schedules:', error)
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -208,7 +212,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div>
-                                                    <h4 className="font-medium text-gray-900">{cycle.cycle_name}</h4>
+                                                    <h4 className="font-medium text-gray-900">{cycle.device_type} - {cycle.frequency}</h4>
                                                     <p className="text-sm text-gray-500">{t(`maintenanceCycle.deviceTypes.${cycle.device_type}`)}</p>
                                                 </div>
                                                 <button
@@ -381,14 +385,26 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                     <button
                         onClick={onClose}
                         className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                        disabled={isSubmitting}
                     >
                         {t('maintenanceCycle.generateSchedule.buttons.cancel')}
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                        className={`px-4 py-2 rounded-md transition-colors ${isSubmitting
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-500 text-white hover:bg-blue-600'
+                            }`}
+                        disabled={isSubmitting}
                     >
-                        {t('maintenanceCycle.generateSchedule.buttons.generate')}
+                        {isSubmitting ? (
+                            <div className="flex items-center">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                {t('maintenanceCycle.generateSchedule.buttons.generating')}
+                            </div>
+                        ) : (
+                            t('maintenanceCycle.generateSchedule.buttons.generate')
+                        )}
                     </button>
                 </div>
             </div>

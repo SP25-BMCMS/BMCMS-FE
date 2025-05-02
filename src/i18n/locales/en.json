@@ -662,6 +662,7 @@
       "noBuildingDetails": "No building details found",
       "buttons": {
         "cancel": "Cancel",
+        "generating": "Generating...",
         "generate": "Generate Schedule"
       },
       "errors": {
@@ -772,7 +773,7 @@
         "above1m": "Above 1,000,000 VND"
       }
     },
-    "create":{
+    "create": {
       "name": "Material Name",
       "namePlaceholder": "Enter material name",
       "description": "Description",

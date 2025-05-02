@@ -358,7 +358,14 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                       }`}
                     disabled={isSubmitting}
                   >
-                    {t('autoSchedule.form.buildingDetails.all')} ({buildingDetails?.length || 0})
+                    {isSubmitting ? (
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        {t('autoSchedule.form.buildingDetails.all')}
+                      </div>
+                    ) : (
+                      `${t('autoSchedule.form.buildingDetails.all')} (${buildingDetails?.length || 0})`
+                    )}
                   </button>
                   <button
                     type="button"
@@ -369,7 +376,14 @@ const CreateAutoScheduleModal: React.FC<CreateAutoScheduleModalProps> = ({
                       }`}
                     disabled={isSubmitting}
                   >
-                    {t('autoSchedule.form.buildingDetails.selected')} ({formData.buildingDetailIds.length})
+                    {isSubmitting ? (
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        {t('autoSchedule.form.buildingDetails.selected')}
+                      </div>
+                    ) : (
+                      `${t('autoSchedule.form.buildingDetails.selected')} (${formData.buildingDetailIds.length})`
+                    )}
                   </button>
                 </div>
               </div>

@@ -874,10 +874,13 @@ const Calendar: React.FC = () => {
                             e.stopPropagation()
                             navigate(`/schedule-job/${item.schedule_id}`)
                           }}
-                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                          className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors group relative"
                           title={t('calendar.tooltips.viewDetails')}
                         >
                           <Eye size={18} />
+                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            {t('calendar.tooltips.viewDetails')}
+                          </span>
                         </button>
                       </div>
                     ),

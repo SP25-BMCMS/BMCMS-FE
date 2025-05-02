@@ -599,33 +599,34 @@
     },
     "filterOptions": {
       "frequency": {
-        "all": "Tất cả tần suất",
-        "daily": "Hàng ngày",
-        "weekly": "Hàng tuần",
-        "monthly": "Hàng tháng",
-        "yearly": "Hàng năm",
-        "specific": "Cụ thể"
+        "All": "Tất cả tần suất",
+        "Daily": "Hàng ngày",
+        "Weekly": "Hàng tuần",
+        "Monthly": "Hàng tháng",
+        "Yearly": "Hàng năm",
+        "Specific": "Cụ thể"
       },
       "basis": {
-        "all": "Tất cả cơ sở",
-        "manufacturerrecommendation": "Khuyến nghị của nhà sản xuất",
-        "legalstandard": "Tiêu chuẩn pháp luật",
-        "operationalexperience": "Kinh nghiệm vận hành",
-        "other": "Khác"
+        "All": "Tất cả cơ sở",
+        "ManufacturerRecommendation": "Khuyến nghị của nhà sản xuất",
+        "LegalStandard": "Tiêu chuẩn pháp luật",
+        "OperationalExperience": "Kinh nghiệm vận hành",
+        "Other": "Khác"
       },
       "deviceType": {
-        "all": "Tất cả thiết bị",
-        "elevator": "Thang máy",
-        "fireprotection": "Phòng cháy",
-        "electrical": "Điện",
-        "plumbing": "Ống nước",
-        "hvac": "HVAC",
-        "cctv": "CCTV",
-        "generator": "Máy phát điện",
-        "lighting": "Chiếu sáng",
-        "automaticdoor": "Cửa tự động",
-        "fireextinguisher": "Bình chữa cháy",
-        "other": "Khác"
+        "All": "Tất cả thiết bị",
+        "Elevator": "Thang máy",
+        "Fireprotection": "Phòng cháy",
+        "Electrical": "Điện",
+        "Plumbing": "Ống nước",
+        "HVAC": "HVAC",
+        "CCTV": "CCTV",
+        "Generator": "Máy phát điện",
+        "Lighting": "Chiếu sáng",
+        "AutomaticDoor": "Cửa tự động",
+        "FireExtinguisher": "Bình chữa cháy",
+        "FireProtection": "Phòng cháy",
+        "Other": "Khác"
       }
     },
     "filter": {
@@ -664,6 +665,7 @@
       "noBuildingDetails": "Không tìm thấy chi tiết tòa nhà",
       "buttons": {
         "cancel": "Hủy",
+        "generating": "Đang tạo...",
         "generate": "Tạo lịch trình"
       },
       "errors": {
@@ -775,18 +777,26 @@
       }
     },
     "create": {
-      "name": "Material Name",
-      "namePlaceholder": "Enter material name",
-      "description": "Description",
-      "descriptionPlaceholder": "Enter material description",
-      "unitPrice": "Unit Price",
+      "title": "Tạo vật tư",
+      "name": "Tên vật tư",
+      "namePlaceholder": "Nhập tên vật tư",
+      "description": "Mô tả",
+      "descriptionPlaceholder": "Nhập mô tả vật tư",
+      "unitPrice": "Đơn giá",
       "unitPricePlaceholder": "0.00",
-      "stockQuantity": "Stock Quantity",
+      "stockQuantity": "Số lượng tồn kho",
       "stockQuantityPlaceholder": "0",
-      "status": "Status",
-      "statusActive": "Active",
-      "statusInactive": "Inactive",
-      "cancel": "Cancel"
+      "status": "Trạng thái",
+      "statusActive": "Đang hoạt động",
+      "statusInactive": "Không hoạt động",
+      "cancel": "Hủy",
+      "create": "Tạo",
+      "createSuccess": "Tạo vật tư thành công",
+      "createError": "Không thể tạo vật tư",
+      "unitPriceUpdateSuccess": "Cập nhật đơn giá thành công",
+      "unitPriceUpdateError": "Không thể cập nhật đơn giá",
+      "stockQuantityUpdateSuccess": "Cập nhật số lượng tồn kho thành công",
+      "stockQuantityUpdateError": "Không thể cập nhật số lượng tồn kho"
     },
     "table": {
       "no": "STT",
