@@ -466,11 +466,14 @@
     "searchPlaceholder": "Tìm kiếm theo tên hoặc địa chỉ...",
     "viewDetails": "Xem chi tiết",
     "technicalRecords": "Hồ sơ kỹ thuật",
+<<<<<<< HEAD
     "filterOptions": {
       "all": "Tất cả",
       "operational": "Đang hoạt động",
       "under_construction": "Đang xây dựng"
     },
+=======
+>>>>>>> ed5304c97566cbb40dfcb714b5cf95164f855450
     "table1": {
       "no": "STT",
       "buildingName": "Tên tòa nhà",
@@ -483,6 +486,21 @@
       "action": "Thao tác",
       "totalApartments": "Tổng số căn hộ"
     },
+<<<<<<< HEAD
+=======
+    "table": {
+      "no": "STT",
+      "name": "Tên cư dân",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "gender": "Giới tính",
+      "dateOfBirth": "Ngày sinh",
+      "createdDate": "Ngày tạo",
+      "status": "Trạng thái",
+      "action": "Thao tác",
+      "totalApartments": "Tổng số căn hộ"
+    },
+>>>>>>> ed5304c97566cbb40dfcb714b5cf95164f855450
     "status": {
       "operational": "Đang hoạt động",
       "under_construction": "Đang xây dựng"
@@ -527,6 +545,7 @@
       "dateOfBirth": "Ngày sinh",
       "createdDate": "Ngày tạo",
       "status": "Trạng thái",
+<<<<<<< HEAD
       "action": "Thao tác"
     },
     "status": {
@@ -645,6 +664,10 @@
         "assignError": "Không thể gán căn hộ cho cư dân"
       },
       "success": "Đã gán căn hộ thành công cho {{username}}"
+=======
+      "action": "Thao tác",
+      "totalApartments": "Tổng số căn hộ"
+>>>>>>> ed5304c97566cbb40dfcb714b5cf95164f855450
     }
   },
   "staffManagement": {
