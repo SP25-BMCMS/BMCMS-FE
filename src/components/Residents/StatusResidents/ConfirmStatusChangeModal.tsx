@@ -1,6 +1,7 @@
 import React from 'react';
 import { Residents } from '@/types';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmStatusChangeModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
   onConfirm,
   resident,
 }) => {
+  const { t } = useTranslation();
+  
   if (!isOpen || !resident) return null;
 
   const newStatus = resident.accountStatus === 'Active' ? 'Inactive' : 'Active';
@@ -24,7 +27,9 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold text-gray-900">Confirm Status Change</h3>
+          <h3 className="text-xl font-semibold text-gray-900">
+            {t('residentManagement.statusChangeModal.title')}
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -36,8 +41,9 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
 
         <div className="py-4">
           <p className="text-gray-700 mb-3">
-            Are you sure you want to change the status of{' '}
-            <span className="font-semibold">{resident.username}</span> from{' '}
+            {t('residentManagement.statusChangeModal.message')}{' '}
+            <span className="font-semibold">{resident.username}</span>{' '}
+            {t('residentManagement.statusChangeModal.from')}{' '}
             <span
               className={
                 resident.accountStatus === 'Active'
@@ -47,10 +53,11 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
             >
               {resident.accountStatus}
             </span>{' '}
-            to <span className={statusColor + ' font-medium'}>{newStatus}</span>?
+            {t('residentManagement.statusChangeModal.to')}{' '}
+            <span className={statusColor + ' font-medium'}>{newStatus}</span>?
           </p>
           <p className="text-sm text-gray-500">
-            This action will change the user's ability to access the system.
+            {t('residentManagement.statusChangeModal.systemNote')}
           </p>
         </div>
 
@@ -60,7 +67,7 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg"
           >
-            Cancel
+            {t('residentManagement.statusChangeModal.cancel')}
           </button>
           <button
             type="button"
@@ -71,7 +78,7 @@ const ConfirmStatusChangeModal: React.FC<ConfirmStatusChangeModalProps> = ({
                 : 'bg-red-600 hover:bg-red-700'
             } text-white font-medium rounded-lg`}
           >
-            Confirm
+            {t('residentManagement.statusChangeModal.confirm')}
           </button>
         </div>
       </div>

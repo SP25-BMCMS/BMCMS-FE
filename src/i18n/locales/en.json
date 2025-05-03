@@ -354,6 +354,19 @@
       "invalidFormat": "Invalid format",
       "fileSize": "File size must be less than {{size}}",
       "fileType": "Invalid file type"
+    },
+    "modal": {
+      "confirmStatusChange": {
+        "title": "Confirm Status Change",
+        "message": "Are you sure you want to change the status of",
+        "from": "from",
+        "to": "to",
+        "systemNote": "This action will change the user's ability to access the system.",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      },
+      "clickOutsideToClose": "Click outside modal to close",
+      "pressEscToClose": "Press ESC key to close"
     }
   },
   "taskManagement": {
@@ -717,12 +730,80 @@
         "assignError": "Failed to assign apartment to resident"
       },
       "success": "Apartment successfully assigned to {{username}}"
+    },
+    "statusChangeModal": {
+      "title": "Confirm Status Change",
+      "message": "Are you sure you want to change the status of",
+      "from": "from",
+      "to": "to",
+      "systemNote": "This action will change the user's ability to access the system.",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
     }
   },
   "staffManagement": {
     "title": "Staff Management",
     "error": "Error retrieving staff information",
-    "addStaff": "Add Staff",
+    "addStaff1": "Add Staff",
+    "addStaff": {
+      "title": "Add New Staff",
+      "subtitle": "Fill in the information below to add a new staff member",
+      "form": {
+        "username": {
+          "label": "Username",
+          "placeholder": "Enter username",
+          "required": "Username is required"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "Enter email",
+          "required": "Email is required",
+          "invalid": "Invalid email format"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "Enter password",
+          "required": "Password is required",
+          "minLength": "Password must be at least 6 characters"
+        },
+        "phone": {
+          "label": "Phone Number",
+          "placeholder": "Enter phone number",
+          "required": "Phone number is required",
+          "invalid": "Invalid phone number"
+        },
+        "role": {
+          "label": "Role",
+          "required": "Please select a role",
+          "options": {
+            "staff": "Staff",
+            "leader": "Leader",
+            "manager": "Manager"
+          }
+        },
+        "gender": {
+          "label": "Gender",
+          "required": "Please select gender",
+          "options": {
+            "male": "Male",
+            "female": "Female"
+          }
+        },
+        "dateOfBirth": {
+          "label": "Date of Birth",
+          "required": "Please select date of birth"
+        }
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "add": "Add Staff",
+        "processing": "Processing..."
+      },
+      "messages": {
+        "success": "Add new staff successfully!",
+        "error": "Something went wrong!"
+      }
+    },
     "editStaff": "Edit Staff",
     "deleteStaff": "Delete Staff",
     "staffDetails": "Staff Details",
@@ -762,7 +843,84 @@
     "selectLeader": "Select team leader",
     "noLeadersAvailable": "No team leaders available for assignment. Please add staff with 'Staff' role and 'Team Leader' position first.",
     "leader": "Team Leader",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "roles": {
+      "leader": "Leader",
+      "staff": "Staff",
+      "manager": "Manager",
+      "admin": "Admin"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "viewDetail": {
+      "title": "Staff Details",
+      "personalInfo": "Personal Information",
+      "workInfo": "Work Information",
+      "close": "Close",
+      "noData": "No staff data available",
+      "error": {
+        "title": "Error Loading Data",
+        "loadFailed": "Failed to load staff details"
+      },
+      "labels": {
+        "gender": "Gender",
+        "dateOfBirth": "Date of Birth",
+        "lastUpdated": "Last Updated",
+        "position": "Position",
+        "department": "Department",
+        "area": "Area"
+      },
+      "noDepartment": "No department information available",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
+    "modal": {
+      "close": "Close Modal",
+      "loading": "Loading...",
+      "error": "Error",
+      "success": "Success"
+    },
+    "departmentPosition": {
+      "title": "Update Department and Position",
+      "titleWithName": "Update Department and Position for {{name}}",
+      "department": {
+        "label": "Department",
+        "placeholder": "-- Select Department --",
+        "noArea": "No Area"
+      },
+      "position": {
+        "label": "Position",
+        "placeholder": "-- Select Position --",
+        "names": {
+          "leader": "Leader",
+          "maintenance": "Maintenance",
+          "staff": "Staff",
+          "manager": "Manager",
+          "unknown": "Position {{number}}"
+        }
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving..."
+      },
+      "messages": {
+        "selectBoth": "Please select department and position",
+        "updateSuccess": "Department and position updated successfully",
+        "updateFailed": "Update failed",
+        "error": "An error occurred during update",
+        "loadError": "Could not load departments and positions list",
+        "invalidFormat": {
+          "department": "Department data is not in the correct format",
+          "position": "Position data is not in the correct format"
+        }
+      },
+      "loading": "Loading..."
+    }
   },
   "maintenanceCycle": {
     "title": "Maintenance Cycle",
@@ -1577,7 +1735,7 @@
           "label": "Upload File",
           "required": "Please select file to upload",
           "dragDrop": "or drag and drop",
-          "pdfOnly": "PDF only, maximum 10MB",
+        "pdfOnly": "PDF only, maximum 10MB",
           "uploadButton": "Upload File",
           "removeFile": "Remove File",
           "fileTooLarge": "File size must not exceed 10MB",
@@ -1604,7 +1762,7 @@
           "building": "Building:"
         },
         "actions": {
-          "download": "Download"
+        "download": "Download"
         },
         "uploadDate": "Uploaded on {{date}}"
       },

@@ -277,6 +277,19 @@
         "loginFailed": "Đăng nhập thất bại",
         "usernamePlaceholder": "John_Doe",
         "passwordPlaceholder": "****************"
+      },
+      "modal": {
+        "confirmStatusChange": {
+          "title": "Xác nhận thay đổi trạng thái",
+          "message": "Bạn có chắc chắn muốn thay đổi trạng thái của",
+          "from": "từ",
+          "to": "thành",
+          "systemNote": "Hành động này sẽ thay đổi khả năng truy cập hệ thống của người dùng.",
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        },
+        "clickOutsideToClose": "Nhấp bên ngoài để đóng",
+        "pressEscToClose": "Nhấn phím ESC để đóng"
       }
     },
     "dropdown": {
@@ -645,12 +658,80 @@
         "assignError": "Không thể gán căn hộ cho cư dân"
       },
       "success": "Đã gán căn hộ thành công cho {{username}}"
+    },
+    "statusChangeModal": {
+      "title": "Xác nhận thay đổi trạng thái",
+      "message": "Bạn có chắc chắn muốn thay đổi trạng thái của",
+      "from": "từ",
+      "to": "thành",
+      "systemNote": "Hành động này sẽ thay đổi khả năng truy cập hệ thống của người dùng.",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận"
     }
   },
   "staffManagement": {
     "title": "Quản lý nhân viên",
     "error": "Lỗi khi lấy thông tin nhân viên",
-    "addStaff": "Thêm nhân viên",
+    "addStaff1": "Thêm nhân viên",
+    "addStaff": {
+      "title": "Thêm nhân viên mới",
+      "subtitle": "Điền thông tin bên dưới để thêm nhân viên mới",
+      "form": {
+        "username": {
+          "label": "Tên đăng nhập",
+          "placeholder": "Nhập tên đăng nhập",
+          "required": "Tên đăng nhập là bắt buộc"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "Nhập email",
+          "required": "Email là bắt buộc",
+          "invalid": "Email không hợp lệ"
+        },
+        "password": {
+          "label": "Mật khẩu",
+          "placeholder": "Nhập mật khẩu",
+          "required": "Mật khẩu là bắt buộc",
+          "minLength": "Mật khẩu phải có ít nhất 6 ký tự"
+        },
+        "phone": {
+          "label": "Số điện thoại",
+          "placeholder": "Nhập số điện thoại",
+          "required": "Số điện thoại là bắt buộc",
+          "invalid": "Số điện thoại không hợp lệ"
+        },
+        "role": {
+          "label": "Vai trò",
+          "required": "Vui lòng chọn vai trò",
+          "options": {
+            "staff": "Nhân viên",
+            "leader": "Trưởng nhóm",
+            "manager": "Quản lý"
+          }
+        },
+        "gender": {
+          "label": "Giới tính",
+          "required": "Vui lòng chọn giới tính",
+          "options": {
+            "male": "Nam",
+            "female": "Nữ"
+          }
+        },
+        "dateOfBirth": {
+          "label": "Ngày sinh",
+          "required": "Vui lòng chọn ngày sinh"
+        }
+      },
+      "buttons": {
+        "cancel": "Hủy",
+        "add": "Thêm nhân viên",
+        "processing": "Đang xử lý..."
+      },
+      "messages": {
+        "success": "Thêm nhân viên mới thành công!",
+        "error": "Đã xảy ra lỗi!"
+      }
+    },
     "editStaff": "Sửa thông tin nhân viên",
     "deleteStaff": "Xóa nhân viên",
     "staffDetails": "Chi tiết nhân viên",
@@ -690,7 +771,74 @@
     "selectLeader": "Chọn nhân viên trưởng nhóm",
     "noLeadersAvailable": "Không có nhân viên trưởng nhóm nào để phân công. Vui lòng thêm nhân viên có vai trò 'Nhân viên' và vị trí 'Trưởng nhóm' trước.",
     "leader": "Trưởng nhóm",
-    "processing": "Đang xử lý..."
+    "processing": "Đang xử lý...",
+    "viewDetail": {
+      "title": "Chi tiết nhân viên",
+      "personalInfo": "Thông tin cá nhân",
+      "workInfo": "Thông tin công việc",
+      "close": "Đóng",
+      "noData": "Không có dữ liệu nhân viên",
+      "error": {
+        "title": "Lỗi tải dữ liệu",
+        "loadFailed": "Không thể tải thông tin nhân viên"
+      },
+      "labels": {
+        "gender": "Giới tính",
+        "dateOfBirth": "Ngày sinh",
+        "lastUpdated": "Cập nhật lần cuối",
+        "position": "Vị trí",
+        "department": "Phòng ban",
+        "area": "Khu vực"
+      },
+      "noDepartment": "Không có thông tin phòng ban",
+      "status": {
+        "active": "Đang hoạt động",
+        "inactive": "Không hoạt động"
+      }
+    },
+    "modal": {
+      "close": "Đóng cửa sổ",
+      "loading": "Đang tải...",
+      "error": "Lỗi",
+      "success": "Thành công"
+    },
+    "departmentPosition": {
+      "title": "Cập nhật phòng ban và vị trí",
+      "titleWithName": "Cập nhật phòng ban và vị trí cho {{name}}",
+      "department": {
+        "label": "Phòng ban",
+        "placeholder": "-- Chọn phòng ban --",
+        "noArea": "Không có khu vực"
+      },
+      "position": {
+        "label": "Vị trí",
+        "placeholder": "-- Chọn vị trí --",
+        "names": {
+          "leader": "Trưởng nhóm",
+          "maintenance": "Bảo trì",
+          "staff": "Nhân viên",
+          "manager": "Quản lý",
+          "unknown": "Vị trí {{number}}"
+        }
+      },
+      "buttons": {
+        "cancel": "Hủy",
+        "save": "Lưu thay đổi",
+        "saving": "Đang lưu..."
+      },
+      "messages": {
+        "selectBoth": "Vui lòng chọn phòng ban và vị trí",
+        "updateSuccess": "Cập nhật phòng ban và vị trí thành công",
+        "updateFailed": "Cập nhật thất bại",
+        "error": "Đã xảy ra lỗi khi cập nhật",
+        "loadError": "Không thể tải danh sách phòng ban và vị trí",
+        "invalidFormat": {
+          "department": "Dữ liệu phòng ban không đúng định dạng",
+          "position": "Dữ liệu vị trí không đúng định dạng"
+        }
+      },
+      "loading": "Đang tải..."
+    }
   },
   "maintenanceCycle": {
     "title": "Chu kỳ bảo trì",

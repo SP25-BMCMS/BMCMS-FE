@@ -467,7 +467,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               {/* Manager Selection - Only shows for operational buildings */}
               {formData.status === 'operational' && (
                 <div className="space-y-1 sm:space-y-2 col-span-1 sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 items-center">
                     <UserIcon className="w-4 h-4 mr-1.5 text-blue-500" />
                     {t('building.edit.manager')}
                   </label>

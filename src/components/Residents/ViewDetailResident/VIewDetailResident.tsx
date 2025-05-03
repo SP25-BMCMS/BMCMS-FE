@@ -294,7 +294,6 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                           {t('residentManagement.viewDetail.personalInformation.dateOfBirth')}
                         </p>
                         <p className="text-sm text-gray-900 dark:text-white">
-                          {t('residentManagement.viewDetail.personalInformation.dateOfBirth')}:{' '}
                           {formatDate(resident.dateOfBirth)}
                         </p>
                       </div>

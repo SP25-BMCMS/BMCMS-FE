@@ -156,6 +156,11 @@ const StaffManagement: React.FC = () => {
     },
   })
 
+  // Update gender display
+  const getGenderTranslation = (gender: string) => {
+    return t(`staffManagement.gender.${gender.toLowerCase()}`)
+  }
+
   const columns: Column<Staff>[] = [
     {
       key: 'index',
@@ -178,15 +183,17 @@ const StaffManagement: React.FC = () => {
       key: 'email',
       title: t('staffManagement.table.email'),
       render: item => {
-        const [username, domain] = item.email.split('@')
-        const truncatedEmail = domain ? `${username}@${domain.substring(0, 3)}...` : item.email
+        const truncatedEmail = item.email.length > 8 
+          ? `${item.email.substring(0, 8)}...` 
+          : item.email;
+        
         return (
           <Tooltip content={item.email}>
             <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
               {truncatedEmail}
             </div>
           </Tooltip>
-        )
+        );
       },
     },
     {
@@ -206,9 +213,10 @@ const StaffManagement: React.FC = () => {
         }
         return (
           <span
-            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${roleColors[item.role] ||
+            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${
+              roleColors[item.role] ||
               'text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-              }`}
+            }`}
           >
             {t(`staffManagement.roles.${item.role.toLowerCase()}`)}
           </span>
@@ -229,12 +237,13 @@ const StaffManagement: React.FC = () => {
       title: t('staffManagement.table.gender'),
       render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === 'Male'
-            ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
-            : 'bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]'
-            }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            item.gender === 'Male'
+              ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
+              : 'bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]'
+          }`}
         >
-          {item.gender}
+          {getGenderTranslation(item.gender)}
         </span>
       ),
     },
@@ -289,18 +298,16 @@ const StaffManagement: React.FC = () => {
     },
   }
 
-  const LoadingIndicator = () => (
-    <div className="flex flex-col justify-center items-center h-64">
-      <motion.div
-        animate={loadingVariants}
-        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
-      />
-      <p className="text-gray-700 dark:text-gray-300">{t('staffManagement.loading')}</p>
-    </div>
-  )
-
   if (isLoadingStaff && allStaffList.length === 0) {
-    return <LoadingIndicator />
+    return (
+      <div className="flex flex-col justify-center items-center h-64">
+        <motion.div
+          animate={loadingVariants}
+          className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
+        />
+        <p className="text-gray-700 dark:text-gray-300">{t('staffManagement.loading')}</p>
+      </div>
+    )
   }
 
   return (
@@ -324,7 +331,7 @@ const StaffManagement: React.FC = () => {
             buttonClassName="w-[150px]"
           />
           <AddButton 
-            label={t('staffManagement.addStaff')} 
+            label={t('staffManagement.addStaff1')} 
             icon={<FiUserPlus />} 
             onClick={openModal}
             className="min-w-[160px] whitespace-nowrap" 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import DepartmentPositionSelect from '../DepartmentPositionSelect';
 
 interface DepartmentPositionModalProps {
@@ -21,6 +22,8 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
   initialDepartmentId,
   initialPositionId,
 }) => {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   const handleSaveSuccess = () => {
@@ -47,7 +50,7 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
         >
           <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white" id="modal-headline">
-              Update Department and Position for {staffName}
+              {t('staffManagement.departmentPosition.titleWithName', { name: staffName })}
             </h3>
             <button
               onClick={onClose}
@@ -62,6 +65,8 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
               staffId={staffId}
               onSaveSuccess={handleSaveSuccess}
               onCancel={onClose}
+              initialDepartmentId={initialDepartmentId}
+              initialPositionId={initialPositionId}
             />
           </div>
         </div>

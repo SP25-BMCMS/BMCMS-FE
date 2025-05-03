@@ -411,7 +411,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Warranty Date - Only shows for operational buildings */}
               {formData.status === 'operational' && (
                 <div className="space-y-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 items-center">
                     <ShieldCheck className="w-4 h-4 mr-1.5 text-green-500" />
                     {t('building.add.warrantyDate')}
                   </label>
@@ -437,7 +437,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
               {/* Manager Selection - Only shows for operational buildings */}
               {formData.status === 'operational' && (
                 <div className="space-y-1 col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 items-center">
                     <UserIcon className="w-4 h-4 mr-1.5 text-blue-500" />
                     {t('building.add.buildingManager')}
                   </label>

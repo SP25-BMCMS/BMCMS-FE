@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import apiInstance from '@/lib/axios';
 import { toast } from 'react-hot-toast';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import Select, { StylesConfig } from 'react-select';
 
 // Define data types according to API structure
 interface Department {
@@ -22,44 +24,10 @@ interface PositionsResponse {
   workingPositions: Position[];
 }
 
-// Map numbers to position names
-const positionNameMap: Record<number, string> = {
-  1: 'Leader',
-  2: 'Maintenance',
-  3: 'Staff',
-  4: 'Manager',
-};
-
-// Get position name from code
-const getPositionName = (positionNameValue: number): string => {
-  return positionNameMap[positionNameValue] || `Position ${positionNameValue}`;
-};
-
-// Format department display name
-const formatDepartmentName = (departments: Department[], dept: Department): string => {
-  let displayName = dept.departmentName;
-
-  // Always include area if it exists
-  if (dept.area) {
-    displayName += ` - ${dept.area}`;
-  } else {
-    // If no area but there are departments with the same name, add "(No Area)" for clarity
-    const duplicateNames = departments.filter(
-      d => d.departmentName === dept.departmentName && d.departmentId !== dept.departmentId
-    );
-
-    if (duplicateNames.length > 0) {
-      displayName += ' (No Area)';
-    }
-  }
-
-  // Add description if available
-  if (dept.description) {
-    displayName += ` (${dept.description})`;
-  }
-
-  return displayName;
-};
+interface SelectOption {
+  value: string;
+  label: string;
+}
 
 interface DepartmentPositionSelectProps {
   staffId: string;
@@ -69,6 +37,40 @@ interface DepartmentPositionSelectProps {
   initialPositionId?: string;
 }
 
+// Map numbers to position names
+const getPositionName = (positionNameValue: number, t: any): string => {
+  const positionMap: Record<number, string> = {
+    1: t('staffManagement.departmentPosition.position.names.leader'),
+    2: t('staffManagement.departmentPosition.position.names.maintenance'),
+    3: t('staffManagement.departmentPosition.position.names.staff'),
+    4: t('staffManagement.departmentPosition.position.names.manager'),
+  };
+  return positionMap[positionNameValue] || t('staffManagement.departmentPosition.position.names.unknown', { number: positionNameValue });
+};
+
+// Format department display name
+const formatDepartmentName = (departments: Department[], dept: Department, t: any): string => {
+  let displayName = dept.departmentName;
+
+  if (dept.area) {
+    displayName += ` - ${dept.area}`;
+  } else {
+    const duplicateNames = departments.filter(
+      d => d.departmentName === dept.departmentName && d.departmentId !== dept.departmentId
+    );
+
+    if (duplicateNames.length > 0) {
+      displayName += ` (${t('staffManagement.departmentPosition.department.noArea')})`;
+    }
+  }
+
+  if (dept.description) {
+    displayName += ` (${dept.description})`;
+  }
+
+  return displayName;
+};
+
 const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
   staffId,
   onSaveSuccess,
@@ -76,145 +78,179 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
   initialDepartmentId,
   initialPositionId,
 }) => {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
-  const [filteredPositions, setFilteredPositions] = useState<Position[]>([]);
-  const [selectedDepartment, setSelectedDepartment] = useState<string>(initialDepartmentId || '');
-  const [selectedPosition, setSelectedPosition] = useState<string>(initialPositionId || '');
+  const [selectedDepartment, setSelectedDepartment] = useState<SelectOption | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState<SelectOption | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch departments and positions from API
+  // Custom styles for react-select
+  const customStyles: StylesConfig<SelectOption, false> = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: theme === 'dark' ? '#374151' : 'white',
+      borderColor: state.isFocused 
+        ? '#3B82F6' 
+        : theme === 'dark' 
+          ? '#4B5563' 
+          : '#D1D5DB',
+      boxShadow: state.isFocused ? '0 0 0 1px #3B82F6' : 'none',
+      '&:hover': {
+        borderColor: theme === 'dark' ? '#6B7280' : '#9CA3AF'
+      },
+      minHeight: '42px'
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: theme === 'dark' ? '#1F2937' : 'white',
+      border: `1px solid ${theme === 'dark' ? '#4B5563' : '#E5E7EB'}`,
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected 
+        ? theme === 'dark' ? '#2563EB' : '#3B82F6'
+        : state.isFocused
+          ? theme === 'dark' ? '#374151' : '#F3F4F6'
+          : 'transparent',
+      color: state.isSelected
+        ? 'white'
+        : theme === 'dark' ? '#F3F4F6' : '#111827',
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: state.isSelected
+          ? theme === 'dark' ? '#2563EB' : '#3B82F6'
+          : theme === 'dark' ? '#374151' : '#F3F4F6'
+      }
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: theme === 'dark' ? '#F3F4F6' : '#111827'
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: theme === 'dark' ? '#F3F4F6' : '#111827'
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: theme === 'dark' ? '#9CA3AF' : '#6B7280'
+    }),
+    indicatorSeparator: (provided) => ({
+      ...provided,
+      backgroundColor: theme === 'dark' ? '#4B5563' : '#D1D5DB'
+    }),
+    dropdownIndicator: (provided) => ({
+      ...provided,
+      color: theme === 'dark' ? '#9CA3AF' : '#6B7280',
+      '&:hover': {
+        color: theme === 'dark' ? '#F3F4F6' : '#111827'
+      }
+    }),
+    clearIndicator: (provided) => ({
+      ...provided,
+      color: theme === 'dark' ? '#9CA3AF' : '#6B7280',
+      '&:hover': {
+        color: theme === 'dark' ? '#F3F4F6' : '#111827'
+      }
+    })
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch departments from API using VITE_VIEW_DEPARTMENT_LIST
-        const departmentsResponse = await apiInstance.get(
-          import.meta.env.VITE_VIEW_DEPARTMENT_LIST
-        );
-        console.log('Departments API Response:', departmentsResponse.data);
+        const [departmentsResponse, positionsResponse] = await Promise.all([
+          apiInstance.get(import.meta.env.VITE_VIEW_DEPARTMENT_LIST),
+          apiInstance.get(import.meta.env.VITE_VIEW_POSITION_LIST)
+        ]);
 
-        // Log the first department to see its structure
-        if (
-          departmentsResponse.data &&
-          departmentsResponse.data.data &&
-          departmentsResponse.data.data.length > 0
-        ) {
-          console.log('Sample department structure:', departmentsResponse.data.data[0]);
+        if (departmentsResponse.data?.data) {
+          const depts = departmentsResponse.data.data;
+          setDepartments(depts);
+
+          if (initialDepartmentId) {
+            const initialDept = depts.find((d: Department) => d.departmentId === initialDepartmentId);
+            if (initialDept) {
+              setSelectedDepartment({
+                value: initialDept.departmentId,
+                label: formatDepartmentName([initialDept], initialDept, t)
+              });
+            }
+          }
         }
 
-        if (
-          departmentsResponse.data &&
-          departmentsResponse.data.data &&
-          Array.isArray(departmentsResponse.data.data)
-        ) {
-          setDepartments(departmentsResponse.data.data);
-        } else {
-          console.error('Unexpected department API response format:', departmentsResponse.data);
-          toast.error('Department data is not in the correct format');
-        }
+        if (positionsResponse.data?.workingPositions) {
+          const pos = positionsResponse.data.workingPositions;
+          setPositions(pos);
 
-        // Call API to get position list from VITE_VIEW_POSITION_LIST
-        const positionsResponse = await apiInstance.get(import.meta.env.VITE_VIEW_POSITION_LIST);
-        console.log('Positions API Response:', positionsResponse.data);
-
-        // Process actual API structure with workingPositions
-        if (
-          positionsResponse.data &&
-          positionsResponse.data.workingPositions &&
-          Array.isArray(positionsResponse.data.workingPositions)
-        ) {
-          setPositions(positionsResponse.data.workingPositions);
-        } else {
-          console.error('Unexpected API response format:', positionsResponse.data);
-          toast.error('Position data is not in the correct format');
+          if (initialPositionId) {
+            const initialPos = pos.find((p: Position) => p.positionId === initialPositionId);
+            if (initialPos) {
+              setSelectedPosition({
+                value: initialPos.positionId,
+                label: getPositionName(initialPos.positionName, t)
+              });
+            }
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch departments and positions:', error);
-        toast.error('Could not load departments and positions list');
-
-        // Fallback to mock department data if API fails
-        const mockDepartments: Department[] = [
-          {
-            departmentId: '2a2ae0a4-067a-4faf-be79-a2c9d4518fea',
-            departmentName: 'Technical Department',
-          },
-          {
-            departmentId: '3b3bf1b5-178b-5gbg-cf80-b3d0d5629gfb',
-            departmentName: 'Administrative Department',
-          },
-          {
-            departmentId: '4c4cg2c6-289c-6hch-dg91-c4e1e6730hgc',
-            departmentName: 'Business Department',
-          },
-        ];
-        setDepartments(mockDepartments);
+        console.error('Failed to fetch data:', error);
+        toast.error(t('staffManagement.departmentPosition.messages.loadError'));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, []);
-
-  // Filter positions based on selected department
-  useEffect(() => {
-    if (selectedDepartment) {
-      // Since departmentId doesn't exist in Position interface anymore,
-      // we don't filter positions based on department
-      // Just reset the selected position when department changes
-      setSelectedPosition('');
-    } else {
-      setFilteredPositions([]);
-      setSelectedPosition('');
-    }
-  }, [selectedDepartment]);
-
-  const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedDepartment(e.target.value);
-  };
-
-  const handlePositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedPosition(e.target.value);
-  };
+  }, [initialDepartmentId, initialPositionId, t]);
 
   const handleSave = async () => {
     if (!selectedDepartment || !selectedPosition) {
-      toast.error('Please select department and position');
+      toast.error(t('staffManagement.departmentPosition.messages.selectBoth'));
       return;
     }
 
     setIsSaving(true);
     try {
-      // Call API to update staff department and position
       const response = await apiInstance.patch(
         import.meta.env.VITE_UPDATE_STAFF_DEPARTMENT_POSITION.replace('{staffId}', staffId),
         {
-          departmentId: selectedDepartment,
-          positionId: selectedPosition,
+          departmentId: selectedDepartment.value,
+          positionId: selectedPosition.value,
         }
       );
 
       if (response.data.isSuccess) {
-        toast.success('Department and position updated successfully');
+        toast.success(t('staffManagement.departmentPosition.messages.updateSuccess'));
         if (onSaveSuccess) onSaveSuccess();
       } else {
-        toast.error(response.data.message || 'Update failed');
+        toast.error(response.data.message || t('staffManagement.departmentPosition.messages.updateFailed'));
       }
     } catch (error: any) {
-      console.error('Failed to update department and position:', error);
-      toast.error(error.response?.data?.message || 'An error occurred during update');
+      console.error('Failed to update:', error);
+      toast.error(error.response?.data?.message || t('staffManagement.departmentPosition.messages.error'));
     } finally {
       setIsSaving(false);
     }
   };
 
+  const departmentOptions = departments.map(dept => ({
+    value: dept.departmentId,
+    label: formatDepartmentName(departments, dept, t)
+  }));
+
+  const positionOptions = positions.map(pos => ({
+    value: pos.positionId,
+    label: getPositionName(pos.positionName, t)
+  }));
+
   return (
     <div className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
       <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-        Update Department and Position
+        {t('staffManagement.departmentPosition.title')}
       </h2>
 
       {isLoading ? (
@@ -223,49 +259,38 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
         </div>
       ) : (
         <>
-          <div>
-            <label
-              htmlFor="department"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Department
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('staffManagement.departmentPosition.department.label')}
             </label>
-            <select
-              id="department"
+            <Select<SelectOption>
               value={selectedDepartment}
-              onChange={handleDepartmentChange}
-              className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
-            >
-              <option value="">-- Select Department --</option>
-              {departments.map(dept => (
-                <option key={dept.departmentId} value={dept.departmentId}>
-                  {formatDepartmentName(departments, dept)}
-                </option>
-              ))}
-            </select>
+              onChange={(option) => setSelectedDepartment(option)}
+              options={departmentOptions}
+              isSearchable
+              isClearable
+              placeholder={t('staffManagement.departmentPosition.department.placeholder')}
+              styles={customStyles}
+              className="react-select-container"
+              classNamePrefix="react-select"
+            />
           </div>
 
-          <div>
-            <label
-              htmlFor="position"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Position
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('staffManagement.departmentPosition.position.label')}
             </label>
-            <select
-              id="position"
+            <Select<SelectOption>
               value={selectedPosition}
-              onChange={handlePositionChange}
-              className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 border-gray-300 hover:border-gray-400 dark:hover:border-gray-500"
-            >
-              <option value="">-- Select Position --</option>
-              {positions.map(pos => (
-                <option key={pos.positionId} value={pos.positionId}>
-                  {getPositionName(pos.positionName)}{' '}
-                  {pos.description ? `(${pos.description})` : ''}
-                </option>
-              ))}
-            </select>
+              onChange={(option) => setSelectedPosition(option)}
+              options={positionOptions}
+              isSearchable
+              isClearable
+              placeholder={t('staffManagement.departmentPosition.position.placeholder')}
+              styles={customStyles}
+              className="react-select-container"
+              classNamePrefix="react-select"
+            />
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
@@ -276,7 +301,7 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
                 className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
                 disabled={isSaving}
               >
-                Cancel
+                {t('staffManagement.departmentPosition.buttons.cancel')}
               </button>
             )}
             <button
@@ -288,10 +313,10 @@ const DepartmentPositionSelect: React.FC<DepartmentPositionSelectProps> = ({
               {isSaving ? (
                 <span className="flex items-center">
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-                  Saving...
+                  {t('staffManagement.departmentPosition.buttons.saving')}
                 </span>
               ) : (
-                'Save Changes'
+                t('staffManagement.departmentPosition.buttons.save')
               )}
             </button>
           </div>

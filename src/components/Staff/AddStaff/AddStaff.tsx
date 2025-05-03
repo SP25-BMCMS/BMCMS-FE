@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AddStaffData } from '@/services/staffs';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AddStaffProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface AddStaffProps {
 }
 
 const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<AddStaffData>({
     username: '',
     email: '',
@@ -74,37 +76,37 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
     const newErrors: { [key in keyof AddStaffData]?: string } = {};
 
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = t('staffManagement.addStaff.form.username.required');
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('staffManagement.addStaff.form.email.required');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = t('staffManagement.addStaff.form.email.invalid');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('staffManagement.addStaff.form.password.required');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = t('staffManagement.addStaff.form.password.minLength');
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
+      newErrors.phone = t('staffManagement.addStaff.form.phone.required');
     } else if (!/^\d{10,11}$/.test(formData.phone)) {
-      newErrors.phone = 'Invalid phone number';
+      newErrors.phone = t('staffManagement.addStaff.form.phone.invalid');
     }
 
     if (!formData.role) {
-      newErrors.role = 'Please select a role';
+      newErrors.role = t('staffManagement.addStaff.form.role.required');
     }
 
     if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = 'Please select date of birth';
+      newErrors.dateOfBirth = t('staffManagement.addStaff.form.dateOfBirth.required');
     }
 
     if (!formData.gender) {
-      newErrors.gender = 'Please select gender';
+      newErrors.gender = t('staffManagement.addStaff.form.gender.required');
     }
 
     setErrors(newErrors);
@@ -134,9 +136,11 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
       <div className="bg-white dark:bg-gray-800 rounded-xl p-8 w-full max-w-[600px] shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Add New Staff</h2>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              {t('staffManagement.addStaff.title')}
+            </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Fill in the information below to add a new staff member
+              {t('staffManagement.addStaff.subtitle')}
             </p>
           </div>
           <button
@@ -161,7 +165,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 htmlFor="username"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Username
+                {t('staffManagement.addStaff.form.username.label')}
               </label>
               <input
                 id="username"
@@ -169,7 +173,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 type="text"
                 value={formData.username}
                 onChange={handleChange}
-                placeholder="Enter username"
+                placeholder={t('staffManagement.addStaff.form.username.placeholder')}
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                   errors.username
                     ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -186,7 +190,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Email
+                {t('staffManagement.addStaff.form.email.label')}
               </label>
               <input
                 id="email"
@@ -194,7 +198,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter email"
+                placeholder={t('staffManagement.addStaff.form.email.placeholder')}
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                   errors.email
                     ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -211,7 +215,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Password
+                {t('staffManagement.addStaff.form.password.label')}
               </label>
               <input
                 id="password"
@@ -219,7 +223,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 type="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Enter password"
+                placeholder={t('staffManagement.addStaff.form.password.placeholder')}
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                   errors.password
                     ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -236,7 +240,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 htmlFor="phone"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Phone Number
+                {t('staffManagement.addStaff.form.phone.label')}
               </label>
               <input
                 id="phone"
@@ -244,7 +248,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 type="text"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="Enter phone number"
+                placeholder={t('staffManagement.addStaff.form.phone.placeholder')}
                 className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                   errors.phone
                     ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -261,7 +265,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 htmlFor="role"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Role
+                {t('staffManagement.addStaff.form.role.label')}
               </label>
               <select
                 id="role"
@@ -274,9 +278,9 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                     : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               >
-                <option value="Staff">Staff</option>
-                <option value="Leader">Leader</option>
-                <option value="Manager">Manager</option>
+                <option value="Staff">{t('staffManagement.addStaff.form.role.options.staff')}</option>
+                <option value="Leader">{t('staffManagement.addStaff.form.role.options.leader')}</option>
+                <option value="Manager">{t('staffManagement.addStaff.form.role.options.manager')}</option>
               </select>
               {errors.role && (
                 <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.role}</p>
@@ -288,7 +292,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 htmlFor="gender"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Gender
+                {t('staffManagement.addStaff.form.gender.label')}
               </label>
               <select
                 id="gender"
@@ -301,8 +305,8 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                     : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
               >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
+                <option value="Male">{t('staffManagement.addStaff.form.gender.options.male')}</option>
+                <option value="Female">{t('staffManagement.addStaff.form.gender.options.female')}</option>
               </select>
               {errors.gender && (
                 <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.gender}</p>
@@ -314,7 +318,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 htmlFor="dateOfBirth"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Date of Birth
+                {t('staffManagement.addStaff.form.dateOfBirth.label')}
               </label>
               <input
                 id="dateOfBirth"
@@ -339,7 +343,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
               onClick={onClose}
               className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-gray-600 transition-colors"
             >
-              Cancel
+              {t('staffManagement.addStaff.buttons.cancel')}
             </button>
             <button
               type="submit"
@@ -349,10 +353,10 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
               {isLoading ? (
                 <span className="flex items-center">
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
+                  {t('staffManagement.addStaff.buttons.processing')}
                 </span>
               ) : (
-                'Add Staff'
+                t('staffManagement.addStaff.buttons.add')
               )}
             </button>
           </div>

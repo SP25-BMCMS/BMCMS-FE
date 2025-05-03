@@ -88,7 +88,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
           <button
             onClick={onClose}
             className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            aria-label={t('common.modal.close')}
+            aria-label={t('staffManagement.modal.close')}
           >
             <X className="h-5 w-5" />
           </button>
