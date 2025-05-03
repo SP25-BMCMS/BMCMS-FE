@@ -552,6 +552,18 @@
       "operational": "Operational",
       "under_construction": "Under Construction"
     },
+    "table":{
+      "no": "No.",
+      "buildingName": "Building Name",
+      "areaName": "Area Name",
+      "manager": "Manager",
+      "floor": "Floor",
+      "status": "Status",
+      "createdDate": "Created Date",
+      "completionDate": "Completion Date",
+      "action": "Action",
+      "totalApartments": "Total Apartments"
+    },
     "table1": {
       "no": "No.",
       "buildingName": "Building Name",

@@ -484,6 +484,18 @@
       "operational": "Đang hoạt động",
       "under_construction": "Đang xây dựng"
     },
+    "table":{
+      "no": "STT",
+      "buildingName": "Tên tòa nhà",
+      "areaName": "Tên khu vực",
+      "manager": "Quản lý",
+      "floor": "Số tầng",
+      "status": "Trạng thái",
+      "createdDate": "Ngày tạo",
+      "completionDate": "Ngày hoàn thành",
+      "action": "Thao tác",
+      "totalApartments": "Tổng số căn hộ"
+    },
     "table1": {
       "no": "STT",
       "buildingName": "Tên tòa nhà",
