@@ -3,6 +3,7 @@ import Modal from './Modal';
 import { getResidentApartments } from '@/services/residents';
 import { Residents, ResidentApartment } from '@/types';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import {
   User,
   Phone,
@@ -24,6 +25,7 @@ interface ViewDetailResidentProps {
 }
 
 const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose, resident }) => {
+  const { t } = useTranslation();
   const [apartments, setApartments] = useState<ResidentApartment[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,44 +57,41 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
     }
   }, [isOpen, resident?.userId]);
 
-  // Handle adding apartment success
-  const handleAddApartmentSuccess = () => {
-    // Refresh apartments list
-    if (resident && resident.accountStatus === 'Active') {
-      fetchResidentApartments();
-      setActiveTab('apartments');
-    }
-  };
-
   const fetchResidentApartments = async () => {
     if (!resident) {
-      console.error('Cannot get apartment information: resident is null');
+      console.error('Cannot get apartment information');
       return;
     }
 
     setIsLoading(true);
     setError(null);
     try {
-      console.log('Calling API getResidentApartments with userId:', resident.userId);
       const response = await getResidentApartments(resident.userId);
-      console.log('API response:', response);
 
       if (response && response.isSuccess && Array.isArray(response.data)) {
-        console.log('apartments:', response.data.length);
         setApartments(response.data);
       } else {
-        const errorMsg = response?.message || 'cannot get apartments';
-        console.error('errorMsg:', errorMsg);
+        const errorMsg =
+          response?.message || t('residentManagement.viewDetail.messages.cannotGetApartment');
+        console.error('Error:', errorMsg);
         setError(errorMsg);
-        toast.error(errorMsg);
       }
     } catch (error: any) {
       console.error('Error calling API getResidentApartments:', error);
-      const errorMessage = error.message || 'An error occurred while loading apartment information';
+      const errorMessage =
+        error.message || t('residentManagement.viewDetail.messages.errorLoadingApartment');
       setError(errorMessage);
-      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Handle adding apartment success
+  const handleAddApartmentSuccess = () => {
+    if (resident && resident.accountStatus === 'Active') {
+      fetchResidentApartments();
+      setActiveTab('apartments');
+      setIsAddApartmentOpen(false);
     }
   };
 
@@ -134,6 +133,11 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
     return 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]';
   };
 
+  // Get translated gender
+  const getTranslatedGender = (gender: string) => {
+    return t(`residentManagement.viewDetail.gender.${gender.toLowerCase()}`);
+  };
+
   if (!resident) {
     console.log('Not displaying modal because resident is null');
     return null;
@@ -144,38 +148,42 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
   console.log('Current account status:', resident.accountStatus, 'isInactive:', isInactive);
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Resident Details" size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={t('residentManagement.viewDetail.title')}
+      size="lg"
+    >
       {isInactive ? (
         <div className="text-center py-6">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-500 mb-3">
             <AlertTriangle className="h-6 w-6" />
           </div>
           <h3 className="text-base font-medium text-gray-900 dark:text-white mb-2">
-            Account Inactive
+            {t('residentManagement.viewDetail.accountInactive.title')}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 max-w-sm mx-auto">
-            This resident account is currently inactive. Details are only available for active
-            accounts.
+            {t('residentManagement.viewDetail.accountInactive.message')}
           </p>
           <div className="flex justify-center gap-4 mt-2">
             <div className="px-3 py-1 rounded-full text-xs font-semibold border bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-400">
               {resident.accountStatus}
             </div>
             <div className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border border-gray-300">
-              ID: {resident.userId.substring(0, 8)}...
+              {t('residentManagement.viewDetail.status.id')}: {resident.userId.substring(0, 8)}...
             </div>
           </div>
           <button
             onClick={handleClose}
             className="mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none transition-colors"
           >
-            Close
+            {t('residentManagement.viewDetail.accountInactive.close')}
           </button>
         </div>
       ) : isLoading ? (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
-          <span className="ml-3">Loading data...</span>
+          <span className="ml-3">{t('residentManagement.viewDetail.loading')}</span>
         </div>
       ) : (
         <div>
@@ -194,7 +202,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                 <span
                   className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getGenderStyle(resident.gender)}`}
                 >
-                  {resident.gender}
+                  {getTranslatedGender(resident.gender)}
                 </span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${getStatusStyle(resident.accountStatus)}`}
@@ -207,11 +215,15 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
             <div className="hidden sm:flex flex-col text-sm text-gray-600 dark:text-gray-400">
               <div className="flex items-center">
                 <Mail className="h-3.5 w-3.5 mr-1" />
-                {resident.email}
+                <span>
+                  {t('residentManagement.viewDetail.contactInfo.email')}: {resident.email}
+                </span>
               </div>
               <div className="flex items-center mt-1">
                 <Phone className="h-3.5 w-3.5 mr-1" />
-                {resident.phone}
+                <span>
+                  {t('residentManagement.viewDetail.contactInfo.phone')}: {resident.phone}
+                </span>
               </div>
             </div>
           </div>
@@ -226,7 +238,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
               }`}
               onClick={() => setActiveTab('info')}
             >
-              Personal Info
+              {t('residentManagement.viewDetail.tabs.personalInfo')}
             </button>
             <button
               className={`px-4 py-2 text-sm font-medium ${
@@ -236,7 +248,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
               }`}
               onClick={() => setActiveTab('apartments')}
             >
-              Apartments ({apartments.length})
+              {t('residentManagement.viewDetail.tabs.apartments')} ({apartments.length})
             </button>
           </div>
 
@@ -259,7 +271,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                 {/* Personal Information */}
                 <div className="bg-white dark:bg-gray-700 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-600">
-                    Personal Information
+                    {t('residentManagement.viewDetail.personalInformation.title')}
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -267,9 +279,11 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                       <User className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
                       <div>
                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                          Gender
+                          {t('residentManagement.viewDetail.gender.title')}
                         </p>
-                        <p className="text-sm text-gray-900 dark:text-white">{resident.gender}</p>
+                        <p className="text-sm text-gray-900 dark:text-white">
+                          {getTranslatedGender(resident.gender)}
+                        </p>
                       </div>
                     </div>
 
@@ -277,18 +291,20 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                       <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
                       <div>
                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                          Date of Birth
+                          {t('residentManagement.viewDetail.personalInformation.dateOfBirth')}
                         </p>
                         <p className="text-sm text-gray-900 dark:text-white">
+                          {t('residentManagement.viewDetail.personalInformation.dateOfBirth')}:{' '}
                           {formatDate(resident.dateOfBirth)}
                         </p>
                       </div>
                     </div>
+
                     <div className="flex items-center">
                       <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
                       <div>
                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                          Created Date
+                          {t('residentManagement.viewDetail.personalInformation.createdDate')}
                         </p>
                         <p className="text-sm text-gray-900 dark:text-white">
                           {resident.createdDate}
@@ -302,24 +318,20 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                 <div className="bg-white dark:bg-gray-700 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
                   <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 dark:border-gray-600">
                     <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                      Property Summary
+                      {t('residentManagement.viewDetail.propertySummary.title')}
                     </h3>
-                    {resident?.accountStatus === 'Active' && (
+                    {resident?.accountStatus === 'Active' && apartments.length === 0 && (
                       <button
                         onClick={() => setIsAddApartmentOpen(true)}
                         className="flex items-center p-1 rounded-md text-xs font-medium text-blue-600 hover:text-blue-700 focus:outline-none"
                       >
                         <Plus className="h-3.5 w-3.5 mr-1" />
-                        Add
+                        {t('residentManagement.viewDetail.propertySummary.add')}
                       </button>
                     )}
                   </div>
 
-                  {error ? (
-                    <div className="text-center py-3 text-red-500 dark:text-red-400 text-sm">
-                      <p>{error}</p>
-                    </div>
-                  ) : isLoading ? (
+                  {isLoading ? (
                     <div className="flex justify-center py-3">
                       <div className="animate-spin h-5 w-5 border-2 border-blue-500 rounded-full border-t-transparent"></div>
                     </div>
@@ -329,7 +341,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                         <Home className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
                         <div>
                           <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                            Total Apartments
+                            {t('residentManagement.viewDetail.propertySummary.totalApartments')}
                           </p>
                           <p className="text-sm text-gray-900 dark:text-white">
                             <span className="font-bold">{apartments.length}</span>
@@ -341,13 +353,15 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                         <Building className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
                         <div>
                           <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                            Buildings
+                            {t('residentManagement.viewDetail.propertySummary.buildings')}
                           </p>
                           <p className="text-sm text-gray-900 dark:text-white">
                             {[
                               ...new Set(
                                 apartments.map(
-                                  apt => apt.buildingDetails?.building?.name || 'Unknown'
+                                  apt =>
+                                    apt.buildingDetails?.building?.name ||
+                                    t('residentManagement.viewDetail.status.unknown')
                                 )
                               ),
                             ].join(', ')}
@@ -359,13 +373,15 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                         <MapPin className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
                         <div>
                           <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                            Areas
+                            {t('residentManagement.viewDetail.propertySummary.areas')}
                           </p>
                           <p className="text-sm text-gray-900 dark:text-white">
                             {[
                               ...new Set(
                                 apartments.map(
-                                  apt => apt.buildingDetails?.building?.area?.name || 'Unknown'
+                                  apt =>
+                                    apt.buildingDetails?.building?.area?.name ||
+                                    t('residentManagement.viewDetail.status.unknownArea')
                                 )
                               ),
                             ].join(', ')}
@@ -374,8 +390,20 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center py-3 text-gray-500 dark:text-gray-400 text-sm">
-                      No apartments assigned.
+                    <div className="text-center py-6">
+                      <Home className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                        {t('residentManagement.viewDetail.propertySummary.noApartmentsMessage')}
+                      </p>
+                      {resident?.accountStatus === 'Active' && (
+                        <button
+                          onClick={() => setIsAddApartmentOpen(true)}
+                          className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none"
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1" />
+                          {t('residentManagement.viewDetail.propertySummary.addFirstApartment')}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -387,44 +415,45 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                 {apartments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
                     <Home className="h-10 w-10 mb-2 text-gray-400" />
-                    <p className="text-sm">No apartments assigned to this resident.</p>
-                    <button
-                      onClick={() => setIsAddApartmentOpen(true)}
-                      className="mt-3 flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none"
-                    >
-                      <Plus className="h-3.5 w-3.5 mr-1" />
-                      Add First Apartment
-                    </button>
+                    <p className="text-sm mb-3">
+                      {t('residentManagement.viewDetail.propertySummary.noApartmentsMessage')}
+                    </p>
+                    {resident?.accountStatus === 'Active' && (
+                      <button
+                        onClick={() => setIsAddApartmentOpen(true)}
+                        className="mt-3 flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none"
+                      >
+                        <Plus className="h-3.5 w-3.5 mr-1" />
+                        {t('residentManagement.viewDetail.propertySummary.addFirstApartment')}
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <div className="flex justify-between items-center mb-1">
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {apartments.length} apartment(s) found
+                        {t('residentManagement.viewDetail.propertySummary.apartmentsFound', {
+                          count: apartments.length,
+                        })}
                       </p>
-                      <button
-                        onClick={() => setIsAddApartmentOpen(true)}
-                        className="flex items-center px-2 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 focus:outline-none"
-                      >
-                        <Plus className="h-3 w-3 mr-1" />
-                        Add New
-                      </button>
                     </div>
 
                     {apartments.map(apartment => {
                       const buildingName =
-                        apartment?.buildingDetails?.building?.name || 'Unknown Building';
+                        apartment?.buildingDetails?.building?.name ||
+                        t('residentManagement.viewDetail.status.unknown');
                       const buildingDetailName = apartment?.buildingDetails?.name || '';
                       const areaName =
-                        apartment?.buildingDetails?.building?.area?.name || 'Unknown Area';
+                        apartment?.buildingDetails?.building?.area?.name ||
+                        t('residentManagement.viewDetail.status.unknownArea');
                       const buildingDescription =
                         apartment?.buildingDetails?.building?.description || '';
                       const buildingFloors = apartment?.buildingDetails?.building?.numberFloor || 0;
-                      const buildingStatus =
-                        apartment?.buildingDetails?.building?.Status || 'Unknown';
+
                       const buildingImage =
                         apartment?.buildingDetails?.building?.imageCover ||
-                        'https://via.placeholder.com/40?text=No+Image';
+                        'https://via.placeholder.com/40?text=' +
+                          t('residentManagement.viewDetail.apartmentInfo.noImage');
 
                       return (
                         <div
@@ -439,26 +468,32 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                                 className="w-full h-full object-cover"
                                 onError={e => {
                                   (e.target as HTMLImageElement).src =
-                                    'https://via.placeholder.com/40?text=No+Image';
+                                    'https://via.placeholder.com/40?text=' +
+                                    t('residentManagement.viewDetail.apartmentInfo.noImage');
                                 }}
                               />
                             </div>
 
                             <div className="ml-3 flex-1 min-w-0">
                               <h4 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center truncate">
-                                <span>Apartment {apartment.apartmentName}</span>
-                                <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                  {buildingStatus}
+                                <span>
+                                  {t('residentManagement.viewDetail.apartmentInfo.name')}{' '}
+                                  {apartment.apartmentName}
                                 </span>
                               </h4>
 
                               <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                <span className="font-medium">Building:</span> {buildingName}{' '}
-                                {buildingDetailName ? `(${buildingDetailName})` : ''}
+                                <span className="font-medium">
+                                  {t('residentManagement.viewDetail.buildingInfo.buildingName')}:
+                                </span>{' '}
+                                {buildingName} {buildingDetailName ? `(${buildingDetailName})` : ''}
                               </p>
 
                               <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                <span className="font-medium">Area:</span> {areaName}
+                                <span className="font-medium">
+                                  {t('residentManagement.viewDetail.propertySummary.areas')}:
+                                </span>{' '}
+                                {areaName}
                               </p>
                             </div>
                           </div>
@@ -477,7 +512,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
               onClick={handleClose}
               className="px-4 py-1.5 bg-gray-200 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none transition-colors"
             >
-              Close
+              {t('residentManagement.modal.close')}
             </button>
           </div>
         </div>

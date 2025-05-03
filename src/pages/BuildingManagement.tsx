@@ -344,14 +344,14 @@ const Building: React.FC = () => {
 
           <AddButton
             label={t('buildingManagement.addArea')}
-            className="w-auto md:w-[120px] lg:w-[154px]"
+            className="w-auto min-w-[120px] md:min-w-[154px] whitespace-nowrap"
             icon={<PiMapPinAreaBold />}
             onClick={() => setIsAddAreaModalOpen(true)}
           />
           <AddButton
             label={t('buildingManagement.addBuilding')}
             icon={<FaRegBuilding />}
-            className="w-auto md:w-[120px] lg:w-[154px]"
+            className="w-auto min-w-[120px] md:min-w-[154px] whitespace-nowrap"
             onClick={() => setIsAddBuildingModalOpen(true)}
           />
         </div>

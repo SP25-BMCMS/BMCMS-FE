@@ -21,6 +21,7 @@ import {
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { FORMAT_DATE } from '@/utils/format';
+import { useTranslation } from 'react-i18next';
 
 interface ModalProps {
   isOpen: boolean;
@@ -103,6 +104,7 @@ const buildingDetailColumns: BuildingDetailColumn[] = [
 ];
 
 const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, buildingId }) => {
+  const { t } = useTranslation();
   const [buildingDetail, setBuildingDetail] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -457,7 +459,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Building Details" size="xl">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('buildingManager.viewBuilding.title')} size="xl">
       {isLoading ? (
         <div className="flex justify-center items-center p-8">
           <div className="h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -485,7 +487,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Không thể tải thông tin
+            {t('buildingManager.viewBuilding.error.title')}
           </h3>
           <p className="text-gray-600 dark:text-gray-400">{error}</p>
         </motion.div>
@@ -511,12 +513,14 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-semibold shadow-sm ${getStatusStyle(buildingDetail.Status)}`}
                   >
-                    {buildingDetail.Status === 'operational' ? 'Operational' : 'Under Construction'}
+                    {buildingDetail.Status === 'operational' 
+                      ? t('buildingManager.viewBuilding.status.operational') 
+                      : t('buildingManager.viewBuilding.status.underConstruction')}
                   </span>
 
                   {buildingDetail.buildingDetailId === null && (
                     <span className="px-3 py-1 rounded-full text-sm font-semibold shadow-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-                      No Id Detail
+                      {t('buildingManager.viewBuilding.status.noDetail')}
                     </span>
                   )}
                 </div>
@@ -533,7 +537,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   <div className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-blue-500" />
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">Area</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.header.area')}</div>
                       <div className="font-medium">{buildingDetail.area.name}</div>
                     </div>
                   </div>
@@ -541,7 +545,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   <div className="flex items-center gap-2">
                     <Layers className="h-5 w-5 text-blue-500" />
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">Floors</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.header.floors')}</div>
                       <div className="font-medium">{buildingDetail.numberFloor}</div>
                     </div>
                   </div>
@@ -549,7 +553,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-blue-500" />
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">Construction</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.header.construction')}</div>
                       <div className="font-medium">
                         {formatDate(buildingDetail.construction_date)}
                       </div>
@@ -559,7 +563,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-blue-500" />
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">Completion</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.header.completion')}</div>
                       <div className="font-medium">
                         {formatDate(buildingDetail.completion_date)}
                       </div>
@@ -592,7 +596,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                 >
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     <Home className="h-5 w-5 text-blue-500" />
-                    Area Details ({buildingDetail.buildingDetails.length})
+                    {t('buildingManager.viewBuilding.details.areaDetails')} ({buildingDetail.buildingDetails.length})
                   </h3>
 
                   <div className="space-y-4">
@@ -606,7 +610,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                             {detail.name}
                           </span>
                           <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                            {detail.total_apartments} apartments
+                            {detail.total_apartments} {t('buildingManager.viewBuilding.details.apartments')}
                           </span>
                         </div>
 
@@ -614,14 +618,14 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                           <div className="flex items-center">
                             <MapPin className="h-3.5 w-3.5 text-blue-500 mr-1.5 flex-shrink-0" />
                             <span className="truncate">
-                              Area: <span className="font-medium">{buildingDetail.area.name}</span>
+                              {t('buildingManager.viewBuilding.header.area')}: <span className="font-medium">{buildingDetail.area.name}</span>
                             </span>
                           </div>
 
                           <div className="flex items-center">
                             <Clock className="h-3.5 w-3.5 text-blue-500 mr-1.5 flex-shrink-0" />
                             <span className="truncate">
-                              Created Date:{' '}
+                              {t('buildingManager.viewBuilding.details.createdDate')}:{' '}
                               <span className="font-medium">{formatDate(detail.createdAt)}</span>
                             </span>
                           </div>
@@ -637,7 +641,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                 >
                   <div className="text-center text-gray-500 dark:text-gray-400">
                     <Home className="h-10 w-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                    <p>No Areas details available</p>
+                    <p>{t('buildingManager.viewBuilding.details.noAreasAvailable')}</p>
                   </div>
                 </motion.div>
               )}
@@ -648,13 +652,13 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               >
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Building className="h-5 w-5 text-blue-500" />
-                  Building Information
+                  {t('buildingManager.viewBuilding.details.buildingInfo')}
                 </h3>
 
                 <div className="space-y-3">
                   {/* Building basic info */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-gray-500 dark:text-gray-400">Building Name</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.details.buildingName')}</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
                       {buildingData.buildingName}
                     </span>
@@ -662,7 +666,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {/* Status */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-gray-500 dark:text-gray-400">Status</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.details.status')}</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
                       {buildingData.status}
                     </span>
@@ -670,7 +674,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {/* Floor count */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-gray-500 dark:text-gray-400">Number of Floors</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.details.numOfFloors')}</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
                       {buildingData.numOfFloors}
                     </span>
@@ -678,7 +682,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {/* Building manager info - always displayed */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-gray-500 dark:text-gray-400">Building Manager</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.details.buildingManager')}</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium flex items-center">
                       <User className="h-4 w-4 mr-1 text-blue-500" />
                       {buildingData.managerName}
@@ -687,7 +691,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {/* Created date */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-gray-500 dark:text-gray-400">Created Date</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.details.createdDate')}</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
                       {formatDate(buildingDetail.createdAt)}
                     </span>
@@ -695,7 +699,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {/* Last updated date */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-gray-500 dark:text-gray-400">Last Updated</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.details.lastUpdated')}</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
                       {formatDate(buildingDetail.updatedAt)}
                     </span>
@@ -703,7 +707,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {/* Construction start date */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-gray-500 dark:text-gray-400">Construction Start</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.details.constructionStart')}</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
                       {formatDate(buildingDetail.construction_date)}
                     </span>
@@ -711,7 +715,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                   {/* Completion date */}
                   <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-gray-500 dark:text-gray-400">Completion Date</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.details.completionDate')}</span>
                     <span className="text-gray-900 dark:text-white text-sm font-medium">
                       {formatDate(buildingDetail.completion_date)}
                     </span>
@@ -720,7 +724,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   {/* Warranty date */}
                   {buildingDetail.Warranty_date && (
                     <div className="flex justify-between pb-2 border-b border-gray-100 dark:border-gray-700">
-                      <span className="text-gray-500 dark:text-gray-400">Warranty Until</span>
+                      <span className="text-gray-500 dark:text-gray-400">{t('buildingManager.viewBuilding.details.warrantyUntil')}</span>
                       <span className="text-green-600 dark:text-green-400 text-sm font-medium flex items-center">
                         <ShieldCheck className="h-4 w-4 mr-1" />
                         {formatDate(buildingDetail.Warranty_date)}
@@ -769,11 +773,15 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                           d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
                         />
                       </svg>
-                      Device Information
+                      {t('buildingManager.viewBuilding.devices.title')}
                     </h3>
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
-                      {buildingDetail.device.length}{' '}
-                      {buildingDetail.device.length === 1 ? 'Device' : 'Devices'}
+                      {t('buildingManager.viewBuilding.devices.count', {
+                        count: buildingDetail.device.length,
+                        deviceLabel: buildingDetail.device.length === 1 
+                          ? t('buildingManager.viewBuilding.devices.device') 
+                          : t('buildingManager.viewBuilding.devices.devices')
+                      })}
                     </span>
                   </div>
 
@@ -804,13 +812,13 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300 mt-3">
                           <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600">
                             <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
-                              Model:
+                              {t('buildingManager.viewBuilding.devices.model')}:
                             </span>
                             <span className="text-gray-900 dark:text-gray-100">{device.model}</span>
                           </div>
                           <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600">
                             <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
-                              Manufacturer:
+                              {t('buildingManager.viewBuilding.devices.manufacturer')}:
                             </span>
                             <span className="text-gray-900 dark:text-gray-100">
                               {device.manufacturer}
@@ -849,10 +857,10 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                       </svg>
                     </div>
                     <p className="text-lg font-medium mb-2 dark:text-gray-300">
-                      No devices available
+                      {t('buildingManager.viewBuilding.devices.noDevices')}
                     </p>
                     <p className="text-sm max-w-md">
-                      This building currently has no registered devices in the system.
+                      {t('buildingManager.viewBuilding.devices.noDevicesMessage')}
                     </p>
                   </div>
                 </motion.div>
@@ -864,7 +872,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               >
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <FileText className="h-5 w-5 text-blue-500" />
-                  Contracts Information
+                  {t('buildingManager.viewBuilding.contracts.title')}
                 </h3>
 
                 {isLoadingContracts ? (
@@ -873,9 +881,9 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   </div>
                 ) : isErrorContracts ? (
                   <div className="text-center py-8">
-                    <p className="text-red-500 mb-2">Error loading contracts</p>
+                    <p className="text-red-500 mb-2">{t('buildingManager.viewBuilding.contracts.error')}</p>
                     <p className="text-gray-500 dark:text-gray-400">
-                      There was an error fetching contracts information.
+                      {t('buildingManager.viewBuilding.contracts.errorMessage')}
                     </p>
                   </div>
                 ) : contractsData && contractsData.length > 0 ? (
@@ -912,7 +920,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                                 d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
                               />
                             </svg>
-                            Devices ({contract.devices.length})
+                            {t('buildingManager.viewBuilding.contracts.devices')} ({contract.devices.length})
                           </div>
 
                           <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2">
@@ -944,7 +952,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                             className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
                           >
                             <Download className="w-3.5 h-3.5 mr-1" />
-                            Download
+                            {t('buildingManager.viewBuilding.contracts.actions.download')}
                           </a>
                           <a
                             href={`${import.meta.env.VITE_API_SECRET}${contract.viewUrl}`}
@@ -953,7 +961,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                             className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
                           >
                             <Eye className="w-3.5 h-3.5 mr-1" />
-                            View
+                            {t('buildingManager.viewBuilding.contracts.actions.view')}
                           </a>
                           <a
                             href={`${import.meta.env.VITE_API_SECRET}${contract.directFileUrl}`}
@@ -962,7 +970,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                             className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-800 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                           >
                             <FileText className="w-3.5 h-3.5 mr-1" />
-                            Direct File
+                            {t('buildingManager.viewBuilding.contracts.actions.directFile')}
                           </a>
                         </div>
                       </div>
@@ -973,8 +981,8 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                     <FileText className="h-10 w-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                     <p className="text-gray-500 dark:text-gray-400">
                       {buildingDetail.buildingDetailId
-                        ? 'No contracts found for this building'
-                        : 'Cannot find contract information'}
+                        ? t('buildingManager.viewBuilding.contracts.noContracts')
+                        : t('buildingManager.viewBuilding.contracts.noContractInfo')}
                     </p>
                   </div>
                 )}

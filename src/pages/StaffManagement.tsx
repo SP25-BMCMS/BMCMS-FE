@@ -323,7 +323,12 @@ const StaffManagement: React.FC = () => {
             label={t('staffManagement.filterByRole')}
             buttonClassName="w-[150px]"
           />
-          <AddButton label={t('staffManagement.addStaff')} icon={<FiUserPlus />} onClick={openModal} />
+          <AddButton 
+            label={t('staffManagement.addStaff')} 
+            icon={<FiUserPlus />} 
+            onClick={openModal}
+            className="min-w-[160px] whitespace-nowrap" 
+          />
         </div>
       </div>
 

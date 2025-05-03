@@ -176,8 +176,6 @@
       "unmute": "Unmute",
       "follow": "Follow",
       "unfollow": "Unfollow",
-      "subscribe": "Subscribe",
-      "unsubscribe": "Unsubscribe",
       "like": "Like",
       "unlike": "Unlike",
       "comment": "Comment",
@@ -523,83 +521,44 @@
   },
   "buildingManagement": {
     "title": "Building Management",
-    "createBuilding": "Add Building",
+    "addBuilding": "Add Building",
+    "addArea": "Add Area",
+    "editBuilding": "Edit Building",
+    "deleteBuilding": "Delete Building",
     "searchPlaceholder": "Search by name or address...",
+    "loading": "Loading building data...",
     "noData": "No buildings found",
-    "totalBuildings": "Total buildings: {{count}}",
+    "notAssigned": "Not Assigned",
+    "unknown": "Unknown",
+    "deleteSuccess": "Building deleted successfully",
+    "deleteError": "Failed to delete building",
+    "viewDetails": "View Details",
+    "technicalRecords": "Technical Records",
     "filterOptions": {
-      "status": {
-        "all": "All statuses",
-        "active": "Active",
-        "inactive": "Inactive",
-        "underConstruction": "Under Construction",
-        "underMaintenance": "Under Maintenance"
-      }
-    },
-    "create": {
-      "title": "Create Building",
-      "name": "Building Name",
-      "namePlaceholder": "Enter building name",
-      "address": "Address",
-      "addressPlaceholder": "Enter building address",
-      "description": "Description",
-      "descriptionPlaceholder": "Enter building description",
-      "status": "Status",
-      "cancel": "Cancel",
-      "create": "Create",
-      "createSuccess": "Building created successfully",
-      "createError": "Unable to create building"
+      "all": "All",
+      "operational": "Operational",
+      "under_construction": "Under Construction"
     },
     "table1": {
       "no": "No.",
-      "name": "Name",
-      "address": "Address",
-      "description": "Description",
-      "status": "Status",
-      "action": "Action"
-    },
-    "details": {
-      "title": "Building Details",
-      "basicInfo": "Basic Information",
-      "maintenanceHistory": "Maintenance History",
-      "residents": "Residents",
-      "staff": "Staff",
-      "assets": "Assets",
-      "reports": "Reports"
-    },
-    "edit": {
-      "title": "Edit Building",
-      "updateSuccess": "Building updated successfully",
-      "updateError": "Unable to update building"
-    },
-    "delete": {
-      "title": "Delete Building",
-      "confirmMessage": "Are you sure you want to delete this building? This action cannot be undone.",
-      "success": "Building deleted successfully",
-      "error": "Unable to delete building"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "underConstruction": "Under Construction",
-      "underMaintenance": "Under Maintenance"
-    },
-    "floors": {
-      "title": "Floors",
-      "addFloor": "Add Floor",
-      "floorNumber": "Floor Number",
-      "description": "Description",
-      "status": "Status",
-      "noData": "No floors found"
-    },
-    "apartments": {
-      "title": "Apartments",
-      "addApartment": "Add Apartment",
-      "apartmentNumber": "Apartment Number",
+      "buildingName": "Building Name",
+      "areaName": "Area Name",
+      "manager": "Manager",
       "floor": "Floor",
       "status": "Status",
-      "noData": "No apartments found"
-    }
+      "createdDate": "Created Date",
+      "completionDate": "Completion Date",
+      "action": "Action",
+      "totalApartments": "Total Apartments"
+    },
+    "status": {
+      "operational": "Operational",
+      "under_construction": "Under Construction"
+    },
+    "warrantyDate": "Warranty Date",
+    "completionDate": "Completion Date",
+    "buildingDetails": "Building Details",
+    "noBuildingDetails": "No building details"
   },
   "residentManagement": {
     "title": "Resident Management",
@@ -614,11 +573,15 @@
     "residentStatus": "Status",
     "loading": "Loading resident data...",
     "noData": "No resident data found",
-    "searchPlaceholder": "Search by name, email or phone number",
-    "statusUpdateSuccess": "Resident status updated successfully",
+    "searchPlaceholder": "Search by name, email or phone",
+    "statusUpdateSuccess": "Resident status updated successfully to {{status}}",
     "statusUpdateError": "Unable to update resident status",
     "invalidDate": "Invalid date",
     "error": "Error",
+    "createdDate": "Created Date",
+    "dateOfBirth": "Date of Birth",
+    "status":"Status",
+    "action":"Action",
     "filterOptions": {
       "all": "All",
       "active": "Active",
@@ -634,6 +597,126 @@
       "createdDate": "Created Date",
       "status": "Status",
       "action": "Action"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "genderOptions": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "viewDetail": {
+      "title": "Resident Details",
+      "loading": "Loading data...",
+      "accountInactive": {
+        "title": "Account Inactive",
+        "message": "This resident account is currently inactive. Details are only available for active accounts.",
+        "close": "Close"
+      },
+      "tabs": {
+        "personalInfo": "Personal Info",
+        "apartments": "Apartments"
+      },
+      "personalInformation": {
+        "title": "Personal Information",
+        "gender": "Gender",
+        "dateOfBirth": "Date of Birth",
+        "createdDate": "Created Date"
+      },
+      "propertySummary": {
+        "title": "Property Summary",
+        "add": "Add",
+        "totalApartments": "Total Apartments",
+        "buildings": "Buildings",
+        "areas": "Areas",
+        "noApartments": "No apartments assigned.",
+        "noApartmentsMessage": "No apartments assigned to this resident.",
+        "addFirstApartment": "Add First Apartment",
+        "apartmentsFound": "{{count}} apartment(s) found",
+        "addNew": "Add New",
+        "apartment": "Apartment",
+        "building": "Building",
+        "area": "Area",
+        "unknown": "Unknown"
+      },
+      "status": {
+        "id": "ID",
+        "unknown": "Unknown Building",
+        "unknownArea": "Unknown Area"
+      },
+      "contactInfo": {
+        "email": "Email",
+        "phone": "Phone"
+      },
+      "buildingInfo": {
+        "buildingName": "Building Name",
+        "buildingDetail": "Building Detail",
+        "buildingStatus": "Building Status",
+        "buildingFloors": "Number of Floors",
+        "buildingDescription": "Description"
+      },
+      "apartmentInfo": {
+        "title": "Apartment Information",
+        "name": "Apartment Name",
+        "status": "Status",
+        "operational": "Operational",
+        "underConstruction": "Under Construction",
+        "noImage": "No Image"
+      },
+      "accountStatus": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "actions": {
+        "addApartment": "Add Apartment",
+        "addNew": "Add New",
+        "close": "Close"
+      },
+      "messages": {
+        "cannotGetApartment": "Cannot get apartment information",
+        "errorLoadingApartment": "An error occurred while loading apartment information"
+      },
+      "gender": {
+        "title": "Gender",
+        "male": "Male",
+        "female": "Female",
+        "other": "Other"
+      }
+    },
+    "modal": {
+      "close": "Close"
+    },
+    "changeStatus": "Change Status",
+    "remove": "Remove",
+    "exportPdf": "Export PDF",
+    "confirmStatusChange": {
+      "title": "Confirm Status Change",
+      "message": "Are you sure you want to change the status of this resident?",
+      "currentStatus": "Current Status",
+      "newStatus": "New Status",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "addApartmentModal": {
+      "title": "Assign Apartment",
+      "assigningFor": "Assigning apartment for:",
+      "infoMessage": "Assigning an apartment will give the resident access to that property in the system.",
+      "apartmentNameLabel": "Apartment Name",
+      "apartmentNamePlaceholder": "e.g. A101",
+      "buildingDetailLabel": "Building Detail",
+      "buildingDetailPlaceholder": "Select building detail",
+      "loadingBuildingDetails": "Loading building details...",
+      "assignButton": "Assign Apartment",
+      "assigningButton": "Assigning Apartment...",
+      "errors": {
+        "missingResident": "Resident information is missing",
+        "enterName": "Please enter apartment name",
+        "selectBuilding": "Please select a building detail",
+        "loadError": "Failed to load building details",
+        "assignError": "Failed to assign apartment to resident"
+      },
+      "success": "Apartment successfully assigned to {{username}}"
     }
   },
   "staffManagement": {
@@ -837,11 +920,17 @@
     "noData": "No cracks found",
     "loading": "Loading data...",
     "errorLoading": "Error loading data",
+    "reportedBy": "Reported By",
     "filterOptions": {
       "all": "All",
       "low": "Low",
       "medium": "Medium",
-      "high": "High"
+      "high": "High",
+      "severity": {
+        "low": "Low Severity",
+        "medium": "Medium Severity",
+        "high": "High Severity"
+      }
     },
     "status": {
       "pending": "Pending",
@@ -1392,9 +1481,9 @@
       "completionDateRequired": "Completion date is required for operational buildings",
       "warrantyDate": "Warranty Date",
       "warrantyDateRequired": "Warranty date is required for operational buildings",
-      "manager": "Building Manager",
+      "buildingManager": "Building Manager",
       "selectManager": "Select Manager",
-      "managerHint": "Select manager for this building. Can be updated later.",
+      "managerNote": "Select manager for this building. Can be updated later.",
       "cancel": "Cancel",
       "addButton": "Add Building",
       "processing": "Processing...",
@@ -1404,6 +1493,28 @@
     "edit": {
       "title": "Edit Building",
       "subtitle": "Update building information below",
+      "name": "Building Name",
+      "namePlaceholder": "Enter building name",
+      "nameRequired": "Building name is required",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter building description",
+      "numberFloors": "Number of Floors",
+      "imageUrl": "Image (URL)",
+      "imageUrlPlaceholder": "Enter image URL",
+      "area": "Area",
+      "selectArea": "Select Area",
+      "areaRequired": "Please select area",
+      "constructionDate": "Construction Date",
+      "constructionDateRequired": "Construction date is required",
+      "status": "Status",
+      "operational": "Operational",
+      "underConstruction": "Under Construction",
+      "completionDate": "Completion Date",
+      "completionDateRequired": "Completion date is required for operational buildings",
+      "manager": "Building Manager",
+      "selectManager": "Select Manager",
+      "managerHint": "Select manager for this building. Can be updated later.",
+      "loading": "Loading building data...",
       "updateButton": "Update Building",
       "updating": "Updating...",
       "success": "Building updated successfully!",
@@ -1444,29 +1555,68 @@
       "title": "Technical Records",
       "upload": {
         "title": "Upload Technical Record",
-        "device": "Device",
-        "deviceRequired": "Please select device",
-        "documentType": "Document Type",
-        "documentTypeRequired": "Please select document type",
-        "fileUpload": "Upload File",
-        "fileRequired": "Please select file to upload",
-        "pdfOnly": "PDF only, maximum 10MB",
-        "uploadButton": "Upload Document",
-        "uploading": "Uploading...",
-        "success": "Technical record uploaded successfully",
-        "error": "Error uploading: {message}"
+        "device": {
+          "label": "Device",
+          "required": "Please select device",
+          "select": "Select device",
+          "allDevicesHaveRecords": "All devices in this building already have technical records. You can only upload one technical record per device."
+        },
+        "documentType": {
+          "label": "Document Type",
+          "required": "Please select document type",
+          "select": "Select document type",
+          "options": {
+            "manual": "User Manual",
+            "specification": "Specification",
+            "certificate": "Certificate",
+            "warranty": "Warranty Document",
+            "maintenance": "Maintenance Guide"
+          }
+        },
+        "file": {
+          "label": "Upload File",
+          "required": "Please select file to upload",
+          "dragDrop": "or drag and drop",
+          "pdfOnly": "PDF only, maximum 10MB",
+          "uploadButton": "Upload File",
+          "removeFile": "Remove File",
+          "fileTooLarge": "File size must not exceed 10MB",
+          "invalidType": "Only PDF files are accepted"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "upload": "Upload Document",
+          "uploading": "Uploading..."
+        }
       },
       "list": {
-        "title": "Technical Records - {buildingName}",
-        "found": "Found {count} technical documents",
-        "noRecords": "No technical records",
-        "noRecordsMessage": "Currently no technical records for this building.",
+        "title": "Technical Records - {{buildingName}}",
+        "count": "Found {{count}} Technical Documents",
         "uploadNew": "Upload New",
-        "deviceInfo": "Device Information",
-        "device": "Device",
-        "type": "Type",
-        "building": "Building",
-        "download": "Download"
+        "noRecords": {
+          "title": "No Technical Records",
+          "description": "Currently no technical records for this building."
+        },
+        "deviceInfo": {
+          "title": "Device Information",
+          "device": "Device:",
+          "type": "Type:",
+          "building": "Building:"
+        },
+        "actions": {
+          "download": "Download"
+        },
+        "uploadDate": "Uploaded on {{date}}"
+      },
+      "errors": {
+        "buildingIdRequired": {
+          "title": "Building ID Required",
+          "description": "Building ID is required to view technical records."
+        },
+        "loadFailed": {
+          "title": "Unable to Load Technical Records",
+          "description": "An error occurred while loading technical records."
+        }
       }
     }
   },
@@ -1708,6 +1858,65 @@
         "loadFailed": {
           "title": "Unable to Load Technical Records",
           "description": "An error occurred while loading technical records."
+        }
+      }
+    },
+    "viewBuilding": {
+      "title": "Building Details",
+      "loading": "Loading building data...",
+      "error": {
+        "title": "Unable to Load Information",
+        "loadError": "Unable to load building details",
+        "noInformation": "Cannot find any information for this building"
+      },
+      "status": {
+        "operational": "Operational",
+        "underConstruction": "Under Construction",
+        "noDetail": "No Id Detail"
+      },
+      "header": {
+        "area": "Area",
+        "floors": "Floors",
+        "construction": "Construction",
+        "completion": "Completion"
+      },
+      "details": {
+        "areaDetails": "Area Details",
+        "buildingInfo": "Building Information",
+        "buildingName": "Building Name",
+        "status": "Status",
+        "numOfFloors": "Number of Floors",
+        "buildingManager": "Building Manager",
+        "createdDate": "Created Date",
+        "lastUpdated": "Last Updated",
+        "constructionStart": "Construction Start",
+        "completionDate": "Completion Date",
+        "warrantyUntil": "Warranty Until",
+        "noAreasAvailable": "No Areas details available",
+        "apartments": "apartments"
+      },
+      "devices": {
+        "title": "Device Information",
+        "count": "{{count}} {{deviceLabel}}",
+        "device": "Device",
+        "devices": "Devices",
+        "noDevices": "No devices available",
+        "noDevicesMessage": "This building currently has no registered devices in the system.",
+        "model": "Model",
+        "manufacturer": "Manufacturer"
+      },
+      "contracts": {
+        "title": "Contracts Information",
+        "loading": "Loading contracts...",
+        "error": "Error loading contracts",
+        "errorMessage": "There was an error fetching contracts information.",
+        "noContracts": "No contracts found for this building",
+        "noContractInfo": "Cannot find contract information",
+        "devices": "Devices",
+        "actions": {
+          "download": "Download",
+          "view": "View",
+          "directFile": "Direct File"
         }
       }
     }

@@ -452,14 +452,22 @@
   },
   "buildingManagement": {
     "title": "Quản lý tòa nhà",
+    "addBuilding": "Thêm tòa nhà",
+    "addArea": "Thêm khu vực",
+    "editBuilding": "Sửa tòa nhà",
+    "deleteBuilding": "Xóa tòa nhà",
     "noBuildingDetails": "Không có thông tin chi tiết tòa nhà",
     "loading": "Đang tải dữ liệu tòa nhà...",
     "noData": "Không tìm thấy tòa nhà nào",
     "notAssigned": "Chưa được gán",
-    "searchPlaceholder": "Tìm kiếm tòa nhà...",
+    "unknown": "Không xác định",
+    "deleteSuccess": "Xóa tòa nhà thành công",
+    "deleteError": "Không thể xóa tòa nhà",
+    "searchPlaceholder": "Tìm kiếm theo tên hoặc địa chỉ...",
     "viewDetails": "Xem chi tiết",
     "technicalRecords": "Hồ sơ kỹ thuật",
-    "status": {
+    "filterOptions": {
+      "all": "Tất cả",
       "operational": "Đang hoạt động",
       "under_construction": "Đang xây dựng"
     },
@@ -467,12 +475,17 @@
       "no": "STT",
       "buildingName": "Tên tòa nhà",
       "areaName": "Tên khu vực",
+      "manager": "Quản lý",
       "floor": "Số tầng",
       "status": "Trạng thái",
       "createdDate": "Ngày tạo",
       "completionDate": "Ngày hoàn thành",
       "action": "Thao tác",
       "totalApartments": "Tổng số căn hộ"
+    },
+    "status": {
+      "operational": "Đang hoạt động",
+      "under_construction": "Đang xây dựng"
     },
     "warrantyDate": "Ngày bảo hành",
     "completionDate": "Ngày hoàn thành",
@@ -492,13 +505,17 @@
     "loading": "Đang tải dữ liệu cư dân...",
     "noData": "Không tìm thấy dữ liệu cư dân",
     "searchPlaceholder": "Tìm kiếm theo tên, email hoặc số điện thoại",
-    "statusUpdateSuccess": "Cập nhật trạng thái cư dân thành công",
+    "statusUpdateSuccess": "Cập nhật trạng thái cư dân thành {{status}} thành công",
     "statusUpdateError": "Không thể cập nhật trạng thái cư dân",
     "invalidDate": "Ngày không hợp lệ",
+    "createdDate": "Ngày tạo",
+    "dateOfBirth": "Ngày sinh",
+    "status":"Trạng thái",
+    "action":"Thao tác",
     "error": "Lỗi",
     "filterOptions": {
       "all": "Tất cả",
-      "active": "Đang hoạt động",
+      "active": "Hoạt động",
       "inactive": "Không hoạt động"
     },
     "table": {
@@ -511,6 +528,123 @@
       "createdDate": "Ngày tạo",
       "status": "Trạng thái",
       "action": "Thao tác"
+    },
+    "status": {
+      "active": "Hoạt động",
+      "inactive": "Không hoạt động"
+    },
+    "genderOptions": {
+      "male": "Nam",
+      "female": "Nữ"
+    },
+    "viewDetail": {
+      "title": "Chi tiết cư dân",
+      "loading": "Đang tải dữ liệu...",
+      "accountInactive": {
+        "title": "Tài khoản không hoạt động",
+        "message": "Tài khoản cư dân này hiện không hoạt động. Chi tiết chỉ khả dụng cho các tài khoản đang hoạt động.",
+        "close": "Đóng"
+      },
+      "tabs": {
+        "personalInfo": "Thông tin cá nhân",
+        "apartments": "Căn hộ"
+      },
+      "personalInformation": {
+        "title": "Thông tin cá nhân",
+        "gender": "Giới tính",
+        "dateOfBirth": "Ngày sinh",
+        "createdDate": "Ngày tạo"
+      },
+      "propertySummary": {
+        "title": "Tổng quan tài sản",
+        "add": "Thêm",
+        "totalApartments": "Tổng số căn hộ",
+        "buildings": "Tòa nhà",
+        "areas": "Khu vực",
+        "noApartments": "Chưa có căn hộ nào được gán.",
+        "noApartmentsMessage": "Chưa có căn hộ nào được gán cho cư dân này.",
+        "addFirstApartment": "Thêm căn hộ đầu tiên",
+        "apartmentsFound": "Tìm thấy {{count}} căn hộ",
+        "addNew": "Thêm mới",
+        "apartment": "Căn hộ",
+        "building": "Tòa nhà",
+        "area": "Khu vực",
+        "unknown": "Không xác định"
+      },
+      "status": {
+        "id": "ID",
+        "unknown": "Tòa nhà không xác định",
+        "unknownArea": "Khu vực không xác định"
+      },
+      "contactInfo": {
+        "email": "Email",
+        "phone": "Số điện thoại"
+      },
+      "buildingInfo": {
+        "buildingName": "Tên tòa nhà",
+        "buildingDetail": "Chi tiết tòa nhà",
+        "buildingStatus": "Trạng thái tòa nhà",
+        "buildingFloors": "Số tầng",
+        "buildingDescription": "Mô tả"
+      },
+      "apartmentInfo": {
+        "title": "Thông tin căn hộ",
+        "name": "Tên căn hộ",
+        "status": "Trạng thái",
+        "operational": "Đang hoạt động",
+        "underConstruction": "Đang xây dựng",
+        "noImage": "Không có hình ảnh"
+      },
+      "accountStatus": {
+        "active": "Hoạt động",
+        "inactive": "Không hoạt động"
+      },
+      "actions": {
+        "addApartment": "Thêm căn hộ",
+        "addNew": "Thêm mới",
+        "close": "Đóng"
+      },
+      "messages": {
+        "cannotGetApartment": "Không thể lấy thông tin căn hộ",
+        "errorLoadingApartment": "Đã xảy ra lỗi khi tải thông tin căn hộ"
+      },
+      "gender": {
+        "title": "Giới tính",
+        "male": "Nam",
+        "female": "Nữ",
+        "other": "Khác"
+      }
+    },
+    "modal": {
+      "close": "Đóng",
+      "title": "Cửa sổ",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận",
+      "save": "Lưu",
+      "delete": "Xóa",
+      "loading": "Đang tải...",
+      "error": "Lỗi",
+      "success": "Thành công"
+    },
+    "addApartmentModal": {
+      "title": "Gán căn hộ",
+      "assigningFor": "Gán căn hộ cho:",
+      "infoMessage": "Gán căn hộ sẽ cho phép cư dân truy cập vào tài sản đó trong hệ thống.",
+      "apartmentNameLabel": "Tên căn hộ",
+      "apartmentNamePlaceholder": "ví dụ: A101",
+      "buildingDetailLabel": "Chi tiết tòa nhà",
+      "buildingDetailPlaceholder": "Chọn chi tiết tòa nhà",
+      "loadingBuildingDetails": "Đang tải chi tiết tòa nhà...",
+      "assignButton": "Gán căn hộ",
+      "assigningButton": "Đang gán căn hộ...",
+      "errors": {
+        "missingResident": "Thiếu thông tin cư dân",
+        "enterName": "Vui lòng nhập tên căn hộ",
+        "selectBuilding": "Vui lòng chọn chi tiết tòa nhà",
+        "loadError": "Không thể tải chi tiết tòa nhà",
+        "assignError": "Không thể gán căn hộ cho cư dân"
+      },
+      "success": "Đã gán căn hộ thành công cho {{username}}"
     }
   },
   "staffManagement": {
@@ -714,11 +848,17 @@
     "noData": "Không tìm thấy vết nứt nào",
     "loading": "Đang tải dữ liệu...",
     "errorLoading": "Lỗi khi tải dữ liệu",
+    "reportedBy": "Người báo cáo",
     "filterOptions": {
       "all": "Tất cả",
       "low": "Thấp",
-      "medium": "Trung bình",
-      "high": "Cao"
+      "medium": "Trung bình", 
+      "high": "Cao",
+      "severity": {
+        "low": "Mức độ thấp",
+        "medium": "Mức độ trung bình", 
+        "high": "Mức độ cao"
+      }
     },
     "status": {
       "pending": "Chờ xử lý",
@@ -1269,9 +1409,9 @@
       "completionDateRequired": "Ngày hoàn thành là bắt buộc cho tòa nhà đang hoạt động",
       "warrantyDate": "Ngày bảo hành",
       "warrantyDateRequired": "Ngày bảo hành là bắt buộc cho tòa nhà đang hoạt động",
-      "manager": "Quản lý tòa nhà",
+      "buildingManager": "Quản lý tòa nhà",
       "selectManager": "Chọn quản lý",
-      "managerHint": "Chọn quản lý cho tòa nhà này. Có thể cập nhật sau.",
+      "managerNote": "Chọn quản lý cho tòa nhà này. Có thể cập nhật sau.",
       "cancel": "Hủy",
       "addButton": "Thêm tòa nhà",
       "processing": "Đang xử lý...",
@@ -1281,6 +1421,28 @@
     "edit": {
       "title": "Chỉnh sửa tòa nhà",
       "subtitle": "Cập nhật thông tin tòa nhà bên dưới",
+      "name": "Tên tòa nhà",
+      "namePlaceholder": "Nhập tên tòa nhà",
+      "nameRequired": "Tên tòa nhà là bắt buộc",
+      "description": "Mô tả",
+      "descriptionPlaceholder": "Nhập mô tả tòa nhà",
+      "numberFloors": "Số tầng",
+      "imageUrl": "Hình ảnh (URL)",
+      "imageUrlPlaceholder": "Nhập URL hình ảnh",
+      "area": "Khu vực",
+      "selectArea": "Chọn khu vực",
+      "areaRequired": "Vui lòng chọn khu vực",
+      "constructionDate": "Ngày khởi công",
+      "constructionDateRequired": "Ngày khởi công là bắt buộc",
+      "status": "Trạng thái",
+      "operational": "Đang hoạt động",
+      "underConstruction": "Đang xây dựng",
+      "completionDate": "Ngày hoàn thành",
+      "completionDateRequired": "Ngày hoàn thành là bắt buộc cho tòa nhà đang hoạt động",
+      "manager": "Quản lý tòa nhà",
+      "selectManager": "Chọn quản lý",
+      "managerHint": "Chọn quản lý cho tòa nhà này. Có thể cập nhật sau.",
+      "loading": "Đang tải dữ liệu tòa nhà...",
       "updateButton": "Cập nhật tòa nhà",
       "updating": "Đang cập nhật...",
       "success": "Cập nhật tòa nhà thành công!",
@@ -1585,6 +1747,65 @@
         "loadFailed": {
           "title": "Không thể tải hồ sơ kỹ thuật",
           "description": "Đã xảy ra lỗi khi tải hồ sơ kỹ thuật."
+        }
+      }
+    },
+    "viewBuilding": {
+      "title": "Chi tiết tòa nhà",
+      "loading": "Đang tải dữ liệu tòa nhà...",
+      "error": {
+        "title": "Không thể tải thông tin",
+        "loadError": "Không thể tải chi tiết tòa nhà",
+        "noInformation": "Không tìm thấy thông tin cho tòa nhà này"
+      },
+      "status": {
+        "operational": "Đang hoạt động",
+        "underConstruction": "Đang xây dựng",
+        "noDetail": "Không có chi tiết"
+      },
+      "header": {
+        "area": "Khu vực",
+        "floors": "Số tầng",
+        "construction": "Xây dựng",
+        "completion": "Hoàn thành"
+      },
+      "details": {
+        "areaDetails": "Chi tiết khu vực",
+        "buildingInfo": "Thông tin tòa nhà",
+        "buildingName": "Tên tòa nhà",
+        "status": "Trạng thái",
+        "numOfFloors": "Số tầng",
+        "buildingManager": "Quản lý tòa nhà",
+        "createdDate": "Ngày tạo",
+        "lastUpdated": "Cập nhật lần cuối",
+        "constructionStart": "Ngày khởi công",
+        "completionDate": "Ngày hoàn thành",
+        "warrantyUntil": "Bảo hành đến",
+        "noAreasAvailable": "Không có chi tiết khu vực",
+        "apartments": "căn hộ"
+      },
+      "devices": {
+        "title": "Thông tin thiết bị",
+        "count": "{{count}} {{deviceLabel}}",
+        "device": "Thiết bị",
+        "devices": "Thiết bị",
+        "noDevices": "Không có thiết bị",
+        "noDevicesMessage": "Hiện tòa nhà này không có thiết bị nào được đăng ký trong hệ thống.",
+        "model": "Model",
+        "manufacturer": "Nhà sản xuất"
+      },
+      "contracts": {
+        "title": "Thông tin hợp đồng",
+        "loading": "Đang tải hợp đồng...",
+        "error": "Lỗi tải hợp đồng",
+        "errorMessage": "Đã xảy ra lỗi khi tải thông tin hợp đồng.",
+        "noContracts": "Không tìm thấy hợp đồng cho tòa nhà này",
+        "noContractInfo": "Không thể tìm thấy thông tin hợp đồng",
+        "devices": "Thiết bị",
+        "actions": {
+          "download": "Tải xuống",
+          "view": "Xem",
+          "directFile": "Tệp trực tiếp"
         }
       }
     }

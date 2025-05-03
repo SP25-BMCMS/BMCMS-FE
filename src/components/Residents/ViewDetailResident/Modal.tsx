@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
+  const { t } = useTranslation();
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Close modal on escape key
@@ -68,6 +70,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
             type="button"
             className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors focus:outline-none"
             onClick={onClose}
+            aria-label={t('residentManagement.modal.close')}
           >
             <svg
               className="h-5 w-5"

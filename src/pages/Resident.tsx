@@ -18,6 +18,7 @@ import { motion } from 'framer-motion'
 import ViewDetailResident from '@/components/Residents/ViewDetailResident'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import Tooltip from '@/components/Tooltip'
 
 interface ResidentsResponse {
   data: Residents[]
@@ -146,15 +147,15 @@ const Resident: React.FC = () => {
   })
 
   const filterOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'Active', label: 'Active' },
-    { value: 'Inactive', label: 'Inactive' },
+    { value: 'all', label: t('common.all') },
+    { value: 'Active', label: t('residentManagement.status.active') },
+    { value: 'Inactive', label: t('residentManagement.status.inactive') }
   ]
 
   const columns: Column<Residents>[] = [
     {
       key: 'index',
-      title: 'No',
+      title: t('residentManagement.table.no'),
       render: (_, index) => (
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {(currentPage - 1) * itemsPerPage + index + 1}
@@ -164,38 +165,51 @@ const Resident: React.FC = () => {
     },
     {
       key: 'name',
-      title: 'Resident Name',
+      title: t('residentManagement.table.name'),
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.username}</div>
       ),
     },
     {
       key: 'email',
-      title: 'Email',
-      render: item => <div className="text-sm text-gray-500 dark:text-gray-400">{item.email}</div>,
+      title: t('residentManagement.table.email'),
+      render: item => {
+        const email = item.email;
+        if (email.length > 8) {
+          return (
+            <Tooltip content={email} position="top">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {email.substring(0, 8)}...
+              </div>
+            </Tooltip>
+          )
+        }
+        return <div className="text-sm text-gray-500 dark:text-gray-400">{email}</div>
+      },
     },
     {
       key: 'phone',
-      title: 'Phone',
+      title: t('residentManagement.table.phone'),
       render: item => <div className="text-sm text-gray-500 dark:text-gray-400">{item.phone}</div>,
     },
     {
       key: 'Gender',
-      title: 'Gender',
+      title: t('residentManagement.table.gender'),
       render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === 'Male'
-            ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
-            : 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]'
-            }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            item.gender === 'Male'
+              ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
+              : 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]'
+          }`}
         >
-          {item.gender}
+          {t(`residentManagement.genderOptions.${item.gender.toLowerCase()}`)}
         </span>
       ),
     },
     {
       key: 'Date Of Birth',
-      title: 'Date Of Birth',
+      title: t('residentManagement.table.dateOfBirth'),
       render: item => {
         try {
           if (!item.dateOfBirth) {
@@ -222,7 +236,7 @@ const Resident: React.FC = () => {
     },
     {
       key: 'createdDate',
-      title: 'Created Date',
+      title: t('residentManagement.table.createdDate'),
       render: item => {
         try {
           if (!item.createdDate) {
@@ -249,7 +263,7 @@ const Resident: React.FC = () => {
     },
     {
       key: 'status',
-      title: 'Status',
+      title: t('residentManagement.table.status'),
       render: item => (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.accountStatus === 'Active'
@@ -263,7 +277,7 @@ const Resident: React.FC = () => {
     },
     {
       key: 'action',
-      title: 'Action',
+      title: t('residentManagement.table.action'),
       render: item => (
         <DropdownMenu
           onViewDetail={() => handleViewDetail(item)}
@@ -290,7 +304,7 @@ const Resident: React.FC = () => {
         animate={loadingVariants}
         className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full loading-spinner mb-4"
       />
-      <p className="text-gray-700 dark:text-gray-300">Loading residents data...</p>
+      <p className="text-gray-700 dark:text-gray-300">{t('residentManagement.loading')}</p>
     </div>
   )
 
@@ -306,7 +320,7 @@ const Resident: React.FC = () => {
   if (!residentsResponse?.data || residentsResponse.data.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
-        <p className="text-gray-700 dark:text-gray-300">No resident data found.</p>
+        <p className="text-gray-700 dark:text-gray-300">{t('residentManagement.noData')}</p>
       </div>
     )
   }
@@ -317,7 +331,7 @@ const Resident: React.FC = () => {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
         <SearchInput
-          placeholder="Search by name, email or phone"
+          placeholder={t('residentManagement.searchPlaceholder')}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="w-full md:w-[20rem] max-w-full md:max-w-xs"

@@ -517,7 +517,7 @@ const DetailCrack: React.FC = () => {
                                   : `bg-[${STATUS_COLORS.RESOLVED.TEXT}]`
                                 }`}
                             ></div>
-                            {t('crackManagement.severity')}: {t(`crackManagement.filterOptions.${detail.severity.toLowerCase()}`)} 
+                            {t('crackManagement.severity')}: {t(`crackManagement.filterOptions.severity.${detail.severity.toLowerCase()}`)}
                           </span>
                         </div>
 

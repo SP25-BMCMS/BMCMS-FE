@@ -5,6 +5,7 @@ import { getAllStaff } from '@/services/staff';
 import { Area, StaffData } from '@/types';
 import toast from 'react-hot-toast';
 import { Loader2, UserIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface EditBuildingModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
   onSuccess,
   buildingId,
 }) => {
+  const { t } = useTranslation();
   const [areas, setAreas] = useState<Area[]>([]);
   const [staff, setStaff] = useState<StaffData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -75,7 +77,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
         }
       } catch (error) {
         console.error('Error fetching building data:', error);
-        toast.error('Unable to load building data');
+        toast.error(t('building.edit.error'));
       } finally {
         setIsLoadingData(false);
       }
@@ -84,7 +86,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
     if (isOpen && buildingId) {
       fetchBuildingData();
     }
-  }, [isOpen, buildingId]);
+  }, [isOpen, buildingId, t]);
 
   useEffect(() => {
     if (formData.status === 'under_construction') {
@@ -110,14 +112,14 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        toast.error('Unable to load required data!');
+        toast.error(t('common.loading.error'));
       }
     };
 
     if (isOpen) {
       fetchData();
     }
-  }, [isOpen]);
+  }, [isOpen, t]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -164,19 +166,19 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Building name is required';
+      newErrors.name = t('building.edit.nameRequired');
     }
 
     if (!formData.areaId) {
-      newErrors.areaId = 'Please select an area';
+      newErrors.areaId = t('building.edit.areaRequired');
     }
 
     if (!formData.construction_date) {
-      newErrors.construction_date = 'Construction date is required';
+      newErrors.construction_date = t('building.edit.constructionDateRequired');
     }
 
     if (formData.status === 'operational' && !formData.completion_date) {
-      newErrors.completion_date = 'Completion date is required for operational buildings';
+      newErrors.completion_date = t('building.edit.completionDateRequired');
     }
 
     setErrors(newErrors);
@@ -216,12 +218,12 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
 
       await updateBuilding(buildingId, buildingData);
 
-      toast.success('Building updated successfully!');
+      toast.success(t('building.edit.success'));
       onSuccess();
       onClose();
     } catch (err) {
       console.error('Error updating building:', err);
-      toast.error('Error updating building!');
+      toast.error(t('building.edit.error'));
     } finally {
       setIsLoading(false);
     }
@@ -235,10 +237,10 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
         <div className="flex justify-between items-center mb-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">
-              Edit Building
+              {t('building.edit.title')}
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Update building information below
+              {t('building.edit.subtitle')}
             </p>
           </div>
           <button
@@ -264,7 +266,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
         {isLoadingData ? (
           <div className="flex justify-center items-center p-4 sm:p-8">
             <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-blue-500" />
-            <span className="ml-2 text-gray-600 dark:text-gray-300">Loading building data...</span>
+            <span className="ml-2 text-gray-600 dark:text-gray-300">{t('building.edit.loading')}</span>
           </div>
         ) : (
           <form
@@ -278,14 +280,14 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               {/* Building Name */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Building Name
+                  {t('building.edit.name')}
                 </label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Enter building name"
+                  placeholder={t('building.edit.namePlaceholder')}
                   className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                     errors.name
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -300,7 +302,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               {/* Number of Floors */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Number of Floors
+                  {t('building.edit.numberFloors')}
                 </label>
                 <input
                   type="number"
@@ -324,14 +326,14 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               {/* Image URL */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Image (URL)
+                  {t('building.edit.imageUrl')}
                 </label>
                 <input
                   type="text"
                   name="imageCover"
                   value={formData.imageCover}
                   onChange={handleChange}
-                  placeholder="Enter image URL"
+                  placeholder={t('building.edit.imageUrlPlaceholder')}
                   className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                     errors.imageCover
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -346,7 +348,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               {/* Area Selection */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Area
+                  {t('building.edit.area')}
                 </label>
                 <select
                   name="areaId"
@@ -358,7 +360,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                       : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                   }`}
                 >
-                  <option value="">Select area</option>
+                  <option value="">{t('building.edit.selectArea')}</option>
                   {areas.map(area => (
                     <option key={area.areaId} value={area.areaId}>
                       {area.name}
@@ -373,7 +375,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               {/* Construction Date */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Construction Date
+                  {t('building.edit.constructionDate')}
                 </label>
                 <input
                   type="date"
@@ -396,7 +398,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               {/* Status */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Status
+                  {t('building.edit.status')}
                 </label>
                 <div className="flex space-x-4">
                   <label className="inline-flex items-center">
@@ -409,7 +411,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                       className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                      Operational
+                      {t('building.edit.operational')}
                     </span>
                   </label>
                   <label className="inline-flex items-center">
@@ -422,7 +424,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                       className="form-radio h-4 w-4 text-blue-600 dark:text-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                      Under construction
+                      {t('building.edit.underConstruction')}
                     </span>
                   </label>
                 </div>
@@ -431,7 +433,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               {/* Completion Date */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Completion Date
+                  {t('building.edit.completionDate')}
                 </label>
                 {formData.status === 'under_construction' ? (
                   <input
@@ -467,7 +469,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                 <div className="space-y-1 sm:space-y-2 col-span-1 sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                     <UserIcon className="w-4 h-4 mr-1.5 text-blue-500" />
-                    Building Manager
+                    {t('building.edit.manager')}
                   </label>
                   <select
                     name="manager_id"
@@ -475,7 +477,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                     onChange={handleChange}
                     className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:text-gray-100"
                   >
-                    <option value="">Select a manager</option>
+                    <option value="">{t('building.edit.selectManager')}</option>
                     {staff
                       .filter(s => s.role === 'Manager' || s.role === 'manager')
                       .map(manager => (
@@ -485,7 +487,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                       ))}
                   </select>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Select a manager for this building.
+                    {t('building.edit.managerHint')}
                   </p>
                 </div>
               )}
@@ -493,13 +495,13 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
               {/* Description - Full Width */}
               <div className="col-span-1 sm:col-span-2 space-y-1 sm:space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Description
+                  {t('building.edit.description')}
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Enter building description"
+                  placeholder={t('building.edit.descriptionPlaceholder')}
                   className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
                     errors.description
                       ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
@@ -522,7 +524,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                 onClick={onClose}
                 className="px-4 sm:px-6 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-gray-600 transition-colors text-sm"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
@@ -532,10 +534,10 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({
                 {isLoading ? (
                   <span className="flex items-center">
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Updating...
+                    {t('building.edit.updating')}
                   </span>
                 ) : (
-                  'Update Building'
+                  t('building.edit.updateButton')
                 )}
               </button>
             </div>
