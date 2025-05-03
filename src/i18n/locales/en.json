@@ -967,6 +967,7 @@
         "Daily": "Daily",
         "Weekly": "Weekly",
         "Monthly": "Monthly",
+        "Quarterly": "Quarterly",
         "Yearly": "Yearly",
         "Specific": "Specific"
       },
@@ -1038,6 +1039,12 @@
         "generateFailed": "Unable to generate schedule"
       },
       "success": "Schedule generated successfully"
+    },
+    "schedule": {
+      "selectAtLeastOneCycle": "Please select at least one cycle",
+      "selectAtLeastOneBuilding": "Please select at least one building",
+      "success": "Schedule generated successfully",
+      "error": "Failed to generate schedule"
     },
     "modal": {
       "title": {

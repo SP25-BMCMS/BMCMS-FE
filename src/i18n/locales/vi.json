@@ -885,6 +885,7 @@
         "Daily": "Hàng ngày",
         "Weekly": "Hàng tuần",
         "Monthly": "Hàng tháng",
+        "Quarterly": "Hàng quý",
         "Yearly": "Hàng năm",
         "Specific": "Cụ thể"
       },
@@ -956,6 +957,12 @@
         "generateFailed": "Không thể tạo lịch trình"
       },
       "success": "Tạo lịch trình thành công"
+    },
+    "schedule": {
+      "selectAtLeastOneCycle": "Vui lòng chọn ít nhất một chu kỳ",
+      "selectAtLeastOneBuilding": "Vui lòng chọn ít nhất một tòa nhà",
+      "success": "Tạo lịch trình thành công",
+      "error": "Không thể tạo lịch trình"
     },
     "modal": {
       "title": {
@@ -1091,7 +1098,7 @@
       "name": "Tên",
       "description": "Mô tả",
       "unitPrice": "Đơn giá",
-      "stockQuantity": "Số lượng tồn kho",
+      "stockQuantity": "Số lượng",
       "status": "Trạng thái",
       "action": "Thao tác"
     },
