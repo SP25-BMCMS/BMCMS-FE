@@ -459,10 +459,6 @@
     "searchPlaceholder": "Tìm kiếm tòa nhà...",
     "viewDetails": "Xem chi tiết",
     "technicalRecords": "Hồ sơ kỹ thuật",
-    "status": {
-      "operational": "Đang hoạt động",
-      "under_construction": "Đang xây dựng"
-    },
     "table1": {
       "no": "STT",
       "buildingName": "Tên tòa nhà",
@@ -473,6 +469,22 @@
       "completionDate": "Ngày hoàn thành",
       "action": "Thao tác",
       "totalApartments": "Tổng số căn hộ"
+    },
+    "table": {
+      "no": "STT",
+      "name": "Tên cư dân",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "gender": "Giới tính",
+      "dateOfBirth": "Ngày sinh",
+      "createdDate": "Ngày tạo",
+      "status": "Trạng thái",
+      "action": "Thao tác",
+      "totalApartments": "Tổng số căn hộ"
+    },
+    "status": {
+      "operational": "Đang hoạt động",
+      "under_construction": "Đang xây dựng"
     },
     "warrantyDate": "Ngày bảo hành",
     "completionDate": "Ngày hoàn thành",
@@ -510,7 +522,8 @@
       "dateOfBirth": "Ngày sinh",
       "createdDate": "Ngày tạo",
       "status": "Trạng thái",
-      "action": "Thao tác"
+      "action": "Thao tác",
+      "totalApartments": "Tổng số căn hộ"
     }
   },
   "staffManagement": {

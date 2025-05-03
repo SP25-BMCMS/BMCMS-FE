@@ -523,8 +523,8 @@
   },
   "buildingManagement": {
     "title": "Building Management",
-    "createBuilding": "Add Building",
-    "searchPlaceholder": "Search by name or address...",
+    "noBuildingDetails": "No building details found",
+    "loading": "Loading building data...",
     "noData": "No buildings found",
     "totalBuildings": "Total buildings: {{count}}",
     "filterOptions": {
@@ -552,11 +552,26 @@
     },
     "table1": {
       "no": "No.",
-      "name": "Name",
-      "address": "Address",
-      "description": "Description",
+      "buildingName": "Building Name",
+      "areaName": "Area Name",
+      "floor": "Floor",
       "status": "Status",
-      "action": "Action"
+      "createdDate": "Created Date",
+      "completionDate": "Completion Date",
+      "action": "Action",
+      "totalApartments": "Total Apartments"
+    },
+    "table": {
+      "no": "No.",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
+      "createdDate": "Created Date",
+      "status": "Status",
+      "action": "Action",
+      "totalApartments": "Total Apartments"
     },
     "details": {
       "title": "Building Details",
@@ -578,9 +593,13 @@
       "success": "Building deleted successfully",
       "error": "Unable to delete building"
     },
+    "warrantyDate": "Warranty Date",
+    "completionDate": "Completion Date",
+    "buildingDetails": "Building Details",
     "status": {
       "active": "Active",
       "inactive": "Inactive",
+      "operational": "Operational",
       "underConstruction": "Under Construction",
       "underMaintenance": "Under Maintenance"
     },
