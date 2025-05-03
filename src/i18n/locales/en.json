@@ -521,15 +521,11 @@
   },
   "buildingManagement": {
     "title": "Building Management",
-<<<<<<< HEAD
     "addBuilding": "Add Building",
     "addArea": "Add Area",
     "editBuilding": "Edit Building",
     "deleteBuilding": "Delete Building",
     "searchPlaceholder": "Search by name or address...",
-=======
-    "noBuildingDetails": "No building details found",
->>>>>>> ed5304c97566cbb40dfcb714b5cf95164f855450
     "loading": "Loading building data...",
     "noData": "No buildings found",
     "notAssigned": "Not Assigned",
@@ -547,71 +543,7 @@
       "no": "No.",
       "buildingName": "Building Name",
       "areaName": "Area Name",
-<<<<<<< HEAD
       "manager": "Manager",
-=======
-      "floor": "Floor",
-      "status": "Status",
-      "createdDate": "Created Date",
-      "completionDate": "Completion Date",
-      "action": "Action",
-      "totalApartments": "Total Apartments"
-    },
-    "table": {
-      "no": "No.",
-      "name": "Name",
-      "email": "Email",
-      "phone": "Phone",
-      "gender": "Gender",
-      "dateOfBirth": "Date of Birth",
-      "createdDate": "Created Date",
-      "status": "Status",
-      "action": "Action",
-      "totalApartments": "Total Apartments"
-    },
-    "details": {
-      "title": "Building Details",
-      "basicInfo": "Basic Information",
-      "maintenanceHistory": "Maintenance History",
-      "residents": "Residents",
-      "staff": "Staff",
-      "assets": "Assets",
-      "reports": "Reports"
-    },
-    "edit": {
-      "title": "Edit Building",
-      "updateSuccess": "Building updated successfully",
-      "updateError": "Unable to update building"
-    },
-    "delete": {
-      "title": "Delete Building",
-      "confirmMessage": "Are you sure you want to delete this building? This action cannot be undone.",
-      "success": "Building deleted successfully",
-      "error": "Unable to delete building"
-    },
-    "warrantyDate": "Warranty Date",
-    "completionDate": "Completion Date",
-    "buildingDetails": "Building Details",
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "operational": "Operational",
-      "underConstruction": "Under Construction",
-      "underMaintenance": "Under Maintenance"
-    },
-    "floors": {
-      "title": "Floors",
-      "addFloor": "Add Floor",
-      "floorNumber": "Floor Number",
-      "description": "Description",
-      "status": "Status",
-      "noData": "No floors found"
-    },
-    "apartments": {
-      "title": "Apartments",
-      "addApartment": "Add Apartment",
-      "apartmentNumber": "Apartment Number",
->>>>>>> ed5304c97566cbb40dfcb714b5cf95164f855450
       "floor": "Floor",
       "status": "Status",
       "createdDate": "Created Date",
