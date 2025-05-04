@@ -6,6 +6,8 @@ import authApi from '@/services/auth'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { FaGlobe } from 'react-icons/fa'
+import { Tooltip } from '@/components/Tooltip'
 
 const Login = () => {
   const [username, setUsername] = useState('')
@@ -13,7 +15,13 @@ const Login = () => {
   const [error, setError] = useState('')
   const toast = useToast()
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'vi' : 'en'
+    i18n.changeLanguage(newLang)
+    localStorage.setItem('language', newLang)
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +45,16 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col animation-bg justify-center bg-gradient-to-r from-[#94EBFF] via-[#D3F5FF] to-white dark:from-gray-900 dark:via-blue-900 dark:to-gray-900">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center space-x-4">
+        <Tooltip content={i18n.language === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}>
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <FaGlobe className="w-5 h-5" />
+            <span className="ml-1 text-sm font-medium">{i18n.language === 'en' ? 'VI' : 'EN'}</span>
+          </button>
+        </Tooltip>
         <ThemeToggle />
       </div>
 
