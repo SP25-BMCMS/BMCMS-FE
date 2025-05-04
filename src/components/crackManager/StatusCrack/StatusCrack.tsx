@@ -48,23 +48,23 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
 
   // Status title mapping
   const statusMapping = {
-    pending: { 
-      title: t('common.statusCrack.status.pending'), 
-      label: t('common.statusCrack.status.pending') 
+    pending: {
+      title: t('common.crackStatus.pending'),
+      label: t('common.crackStatus.pending')
     },
-    InProgress: { 
-      title: t('common.statusCrack.status.inProgress'), 
-      label: t('common.statusCrack.status.inProgress') 
+    InProgress: {
+      title: t('common.crackStatus.inProgress'),
+      label: t('common.crackStatus.inProgress')
     },
-    resolved: { 
-      title: t('common.statusCrack.status.resolved'), 
-      label: t('common.statusCrack.status.resolved') 
+    resolved: {
+      title: t('common.crackStatus.resolved'),
+      label: t('common.crackStatus.resolved')
     },
   }
 
   // Get the status title
   const getStatusTitle = () => {
-    return statusMapping[crackStatus as keyof typeof statusMapping]?.title || t('common.statusCrack.status.pending')
+    return statusMapping[crackStatus as keyof typeof statusMapping]?.title || t('common.crackStatus.pending')
   }
 
   // Get the status label
@@ -166,15 +166,15 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
       )
 
       if (response.isSuccess) {
-        toast.success(t('common.statusCrack.updateSuccess'))
+        toast.success(t('common.crackStatus.updateSuccess'))
         onUpdateSuccess()
         onClose()
       } else {
-        toast.error(response.message || t('common.statusCrack.updateError'))
+        toast.error(response.message || t('common.crackStatus.updateError'))
       }
     } catch (error: any) {
       console.error('Failed to update crack status:', error)
-      toast.error(error.message || t('common.statusCrack.updateError'))
+      toast.error(error.message || t('common.crackStatus.updateError'))
     } finally {
       setIsSaving(false)
     }
@@ -269,7 +269,7 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
             {isSaving ? (
               <span className="flex items-center">
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-                {t('common.statusCrack.processing')}
+                {t('common.crackStatus.processing')}
               </span>
             ) : (
               t('staffManagement.assignAndUpdate')

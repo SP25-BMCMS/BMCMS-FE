@@ -28,6 +28,15 @@
     "filter": "Lọc",
     "all": "Tất cả",
     "status": "Trạng thái",
+    "crackStatus": {
+      "title": "Trạng thái vết nứt",
+      "reviewing": "Đang xem xét",
+      "pending": "Chờ xử lý",
+      "inprogress": "Đang thực hiện",
+      "completed": "Hoàn thành",
+      "updateError": "Cập nhật thất bại",
+      "updateSuccess": "Cập nhật thành công"
+    },
     "action": "Thao tác",
     "createdDate": "Ngày tạo",
     "description": "Mô tả",
@@ -38,7 +47,6 @@
     "crack": "Vết nứt",
     "scheduleInfo": "Thông tin lịch trình",
     "scheduleStatus": "Trạng thái lịch trình",
-    "crackStatus": "Trạng thái vết nứt",
     "loading": "Đang tải...",
     "error": "Lỗi",
     "tryAgain": "Thử lại",
@@ -1051,7 +1059,8 @@
       "severity": {
         "low": "Mức độ thấp",
         "medium": "Mức độ trung bình",
-        "high": "Mức độ cao"
+        "high": "Mức độ cao",
+        "unknown": "Không xác định"
       }
     },
     "status": {

@@ -38,7 +38,15 @@
     "crack": "Crack",
     "scheduleInfo": "Schedule information",
     "scheduleStatus": "Schedule status",
-    "crackStatus": "Crack status",
+    "crackStatus": {
+      "title": "Crack status",
+      "reviewing": "Reviewing",
+      "pending": "Pending",
+      "inprogress": "In Progress",
+      "completed": "Completed",
+      "updateError": "Update failed",
+      "updateSuccess": "Update successfully"
+    },
     "loading": "Loading...",
     "error": "Error",
     "tryAgain": "Try again",
@@ -553,7 +561,7 @@
       "operational": "Operational",
       "under_construction": "Under Construction"
     },
-    "table":{
+    "table": {
       "no": "No.",
       "buildingName": "Building Name",
       "areaName": "Area Name",
@@ -606,8 +614,8 @@
     "error": "Error",
     "createdDate": "Created Date",
     "dateOfBirth": "Date of Birth",
-    "status":"Status",
-    "action":"Action",
+    "status": "Status",
+    "action": "Action",
     "filterOptions": {
       "all": "All",
       "active": "Active",
@@ -1115,7 +1123,8 @@
       "severity": {
         "low": "Low Severity",
         "medium": "Medium Severity",
-        "high": "High Severity"
+        "high": "High Severity",
+        "unknown": "Unknown"
       }
     },
     "status": {
@@ -1763,7 +1772,7 @@
           "label": "Upload File",
           "required": "Please select file to upload",
           "dragDrop": "or drag and drop",
-        "pdfOnly": "PDF only, maximum 10MB",
+          "pdfOnly": "PDF only, maximum 10MB",
           "uploadButton": "Upload File",
           "removeFile": "Remove File",
           "fileTooLarge": "File size must not exceed 10MB",
@@ -1790,7 +1799,7 @@
           "building": "Building:"
         },
         "actions": {
-        "download": "Download"
+          "download": "Download"
         },
         "uploadDate": "Uploaded on {{date}}"
       },

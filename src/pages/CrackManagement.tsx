@@ -18,6 +18,15 @@ interface ErrorResponse {
   message: string
 }
 
+interface ApiResponse {
+  isSuccess: boolean
+  message: string
+  data: {
+    data: CrackReportResponse[]
+    pagination: CrackListPaginationResponse['pagination']
+  }
+}
+
 // Map API response to UI model
 const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
   return {
@@ -106,15 +115,22 @@ const CrackManagement: React.FC = () => {
     queryFn: async () => {
       try {
         const params = getQueryParams()
-        const response = await crackApi.getCrackList(params)
+        const response = await crackApi.getCrackList(params) as unknown as ApiResponse
+
+        // Kiểm tra response có thành công không
+        if (!response.isSuccess) {
+          throw new Error(response.message || 'Failed to fetch cracks')
+        }
+
         return {
-          cracks: response.data.map(mapCrackResponseToCrack),
-          pagination: response.pagination,
+          cracks: response.data.data.map(mapCrackResponseToCrack),
+          pagination: response.data.pagination,
         }
       } catch (error) {
         const axiosError = error as AxiosError<ErrorResponse>
-        toast.error(axiosError.response?.data?.message || 'Failed to fetch cracks')
-        throw error
+        const errorMessage = axiosError.response?.data?.message || 'Failed to fetch cracks'
+        toast.error(errorMessage)
+        throw error // Vẫn throw error để React Query có thể retry
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -122,7 +138,7 @@ const CrackManagement: React.FC = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: false,
+    retry: 1, // Chỉ retry 1 lần
   }
 
   const { data: cracksData, isLoading, isFetching } = useQuery<CracksQueryData>(queryOptions)
