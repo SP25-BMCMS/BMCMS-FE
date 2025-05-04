@@ -21,8 +21,9 @@ import Tooltip from '@/components/Tooltip'
 
 interface StaffResponse {
   isSuccess: boolean
+  message: string
   data: StaffData[]
-  pagination?: {
+  pagination: {
     total: number
     page: number
     limit: number
@@ -54,16 +55,14 @@ const StaffManagement: React.FC = () => {
   const { data: staffResponse, isLoading: isLoadingStaff } = useQuery<StaffResponse>({
     queryKey: ['staff', searchTerm, currentPage, itemsPerPage, selectedRole],
     queryFn: async () => {
-      const response = await getAllStaff()
-      return {
-        ...response,
-        pagination: response.pagination || {
-          total: response.data.length,
-          page: currentPage,
-          limit: itemsPerPage,
-          totalPages: Math.ceil(response.data.length / itemsPerPage),
-        },
+      const params = {
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+        search: searchTerm,
+        role: selectedRole !== 'all' ? selectedRole : undefined
       }
+      const response = await getAllStaff(params)
+      return response
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -74,18 +73,17 @@ const StaffManagement: React.FC = () => {
   })
 
   // Format staff data
-  const allStaffList =
-    staffResponse?.data.map((staff: StaffData) => ({
-      id: staff.userId,
-      name: staff.username,
-      email: staff.email,
-      phone: staff.phone,
-      role: staff.role as Staff['role'],
-      dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
-      gender: staff.gender,
-      createdDate: new Date().toLocaleDateString(),
-      userDetails: staff.userDetails,
-    })) || []
+  const staffList = staffResponse?.data.map((staff: StaffData) => ({
+    id: staff.userId,
+    name: staff.username,
+    email: staff.email,
+    phone: staff.phone,
+    role: staff.role as Staff['role'],
+    dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
+    gender: staff.gender,
+    createdDate: new Date().toLocaleDateString(),
+    userDetails: staff.userDetails,
+  })) || []
 
   const {
     isModalOpen,
@@ -183,17 +181,17 @@ const StaffManagement: React.FC = () => {
       key: 'email',
       title: t('staffManagement.table.email'),
       render: item => {
-        const truncatedEmail = item.email.length > 8 
-          ? `${item.email.substring(0, 8)}...` 
-          : item.email;
-        
+        const truncatedEmail = item.email.length > 8
+          ? `${item.email.substring(0, 8)}...`
+          : item.email
+
         return (
           <Tooltip content={item.email}>
             <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
               {truncatedEmail}
             </div>
           </Tooltip>
-        );
+        )
       },
     },
     {
@@ -213,10 +211,9 @@ const StaffManagement: React.FC = () => {
         }
         return (
           <span
-            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${
-              roleColors[item.role] ||
+            className={`inline-flex justify-center items-center text-xs leading-5 font-semibold rounded-full px-4 py-1 min-w-[82px] text-center ${roleColors[item.role] ||
               'text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-            }`}
+              }`}
           >
             {t(`staffManagement.roles.${item.role.toLowerCase()}`)}
           </span>
@@ -237,11 +234,10 @@ const StaffManagement: React.FC = () => {
       title: t('staffManagement.table.gender'),
       render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.gender === 'Male'
-              ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
-              : 'bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]'
-          }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === 'Male'
+            ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
+            : 'bg-[#360AFE] bg-opacity-30 text-[#360AFE] border border-[#360AFE]'
+            }`}
         >
           {getGenderTranslation(item.gender)}
         </span>
@@ -271,23 +267,6 @@ const StaffManagement: React.FC = () => {
     },
   ]
 
-  // Lọc danh sách nhân viên dựa trên từ khóa tìm kiếm và role
-  const filteredStaffList = allStaffList.filter(
-    staff =>
-      (staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        staff.id.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (selectedRole === 'all' || staff.role === selectedRole)
-  )
-
-  // Apply pagination to filtered staff
-  const paginatedStaff = filteredStaffList.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
-
-  // Calculate total pages
-  const totalPages = Math.ceil(filteredStaffList.length / itemsPerPage)
-
   // Loading animation
   const loadingVariants = {
     rotate: 360,
@@ -298,7 +277,7 @@ const StaffManagement: React.FC = () => {
     },
   }
 
-  if (isLoadingStaff && allStaffList.length === 0) {
+  if (isLoadingStaff && staffList.length === 0) {
     return (
       <div className="flex flex-col justify-center items-center h-64">
         <motion.div
@@ -330,17 +309,17 @@ const StaffManagement: React.FC = () => {
             label={t('staffManagement.filterByRole')}
             buttonClassName="w-[150px]"
           />
-          <AddButton 
-            label={t('staffManagement.addStaff1')} 
-            icon={<FiUserPlus />} 
+          <AddButton
+            label={t('staffManagement.addStaff1')}
+            icon={<FiUserPlus />}
             onClick={openModal}
-            className="min-w-[160px] whitespace-nowrap" 
+            className="min-w-[160px] whitespace-nowrap"
           />
         </div>
       </div>
 
       <Table<Staff>
-        data={paginatedStaff}
+        data={staffList}
         columns={columns}
         keyExtractor={item => item.id}
         onRowClick={item => console.log('Row clicked:', item)}
@@ -350,17 +329,19 @@ const StaffManagement: React.FC = () => {
         emptyText={t('staffManagement.noData')}
       />
 
-      <div className="w-[95%] mx-auto mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          totalItems={filteredStaffList.length}
-          itemsPerPage={itemsPerPage}
-          onLimitChange={handleLimitChange}
-          limitOptions={[5, 10, 20, 50]}
-        />
-      </div>
+      {staffResponse && (
+        <div className="w-[95%] mx-auto mt-4">
+          <Pagination
+            currentPage={staffResponse.pagination.page}
+            totalPages={staffResponse.pagination.totalPages}
+            onPageChange={handlePageChange}
+            totalItems={staffResponse.pagination.total}
+            itemsPerPage={staffResponse.pagination.limit}
+            onLimitChange={handleLimitChange}
+            limitOptions={[5, 10, 20, 50]}
+          />
+        </div>
+      )}
 
       <AddStaff
         isOpen={isModalOpen}

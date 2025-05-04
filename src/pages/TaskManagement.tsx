@@ -307,37 +307,31 @@ const TaskManagement: React.FC = () => {
           {(currentPage - 1) * itemsPerPage + index + 1}
         </div>
       ),
-      width: '40px sm:50px md:60px',
+      width: '60px',
     },
     {
       key: 'title',
       title: t('taskManagement.table.title'),
       render: item => (
-        <Tooltip content={item.title || ''} position="bottom">
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 max-w-[120px] xs:max-w-[140px] sm:max-w-[180px] md:max-w-[220px] truncate">
+        <Tooltip content={item.title || ''}>
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px] md:max-w-[200px] lg:max-w-[250px]">
             {item.title}
           </div>
         </Tooltip>
       ),
-      width: '120px xs:140px sm:180px md:220px',
+      width: '200px',
     },
     {
       key: 'description',
       title: t('taskManagement.table.description'),
-      render: item => {
-        const shortDescription = item.description?.substring(0, 60) || ''
-        const needsTooltip = (item.description?.length || 0) > 60
-
-        return (
-          <Tooltip content={item.description || ''} position="bottom">
-            <div className="text-sm text-gray-500 dark:text-gray-400 max-w-[80px] xs:max-w-[120px] sm:max-w-[160px] md:max-w-[180px] truncate">
-              {shortDescription}
-              {needsTooltip ? '...' : ''}
-            </div>
-          </Tooltip>
-        )
-      },
-      width: '80px xs:120px sm:160px md:180px',
+      render: item => (
+        <Tooltip content={item.description || ''}>
+          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px] md:max-w-[250px] lg:max-w-[300px]">
+            {item.description}
+          </div>
+        </Tooltip>
+      ),
+      width: '250px',
     },
     {
       key: 'building',
@@ -351,13 +345,15 @@ const TaskManagement: React.FC = () => {
           const position = crackData.position
 
           buildingInfo = (
-            <div className="flex items-center">
-              <FaBuilding className="text-blue-500 mr-1 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="font-medium truncate">{buildingDetailId?.substring(0, 8)}</div>
-                <div className="text-xs truncate">{position}</div>
+            <Tooltip content={`${buildingDetailId} - ${position}`}>
+              <div className="flex items-center space-x-2">
+                <FaBuilding className="text-blue-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="font-medium truncate max-w-[100px] md:max-w-[150px]">{buildingDetailId}</div>
+                  <div className="text-xs truncate max-w-[100px] md:max-w-[150px]">{position}</div>
+                </div>
               </div>
-            </div>
+            </Tooltip>
           )
         } else if (taskType === 'schedule' && item.schedulesjobInfo?.isSuccess) {
           const scheduleData = item.schedulesjobInfo.data
@@ -367,12 +363,12 @@ const TaskManagement: React.FC = () => {
             const buildingDetailName = buildingDetail.name || ''
 
             buildingInfo = (
-              <Tooltip content={`${buildingName} - ${buildingDetailName}`} position="bottom">
-                <div className="flex items-center">
-                  <FaBuilding className="text-green-500 mr-1 flex-shrink-0" />
+              <Tooltip content={`${buildingName} - ${buildingDetailName}`}>
+                <div className="flex items-center space-x-2">
+                  <FaBuilding className="text-green-500 flex-shrink-0" />
                   <div className="min-w-0">
-                    <div className="font-medium truncate max-w-[70px] xs:max-w-[100px] sm:max-w-[120px]">{buildingName}</div>
-                    <div className="text-xs truncate max-w-[70px] xs:max-w-[100px] sm:max-w-[120px]">{buildingDetailName}</div>
+                    <div className="font-medium truncate max-w-[100px] md:max-w-[150px]">{buildingName}</div>
+                    <div className="text-xs truncate max-w-[100px] md:max-w-[150px]">{buildingDetailName}</div>
                   </div>
                 </div>
               </Tooltip>
@@ -382,7 +378,7 @@ const TaskManagement: React.FC = () => {
 
         return buildingInfo || <div className="text-sm text-gray-400">-</div>
       },
-      width: '100px xs:120px sm:140px',
+      width: '180px',
     },
     ...(taskType === 'crack'
       ? [
@@ -645,14 +641,14 @@ const TaskManagement: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="w-full overflow-x-auto rounded-lg shadow-sm border border-gray-100 dark:border-gray-800">
+      <div className="w-full overflow-hidden rounded-lg shadow-sm border border-gray-100 dark:border-gray-800">
         {isLoadingTasks || isNavigating ? (
           <LoadingIndicator />
         ) : tasksError ? (
           <ErrorMessage />
         ) : (
-          <>
-            <div className="min-w-[640px] sm:min-w-[768px] md:min-w-[900px]">
+          <div className="overflow-x-auto">
+            <div className="min-w-[1024px]">
               <Table<TaskResponse>
                 data={tasksData?.data || []}
                 columns={columns}
@@ -660,11 +656,11 @@ const TaskManagement: React.FC = () => {
                 onRowClick={item => handleNavigateToDetail(item.task_id)}
                 onRowMouseEnter={item => handleTaskMouseEnter(item.task_id)}
                 className="w-full"
-                tableClassName="w-full"
+                tableClassName="w-full table-fixed"
               />
             </div>
 
-            <div className="w-full px-4 py-3">
+            <div className="w-full px-4 py-3 border-t border-gray-100 dark:border-gray-800">
               <Pagination
                 currentPage={currentPage}
                 totalPages={tasksData?.pagination?.totalPages || 1}
@@ -675,7 +671,7 @@ const TaskManagement: React.FC = () => {
                 className="w-full"
               />
             </div>
-          </>
+          </div>
         )}
       </div>
 
