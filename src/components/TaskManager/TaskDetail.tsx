@@ -137,9 +137,9 @@ const TaskDetail: React.FC = () => {
       }
     },
     enabled: !!taskId && Object.keys(staffNameMap).length > 0,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Set staleTime to 0 to always refetch on mount
     gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnMount: false,
+    refetchOnMount: true, // Always refetch on mount
     refetchOnWindowFocus: false,
     retry: 1,
     placeholderData: (previousData) => previousData, // Keep previous data while loading
