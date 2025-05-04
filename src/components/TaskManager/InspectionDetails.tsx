@@ -26,7 +26,8 @@ interface InspectionDetailsProps {
 }
 
 // Type for report status
-type ReportStatus = 'NoPending' | 'Pending' | 'Rejected' | 'Approved'
+type ReportStatus = 'NoPending' | 'Pending' | 'Rejected' | 'Approved' | 'AutoApproved'
+type AssignmentStatus = 'Pending' | 'Verified' | 'Unverified' | 'InFixing' | 'Fixed' | 'Confirmed' | 'Reassigned' | 'Notcompleted'
 
 // Extended inspection type for our component
 interface EnhancedInspection extends Inspection {
@@ -50,7 +51,7 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
   const { data: staffData } = useQuery({
     queryKey: ['staff'],
     queryFn: async () => {
-      const response = await getAllStaff()
+      const response = await getAllStaff({ page: '1', limit: '9999' })
       return response.data || []
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -189,7 +190,6 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
   const getStatusColors = (status: ReportStatus) => {
     switch (status) {
       case 'NoPending':
-      case 'Approved':
         return {
           bg: STATUS_COLORS.RESOLVED.BG,
           text: STATUS_COLORS.RESOLVED.TEXT,
@@ -201,11 +201,23 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
           text: STATUS_COLORS.PENDING.TEXT,
           border: STATUS_COLORS.PENDING.BORDER,
         }
+      case 'Approved':
+        return {
+          bg: STATUS_COLORS.RESOLVED.BG,
+          text: STATUS_COLORS.RESOLVED.TEXT,
+          border: STATUS_COLORS.RESOLVED.BORDER,
+        }
       case 'Rejected':
         return {
           bg: STATUS_COLORS.INACTIVE.BG,
           text: STATUS_COLORS.INACTIVE.TEXT,
           border: STATUS_COLORS.INACTIVE.BORDER,
+        }
+      case 'AutoApproved':
+        return {
+          bg: STATUS_COLORS.RESOLVED.BG,
+          text: STATUS_COLORS.RESOLVED.TEXT,
+          border: STATUS_COLORS.RESOLVED.BORDER,
         }
       default:
         return {
@@ -214,6 +226,76 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
           border: '#d1d5db',
         }
     }
+  }
+
+  // Helper function to get status text with translation
+  const getStatusText = (status: ReportStatus) => {
+    return t(`taskManagement.inspection.status.${status.toLowerCase()}`)
+  }
+
+  // Helper function to get status colors for assignment
+  const getAssignmentStatusColors = (status: AssignmentStatus) => {
+    switch (status) {
+      case 'Pending':
+        return {
+          bg: 'rgba(255,193,7,0.3)',
+          text: '#ffc107',
+          border: '#ffc107',
+        }
+      case 'Verified':
+        return {
+          bg: 'rgba(80,241,134,0.31)',
+          text: '#00ff90',
+          border: '#50f186',
+        }
+      case 'Unverified':
+        return {
+          bg: 'rgba(255,193,7,0.3)',
+          text: '#ffc107',
+          border: '#ffc107',
+        }
+      case 'InFixing':
+        return {
+          bg: 'rgba(255,193,7,0.3)',
+          text: '#ffc107',
+          border: '#ffc107',
+        }
+      case 'Fixed':
+        return {
+          bg: 'rgba(80,241,134,0.31)',
+          text: '#00ff90',
+          border: '#50f186',
+        }
+      case 'Confirmed':
+        return {
+          bg: 'rgba(80,241,134,0.31)',
+          text: '#00ff90',
+          border: '#50f186',
+        }
+      case 'Reassigned':
+        return {
+          bg: 'rgba(88,86,214,0.3)',
+          text: '#5856D6',
+          border: '#5856D6',
+        }
+      case 'Notcompleted':
+        return {
+          bg: 'rgba(255,0,0,0.3)',
+          text: '#ff0000',
+          border: '#ff0000',
+        }
+      default:
+        return {
+          bg: 'rgba(229, 231, 235, 0.8)',
+          text: '#374151',
+          border: '#d1d5db',
+        }
+    }
+  }
+
+  // Helper function to get assignment status text with translation
+  const getAssignmentStatusText = (status: AssignmentStatus) => {
+    return t(`taskManagement.detail.assignments.${status.toLowerCase()}`)
   }
 
   // Format inspection identifier
@@ -250,7 +332,7 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
                 : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-500'
                 }`}
             >
-              {t('taskManagement.inspection.assignment')} {index + 1} • {assignment.status}
+              {t('taskManagement.inspection.assignment')} {index + 1} • {t(`taskManagement.detail.assignments.${assignment.status.toLowerCase()}`)}
             </button>
           ))}
         </div>
@@ -262,16 +344,14 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
           <div className="flex justify-between items-start mb-2">
             <h3 className="font-medium dark:text-white">{selectedAssignment.description}</h3>
             <span
-              className={`px-2 text-xs font-medium rounded-full ${selectedAssignment.status === 'Fixed'
-                ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
-                : selectedAssignment.status === 'InFixing'
-                  ? 'bg-[rgba(255,193,7,0.3)] text-[#ffc107] border border-[#ffc107]'
-                  : selectedAssignment.status === 'Reassigned'
-                    ? 'bg-[rgba(88,86,214,0.3)] text-[#5856D6] border border-[#5856D6]'
-                    : 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
-                }`}
+              className={`px-2 text-xs font-medium rounded-full`}
+              style={{
+                backgroundColor: getAssignmentStatusColors(selectedAssignment.status as AssignmentStatus).bg,
+                color: getAssignmentStatusColors(selectedAssignment.status as AssignmentStatus).text,
+                border: `1px solid ${getAssignmentStatusColors(selectedAssignment.status as AssignmentStatus).border}`,
+              }}
             >
-              {selectedAssignment.status}
+              {getAssignmentStatusText(selectedAssignment.status as AssignmentStatus)}
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">

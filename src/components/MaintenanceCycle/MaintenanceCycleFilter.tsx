@@ -35,6 +35,7 @@ const MaintenanceCycleFilter: React.FC<MaintenanceCycleFilterProps> = ({
     { value: 'Daily', label: t('maintenanceCycle.filterOptions.frequency.Daily') },
     { value: 'Weekly', label: t('maintenanceCycle.filterOptions.frequency.Weekly') },
     { value: 'Monthly', label: t('maintenanceCycle.filterOptions.frequency.Monthly') },
+    { value: 'Quarterly', label: t('maintenanceCycle.filterOptions.frequency.Quarterly') },
     { value: 'Yearly', label: t('maintenanceCycle.filterOptions.frequency.Yearly') },
     { value: 'Specific', label: t('maintenanceCycle.filterOptions.frequency.Specific') }
   ]
@@ -59,6 +60,7 @@ const MaintenanceCycleFilter: React.FC<MaintenanceCycleFilterProps> = ({
     { value: 'Lighting', label: t('maintenanceCycle.filterOptions.deviceType.Lighting') },
     { value: 'AutomaticDoor', label: t('maintenanceCycle.filterOptions.deviceType.AutomaticDoor') },
     { value: 'FireExtinguisher', label: t('maintenanceCycle.filterOptions.deviceType.FireExtinguisher') },
+    { value: 'BuildingStructure', label: t('maintenanceCycle.filterOptions.deviceType.BuildingStructure') },
     { value: 'Other', label: t('maintenanceCycle.filterOptions.deviceType.Other') }
   ]
 

@@ -1,29 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Residents } from '@/types';
-import { toast } from 'react-hot-toast';
-import { X, Building, User, Home, Info } from 'lucide-react';
-import { getAllBuildingDetails, addApartmentForResident } from '@/services/residents';
-import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
+import React, { useState, useEffect } from 'react'
+import { Residents } from '@/types'
+import { toast } from 'react-hot-toast'
+import { X, Building, User, Home, Info } from 'lucide-react'
+import { getAllBuildingDetails, addApartmentForResident } from '@/services/residents'
+import { useTranslation } from 'react-i18next'
+import Select from 'react-select'
 
 interface AddApartmentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  resident: Residents | null;
-  onSuccess: () => void;
+  isOpen: boolean
+  onClose: () => void
+  resident: Residents | null
+  onSuccess: () => void
 }
 
 interface BuildingDetail {
-  buildingDetailId: string;
-  name: string;
+  buildingDetailId: string
+  name: string
   building: {
-    name: string;
-  };
+    name: string
+  }
 }
 
 interface BuildingOption {
-  value: string;
-  label: string;
+  value: string
+  label: string
 }
 
 const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
@@ -32,53 +32,53 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
   resident,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
-  const [apartmentName, setApartmentName] = useState<string>('');
-  const [selectedBuildingDetail, setSelectedBuildingDetail] = useState<BuildingOption | null>(null);
-  const [buildingDetails, setBuildingDetails] = useState<BuildingDetail[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { t } = useTranslation()
+  const [apartmentName, setApartmentName] = useState<string>('')
+  const [selectedBuildingDetail, setSelectedBuildingDetail] = useState<BuildingOption | null>(null)
+  const [buildingDetails, setBuildingDetails] = useState<BuildingDetail[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   useEffect(() => {
     if (isOpen) {
-      fetchBuildingDetails();
+      fetchBuildingDetails()
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   const fetchBuildingDetails = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const response = await getAllBuildingDetails();
+      const response = await getAllBuildingDetails({ page: '1', limit: '9999' })
       if (response.data) {
-        setBuildingDetails(response.data);
+        setBuildingDetails(response.data)
       }
     } catch (error) {
-      console.error('Error fetching building details:', error);
-      toast.error(t('residentManagement.addApartmentModal.errors.loadError'));
+      console.error('Error fetching building details:', error)
+      toast.error(t('residentManagement.addApartmentModal.errors.loadError'))
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!resident) {
-      toast.error(t('residentManagement.addApartmentModal.errors.missingResident'));
-      return;
+      toast.error(t('residentManagement.addApartmentModal.errors.missingResident'))
+      return
     }
 
     if (!apartmentName.trim()) {
-      toast.error(t('residentManagement.addApartmentModal.errors.enterName'));
-      return;
+      toast.error(t('residentManagement.addApartmentModal.errors.enterName'))
+      return
     }
 
     if (!selectedBuildingDetail) {
-      toast.error(t('residentManagement.addApartmentModal.errors.selectBuilding'));
-      return;
+      toast.error(t('residentManagement.addApartmentModal.errors.selectBuilding'))
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       await addApartmentForResident(resident.userId, {
         apartments: [
@@ -87,24 +87,24 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
             buildingDetailId: selectedBuildingDetail.value,
           },
         ],
-      });
+      })
 
-      toast.success(t('residentManagement.addApartmentModal.success', { username: resident.username }));
-      setApartmentName('');
-      setSelectedBuildingDetail(null);
-      onSuccess();
-      onClose();
+      toast.success(t('residentManagement.addApartmentModal.success', { username: resident.username }))
+      setApartmentName('')
+      setSelectedBuildingDetail(null)
+      onSuccess()
+      onClose()
     } catch (error: any) {
-      toast.error(error.response?.data?.message || t('residentManagement.addApartmentModal.errors.assignError'));
+      toast.error(error.response?.data?.message || t('residentManagement.addApartmentModal.errors.assignError'))
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const buildingOptions: BuildingOption[] = buildingDetails.map(detail => ({
     value: detail.buildingDetailId,
     label: `${detail.name} - ${detail.building.name}`,
-  }));
+  }))
 
   // Updated styles for react-select
   const customStyles = {
@@ -147,7 +147,7 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
       ...provided,
       zIndex: 9999,
     }),
-  };
+  }
 
   // Dark mode styles
   const darkModeStyles = {
@@ -186,16 +186,16 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
       ...provided,
       zIndex: 9999,
     }),
-  };
+  }
 
   // Handle outside click
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      onClose()
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div
@@ -309,11 +309,10 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting || isLoading}
-              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 ${
-                isSubmitting || isLoading
+              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 ${isSubmitting || isLoading
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-              }`}
+                }`}
             >
               {isSubmitting ? (
                 <>
@@ -347,7 +346,7 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddApartmentModal;
+export default AddApartmentModal

@@ -51,20 +51,28 @@ const TaskDetail: React.FC = () => {
 
   // Fetch all staff data to map IDs to names
   const { data: staffData } = useQuery({
-    queryKey: ['staff'],
+    queryKey: ['staff', 'all'],
     queryFn: async () => {
-      const response = await getAllStaff()
+      const response = await getAllStaff({ page: '1', limit: '9999' })
       return response.data || []
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
   })
 
   // Create a map of staff IDs to names
   const staffNameMap = React.useMemo(() => {
-    const map: { [key: string]: string } = {}
+    const map: { [key: string]: { username: string; position?: string; department?: string, positionNameLabel?: string } } = {}
     if (staffData) {
       staffData.forEach((staff: StaffData) => {
-        map[staff.userId] = staff.username
+        map[staff.userId] = {
+          username: staff.username,
+          position: staff.userDetails?.position?.positionNameLabel,
+          department: staff.userDetails?.department?.departmentName
+        }
       })
     }
     return map
@@ -72,7 +80,7 @@ const TaskDetail: React.FC = () => {
 
   // Fetch task details and assignments
   const { data: taskData, isLoading } = useQuery({
-    queryKey: ['taskAssignments', taskId],
+    queryKey: ['task', 'detail', taskId],
     queryFn: async () => {
       try {
         const response = await tasksApi.getTaskAssignmentsByTaskId(taskId || '')
@@ -95,7 +103,7 @@ const TaskDetail: React.FC = () => {
                     crackInfo: taskWithCrackInfo.crackInfo,
                     taskAssignments: response.data.taskAssignments.map(assignment => ({
                       ...assignment,
-                      employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
+                      employee_name: staffNameMap[assignment.employee_id]?.username || 'Unknown Staff',
                     })),
                   },
                 }
@@ -114,7 +122,7 @@ const TaskDetail: React.FC = () => {
               ...response.data,
               taskAssignments: response.data.taskAssignments.map(assignment => ({
                 ...assignment,
-                employee_name: staffNameMap[assignment.employee_id] || 'Unknown Staff',
+                employee_name: staffNameMap[assignment.employee_id]?.username || 'Unknown Staff',
               })),
             },
           }
@@ -129,8 +137,12 @@ const TaskDetail: React.FC = () => {
       }
     },
     enabled: !!taskId && Object.keys(staffNameMap).length > 0,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
+    retry: 1,
+    placeholderData: (previousData) => previousData, // Keep previous data while loading
   })
 
   // Fetch inspections for selected assignment only when modal is open
@@ -139,7 +151,7 @@ const TaskDetail: React.FC = () => {
     isLoading: isLoadingInspections,
     error: inspectionsError,
   } = useQuery({
-    queryKey: ['inspections', selectedAssignmentId],
+    queryKey: ['task', 'inspections', selectedAssignmentId],
     queryFn: async () => {
       try {
         const response = await tasksApi.getInspectionsByAssignmentId(selectedAssignmentId || '')
@@ -152,12 +164,12 @@ const TaskDetail: React.FC = () => {
               ...inspection,
               inspected_by_user: {
                 userId: inspection.inspected_by,
-                username: staffNameMap[inspection.inspected_by] || 'Unknown Staff',
+                username: staffNameMap[inspection.inspected_by]?.username || 'Unknown Staff',
               },
               confirmed_by_user: inspection.confirmed_by
                 ? {
                   userId: inspection.confirmed_by,
-                  username: staffNameMap[inspection.confirmed_by] || 'Unknown Staff',
+                  username: staffNameMap[inspection.confirmed_by]?.username || 'Unknown Staff',
                 }
                 : null,
             })),
@@ -171,10 +183,20 @@ const TaskDetail: React.FC = () => {
       }
     },
     enabled: !!selectedAssignmentId && Object.keys(staffNameMap).length > 0,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: 1,
+    placeholderData: (previousData) => previousData, // Keep previous data while loading
   })
+
+  // Add effect to handle initial loading
+  React.useEffect(() => {
+    if (taskId && Object.keys(staffNameMap).length > 0) {
+      setIsInitialLoading(true)
+    }
+  }, [taskId, staffNameMap])
 
   // Get crack information
   const hasCrackInfo =
@@ -199,7 +221,8 @@ const TaskDetail: React.FC = () => {
     },
   })
 
-  if (isInitialLoading || isLoading) {
+  // Show loading only if we don't have any data
+  if ((isInitialLoading || isLoading) && !taskData) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
         <motion.div
@@ -264,8 +287,21 @@ const TaskDetail: React.FC = () => {
   const selectedAssignment = findSelectedAssignment()
 
   // Helper function to display staff name
-  const displayStaffName = assignment => {
-    return assignment.employee_name || 'Staff Member'
+  const displayStaffName = (assignment: TaskAssignment) => {
+    const staffInfo = staffNameMap[assignment.employee_id]
+    if (!staffInfo) return t('taskManagement.detail.unknownStaff')
+
+    return (
+      <div className="flex flex-col">
+        <span className="font-medium">{staffInfo.username}</span>
+        {staffInfo.position && (
+          <span className="text-xs text-gray-500 dark:text-gray-400">{staffInfo.position}</span>
+        )}
+        {staffInfo.department && (
+          <span className="text-xs text-gray-500 dark:text-gray-400">{staffInfo.department}</span>
+        )}
+      </div>
+    )
   }
 
   // Format assignment identifier
@@ -353,7 +389,7 @@ const TaskDetail: React.FC = () => {
                       : STATUS_COLORS.REVIEWING.BORDER,
             }}
           >
-            {task.status}
+            {t(`taskManagement.detail.taskStatus.${task.status.toLowerCase()}`)}
           </span>
         </div>
 

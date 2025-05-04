@@ -1,5 +1,7 @@
 {
   "common": {
+    "usernamePlaceholder": "Username",
+    "passwordPlaceholder": "Password",
     "pagination": {
       "itemsPerPage": "Show:",
       "of": "of",
@@ -283,18 +285,6 @@
       "changeStatus": "Change status",
       "remove": "Remove"
     },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "pending": "Pending",
-      "completed": "Completed",
-      "cancelled": "Cancelled",
-      "failed": "Failed",
-      "error": "Error",
-      "success": "Success",
-      "warning": "Warning",
-      "info": "Information"
-    },
     "messages": {
       "loading": "Loading...",
       "processing": "Processing...",
@@ -438,6 +428,13 @@
       "verifiedBy": "Verified By",
       "location": "Location",
       "sendNotification": "Send maintenance notification to residents",
+      "taskStatus": {
+        "assigned": "Assigned",
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "pending": "Pending"
+      },
       "confirmNotification": {
         "title": "Confirm Notification",
         "message": "Are you sure you want to send a maintenance notification to residents and mark this task as completed?",
@@ -445,10 +442,14 @@
         "sendAndComplete": "Send & Complete"
       },
       "assignments": {
+        "pending": "Pending",
+        "verified": "Verified",
+        "unverified": "Unverified",
+        "infixing": "In Fixing",
+        "fixed": "Fixed",
         "confirmed": "Confirmed",
         "reassigned": "Reassigned",
-        "inFixing": "In Fixing",
-        "fixed": "Fixed",
+        "notcompleted": "Not Completed",
         "noAssignments": "No assignments in this status",
         "assignment": "Assignment",
         "staffMember": "Staff Member",
@@ -950,21 +951,29 @@
     "updatedBy": "Updated by",
     "reason": "Reason",
     "noHistory": "No history",
+    "frequencies": {
+      "All": "All Frequencies",
+      "Daily": "Daily",
+      "Weekly": "Weekly",
+      "Monthly": "Monthly",
+      "Quarterly": "Quarterly",
+      "Yearly": "Yearly",
+      "Specific": "Specific"
+    },
     "deviceTypes": {
       "All": "All Devices",
       "Elevator": "Elevator",
-      "Fireprotection": "Fire Protection",
       "Electrical": "Electrical",
       "Plumbing": "Plumbing",
       "HVAC": "HVAC",
       "CCTV": "CCTV",
       "Generator": "Generator",
       "Lighting": "Lighting",
-      "Automaticdoor": "Automatic Door",
-      "Fireextinguisher": "Fire Extinguisher",
       "Other": "Other",
       "FireProtection": "Fire Protection",
-      "AutomaticDoor": "Automatic Door"
+      "AutomaticDoor": "Automatic Door",
+      "FireExtinguisher": "Fire Extinguisher",
+      "BuildingStructure": "Building Structure"
     },
     "table": {
       "no": "No.",
@@ -993,7 +1002,6 @@
       "deviceType": {
         "All": "All Devices",
         "Elevator": "Elevator",
-        "Fireprotection": "Fire Protection",
         "Electrical": "Electrical",
         "Plumbing": "Plumbing",
         "HVAC": "HVAC",
@@ -1003,6 +1011,7 @@
         "AutomaticDoor": "Automatic Door",
         "FireExtinguisher": "Fire Extinguisher",
         "FireProtection": "Fire Protection",
+        "BuildingStructure": "Building Structure",
         "Other": "Other"
       }
     },

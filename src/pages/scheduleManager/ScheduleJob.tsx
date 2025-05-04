@@ -108,7 +108,7 @@ const ScheduleJob: React.FC = () => {
     mutationFn: (data: CreateScheduleJobRequest) => scheduleJobsApi.createScheduleJob(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
-      toast.success('Schedule job created successfully')
+      toast.success(t('maintenanceCycle.success.create'))
       setShowCreateJobModal(false)
       refetchJobs()
     },
@@ -123,7 +123,7 @@ const ScheduleJob: React.FC = () => {
       scheduleJobsApi.updateScheduleJob(jobId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scheduleJobs'] })
-      toast.success('Schedule job updated successfully')
+      toast.success(t('maintenanceCycle.success.update'))
       setShowUpdateStatusModal(false)
       setSelectedJob(null)
       refetchJobs()
@@ -175,7 +175,7 @@ const ScheduleJob: React.FC = () => {
           jobId: selectedJob.schedule_job_id,
           data: { status: 'Cancel' },
         })
-        toast.success('Schedule job cancelled successfully')
+        toast.success(t('maintenanceCycle.success.cancel'))
         setShowDeleteConfirm(false)
         setSelectedJob(null)
       } catch (error) {
@@ -193,7 +193,7 @@ const ScheduleJob: React.FC = () => {
     if (selectedJob) {
       try {
         await sendEmailMutation.mutateAsync(selectedJob.schedule_job_id)
-        toast.success('Maintenance email sent successfully')
+        toast.success(t('maintenanceCycle.success.sendEmail'))
         setShowEmailConfirm(false)
         setSelectedJob(null)
         refetchJobs()

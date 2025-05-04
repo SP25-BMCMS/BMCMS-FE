@@ -17,6 +17,7 @@ const frequencyOptions = [
   { value: 'Daily', label: 'Daily' },
   { value: 'Weekly', label: 'Weekly' },
   { value: 'Monthly', label: 'Monthly' },
+  { value: 'Quarterly', label: 'Quarterly' },
   { value: 'Yearly', label: 'Yearly' },
   { value: 'Specific', label: 'Specific' },
 ]
@@ -39,6 +40,7 @@ const deviceTypeOptions = [
   { value: 'Lighting', label: 'Lighting' },
   { value: 'AutomaticDoor', label: 'Automatic Door' },
   { value: 'FireExtinguisher', label: 'Fire Extinguisher' },
+  { value: 'BuildingStructure', label: 'Building Structure' },
   { value: 'Other', label: 'Other' },
 ]
 
@@ -62,7 +64,7 @@ const MaintenanceCycleModal: React.FC<MaintenanceCycleModalProps> = ({
       setDeviceType(cycleData.device_type || '')
       setFrequency(cycleData.frequency || '')
       setBasis(cycleData.basis || '')
-      setReason(cycleData.reason || '')
+      setReason(cycleData?.reason || '')
     }
   }, [editMode, cycleData, isOpen])
 

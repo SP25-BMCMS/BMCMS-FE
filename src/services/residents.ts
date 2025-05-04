@@ -123,12 +123,16 @@ export const updateResidentStatus = async (
   }
 };
 
-export const getAllBuildingDetails = async () => {
+export const getAllBuildingDetails = async ({page, limit}: {page?: string, limit?: string}) => {
   try {
     const url = `${API_SECRET}${BUILDING_DETAILS_API}`;
     const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('bmcms_token')}`,
+      },
+      params: {
+        page,
+        limit,
       },
     });
     return response.data;

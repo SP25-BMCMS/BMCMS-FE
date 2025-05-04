@@ -1,5 +1,7 @@
 {
   "common": {
+    "usernamePlaceholder": "Tên đăng nhập",
+    "passwordPlaceholder": "Mật khẩu",
     "pagination": {
       "itemsPerPage": "Hiển thị:",
       "of": "trên tổng số",
@@ -369,6 +371,13 @@
       "verifiedBy": "Người xác minh",
       "location": "Vị trí",
       "sendNotification": "Gửi thông báo bảo trì cho cư dân",
+      "taskStatus": {
+        "assigned": "Đã phân công",
+        "inProgress": "Đang thực hiện",
+        "completed": "Hoàn thành",
+        "cancelled": "Đã hủy",
+        "pending": "Chờ xử lý"
+      },
       "confirmNotification": {
         "title": "Xác nhận thông báo",
         "message": "Bạn có chắc chắn muốn gửi thông báo bảo trì cho cư dân và đánh dấu nhiệm vụ này là đã hoàn thành?",
@@ -376,10 +385,14 @@
         "sendAndComplete": "Gửi & Hoàn thành"
       },
       "assignments": {
+        "pending": "Chờ xử lý",
+        "verified": "Đã xác minh",
+        "unverified": "Chưa xác minh",
+        "infixing": "Đang sửa chữa",
+        "fixed": "Đã sửa xong",
         "confirmed": "Đã xác nhận",
         "reassigned": "Đã phân công lại",
-        "inFixing": "Đang sửa chữa",
-        "fixed": "Đã sửa xong",
+        "notcompleted": "Chưa hoàn thành",
         "noAssignments": "Không có phân công nào trong trạng thái này",
         "assignment": "Phân công",
         "staffMember": "Nhân viên",
@@ -442,7 +455,12 @@
         "error": {
           "updateFailed": "Không thể cập nhật trạng thái kiểm tra",
           "missingUser": "Thiếu thông tin người dùng. Vui lòng đăng nhập lại."
-        }
+        },
+        "nopending": "Không chờ duyệt",
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối",
+        "autoapproved": "Tự động duyệt"
       }
     }
   },
@@ -484,7 +502,7 @@
       "operational": "Đang hoạt động",
       "under_construction": "Đang xây dựng"
     },
-    "table":{
+    "table": {
       "no": "STT",
       "buildingName": "Tên tòa nhà",
       "areaName": "Tên khu vực",
@@ -535,8 +553,8 @@
     "invalidDate": "Ngày không hợp lệ",
     "createdDate": "Ngày tạo",
     "dateOfBirth": "Ngày sinh",
-    "status":"Trạng thái",
-    "action":"Thao tác",
+    "status": "Trạng thái",
+    "action": "Thao tác",
     "error": "Lỗi",
     "filterOptions": {
       "all": "Tất cả",
@@ -871,18 +889,17 @@
     "deviceTypes": {
       "All": "Tất cả thiết bị",
       "Elevator": "Thang máy",
-      "Fireprotection": "Phòng cháy",
+      "FireProtection": "Phòng cháy",
       "Electrical": "Điện",
       "Plumbing": "Ống nước",
       "HVAC": "HVAC",
       "CCTV": "CCTV",
       "Generator": "Máy phát điện",
       "Lighting": "Chiếu sáng",
-      "Automaticdoor": "Cửa tự động",
-      "Fireextinguisher": "Bình chữa cháy",
+      "AutomaticDoor": "Cửa tự động",
+      "FireExtinguisher": "Bình chữa cháy",
       "Other": "Khác",
-      "FireProtection": "Phòng cháy",
-      "AutomaticDoor": "Cửa tự động"
+      "BuildingStructure": "Cấu trúc tòa nhà"
     },
     "table": {
       "no": "STT",
@@ -890,6 +907,15 @@
       "basis": "Cơ sở",
       "deviceType": "Loại thiết bị",
       "actions": "Thao tác"
+    },
+    "frequencies": {
+      "All": "Tất cả tần suất",
+      "Daily": "Hàng ngày",
+      "Weekly": "Hàng tuần",
+      "Monthly": "Hàng tháng",
+      "Quarterly": "Hàng quý",
+      "Yearly": "Hàng năm",
+      "Specific": "Cụ thể"
     },
     "filterOptions": {
       "frequency": {
@@ -921,6 +947,7 @@
         "AutomaticDoor": "Cửa tự động",
         "FireExtinguisher": "Bình chữa cháy",
         "FireProtection": "Phòng cháy",
+        "BuildingStructure": "Cấu trúc tòa nhà",
         "Other": "Khác"
       }
     },
@@ -1019,11 +1046,11 @@
     "filterOptions": {
       "all": "Tất cả",
       "low": "Thấp",
-      "medium": "Trung bình", 
+      "medium": "Trung bình",
       "high": "Cao",
       "severity": {
         "low": "Mức độ thấp",
-        "medium": "Mức độ trung bình", 
+        "medium": "Mức độ trung bình",
         "high": "Mức độ cao"
       }
     },

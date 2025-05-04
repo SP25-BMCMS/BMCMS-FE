@@ -435,6 +435,15 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                           count: apartments.length,
                         })}
                       </p>
+                      {resident?.accountStatus === 'Active' && (
+                      <button
+                        onClick={() => setIsAddApartmentOpen(true)}
+                        className="mt-3 flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none"
+                      >
+                        <Plus className="h-3.5 w-3.5 mr-1" />
+                        {t('residentManagement.viewDetail.propertySummary.addNew')}
+                      </button>
+                    )}
                     </div>
 
                     {apartments.map(apartment => {

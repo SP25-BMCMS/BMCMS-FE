@@ -7,6 +7,7 @@ import AddButton from '@/components/AddButton'
 import { MdOutlineAddTask } from 'react-icons/md'
 import { motion } from 'framer-motion'
 import tasksApi from '@/services/tasks'
+import { getAllStaff } from '@/services/staff'
 import { TaskResponse } from '@/types'
 import Pagination from '@/components/Pagination'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
@@ -37,12 +38,10 @@ const TaskManagement: React.FC = () => {
   const [modalType, setModalType] = useState<'task' | 'crack'>('task')
   const [currentCrackStatus, setCurrentCrackStatus] = useState<string>('')
   const [taskType, setTaskType] = useState<'crack' | 'schedule'>('crack')
+  const [isNavigating, setIsNavigating] = useState(false)
   const navigate = useNavigate()
 
   const queryClient = useQueryClient()
-
-  // Add new state for loading navigation
-  const [isNavigating, setIsNavigating] = useState(false)
 
   // Fetch tasks with React Query
   const { data: tasksData, isLoading: isLoadingTasks, error: tasksError } = useQuery({
@@ -157,6 +156,36 @@ const TaskManagement: React.FC = () => {
     },
   })
 
+  // Add prefetch function for task details
+  const prefetchTaskDetails = async (taskId: string) => {
+    try {
+      setIsNavigating(true)
+      // Prefetch staff data first
+      const staffResponse = await getAllStaff({ page: '1', limit: '9999' })
+      await queryClient.prefetchQuery({
+        queryKey: ['staff', 'all'],
+        queryFn: async () => staffResponse.data || [],
+        staleTime: 30 * 60 * 1000,
+        gcTime: 60 * 60 * 1000,
+      })
+
+      // Then prefetch task details
+      const taskResponse = await tasksApi.getTaskAssignmentsByTaskId(taskId)
+      await queryClient.prefetchQuery({
+        queryKey: ['task', 'detail', taskId],
+        queryFn: async () => taskResponse,
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        initialData: taskResponse, // Set initial data immediately
+      })
+    } catch (error) {
+      console.error('Error prefetching data:', error)
+      // Don't throw the error, just log it
+    } finally {
+      setIsNavigating(false)
+    }
+  }
+
   const handleFilterChange = (value: string) => {
     setSelectedStatus(value)
     setCurrentPage(1)
@@ -251,9 +280,22 @@ const TaskManagement: React.FC = () => {
   ]
 
   // Update the navigation handler
-  const handleNavigateToDetail = (taskId: string) => {
-    setIsNavigating(true)
-    navigate(`/task-detail/${taskId}`)
+  const handleNavigateToDetail = async (taskId: string) => {
+    try {
+      setIsNavigating(true)
+      await prefetchTaskDetails(taskId)
+    } catch (error) {
+      console.error('Error prefetching data:', error)
+    } finally {
+      navigate(`/task-detail/${taskId}`)
+    }
+  }
+
+  // Add mouse enter handler for prefetching
+  const handleTaskMouseEnter = (taskId: string) => {
+    prefetchTaskDetails(taskId).catch(error => {
+      console.error('Error prefetching on hover:', error)
+    })
   }
 
   const columns: Column<TaskResponse>[] = [
@@ -616,6 +658,7 @@ const TaskManagement: React.FC = () => {
                 columns={columns}
                 keyExtractor={item => item.task_id}
                 onRowClick={item => handleNavigateToDetail(item.task_id)}
+                onRowMouseEnter={item => handleTaskMouseEnter(item.task_id)}
                 className="w-full"
                 tableClassName="w-full"
               />

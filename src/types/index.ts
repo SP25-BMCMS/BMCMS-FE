@@ -115,6 +115,7 @@ export interface StaffData {
     position?: {
       positionId: string
       positionName: string
+      positionNameLabel: string
       description: string
     }
     department?: {
@@ -608,6 +609,7 @@ export interface MaintenanceCycle {
   frequency: string
   basis: string
   device_type: string
+  reason?: string
 }
 
 export interface MaintenanceCycleResponse {

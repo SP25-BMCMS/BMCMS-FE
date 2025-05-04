@@ -1,15 +1,15 @@
-import React, { useState } from 'react'
 import Modal from '@/components/Modal'
-import { useQuery } from '@tanstack/react-query'
-import { getMaintenanceCycles } from '@/services/maintenanceCycle'
 import buildingDetailsApi from '@/services/buildingDetails'
-import { MaintenanceCycle } from '@/types'
-import { BuildingDetail, BuildingDetailWithBuilding } from '@/types/buildingDetail'
-import { format } from 'date-fns'
-import { toast } from 'react-hot-toast'
+import { getMaintenanceCycles } from '@/services/maintenanceCycle'
 import schedulesApi, { CycleConfig } from '@/services/schedules'
+import { MaintenanceCycle } from '@/types'
+import { BuildingDetailWithBuilding } from '@/types/buildingDetail'
+import { useQuery } from '@tanstack/react-query'
+import { format } from 'date-fns'
 import { motion } from 'framer-motion'
-import { Calendar, Building2, Clock, CheckCircle2 } from 'lucide-react'
+import { Building2, Calendar, CheckCircle2, Clock } from 'lucide-react'
+import React, { useState } from 'react'
+import { toast } from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
 interface GenerateScheduleModalProps {
@@ -32,7 +32,7 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
     // Fetch maintenance cycles
     const { data: maintenanceCycles, isLoading: isLoadingCycles } = useQuery({
         queryKey: ['maintenanceCycles'],
-        queryFn: () => getMaintenanceCycles(),
+        queryFn: () => getMaintenanceCycles({ page: 1, limit: 9999 }),
     })
 
     // Fetch building details
@@ -212,8 +212,10 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div>
-                                                    <h4 className="font-medium text-gray-900">{cycle.device_type} - {cycle.frequency}</h4>
-                                                    <p className="text-sm text-gray-500">{t(`maintenanceCycle.deviceTypes.${cycle.device_type}`)}</p>
+                                                    <h4 className="font-medium text-gray-900">
+                                                        {t(`maintenanceCycle.deviceTypes.${cycle.device_type}`)} - {t(`maintenanceCycle.frequencies.${cycle.frequency}`)}
+                                                    </h4>
+                                                    <p className="text-sm text-gray-500">{cycle.description}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleCycleSelect(cycle)}
