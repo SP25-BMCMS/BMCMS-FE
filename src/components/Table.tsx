@@ -1,29 +1,29 @@
-import React, { ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import '../../src/styles/Table.css';
+import { AnimatePresence, motion } from 'framer-motion'
+import { ReactNode, useEffect, useRef } from 'react'
+import '../../src/styles/Table.css'
 
 export type Column<T> = {
-  key: string;
-  title: string;
-  render?: (item: T, index: number) => ReactNode;
-  width?: string | number;
-  className?: string;
-};
+  key: string
+  title: string
+  render?: (item: T, index: number) => ReactNode
+  width?: string | number
+  className?: string
+}
 
 type TableProps<T> = {
-  data: T[];
-  columns: Column<T>[];
-  keyExtractor: (item: T) => string | number;
-  onRowClick?: (item: T) => void;
-  className?: string;
-  tableClassName?: string;
-  headerClassName?: string;
-  bodyClassName?: string;
-  emptyText?: string;
-  isLoading?: boolean;
-  loadingComponent?: ReactNode;
-  animated?: boolean;
-};
+  data: T[]
+  columns: Column<T>[]
+  keyExtractor: (item: T) => string | number
+  onRowClick?: (item: T) => void
+  className?: string
+  tableClassName?: string
+  headerClassName?: string
+  bodyClassName?: string
+  emptyText?: string
+  isLoading?: boolean
+  loadingComponent?: ReactNode
+  animated?: boolean
+}
 
 const rowVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -41,7 +41,7 @@ const rowVariants = {
     y: -20,
     transition: { duration: 0.2 },
   },
-};
+}
 
 const Table = <T extends {}>({
   data,
@@ -57,10 +57,42 @@ const Table = <T extends {}>({
   loadingComponent,
   animated = true,
 }: TableProps<T>) => {
+  const tableRef = useRef<HTMLTableElement>(null)
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (tableRef.current) {
+        const table = tableRef.current
+        const container = table.parentElement
+        if (container) {
+          // Get the actual available width by considering the sidebar and padding
+          const sidebarWidth = document.querySelector('.sidebar')?.clientWidth || 0
+          const containerPadding = parseInt(getComputedStyle(container).paddingLeft) +
+            parseInt(getComputedStyle(container).paddingRight)
+          const availableWidth = window.innerWidth - sidebarWidth - containerPadding
+
+          const hasOverflow = table.scrollWidth > availableWidth
+
+          if (hasOverflow) {
+            window.dispatchEvent(new CustomEvent('tableOverflow', { detail: { hasOverflow: true } }))
+          }
+        }
+      }
+    }
+
+    // Check on mount and resize
+    checkOverflow()
+    window.addEventListener('resize', checkOverflow)
+
+    return () => {
+      window.removeEventListener('resize', checkOverflow)
+    }
+  }, [data]) // Re-check when data changes
+
   // Wrapper for content to ensure dark mode compatibility
   const ContentWrapper = ({ children }: { children: ReactNode }) => (
     <div className="text-gray-700 dark:text-gray-300">{children}</div>
-  );
+  )
 
   // Animated row component
   const AnimatedRow = ({ item, index }: { item: T; index: number }) => (
@@ -87,7 +119,7 @@ const Table = <T extends {}>({
         </td>
       ))}
     </motion.tr>
-  );
+  )
 
   // Regular row component
   const RegularRow = ({ item, index }: { item: T; index: number }) => (
@@ -109,7 +141,7 @@ const Table = <T extends {}>({
         </td>
       ))}
     </tr>
-  );
+  )
 
   // Loading animation
   const loadingVariants = {
@@ -121,7 +153,7 @@ const Table = <T extends {}>({
         ease: 'linear',
       },
     },
-  };
+  }
 
   const LoadingAnimation = () => (
     <div className="flex justify-center items-center py-8">
@@ -132,13 +164,12 @@ const Table = <T extends {}>({
       />
       <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">Loading data...</span>
     </div>
-  );
+  )
 
   return (
-    <div
-      className={`overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}
-    >
+    <div className={`overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}>
       <table
+        ref={tableRef}
         className={`min-w-full divide-y divide-gray-200 dark:divide-gray-700 ${tableClassName}`}
       >
         <thead className={headerClassName}>
@@ -196,7 +227,7 @@ const Table = <T extends {}>({
         </tbody>
       </table>
     </div>
-  );
-};
+  )
+}
 
-export default Table;
+export default Table

@@ -27,6 +27,105 @@ interface TasksCacheData {
   }
 }
 
+interface CrackReportData {
+  crackReportId: string
+  buildingDetailId: string
+  description: string
+  isPrivatesAsset: boolean
+  position: string
+  status: 'Pending' | 'InProgress' | 'Resolved' | 'Reviewing' | 'Completed' | 'Rejected' | 'InFixing' | 'WaitingConfirm'
+  reportedBy: {
+    userId: string
+    username: string
+  }
+  verifiedBy?: {
+    userId: string
+    username: string
+  }
+  createdAt: string
+  updatedAt: string
+  crackDetails: {
+    crackDetailsId: string
+    crackReportId: string
+    photoUrl: string
+    severity: string
+    severityLabel: string
+    aiDetectionUrl: string
+    createdAt: string
+    updatedAt: string
+  }[]
+  buildingId: string
+  buildingName: string
+}
+
+interface TaskResponse {
+  task_id: string
+  title: string
+  description: string
+  status: string
+  statusLabel: string
+  created_at: string
+  updated_at: string
+  crack_id: string
+  schedule_job_id: string
+  taskAssignments: {
+    assignment_id: string
+    task_id: string
+    employee_id: string
+    description: string
+    status: string
+    statusLabel: string
+    created_at: string
+    updated_at: string
+  }[]
+  workLogs: {
+    worklog_id: string
+    task_id: string
+    title: string
+    description: string
+    status: string
+    statusLabel: string
+    created_at: string
+    updated_at: string
+  }[]
+  feedbacks: {
+    feedback_id: string
+    task_id: string
+    feedback_by: string
+    comments: string
+    rating: number
+    created_at: string
+    updated_at: string
+    status: string
+    statusLabel: string
+  }[]
+  crackInfo?: {
+    isSuccess: boolean
+    message: string
+    data: CrackReportData[]
+  }
+  schedulesjobInfo?: {
+    isSuccess: boolean
+    message: string
+    data: {
+      buildingDetail?: {
+        building?: {
+          name: string
+        }
+        name: string
+      }
+      schedule?: {
+        schedule_name: string
+        cycle?: {
+          device_type: string
+        }
+      }
+      run_date: string
+      status: string
+    }
+  }
+}
+
 const TaskManagement: React.FC = () => {
   const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState<string>('')
@@ -340,15 +439,15 @@ const TaskManagement: React.FC = () => {
 
         if (taskType === 'crack' && item.crackInfo?.isSuccess && item.crackInfo.data.length > 0) {
           const crackData = item.crackInfo.data[0]
-          const buildingDetailId = crackData.buildingDetailId
+          const buildingName = crackData.buildingName
           const position = crackData.position
 
           buildingInfo = (
-            <Tooltip content={`${buildingDetailId} - ${position}`}>
+            <Tooltip content={`${buildingName} - ${position}`}>
               <div className="flex items-center space-x-2">
                 <FaBuilding className="text-blue-500 flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="font-medium truncate max-w-[100px] md:max-w-[150px]">{buildingDetailId}</div>
+                  <div className="font-medium truncate max-w-[100px] md:max-w-[150px]">{buildingName}</div>
                   <div className="text-xs truncate max-w-[100px] md:max-w-[150px]">{position}</div>
                 </div>
               </div>

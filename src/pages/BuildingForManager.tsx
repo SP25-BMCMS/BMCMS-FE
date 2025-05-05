@@ -255,15 +255,15 @@ const BuildingForManager: React.FC = () => {
   ]
 
   return (
-    <div className="w-full mt-[60px]">
-      <div className="flex justify-between mb-4 mx-auto w-[95%]">
+    <div className="w-full mt-[60px] px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="flex justify-between mb-4">
         <div className="flex items-center">
           <SearchInput
             placeholder={t('buildingManagement.searchPlaceholder')}
             value={searchQuery}
             onChange={handleSearch}
             onSearch={handleSearchSubmit}
-            className="w-[20rem] max-w-xs"
+            className="w-full md:w-[20rem] max-w-full"
           />
         </div>
       </div>
@@ -273,11 +273,11 @@ const BuildingForManager: React.FC = () => {
       ) : (
         <>
           {buildingsData?.data.map((building) => (
-            <div key={building.buildingId} className="w-[95%] mx-auto mb-8">
+            <div key={building.buildingId} className="mb-8">
               {/* Building Information Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-                <div className="flex items-start gap-6">
-                  <div className="w-48 h-48 rounded-lg overflow-hidden flex-shrink-0">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 mb-6">
+                <div className="flex flex-col md:flex-row items-start gap-4 md:gap-6">
+                  <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden flex-shrink-0">
                     <img
                       src={building.imageCover}
                       alt={building.name}
@@ -285,9 +285,9 @@ const BuildingForManager: React.FC = () => {
                     />
                   </div>
                   <div className="flex-grow">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                        <Building2 className="h-6 w-6 mr-2 text-blue-500" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                        <Building2 className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-blue-500" />
                         {building.name}
                       </h2>
                       <span
@@ -296,13 +296,13 @@ const BuildingForManager: React.FC = () => {
                           color: getStatusStyle(building.Status).text,
                           borderColor: getStatusStyle(building.Status).border,
                         }}
-                        className="px-3 py-1 text-sm font-semibold rounded-full border"
+                        className="px-3 py-1 text-sm font-semibold rounded-full border whitespace-nowrap"
                       >
                         {getStatusStyle(building.Status).label}
                       </span>
                     </div>
                     <p className="text-gray-600 dark:text-gray-400 mb-4">{building.description}</p>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex items-center text-gray-600 dark:text-gray-400">
                         <MapPin className="h-5 w-5 mr-2 text-green-500" />
                         <span>{building.area?.name || t('buildingManagement.notAssigned')}</span>
@@ -327,15 +327,19 @@ const BuildingForManager: React.FC = () => {
                     {t('buildingManagement.buildingDetails')}
                   </h3>
                 </div>
-                <Table<BuildingWithArea['buildingDetails'][0]>
-                  data={building.buildingDetails || []}
-                  columns={columns}
-                  keyExtractor={item => item.buildingDetailId}
-                  isLoading={isLoading}
-                  emptyText={t('buildingManagement.noData')}
-                  animated={true}
-                  tableClassName="w-full"
-                />
+                <div className="w-full overflow-x-auto">
+                  <div className="min-w-[800px]">
+                    <Table<BuildingWithArea['buildingDetails'][0]>
+                      data={building.buildingDetails || []}
+                      columns={columns}
+                      keyExtractor={item => item.buildingDetailId}
+                      isLoading={isLoading}
+                      emptyText={t('buildingManagement.noData')}
+                      animated={true}
+                      tableClassName="w-full"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -348,7 +352,7 @@ const BuildingForManager: React.FC = () => {
               totalItems={pagination.totalItems}
               itemsPerPage={pagination.itemsPerPage}
               onLimitChange={handleLimitChange}
-              className="w-[95%] mx-auto mt-4"
+              className="mt-4"
             />
           )}
         </>

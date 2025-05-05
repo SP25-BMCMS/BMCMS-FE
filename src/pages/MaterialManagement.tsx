@@ -352,7 +352,7 @@ const MaterialManagement: React.FC = () => {
   ]
 
   return (
-    <div className="w-full mt-[60px] p-4">
+    <div className="w-full mt-[60px] px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8">
       <div className="flex flex-col space-y-4 mb-4">
         <div className="flex flex-col lg:flex-row justify-between gap-4">
           <SearchInput
@@ -415,17 +415,17 @@ const MaterialManagement: React.FC = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="w-full overflow-x-auto">
         <div className="min-w-[800px]">
-      <Table<Material>
-        data={filteredMaterials}
-        columns={columns}
-        keyExtractor={item => item.material_id || Math.random().toString()}
+          <Table<Material>
+            data={filteredMaterials}
+            columns={columns}
+            keyExtractor={item => item.material_id || Math.random().toString()}
             className="w-full"
-        tableClassName="w-full"
-        isLoading={isLoading || isFetching}
-        emptyText={t('materialManagement.noData')}
-      />
+            tableClassName="w-full"
+            isLoading={isLoading || isFetching}
+            emptyText={t('materialManagement.noData')}
+          />
         </div>
       </div>
 

@@ -17,17 +17,16 @@ const DetailLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-2 sm:p-4 md:p-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white truncate">
           </h1>
 
           {/* Header Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
             <Tooltip content={i18nInstance.language === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}>
               <button
                 onClick={toggleLanguage}
@@ -43,7 +42,9 @@ const DetailLayout: React.FC = () => {
         </div>
 
         {/* Outlet để render các trang con */}
-        <Outlet />
+        <div className="overflow-x-auto">
+          <Outlet />
+        </div>
       </div>
     </div>
   )

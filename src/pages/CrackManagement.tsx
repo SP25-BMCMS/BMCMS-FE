@@ -361,29 +361,29 @@ const CrackManagement: React.FC = () => {
   ]
 
   return (
-    <div className="w-full mt-[60px]">
-      <div className="flex flex-col space-y-4 mb-4 ml-[90px] mr-[132px]">
-        <div className="flex justify-between">
+    <div className="w-full mt-[60px] px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="flex flex-col space-y-4 mb-4">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
           <SearchInput
             placeholder={t('crackManagement.searchPlaceholder')}
             value={searchTerm}
             onChange={e => handleSearch(e.target.value)}
-            className="w-[20rem] max-w-xs"
+            className="w-full md:w-[20rem] max-w-full"
           />
 
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-2 sm:gap-3 w-full md:w-auto justify-start md:justify-end">
             <FilterDropdown
               options={severityOptions}
               onSelect={handleSeverityChange}
-              buttonClassName="w-[160px]"
+              buttonClassName="w-full sm:w-[160px]"
               selectedValue={selectedSeverity}
               label={t('crackManagement.severity')}
             />
           </div>
         </div>
 
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+          <div className="flex flex-wrap gap-4">
             {/* Pending */}
             <div className="flex items-center">
               <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
@@ -446,18 +446,22 @@ const CrackManagement: React.FC = () => {
         </div>
       </div>
 
-      <Table<CrackUI>
-        data={cracksData?.cracks || []}
-        columns={columns}
-        keyExtractor={item => item.id}
-        className="w-[95%] mx-auto"
-        tableClassName="w-full"
-        isLoading={isLoading || isFetching}
-        emptyText={t('crackManagement.noData')}
-      />
+      <div className="w-full overflow-x-auto">
+        <div className="min-w-[1024px]">
+          <Table<CrackUI>
+            data={cracksData?.cracks || []}
+            columns={columns}
+            keyExtractor={item => item.id}
+            className="w-full"
+            tableClassName="w-full"
+            isLoading={isLoading || isFetching}
+            emptyText={t('crackManagement.noData')}
+          />
+        </div>
+      </div>
 
       {!isLoading && cracksData && (
-        <div className="w-[95%] mx-auto">
+        <div className="mt-4">
           <Pagination
             currentPage={currentPage}
             totalPages={cracksData.pagination.totalPages}

@@ -88,10 +88,11 @@ export const sidebarItems = [
 
 interface SidebarProps {
   onToggle?: (isCollapsed: boolean) => void
+  isCollapsed?: boolean
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+const Sidebar: React.FC<SidebarProps> = ({ onToggle, isCollapsed: externalCollapsed }) => {
+  const [internalCollapsed, setInternalCollapsed] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const [openDropdown, setOpenDropdown] = useState('')
@@ -100,6 +101,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
     return storedUser ? JSON.parse(storedUser) : null
   })[0]
   const { t } = useTranslation()
+
+  // Use external collapsed state if provided, otherwise use internal state
+  const isCollapsed = externalCollapsed !== undefined ? externalCollapsed : internalCollapsed
 
   useEffect(() => {
     const parentItem = sidebarItems.find(item =>
@@ -110,8 +114,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
 
   const toggleSidebar = () => {
     const newState = !isCollapsed
-    setIsCollapsed(newState)
-
+    if (externalCollapsed === undefined) {
+      setInternalCollapsed(newState)
+    }
     if (onToggle) {
       onToggle(newState)
     }
@@ -139,7 +144,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggle }) => {
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 h-screen shadow-xl border-r border-gray-200 dark:border-gray-700 
+      className={`sidebar bg-white dark:bg-gray-800 h-screen shadow-xl border-r border-gray-200 dark:border-gray-700 
       transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'} fixed top-0 left-0 z-30`}
     >
       {/* Collapse Button */}

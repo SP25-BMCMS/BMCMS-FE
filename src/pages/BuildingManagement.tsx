@@ -325,7 +325,7 @@ const Building: React.FC = () => {
   )
 
   return (
-    <div className="w-full mt-[30px] md:mt-[60px] px-3 sm:px-4 md:px-6 lg:px-8">
+    <div className="w-full mt-[30px] md:mt-[60px] px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
         <SearchInput
           placeholder={t('buildingManagement.searchPlaceholder')}
@@ -334,23 +334,24 @@ const Building: React.FC = () => {
           className="w-full md:w-[20rem] max-w-full md:max-w-xs"
         />
 
-        <div className="flex flex-wrap gap-3 w-full md:w-auto justify-start md:justify-end">
+        <div className="flex flex-wrap gap-2 sm:gap-3 w-full md:w-auto justify-start md:justify-end">
           <FilterDropdown
             options={filterOptions}
             selectedValue={selectedStatus}
             onSelect={setSelectedStatus}
+            buttonClassName="w-full sm:w-[160px]"
           />
 
           <AddButton
             label={t('buildingManagement.addArea')}
-            className="w-auto min-w-[120px] md:min-w-[154px] whitespace-nowrap"
+            className="w-full sm:w-auto min-w-[120px] md:min-w-[154px] whitespace-nowrap"
             icon={<PiMapPinAreaBold />}
             onClick={() => setIsAddAreaModalOpen(true)}
           />
           <AddButton
             label={t('buildingManagement.addBuilding')}
             icon={<FaRegBuilding />}
-            className="w-auto min-w-[120px] md:min-w-[154px] whitespace-nowrap"
+            className="w-full sm:w-auto min-w-[120px] md:min-w-[154px] whitespace-nowrap"
             onClick={() => setIsAddBuildingModalOpen(true)}
           />
         </div>
@@ -361,14 +362,16 @@ const Building: React.FC = () => {
       ) : (
         <>
           <div className="w-full overflow-x-auto">
-            <Table<BuildingResponse>
-              data={buildingsData?.data || []}
-              columns={columns}
-              keyExtractor={item => item.buildingId}
-              onRowClick={() => { }}
-              className="w-full"
-              tableClassName="w-full min-w-[750px]"
-            />
+            <div className="min-w-[1024px]">
+              <Table<BuildingResponse>
+                data={buildingsData?.data || []}
+                columns={columns}
+                keyExtractor={item => item.buildingId}
+                onRowClick={() => { }}
+                className="w-full"
+                tableClassName="w-full"
+              />
+            </div>
           </div>
 
           <Pagination

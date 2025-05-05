@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react'
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import Sidebar from '@/components/layout/Sidebar'
 import { sidebarItems } from '@/components/layout/Sidebar' // Import sidebarItems để lấy tiêu đề động
@@ -22,6 +21,21 @@ const DashboardLayout = () => {
       i18n.changeLanguage(savedLang)
     }
   }, [i18n])
+
+  // Add overflow event listener
+  useEffect(() => {
+    const handleTableOverflow = (event: CustomEvent) => {
+      if (event.detail.hasOverflow) {
+        setIsSidebarCollapsed(true)
+      }
+    }
+
+    window.addEventListener('tableOverflow', handleTableOverflow as EventListener)
+
+    return () => {
+      window.removeEventListener('tableOverflow', handleTableOverflow as EventListener)
+    }
+  }, [])
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
@@ -54,23 +68,25 @@ const DashboardLayout = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {/* Placeholder để giữ không gian cho sidebar */}
       <div
-        className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} flex-shrink-0 transition-all duration-300`}
+        className={`${isSidebarCollapsed ? 'w-16 sm:w-20' : 'w-56 sm:w-64'} flex-shrink-0 transition-all duration-300`}
       ></div>
 
       {/* Sidebar */}
-      <Sidebar onToggle={setIsSidebarCollapsed} />
+      <Sidebar onToggle={setIsSidebarCollapsed} isCollapsed={isSidebarCollapsed} />
 
       {/* Main Content */}
-      <div className="flex-1 p-6 transition-all duration-300">
+      <div className="flex-1 p-2 sm:p-4 md:p-6 transition-all duration-300">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{currentTitle}</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white truncate">
+            {currentTitle}
+          </h1>
 
           {/* Header Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
             <Tooltip content={i18n.language === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}>
               <button
                 onClick={toggleLanguage}
@@ -86,7 +102,9 @@ const DashboardLayout = () => {
         </div>
 
         {/* Outlet để render các trang con */}
-        <Outlet />
+        <div className="overflow-x-auto">
+          <Outlet />
+        </div>
       </div>
     </div>
   )
