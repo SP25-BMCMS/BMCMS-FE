@@ -364,7 +364,27 @@
         "confirm": "Confirm"
       },
       "clickOutsideToClose": "Click outside modal to close",
-      "pressEscToClose": "Press ESC key to close"
+      "pressEscToClose": "Press ESC key to close",
+      "changeStatus": {
+        "title": "Change Status",
+        "taskStatus": "Task Status",
+        "crackStatus": "Crack Status",
+        "currentStatus": "Current Status",
+        "newStatus": "New Status",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter description for status change",
+        "info": {
+          "taskOnly": "This will update the task status.",
+          "taskAndCrack": "This will update both the task status and its associated crack status."
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "update": "Update Status",
+          "updating": "Updating..."
+        },
+        "success": "Status updated successfully",
+        "error": "Failed to update status"
+      }
     }
   },
   "taskManagement": {
@@ -386,6 +406,7 @@
       "pending": "Pending"
     },
     "crackStatus": {
+      "rejected": "Rejected",
       "reviewing": "Reviewing",
       "pending": "Pending",
       "inprogress": "In Progress",
@@ -463,6 +484,9 @@
         "staffMember": "Staff Member",
         "lastUpdated": "Last Updated"
       },
+      "selectScheduleJobLabel": "Created schedules",
+      "selectScheduleJob": "Select schedule",
+      "scheduleJobRequired": "Schedule is required",
       "loading": "Loading task information...",
       "error": "Unable to load task information. Please try again later."
     },
@@ -520,6 +544,32 @@
         "error": {
           "updateFailed": "Unable to update inspection status",
           "missingUser": "Missing user information. Please login again."
+        }
+      }
+    },
+    "modal": {
+      "changeStatus": {
+        "title": "Change Status",
+        "taskStatus": "Task Status",
+        "crackStatus": "Crack Status",
+        "currentStatus": "Current Status",
+        "newStatus": "New Status",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter description for status change",
+        "info": {
+          "taskOnly": "This will update the task status.",
+          "taskAndCrack": "This will update both the task status and its associated crack status."
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "update": "Update Status",
+          "updating": "Updating..."
+        },
+        "messages": {
+          "success": "Status updated successfully",
+          "error": "Failed to update status",
+          "defaultCrackDescription": "Crack has been {{status}}",
+          "noAssociatedCrack": "No crack associated with this task"
         }
       }
     }

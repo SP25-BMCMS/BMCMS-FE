@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import tasksApi from '@/services/tasks'
+import scheduleJobsApi, { ScheduleJob } from '@/services/scheduleJobs'
 import { getAllStaff } from '@/services/staff'
 import { motion } from 'framer-motion'
 import { FORMAT_DATE_TIME } from '@/utils/helpers'
@@ -18,6 +19,7 @@ import {
   FaFileAlt,
   FaMapMarkerAlt,
   FaMailBulk,
+  FaBuilding,
 } from 'react-icons/fa'
 import SimpleInspectionModal from '@/components/TaskManager/SimpleInspectionModal'
 import InspectionDetails from '@/components/TaskManager/InspectionDetails'
@@ -48,6 +50,7 @@ const TaskDetail: React.FC = () => {
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [selectedScheduleJobId, setSelectedScheduleJobId] = useState<string>('')
 
   // Fetch all staff data to map IDs to names
   const { data: staffData } = useQuery({
@@ -208,7 +211,7 @@ const TaskDetail: React.FC = () => {
 
   // Add mutation for sending notification
   const sendNotificationMutation = useMutation({
-    mutationFn: async (data: { taskId: string; scheduleJobId: string }) => {
+    mutationFn: async (data: { taskId: string; schedule_job_id: string }) => {
       const response = await apiInstance.post('/tasks/notification-thanks-to-resident', data)
       return response.data
     },
@@ -219,6 +222,25 @@ const TaskDetail: React.FC = () => {
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to send notification')
     },
+  })
+
+  // Add query for schedule jobs
+  const { data: scheduleJobs } = useQuery({
+    queryKey: ['schedule-jobs', taskId],
+    queryFn: async () => {
+      try {
+        const response = await scheduleJobsApi.getScheduleJobs({
+          page: 1,
+          limit: 100
+        })
+        return response.data
+      } catch (error) {
+        console.error('Error fetching schedule jobs:', error)
+        return []
+      }
+    },
+    enabled: !!taskId,
+    staleTime: 5 * 60 * 1000,
   })
 
   // Show loading only if we don't have any data
@@ -322,10 +344,14 @@ const TaskDetail: React.FC = () => {
   // Update handler for confirming and sending notification
   const handleConfirmAndSend = async () => {
     if (!taskId) return
+    if (!selectedScheduleJobId) {
+      toast.error(t('taskManagement.detail.scheduleJobRequired'))
+      return
+    }
     try {
       await sendNotificationMutation.mutateAsync({
         taskId: taskId,
-        scheduleJobId: ""
+        schedule_job_id: selectedScheduleJobId
       })
     } catch (error) {
       console.error('Error sending notification:', error)
@@ -669,11 +695,43 @@ const TaskDetail: React.FC = () => {
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/20 mb-4">
                 <FaMailBulk className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('taskManagement.detail.confirmNotification.title')}</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                {t('taskManagement.detail.confirmNotification.title')}
+              </h3>
               <div className="mt-2">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                   {t('taskManagement.detail.confirmNotification.message')}
                 </p>
+
+                {/* Schedule Job Selection */}
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-2">
+                    {t('taskManagement.detail.selectScheduleJobLabel')}
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedScheduleJobId}
+                      onChange={(e) => setSelectedScheduleJobId(e.target.value)}
+                      className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-gray-300"
+                      aria-label={t('taskManagement.detail.selectScheduleJobLabel')}
+                    >
+                      <option value="">{t('taskManagement.detail.selectScheduleJob')}</option>
+                      {scheduleJobs?.map((job) => (
+                        <option key={job.schedule_job_id} value={job.schedule_job_id}>
+                          {job.schedule?.schedule_name} - {new Date(job.run_date).toLocaleDateString()}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <FaCalendarAlt className="h-4 w-4 text-gray-400" />
+                    </div>
+                  </div>
+                  {!selectedScheduleJobId && (
+                    <p className="mt-1 text-xs text-left text-red-500">
+                      {t('taskManagement.detail.scheduleJobRequired')}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -688,7 +746,11 @@ const TaskDetail: React.FC = () => {
               <button
                 type="button"
                 onClick={handleConfirmAndSend}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none"
+                disabled={!selectedScheduleJobId}
+                className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none ${selectedScheduleJobId
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-green-400 cursor-not-allowed'
+                  }`}
               >
                 {t('taskManagement.detail.confirmNotification.sendAndComplete')}
               </button>

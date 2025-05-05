@@ -30,6 +30,7 @@
     "status": "Trạng thái",
     "crackStatus": {
       "title": "Trạng thái vết nứt",
+      "processing": "Đang xử lý",
       "reviewing": "Đang xem xét",
       "pending": "Chờ xử lý",
       "inprogress": "Đang thực hiện",
@@ -300,6 +301,26 @@
         },
         "clickOutsideToClose": "Nhấp bên ngoài để đóng",
         "pressEscToClose": "Nhấn phím ESC để đóng"
+      },
+      "changeStatus": {
+        "title": "Thay đổi trạng thái",
+        "taskStatus": "Trạng thái nhiệm vụ",
+        "crackStatus": "Trạng thái vết nứt",
+        "currentStatus": "Trạng thái hiện tại",
+        "newStatus": "Trạng thái mới",
+        "description": "Mô tả",
+        "descriptionPlaceholder": "Nhập mô tả cho thay đổi trạng thái",
+        "info": {
+          "taskOnly": "Thao tác này sẽ cập nhật trạng thái nhiệm vụ.",
+          "taskAndCrack": "Thao tác này sẽ cập nhật cả trạng thái nhiệm vụ và trạng thái vết nứt liên quan."
+        },
+        "buttons": {
+          "cancel": "Hủy",
+          "update": "Cập nhật trạng thái",
+          "updating": "Đang cập nhật..."
+        },
+        "success": "Cập nhật trạng thái thành công",
+        "error": "Không thể cập nhật trạng thái"
       }
     },
     "dropdown": {
@@ -329,6 +350,7 @@
       "pending": "Chờ xử lý"
     },
     "crackStatus": {
+      "rejected": "Từ chối",
       "reviewing": "Đang xem xét",
       "pending": "Chờ xử lý",
       "inprogress": "Đang thực hiện",
@@ -406,6 +428,9 @@
         "staffMember": "Nhân viên",
         "lastUpdated": "Cập nhật lần cuối"
       },
+      "selectScheduleJobLabel": "Các lịch trình đã được tạo",
+      "selectScheduleJob": "Chọn lịch trình",
+      "scheduleJobRequired": "Bắt buộc chọn lịch trình",
       "loading": "Đang tải thông tin nhiệm vụ...",
       "error": "Không thể tải thông tin nhiệm vụ. Vui lòng thử lại sau."
     },
@@ -469,6 +494,32 @@
         "approved": "Đã duyệt",
         "rejected": "Từ chối",
         "autoapproved": "Tự động duyệt"
+      }
+    },
+    "modal": {
+      "changeStatus": {
+        "title": "Thay đổi trạng thái",
+        "taskStatus": "Trạng thái nhiệm vụ",
+        "crackStatus": "Trạng thái vết nứt",
+        "currentStatus": "Trạng thái hiện tại",
+        "newStatus": "Trạng thái mới",
+        "description": "Mô tả",
+        "descriptionPlaceholder": "Nhập mô tả cho việc thay đổi trạng thái",
+        "info": {
+          "taskOnly": "Thao tác này sẽ cập nhật trạng thái nhiệm vụ.",
+          "taskAndCrack": "Thao tác này sẽ cập nhật cả trạng thái nhiệm vụ và trạng thái vết nứt liên quan."
+        },
+        "buttons": {
+          "cancel": "Hủy",
+          "update": "Cập nhật trạng thái",
+          "updating": "Đang cập nhật..."
+        },
+        "messages": {
+          "success": "Cập nhật trạng thái thành công",
+          "error": "Không thể cập nhật trạng thái",
+          "defaultCrackDescription": "Vết nứt đã được {{status}}",
+          "noAssociatedCrack": "Không có vết nứt liên quan đến nhiệm vụ này"
+        }
       }
     }
   },
