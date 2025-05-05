@@ -193,12 +193,12 @@ const ScheduleJob: React.FC = () => {
     if (selectedJob) {
       try {
         await sendEmailMutation.mutateAsync(selectedJob.schedule_job_id)
-        toast.success(t('maintenanceCycle.success.sendEmail'))
+        toast.success(t('maintenanceCycle.sendMail.success'))
         setShowEmailConfirm(false)
         setSelectedJob(null)
         refetchJobs()
       } catch (error) {
-        toast.error('Failed to send maintenance email')
+        toast.error(t('maintenanceCycle.sendMail.error'))
       }
     }
   }

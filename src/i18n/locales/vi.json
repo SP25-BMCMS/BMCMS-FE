@@ -956,6 +956,10 @@
     "updatedBy": "Cập nhật bởi",
     "reason": "Lý do",
     "noHistory": "Không có lịch sử",
+    "sendMail": {
+      "success": "Gửi email thành công",
+      "error": "Không thể gửi email"
+    },
     "deviceTypes": {
       "All": "Tất cả thiết bị",
       "Elevator": "Thang máy",
