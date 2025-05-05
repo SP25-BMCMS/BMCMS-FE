@@ -46,17 +46,22 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
   }, [isOpen])
 
   const fetchBuildingDetails = async () => {
+    if (!isOpen) return
     setIsLoading(true)
     try {
       const response = await getAllBuildingDetails({ page: '1', limit: '9999' })
-      if (response.data) {
+      if (response.data && isOpen) {
         setBuildingDetails(response.data)
       }
     } catch (error) {
       console.error('Error fetching building details:', error)
-      toast.error(t('residentManagement.addApartmentModal.errors.loadError'))
+      if (isOpen) {
+        toast.error(t('residentManagement.addApartmentModal.errors.loadError'))
+      }
     } finally {
-      setIsLoading(false)
+      if (isOpen) {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -190,9 +195,11 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
 
   // Handle outside click
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose()
+    // Prevent closing if clicking on the modal content
+    if (e.target !== e.currentTarget) {
+      return
     }
+    onClose()
   }
 
   if (!isOpen) return null
@@ -202,7 +209,10 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md overflow-hidden">
+      <div
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md overflow-hidden"
+        onClick={(e) => e.stopPropagation()} // Prevent click from bubbling up
+      >
         <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 p-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {t('residentManagement.addApartmentModal.title')}
@@ -210,6 +220,7 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+            aria-label="Close modal"
           >
             <X className="h-5 w-5" />
           </button>
@@ -310,8 +321,8 @@ const AddApartmentModal: React.FC<AddApartmentModalProps> = ({
               type="submit"
               disabled={isSubmitting || isLoading}
               className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 ${isSubmitting || isLoading
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 }`}
             >
               {isSubmitting ? (

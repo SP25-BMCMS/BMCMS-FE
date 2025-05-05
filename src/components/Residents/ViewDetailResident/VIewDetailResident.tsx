@@ -38,9 +38,11 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
       setApartments([])
       setError(null)
       setActiveTab('info')
+      setIsAddApartmentOpen(false)
     } else if (resident) {
       setApartments([])
       setError(null)
+      setIsAddApartmentOpen(false)
 
       // Only fetch if resident is active
       if (resident.accountStatus === 'Active') {
