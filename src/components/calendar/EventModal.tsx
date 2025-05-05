@@ -158,7 +158,6 @@ const EventModal: React.FC<EventModalProps> = ({
 
       // Get cycle ID from existing data if available
       const cycleId = selectedEvent.cycle_id || ''
-      console.log('Selected Event Cycle ID:', cycleId) // Debug log
 
       setFormData({
         title: selectedEvent.title || '',
@@ -245,9 +244,6 @@ const EventModal: React.FC<EventModalProps> = ({
 
   // Add function to get cycle label
   const getCycleLabel = (cycleId: string) => {
-    console.log('Getting cycle label for:', cycleId)
-    console.log('Available cycles:', maintenanceCycles)
-
     // Extract data array from the response if needed
     const cyclesArray = Array.isArray(maintenanceCycles)
       ? maintenanceCycles
@@ -255,13 +251,11 @@ const EventModal: React.FC<EventModalProps> = ({
 
     // Ensure cyclesArray is an array and cycleId exists
     if (!Array.isArray(cyclesArray) || !cycleId || cycleId.trim() === '') {
-      console.log('Invalid maintenance cycles or cycle ID')
       return ''
     }
 
     try {
       const cycle = cyclesArray.find(c => c.cycle_id === cycleId)
-      console.log('Found cycle:', cycle)
       if (!cycle) return ''
 
       const deviceType = t(`maintenanceCycle.filterOptions.deviceType.${cycle.device_type}`)
@@ -270,15 +264,11 @@ const EventModal: React.FC<EventModalProps> = ({
 
       return `${deviceType} - ${frequency} (${basis})`
     } catch (error) {
-      console.error('Error getting cycle label:', error)
       return ''
     }
   }
 
   if (!isOpen) return null
-
-  console.log('Rendering Modal - Form Data:', formData)
-  console.log('Rendering Modal - Maintenance Cycles:', maintenanceCycles)
 
   // Extract data array from the response if needed
   const cyclesArray = Array.isArray(maintenanceCycles)
@@ -290,8 +280,6 @@ const EventModal: React.FC<EventModalProps> = ({
     Array.isArray(cyclesArray) && formData.cycle_id && formData.cycle_id.trim() !== ''
       ? cyclesArray.find(c => c.cycle_id === formData.cycle_id)
       : null
-
-  console.log('Current Cycle:', currentCycle) // Debug log
 
   // Filter building details based on search term
   const filteredBuildingDetails = buildingDetails.filter(buildingDetail =>

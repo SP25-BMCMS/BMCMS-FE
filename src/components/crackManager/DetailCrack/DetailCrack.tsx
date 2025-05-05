@@ -1,25 +1,28 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
-import crackApi from '@/services/cracks'
+import { STATUS_COLORS } from '@/constants/colors'
 import { getBuildingDetail } from '@/services/building'
+import crackApi from '@/services/cracks'
+import { useQuery } from '@tanstack/react-query'
 import {
   ArrowLeft,
-  CheckCircle,
-  XCircle,
-  User,
-  Calendar,
-  Loader2,
   Building2,
+  Calendar,
+  CheckCircle,
+  Loader2,
   MapPin,
+  User,
+  XCircle,
 } from 'lucide-react'
-import { STATUS_COLORS } from '@/constants/colors'
-import { useQuery } from '@tanstack/react-query'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 // Add this CSS class at the top of the file
 const pulseAnimation = {
   pending: `animate-pulse-fast bg-[${STATUS_COLORS.PENDING.TEXT}]`,
   inProgress: `animate-pulse bg-[${STATUS_COLORS.IN_PROGRESS.TEXT}]`,
+  reviewing: `animate-pulse bg-[${STATUS_COLORS.REVIEWING.TEXT}]`,
+  rejected: `animate-pulse bg-[${STATUS_COLORS.REJECTED.TEXT}]`,
+  completed: `animate-pulse bg-[${STATUS_COLORS.COMPLETED.TEXT}]`,
   resolved: `bg-[${STATUS_COLORS.RESOLVED.TEXT}]`,
 }
 
@@ -145,7 +148,6 @@ const DetailCrack: React.FC = () => {
       try {
         setLoading(true)
         const response = await crackApi.getCrackDetail(id)
-        console.log('Crack detail response:', response)
         if (response.isSuccess && response.data.length > 0) {
           setCrack(response.data[0])
         } else {
@@ -317,18 +319,36 @@ const DetailCrack: React.FC = () => {
                         ? STATUS_COLORS.RESOLVED.BG
                         : crack.status === 'InProgress'
                           ? STATUS_COLORS.IN_PROGRESS.BG
-                          : STATUS_COLORS.PENDING.BG,
+                          : crack.status === 'reviewing'
+                            ? STATUS_COLORS.REVIEWING.BG
+                            : crack.status === 'rejected'
+                              ? STATUS_COLORS.REJECTED.BG
+                              : crack.status === 'Completed'
+                                ? STATUS_COLORS.COMPLETED.BG
+                                : STATUS_COLORS.PENDING.BG,
                     color:
                       crack.status === 'Resolved'
                         ? STATUS_COLORS.RESOLVED.TEXT
                         : crack.status === 'InProgress'
                           ? STATUS_COLORS.IN_PROGRESS.TEXT
-                          : STATUS_COLORS.PENDING.TEXT,
+                          : crack.status === 'reviewing'
+                            ? STATUS_COLORS.REVIEWING.TEXT
+                            : crack.status === 'rejected'
+                              ? STATUS_COLORS.REJECTED.TEXT
+                              : crack.status === 'Completed'
+                                ? STATUS_COLORS.COMPLETED.TEXT
+                                : STATUS_COLORS.PENDING.TEXT,
                     border: `1px solid ${crack.status === 'Resolved'
                       ? STATUS_COLORS.RESOLVED.BORDER
                       : crack.status === 'InProgress'
                         ? STATUS_COLORS.IN_PROGRESS.BORDER
-                        : STATUS_COLORS.PENDING.BORDER
+                        : crack.status === 'reviewing'
+                          ? STATUS_COLORS.REVIEWING.BORDER
+                          : crack.status === 'rejected'
+                            ? STATUS_COLORS.REJECTED.BORDER
+                            : crack.status === 'Completed'
+                              ? STATUS_COLORS.COMPLETED.BORDER
+                              : STATUS_COLORS.PENDING.BORDER
                       }`,
                   }}
                 >
@@ -341,7 +361,13 @@ const DetailCrack: React.FC = () => {
                             ? STATUS_COLORS.RESOLVED.TEXT
                             : crack.status === 'InProgress'
                               ? STATUS_COLORS.IN_PROGRESS.TEXT
-                              : STATUS_COLORS.PENDING.TEXT,
+                              : crack.status === 'reviewing'
+                                ? STATUS_COLORS.REVIEWING.TEXT
+                                : crack.status === 'rejected'
+                                  ? STATUS_COLORS.REJECTED.TEXT
+                                  : crack.status === 'Completed'
+                                    ? STATUS_COLORS.COMPLETED.TEXT
+                                    : STATUS_COLORS.PENDING.TEXT,
                       }}
                     ></span>
                     {crack.status !== 'Resolved' && (
@@ -351,7 +377,13 @@ const DetailCrack: React.FC = () => {
                           backgroundColor:
                             crack.status === 'InProgress'
                               ? STATUS_COLORS.IN_PROGRESS.TEXT
-                              : STATUS_COLORS.PENDING.TEXT,
+                              : crack.status === 'reviewing'
+                                ? STATUS_COLORS.REVIEWING.TEXT
+                                : crack.status === 'rejected'
+                                  ? STATUS_COLORS.REJECTED.TEXT
+                                  : crack.status === 'Completed'
+                                    ? STATUS_COLORS.COMPLETED.TEXT
+                                    : STATUS_COLORS.PENDING.TEXT,
                         }}
                       ></span>
                     )}

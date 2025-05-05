@@ -174,7 +174,7 @@ const Resident: React.FC = () => {
       key: 'email',
       title: t('residentManagement.table.email'),
       render: item => {
-        const email = item.email;
+        const email = item.email
         if (email.length > 8) {
           return (
             <Tooltip content={email} position="top">
@@ -197,11 +197,10 @@ const Resident: React.FC = () => {
       title: t('residentManagement.table.gender'),
       render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            item.gender === 'Male'
-              ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
-              : 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]'
-          }`}
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.gender === 'Male'
+            ? 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
+            : 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]'
+            }`}
         >
           {t(`residentManagement.genderOptions.${item.gender.toLowerCase()}`)}
         </span>
@@ -343,7 +342,7 @@ const Resident: React.FC = () => {
           data={residentsResponse?.data || []}
           columns={columns}
           keyExtractor={item => item.userId}
-          onRowClick={item => console.log('Row clicked:', item)}
+          onRowClick={item => { }}
           className="w-full"
           tableClassName="w-full min-w-[750px]"
           isLoading={isLoadingResidents}

@@ -17,6 +17,7 @@
     },
     "username": "Username",
     "password": "Password",
+    "sending": "Sending...",
     "rememberPassword": "Remember password",
     "forgotPassword": "Forgot password",
     "loginSuccess": "Login successful",
@@ -451,10 +452,13 @@
       "title": "Task Details",
       "backButton": "Back",
       "taskReference": "Task Reference",
-      "created": "Created Date",
-      "updated": "Updated Date",
+      "created": "Created",
+      "updated": "Updated",
       "reportedBy": "Reported By",
       "verifiedBy": "Verified By",
+      "selectSchedule": "Select Schedule",
+      "scheduleRequired": "Select Schedule",
+      "selectScheduleLabel": "Select Schedule",
       "location": "Location",
       "sendNotification": "Send maintenance notification to residents",
       "taskStatus": {
@@ -466,7 +470,7 @@
       },
       "confirmNotification": {
         "title": "Confirm Notification",
-        "message": "Are you sure you want to send a maintenance notification to residents and mark this task as completed?",
+        "message": "Are you sure you want to send maintenance notification to residents and mark this task as completed?",
         "cancel": "Cancel",
         "sendAndComplete": "Send & Complete"
       },
@@ -484,11 +488,16 @@
         "staffMember": "Staff Member",
         "lastUpdated": "Last Updated"
       },
-      "selectScheduleJobLabel": "Created schedules",
-      "selectScheduleJob": "Select schedule",
-      "scheduleJobRequired": "Schedule is required",
+      "selectScheduleJobLabel": "Created Schedules",
+      "selectScheduleJob": "Select Schedule",
+      "scheduleJobRequired": "Select Schedule",
       "loading": "Loading task information...",
-      "error": "Unable to load task information. Please try again later."
+      "error": "Unable to load task information. Please try again later.",
+      "createNewSchedule": "Create New Schedule",
+      "createNewScheduleHint": "If no suitable maintenance schedule is found, you can create a new one.",
+      "notificationSentSuccess": "Notification sent successfully",
+      "errorUpdatingData": "Unable to update data",
+      "failedToSendNotification": "Failed to send notification"
     },
     "inspection": {
       "title": "Inspection Details",
@@ -1179,8 +1188,11 @@
     },
     "status": {
       "pending": "Pending",
+      "inprogress": "In Progress",
       "inProgress": "In Progress",
       "reviewing": "Reviewing",
+      "rejected": "Rejected",
+      "completed": "Completed",
       "resolved": "Resolved",
       "current": "Current Status"
     },

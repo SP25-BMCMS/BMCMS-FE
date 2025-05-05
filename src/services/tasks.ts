@@ -75,7 +75,6 @@ const getTaskAssignmentsByTaskId = async (taskId: string): Promise<TaskAssignmen
         const employeeIds = [
           ...new Set(data.data.taskAssignments.map(assignment => assignment.employee_id)),
         ]
-        console.log('Employee IDs to fetch:', employeeIds)
 
         // Make parallel requests to get all staff details
         const staffDetailsPromises = employeeIds.map(employeeId =>
@@ -96,7 +95,6 @@ const getTaskAssignmentsByTaskId = async (taskId: string): Promise<TaskAssignmen
         )
 
         const staffDetails = await Promise.all(staffDetailsPromises)
-        console.log('Staff details results:', staffDetails)
 
         // Create a map of employee IDs to usernames
         const employeeMap = staffDetails.reduce(
@@ -115,8 +113,6 @@ const getTaskAssignmentsByTaskId = async (taskId: string): Promise<TaskAssignmen
           employee_name:
             employeeMap[assignment.employee_id] || assignment.employee_id.substring(0, 8),
         }))
-
-        console.log('Assignments with employee names:', data.data.taskAssignments)
       } catch (error) {
         console.warn('Error adding staff names to assignments:', error)
         // Continue with the original response if staff details can't be fetched
@@ -133,9 +129,6 @@ const getTaskAssignmentDetail = async (
   assignmentId: string
 ): Promise<TaskAssignmentDetailResponse> => {
   try {
-    console.log(
-      `Calling API: ${import.meta.env.VITE_GET_TASK_ASSIGNMENT_BY_ID.replace('{id}', assignmentId)}`
-    )
     const endpoint = import.meta.env.VITE_GET_TASK_ASSIGNMENT_BY_ID.replace('{id}', assignmentId)
     const { data } = await apiInstance.get<TaskAssignmentDetailResponse>(endpoint)
 
@@ -155,9 +148,6 @@ const getTaskAssignmentDetail = async (
 
 const getInspectionsByAssignmentId = async (assignmentId: string): Promise<InspectionResponse> => {
   try {
-    console.log(
-      `Calling API: ${import.meta.env.VITE_GET_INSPECTION_ASSIGNMENT_ID.replace('{task_assignment_id}', assignmentId)}`
-    )
     const endpoint = import.meta.env.VITE_GET_INSPECTION_ASSIGNMENT_ID.replace(
       '{task_assignment_id}',
       assignmentId
@@ -180,7 +170,6 @@ const getInspectionsByAssignmentId = async (assignmentId: string): Promise<Inspe
 
 const updateTaskStatus = async (taskId: string, status: string): Promise<any> => {
   try {
-    console.log(`Updating task status: ${taskId} to ${status}`)
     const endpoint = import.meta.env.VITE_CHANGE_STATUS_TASK.replace('{task_id}', taskId)
     const { data } = await apiInstance.put(endpoint, { status })
     return data
@@ -197,7 +186,6 @@ const updateCrackStatus = async (
   description: string
 ): Promise<any> => {
   try {
-    console.log(`Updating crack status: ${crackId} to ${status}`)
     const endpoint = import.meta.env.VITE_CHANGE_PATCH_CRACK.replace('{id}', crackId)
     const { data } = await apiInstance.patch(endpoint, {
       status,

@@ -98,7 +98,6 @@ const Calendar: React.FC = () => {
         page: 1,
         limit: 99999,
       })
-      console.log('Maintenance Cycles Response:', response) // Debug log
       return response.data || [] // Extract the data array from the response
     },
   })
@@ -339,8 +338,6 @@ const Calendar: React.FC = () => {
       // Get schedule data from the original data source
       const scheduleData = schedulesData?.data?.find(schedule => schedule.schedule_id === event.id)
 
-      console.log('Schedule Data:', scheduleData) // Debug log
-
       setSelectedEvent({
         id: event.id,
         title: event.title,
@@ -472,7 +469,6 @@ const Calendar: React.FC = () => {
         buildingDetailIds: buildingDetailIds,
       }
 
-      console.log('Creating schedule with data:', newSchedule)
       createScheduleMutation.mutate(newSchedule as any)
     },
     [createScheduleMutation, t]
@@ -569,8 +565,6 @@ const Calendar: React.FC = () => {
         buildingDetailIds: formData.buildingDetailIds,
       }
 
-      console.log('Updating event with data:', updateData)
-
       updateScheduleMutation.mutate({ id: selectedEvent.id, data: updateData as any })
     },
     [selectedEvent, updateScheduleMutation]
@@ -645,7 +639,6 @@ const Calendar: React.FC = () => {
       }
     } catch (error) {
       toast.error('Failed to create schedule')
-      console.error('Error creating schedule:', error)
     }
   }
 

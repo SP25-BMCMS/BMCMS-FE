@@ -27,6 +27,7 @@ import { StaffData, TaskAssignment, TaskResponse } from '@/types'
 import { toast } from 'react-hot-toast'
 import apiInstance from '@/lib/axios'
 import { useTranslation } from 'react-i18next'
+import buildingDetailsApi, { BuildingDetail } from '@/services/buildingDetails'
 
 // Extended task data interface that includes both task assignment and crack info
 interface ExtendedTaskData {
@@ -42,6 +43,92 @@ interface ExtendedTaskData {
   crackInfo?: TaskResponse['crackInfo']
 }
 
+// Add loading indicator component
+interface LoadingIndicatorProps {
+  loadingText?: string
+}
+
+const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ loadingText }) => {
+  const { t } = useTranslation()
+  return (
+    <div className="flex items-center justify-center py-4">
+      <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+        {loadingText || t('common.loading')}
+      </span>
+    </div>
+  )
+}
+
+// Update StyledSelect component
+interface StyledSelectProps {
+  value: string
+  onChange: (value: string) => void
+  options: Array<{ value: string; label: string }>
+  placeholder: string
+  icon: React.ComponentType<{ className: string }>
+  isLoading: boolean
+  label: string
+  error?: string
+  loadingText?: string
+}
+
+const StyledSelect: React.FC<StyledSelectProps> = ({
+  value,
+  onChange,
+  options,
+  placeholder,
+  icon: Icon,
+  isLoading,
+  label,
+  error,
+  loadingText
+}) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+      {label}
+    </label>
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-md dark:bg-gray-700 dark:text-gray-300 transition-all duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        aria-label={label}
+        disabled={isLoading}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+        <Icon className="h-5 w-5 text-gray-400" />
+      </div>
+    </div>
+    {isLoading && <LoadingIndicator loadingText={loadingText} />}
+    {error && !isLoading && (
+      <p className="mt-1 text-xs text-red-500">
+        {error}
+      </p>
+    )}
+  </div>
+)
+
+// Add function to get user data from localStorage
+const getUserFromLocalStorage = () => {
+  const userStr = localStorage.getItem('bmcms_user')
+  if (!userStr) return null
+  try {
+    return JSON.parse(userStr)
+  } catch (error) {
+    console.error('Error parsing user data from localStorage:', error)
+    return null
+  }
+}
+
 const TaskDetail: React.FC = () => {
   const { t } = useTranslation()
   const { taskId } = useParams<{ taskId: string }>()
@@ -50,7 +137,11 @@ const TaskDetail: React.FC = () => {
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [selectedScheduleId, setSelectedScheduleId] = useState<string>('')
   const [selectedScheduleJobId, setSelectedScheduleJobId] = useState<string>('')
+
+  // Get user data from localStorage
+  const user = getUserFromLocalStorage()
 
   // Fetch all staff data to map IDs to names
   const { data: staffData } = useQuery({
@@ -215,33 +306,113 @@ const TaskDetail: React.FC = () => {
       const response = await apiInstance.post('/tasks/notification-thanks-to-resident', data)
       return response.data
     },
-    onSuccess: () => {
-      toast.success('Notification sent successfully')
-      navigate('/tasks')
+    onSuccess: async () => {
+      try {
+        // Invalidate and refetch all related queries
+        await Promise.all([
+          // Invalidate task detail
+          queryClient.invalidateQueries({ queryKey: ['task', 'detail', taskId] }),
+          // Invalidate tasks list with all possible filters
+          queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+          // Invalidate tasks with specific filters
+          queryClient.invalidateQueries({
+            queryKey: ['tasks', 1, 10, '', 'all', 'crack']
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['tasks', 1, 10, '', 'all', 'schedule']
+          }),
+          // Invalidate tasks with status filters
+          queryClient.invalidateQueries({
+            queryKey: ['tasks', 1, 10, '', 'Assigned', 'crack']
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['tasks', 1, 10, '', 'Completed', 'crack']
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['tasks', 1, 10, '', 'In Progress', 'crack']
+          })
+        ])
+
+        // Prefetch the tasks data before navigation
+        await queryClient.prefetchQuery({
+          queryKey: ['tasks', 1, 10, '', 'all', 'crack'],
+          queryFn: () => tasksApi.getTasksByType({
+            page: 1,
+            limit: 10,
+            taskType: 'crack'
+          })
+        })
+
+        toast.success(t('taskManagement.detail.notificationSentSuccess'))
+        navigate('/tasks')
+      } catch (error) {
+        console.error('Error updating data:', error)
+        toast.error(t('taskManagement.detail.errorUpdatingData'))
+      }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to send notification')
+      toast.error(error.response?.data?.message || t('taskManagement.detail.failedToSendNotification'))
     },
   })
 
-  // Add query for schedule jobs
-  const { data: scheduleJobs } = useQuery({
-    queryKey: ['schedule-jobs', taskId],
+  // Update schedules query to log response
+  const { data: schedules, isLoading: isLoadingSchedules } = useQuery({
+    queryKey: ['schedules'],
     queryFn: async () => {
       try {
-        const response = await scheduleJobsApi.getScheduleJobs({
-          page: 1,
-          limit: 100
-        })
-        return response.data
+        const response = await apiInstance.get('/schedules')
+        console.log('Raw Schedules Response:', response.data)
+        return response.data.data
       } catch (error) {
-        console.error('Error fetching schedule jobs:', error)
+        console.error('Error fetching schedules:', error)
         return []
       }
     },
-    enabled: !!taskId,
     staleTime: 5 * 60 * 1000,
   })
+
+  // Update building details query to use userId from localStorage
+  const { data: buildingDetails } = useQuery<BuildingDetail[]>({
+    queryKey: ['buildingDetails', user?.userId],
+    queryFn: async () => {
+      if (!user?.userId) {
+        throw new Error('User ID not found')
+      }
+      const response = await buildingDetailsApi.getBuildingDetailsForManager(user.userId)
+      console.log('Building Details Response:', response)
+      if (!response) {
+        throw new Error('No building details returned')
+      }
+      return response
+    },
+    enabled: !!user?.userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  // Create a map of buildingDetailId to building information
+  const buildingDetailMap = React.useMemo(() => {
+    const map = new Map<string, BuildingDetail>()
+    if (buildingDetails) {
+      console.log('Building Details for mapping:', buildingDetails)
+      buildingDetails.forEach(detail => {
+        if (detail.buildingDetailId) {
+          map.set(detail.buildingDetailId, detail)
+        }
+      })
+    }
+    return map
+  }, [buildingDetails])
+
+  // Log schedules data for debugging
+  React.useEffect(() => {
+    if (schedules) {
+      console.log('Schedules Data:', schedules)
+      const selectedSchedule = schedules.find(s => s.schedule_id === selectedScheduleId)
+      if (selectedSchedule) {
+        console.log('Selected Schedule Jobs:', selectedSchedule.schedule_job)
+      }
+    }
+  }, [schedules, selectedScheduleId])
 
   // Show loading only if we don't have any data
   if ((isInitialLoading || isLoading) && !taskData) {
@@ -344,10 +515,11 @@ const TaskDetail: React.FC = () => {
   // Update handler for confirming and sending notification
   const handleConfirmAndSend = async () => {
     if (!taskId) return
-    if (!selectedScheduleJobId) {
+    if (!selectedScheduleId || !selectedScheduleJobId) {
       toast.error(t('taskManagement.detail.scheduleJobRequired'))
       return
     }
+
     try {
       await sendNotificationMutation.mutateAsync({
         taskId: taskId,
@@ -356,6 +528,11 @@ const TaskDetail: React.FC = () => {
     } catch (error) {
       console.error('Error sending notification:', error)
     }
+  }
+
+  // Add handler for navigating to schedule job creation
+  const handleNavigateToScheduleJob = () => {
+    navigate('/maintenance-cycles')
   }
 
   return (
@@ -460,14 +637,21 @@ const TaskDetail: React.FC = () => {
               )}
               {crackInfo.isPrivatesAsset === false && task.status !== 'Completed' && (
                 <div className="mt-4">
-                  <button
-                    onClick={handleOpenConfirmModal}
-                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                    title={t('taskManagement.detail.sendNotification')}
-                  >
-                    <FaMailBulk className="w-5 h-5 mr-2" />
-                    {t('taskManagement.detail.sendNotification')}
-                  </button>
+                  {isLoadingSchedules ? (
+                    <div className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md">
+                      <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">{t('taskManagement.detail.loadingSchedules')}</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleOpenConfirmModal}
+                      className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                      title={t('taskManagement.detail.sendNotification')}
+                    >
+                      <FaMailBulk className="w-5 h-5 mr-2" />
+                      {t('taskManagement.detail.sendNotification')}
+                    </button>
+                  )}
                 </div>
               )}
             </>
@@ -702,40 +886,101 @@ const TaskDetail: React.FC = () => {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                   {t('taskManagement.detail.confirmNotification.message')}
                 </p>
-
-                {/* Schedule Job Selection */}
+                <div className="w-full text-center mt-4">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    {t('taskManagement.detail.createNewScheduleHint')}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigateToScheduleJob()}
+                    className="px-4 py-2 text-sm font-medium border border-blue-500 text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900 transition"
+                  >
+                    {t('taskManagement.detail.createNewSchedule')}
+                  </button>
+                </div>
+                {/* Schedule Selection */}
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-2">
-                    {t('taskManagement.detail.selectScheduleJobLabel')}
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={selectedScheduleJobId}
-                      onChange={(e) => setSelectedScheduleJobId(e.target.value)}
-                      className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-gray-300"
-                      aria-label={t('taskManagement.detail.selectScheduleJobLabel')}
-                    >
-                      <option value="">{t('taskManagement.detail.selectScheduleJob')}</option>
-                      {scheduleJobs?.map((job) => (
-                        <option key={job.schedule_job_id} value={job.schedule_job_id}>
-                          {job.schedule?.schedule_name} - {new Date(job.run_date).toLocaleDateString()}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                      <FaCalendarAlt className="h-4 w-4 text-gray-400" />
+                  {isLoadingSchedules ? (
+                    <div className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md">
+                      <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">{t('taskManagement.detail.loadingSchedules')}</span>
                     </div>
-                  </div>
-                  {!selectedScheduleJobId && (
-                    <p className="mt-1 text-xs text-left text-red-500">
-                      {t('taskManagement.detail.scheduleJobRequired')}
-                    </p>
+                  ) : (
+                    <StyledSelect
+                      value={selectedScheduleId}
+                      onChange={(value) => {
+                        setSelectedScheduleId(value)
+                        setSelectedScheduleJobId('')
+                      }}
+                      options={schedules?.map(schedule => {
+                        const cycleInfo = schedule.cycle
+                          ? `${schedule.cycle.device_type} - ${schedule.cycle.frequency} (${schedule.cycle.basis})`
+                          : ''
+                        return {
+                          value: schedule.schedule_id,
+                          label: `${schedule.schedule_name} - ${cycleInfo} (${new Date(schedule.start_date).toLocaleDateString()})`
+                        }
+                      }) || []}
+                      placeholder={t('taskManagement.detail.selectSchedule')}
+                      icon={FaCalendarAlt}
+                      isLoading={isLoadingSchedules}
+                      label={t('taskManagement.detail.selectScheduleLabel')}
+                      error={!selectedScheduleId && !isLoadingSchedules ? t('taskManagement.detail.scheduleRequired') : undefined}
+                      loadingText={t('taskManagement.detail.loadingSchedules')}
+                    />
                   )}
                 </div>
+
+                {/* Schedule Job Selection */}
+                {selectedScheduleId && (
+                  <div className="mt-4">
+                    <StyledSelect
+                      value={selectedScheduleJobId}
+                      onChange={(value) => setSelectedScheduleJobId(value)}
+                      options={schedules
+                        ?.find(s => s.schedule_id === selectedScheduleId)
+                        ?.schedule_job?.map(job => {
+                          let label = 'Unknown Building'
+                          let locationInfoText = ''
+
+                          // Try to get building detail from the map
+                          const mappedBuildingDetail = job.buildingDetailId ? buildingDetailMap.get(job.buildingDetailId) : null
+
+                          // Try to get building detail from the job
+                          const jobBuildingDetail = job.buildingDetail
+
+                          if (jobBuildingDetail?.name) {
+                            label = jobBuildingDetail.name
+                          } else if (mappedBuildingDetail) {
+                            label = mappedBuildingDetail.name
+                            locationInfoText = mappedBuildingDetail.locationDetails
+                              ?.map(loc => `${loc.floorNumber}-${loc.roomNumber}`)
+                              .join(', ') || ''
+                          }
+
+                          if (locationInfoText) {
+                            label += ` (${locationInfoText})`
+                          }
+
+                          label += ` - ${new Date(job.run_date).toLocaleDateString()}`
+
+                          return {
+                            value: job.schedule_job_id,
+                            label
+                          }
+                        }) || []}
+                      placeholder={t('taskManagement.detail.selectScheduleJob')}
+                      icon={FaBuilding}
+                      isLoading={false}
+                      label={t('taskManagement.detail.selectScheduleJobLabel')}
+                      error={!selectedScheduleJobId ? t('taskManagement.detail.scheduleJobRequired') : undefined}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="mt-5 flex justify-center space-x-3">
+            <div className="mt-5 flex justify-center space-x-3 w-full">
               <button
                 type="button"
                 onClick={handleCloseConfirmModal}
@@ -746,13 +991,25 @@ const TaskDetail: React.FC = () => {
               <button
                 type="button"
                 onClick={handleConfirmAndSend}
-                disabled={!selectedScheduleJobId}
-                className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none ${selectedScheduleJobId
+                disabled={!selectedScheduleId || !selectedScheduleJobId || isLoadingSchedules || sendNotificationMutation.isPending}
+                className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none ${selectedScheduleId && selectedScheduleJobId && !isLoadingSchedules && !sendNotificationMutation.isPending
                   ? 'bg-green-600 hover:bg-green-700'
                   : 'bg-green-400 cursor-not-allowed'
                   }`}
               >
-                {t('taskManagement.detail.confirmNotification.sendAndComplete')}
+                {sendNotificationMutation.isPending ? (
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    {t('common.sending')}
+                  </div>
+                ) : isLoadingSchedules ? (
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    {t('common.loading')}
+                  </div>
+                ) : (
+                  t('taskManagement.detail.confirmNotification.sendAndComplete')
+                )}
               </button>
             </div>
           </div>

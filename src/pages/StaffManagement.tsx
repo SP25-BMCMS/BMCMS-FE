@@ -258,7 +258,7 @@ const StaffManagement: React.FC = () => {
           <DropdownMenu
             onViewDetail={() => handleViewDetail(item)}
             onChangeStatus={() => handleOpenDeptPosModal(item)}
-            onRemove={() => console.log('Remove clicked', item)}
+            onRemove={() => { }}
             changeStatusTitle={t('staffManagement.changeDepartment')}
           />
         </div>
@@ -322,7 +322,7 @@ const StaffManagement: React.FC = () => {
         data={staffList}
         columns={columns}
         keyExtractor={item => item.id}
-        onRowClick={item => console.log('Row clicked:', item)}
+        onRowClick={item => { }}
         className="w-[95%] mx-auto"
         tableClassName="w-full"
         isLoading={isLoadingStaff}

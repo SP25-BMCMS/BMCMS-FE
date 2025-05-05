@@ -256,9 +256,9 @@ const Building: React.FC = () => {
       key: 'completion Date',
       title: t('buildingManagement.table1.completionDate'),
       render: item => (
-        <Tooltip 
-          content={item.completion_date ? new Date(item.completion_date).toLocaleDateString() : 'N/A'} 
-          position="bottom" 
+        <Tooltip
+          content={item.completion_date ? new Date(item.completion_date).toLocaleDateString() : 'N/A'}
+          position="bottom"
           delay={200}
         >
           <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[100px]">
@@ -273,11 +273,10 @@ const Building: React.FC = () => {
       render: item => (
         <Tooltip content={t(`buildingManagement.status.${item.Status}`)} position="bottom" delay={200}>
           <span
-            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-              item.Status === 'operational'
-                ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
-                : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
-            }`}
+            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.Status === 'operational'
+              ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
+              : 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+              }`}
           >
             {t(`buildingManagement.status.${item.Status}`)}
           </span>
@@ -366,7 +365,7 @@ const Building: React.FC = () => {
               data={buildingsData?.data || []}
               columns={columns}
               keyExtractor={item => item.buildingId}
-              onRowClick={item => console.log('Row clicked:', item)}
+              onRowClick={() => { }}
               className="w-full"
               tableClassName="w-full min-w-[750px]"
             />

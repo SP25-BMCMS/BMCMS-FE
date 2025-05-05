@@ -179,7 +179,6 @@ const TaskManagement: React.FC = () => {
         initialData: taskResponse, // Set initial data immediately
       })
     } catch (error) {
-      console.error('Error prefetching data:', error)
       // Don't throw the error, just log it
     } finally {
       setIsNavigating(false)
@@ -285,7 +284,7 @@ const TaskManagement: React.FC = () => {
       setIsNavigating(true)
       await prefetchTaskDetails(taskId)
     } catch (error) {
-      console.error('Error prefetching data:', error)
+      console.log('Error prefetching data:', error)
     } finally {
       navigate(`/task-detail/${taskId}`)
     }
@@ -294,7 +293,7 @@ const TaskManagement: React.FC = () => {
   // Add mouse enter handler for prefetching
   const handleTaskMouseEnter = (taskId: string) => {
     prefetchTaskDetails(taskId).catch(error => {
-      console.error('Error prefetching on hover:', error)
+      console.log('Error prefetching on hover:', error)
     })
   }
 

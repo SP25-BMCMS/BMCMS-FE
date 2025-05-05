@@ -56,7 +56,6 @@ const subscribeToNotifications = (
     eventSource = new EventSource(url)
 
     eventSource.onopen = () => {
-      console.log('SSE Connection established')
       reconnectAttempts = 0
     }
 
@@ -74,7 +73,6 @@ const subscribeToNotifications = (
 
       if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
         reconnectAttempts++
-        console.log(`Attempting to reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`)
 
         if (reconnectTimeout) {
           clearTimeout(reconnectTimeout)

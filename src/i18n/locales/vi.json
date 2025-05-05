@@ -28,6 +28,7 @@
     "filter": "Lọc",
     "all": "Tất cả",
     "status": "Trạng thái",
+    "sending": "Đang gửi...",
     "crackStatus": {
       "title": "Trạng thái vết nứt",
       "processing": "Đang xử lý",
@@ -399,6 +400,9 @@
       "updated": "Ngày cập nhật",
       "reportedBy": "Người báo cáo",
       "verifiedBy": "Người xác minh",
+      "selectSchedule": "Chọn lịch trình",
+      "scheduleRequired": "Chọn lịch trình công việc",
+      "selectScheduleLabel": "Chọn lịch trình",
       "location": "Vị trí",
       "sendNotification": "Gửi thông báo bảo trì cho cư dân",
       "taskStatus": {
@@ -432,7 +436,12 @@
       "selectScheduleJob": "Chọn lịch trình",
       "scheduleJobRequired": "Bắt buộc chọn lịch trình",
       "loading": "Đang tải thông tin nhiệm vụ...",
-      "error": "Không thể tải thông tin nhiệm vụ. Vui lòng thử lại sau."
+      "error": "Không thể tải thông tin nhiệm vụ. Vui lòng thử lại sau.",
+      "createNewSchedule": "Tạo lịch bảo trì mới",
+      "createNewScheduleHint": "Nếu không tìm thấy lịch bảo trì phù hợp, bạn có thể tạo mới.",
+      "notificationSentSuccess": "Thông báo đã được gửi thành công",
+      "errorUpdatingData": "Không thể cập nhật dữ liệu",
+      "failedToSendNotification": "Không thể gửi thông báo"
     },
     "inspection": {
       "title": "Chi tiết kiểm tra",
@@ -1116,8 +1125,11 @@
     },
     "status": {
       "pending": "Chờ xử lý",
+      "inprogress": "Đang xử lý",
       "inProgress": "Đang xử lý",
       "reviewing": "Đang kiểm tra",
+      "rejected": "Từ chối",
+      "completed": "Hoàn tất",
       "resolved": "Đã xử lý",
       "current": "Trạng thái hiện tại"
     },

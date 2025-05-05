@@ -114,6 +114,12 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
         return ''
       case 'InProgress':
         return 'animate-pulse'
+      case 'reviewing':
+        return 'animate-pulse'
+      case 'rejected':
+        return 'animate-pulse'
+      case 'completed':
+        return 'animate-pulse'
       default:
         return 'animate-pulse-fast'
     }
@@ -126,6 +132,12 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
         return 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
       case 'InProgress':
         return 'bg-[rgba(255,165,0,0.3)] text-[#ff9900] border border-[#ffa500]'
+      case 'reviewing':
+        return 'bg-[rgba(255,165,0,0.3)] text-[#ff9900] border border-[#ffa500]'
+      case 'rejected':
+        return 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
+      case 'completed':
+        return 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
       default:
         return 'bg-[#f80808] bg-opacity-30 text-[#ff0000] border border-[#f80808]'
     }
@@ -138,6 +150,12 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
         return 'bg-[#00ff90]'
       case 'InProgress':
         return 'bg-[#ff9900]'
+      case 'reviewing':
+        return 'bg-[#ff9900]'
+      case 'rejected':
+        return 'bg-[#ff0000]'
+      case 'completed':
+        return 'bg-[#00ff90]'
       default:
         return 'bg-[#ff0000]'
     }

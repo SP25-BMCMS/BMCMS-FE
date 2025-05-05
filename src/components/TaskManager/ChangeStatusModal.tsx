@@ -81,7 +81,6 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({
   // Task status mutation
   const updateTaskStatusMutation = useMutation({
     mutationFn: async (status: string) => {
-      console.log(`Updating task status: ${taskId} to ${status}`)
       return await tasksApi.updateTaskStatus(taskId, status)
     },
     onSuccess: () => {
@@ -100,7 +99,6 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({
   const updateCrackStatusMutation = useMutation({
     mutationFn: async ({ status, description }: { status: string; description: string }) => {
       if (!crackId) throw new Error(t('taskManagement.modal.changeStatus.messages.noAssociatedCrack'))
-      console.log(`Updating crack status: ${crackId} to ${status}`)
       return await tasksApi.updateCrackStatus(crackId, status, description)
     },
     onSuccess: () => {

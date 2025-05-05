@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Modal from './Modal';
-import { getResidentApartments } from '@/services/residents';
-import { Residents, ResidentApartment } from '@/types';
-import { toast } from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react'
+import Modal from './Modal'
+import { getResidentApartments } from '@/services/residents'
+import { Residents, ResidentApartment } from '@/types'
+import { toast } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import {
   User,
   Phone,
@@ -15,93 +15,84 @@ import {
   UserCheck,
   AlertTriangle,
   Plus,
-} from 'lucide-react';
-import AddApartmentModal from '../AddApartment';
+} from 'lucide-react'
+import AddApartmentModal from '../AddApartment'
 
 interface ViewDetailResidentProps {
-  isOpen: boolean;
-  onClose: () => void;
-  resident: Residents | null;
+  isOpen: boolean
+  onClose: () => void
+  resident: Residents | null
 }
 
 const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose, resident }) => {
-  const { t } = useTranslation();
-  const [apartments, setApartments] = useState<ResidentApartment[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isAddApartmentOpen, setIsAddApartmentOpen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'info' | 'apartments'>('info');
-
-  // Debug: console log when component renders with resident
-  useEffect(() => {
-    if (isOpen && resident) {
-      console.log('ViewDetailResident opened with resident:', resident);
-    }
-  }, [isOpen, resident]);
+  const { t } = useTranslation()
+  const [apartments, setApartments] = useState<ResidentApartment[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isAddApartmentOpen, setIsAddApartmentOpen] = useState<boolean>(false)
+  const [activeTab, setActiveTab] = useState<'info' | 'apartments'>('info')
 
   // Reset state when modal closes or resident changes
   useEffect(() => {
     if (!isOpen) {
-      setApartments([]);
-      setError(null);
-      setActiveTab('info');
+      setApartments([])
+      setError(null)
+      setActiveTab('info')
     } else if (resident) {
-      setApartments([]);
-      setError(null);
-      console.log('Account status:', resident.accountStatus);
+      setApartments([])
+      setError(null)
 
       // Only fetch if resident is active
       if (resident.accountStatus === 'Active') {
-        fetchResidentApartments();
+        fetchResidentApartments()
       }
     }
-  }, [isOpen, resident?.userId]);
+  }, [isOpen, resident?.userId])
 
   const fetchResidentApartments = async () => {
     if (!resident) {
-      console.error('Cannot get apartment information');
-      return;
+      console.error('Cannot get apartment information')
+      return
     }
 
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
     try {
-      const response = await getResidentApartments(resident.userId);
+      const response = await getResidentApartments(resident.userId)
 
       if (response && response.isSuccess && Array.isArray(response.data)) {
-        setApartments(response.data);
+        setApartments(response.data)
       } else {
         const errorMsg =
-          response?.message || t('residentManagement.viewDetail.messages.cannotGetApartment');
-        console.error('Error:', errorMsg);
-        setError(errorMsg);
+          response?.message || t('residentManagement.viewDetail.messages.cannotGetApartment')
+        console.error('Error:', errorMsg)
+        setError(errorMsg)
       }
     } catch (error: any) {
-      console.error('Error calling API getResidentApartments:', error);
+      console.error('Error calling API getResidentApartments:', error)
       const errorMessage =
-        error.message || t('residentManagement.viewDetail.messages.errorLoadingApartment');
-      setError(errorMessage);
+        error.message || t('residentManagement.viewDetail.messages.errorLoadingApartment')
+      setError(errorMessage)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Handle adding apartment success
   const handleAddApartmentSuccess = () => {
     if (resident && resident.accountStatus === 'Active') {
-      fetchResidentApartments();
-      setActiveTab('apartments');
-      setIsAddApartmentOpen(false);
+      fetchResidentApartments()
+      setActiveTab('apartments')
+      setIsAddApartmentOpen(false)
     }
-  };
+  }
 
   // Handle custom close function to ensure state is reset
   const handleClose = () => {
-    console.log('Close modal');
-    setApartments([]);
-    setError(null);
-    onClose();
-  };
+    setApartments([])
+    setError(null)
+    onClose()
+  }
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -110,42 +101,40 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-      });
+      })
     } catch (error) {
-      console.error('Error when formatting date:', error);
-      return dateString;
+      console.error('Error when formatting date:', error)
+      return dateString
     }
-  };
+  }
 
   // Define account status styles
   const getStatusStyle = (status: string) => {
     if (status === 'Active') {
-      return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-400';
+      return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-400'
     }
-    return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-400';
-  };
+    return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-400'
+  }
 
   // Define gender styles
   const getGenderStyle = (gender: string) => {
     if (gender === 'Male') {
-      return 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]';
+      return 'bg-[#FBCD17] bg-opacity-35 text-[#FBCD17] border border-[#FBCD17]'
     }
-    return 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]';
-  };
+    return 'bg-[#FF6B98] bg-opacity-30 text-[#FF6B98] border border-[#FF6B98]'
+  }
 
   // Get translated gender
   const getTranslatedGender = (gender: string) => {
-    return t(`residentManagement.viewDetail.gender.${gender.toLowerCase()}`);
-  };
+    return t(`residentManagement.viewDetail.gender.${gender.toLowerCase()}`)
+  }
 
   if (!resident) {
-    console.log('Not displaying modal because resident is null');
-    return null;
+    return null
   }
 
   // Show warning for inactive residents
-  const isInactive = resident.accountStatus !== 'Active';
-  console.log('Current account status:', resident.accountStatus, 'isInactive:', isInactive);
+  const isInactive = resident.accountStatus !== 'Active'
 
   return (
     <Modal
@@ -231,21 +220,19 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
           {/* Tabs */}
           <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
             <button
-              className={`px-4 py-2 text-sm font-medium ${
-                activeTab === 'info'
-                  ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
+              className={`px-4 py-2 text-sm font-medium ${activeTab === 'info'
+                ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
               onClick={() => setActiveTab('info')}
             >
               {t('residentManagement.viewDetail.tabs.personalInfo')}
             </button>
             <button
-              className={`px-4 py-2 text-sm font-medium ${
-                activeTab === 'apartments'
-                  ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
+              className={`px-4 py-2 text-sm font-medium ${activeTab === 'apartments'
+                ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
               onClick={() => setActiveTab('apartments')}
             >
               {t('residentManagement.viewDetail.tabs.apartments')} ({apartments.length})
@@ -436,32 +423,32 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                         })}
                       </p>
                       {resident?.accountStatus === 'Active' && (
-                      <button
-                        onClick={() => setIsAddApartmentOpen(true)}
-                        className="mt-3 flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none"
-                      >
-                        <Plus className="h-3.5 w-3.5 mr-1" />
-                        {t('residentManagement.viewDetail.propertySummary.addNew')}
-                      </button>
-                    )}
+                        <button
+                          onClick={() => setIsAddApartmentOpen(true)}
+                          className="mt-3 flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none"
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1" />
+                          {t('residentManagement.viewDetail.propertySummary.addNew')}
+                        </button>
+                      )}
                     </div>
 
                     {apartments.map(apartment => {
                       const buildingName =
                         apartment?.buildingDetails?.building?.name ||
-                        t('residentManagement.viewDetail.status.unknown');
-                      const buildingDetailName = apartment?.buildingDetails?.name || '';
+                        t('residentManagement.viewDetail.status.unknown')
+                      const buildingDetailName = apartment?.buildingDetails?.name || ''
                       const areaName =
                         apartment?.buildingDetails?.building?.area?.name ||
-                        t('residentManagement.viewDetail.status.unknownArea');
+                        t('residentManagement.viewDetail.status.unknownArea')
                       const buildingDescription =
-                        apartment?.buildingDetails?.building?.description || '';
-                      const buildingFloors = apartment?.buildingDetails?.building?.numberFloor || 0;
+                        apartment?.buildingDetails?.building?.description || ''
+                      const buildingFloors = apartment?.buildingDetails?.building?.numberFloor || 0
 
                       const buildingImage =
                         apartment?.buildingDetails?.building?.imageCover ||
                         'https://via.placeholder.com/40?text=' +
-                          t('residentManagement.viewDetail.apartmentInfo.noImage');
+                        t('residentManagement.viewDetail.apartmentInfo.noImage')
 
                       return (
                         <div
@@ -477,7 +464,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                                 onError={e => {
                                   (e.target as HTMLImageElement).src =
                                     'https://via.placeholder.com/40?text=' +
-                                    t('residentManagement.viewDetail.apartmentInfo.noImage');
+                                    t('residentManagement.viewDetail.apartmentInfo.noImage')
                                 }}
                               />
                             </div>
@@ -506,7 +493,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
                             </div>
                           </div>
                         </div>
-                      );
+                      )
                     })}
                   </div>
                 )}
@@ -532,7 +519,7 @@ const ViewDetailResident: React.FC<ViewDetailResidentProps> = ({ isOpen, onClose
         onSuccess={handleAddApartmentSuccess}
       />
     </Modal>
-  );
-};
+  )
+}
 
-export default ViewDetailResident;
+export default ViewDetailResident

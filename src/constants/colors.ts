@@ -29,6 +29,16 @@ export const STATUS_COLORS = {
     TEXT: '#ff0000', // Màu chữ đỏ
     BORDER: '#f80808', // Màu viền đỏ
   },
-};
-export const ACTIVE = 'bg-[rgba(80,241,134,0.35)] text-[#50F186] border border-[#50F186]';
-export const INACTIVE = 'bg-[rgba(248,8,8,0.3)] text-[#ff0000] border border-[#f80808]';
+  COMPLETED: {
+    BG: 'rgba(80, 241, 134, 0.35)', // Màu nền từ 50F186 nhạt 35%
+    TEXT: '#50F186', // Màu chữ xanh lá
+    BORDER: '#50F186', // Màu viền xanh lá
+  },
+  REJECTED: {
+    BG: 'rgba(248, 8, 8, 0.3)', // Màu nền đỏ nhạt 30%
+    TEXT: '#ff0000', // Màu chữ đỏ
+    BORDER: '#f80808', // Màu viền đỏ
+  },
+}
+export const ACTIVE = 'bg-[rgba(80,241,134,0.35)] text-[#50F186] border border-[#50F186]'
+export const INACTIVE = 'bg-[rgba(248,8,8,0.3)] text-[#ff0000] border border-[#f80808]'

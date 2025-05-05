@@ -260,7 +260,7 @@ const CrackManagement: React.FC = () => {
                 ? undefined
                 : () => handleStatusUpdate(item)
             }
-            onRemove={() => console.log('Remove', item)}
+            onRemove={() => { }}
           />
         </div>
       ),

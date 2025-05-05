@@ -142,8 +142,6 @@ const schedulesApi = {
         import.meta.env.VITE_GENERATE_SCHEDULES_API,
         data
       )
-      // Log the response for debugging
-      console.log('Generate schedules response:', response)
       return response.data
     } catch (error) {
       console.error('Error generating schedules:', error)
