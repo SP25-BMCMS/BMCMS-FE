@@ -1407,7 +1407,12 @@
     "warrantyUntil": "Warranty until",
     "created": "Created",
     "construction": "Construction",
-    "completion": "Completion"
+    "completion": "Completion",
+    "buildingStatus": {
+      "under_construction": "Under Construction",
+      "operational": "Operational",
+      "completion_date": "Completed"
+    }
   },
   "workLog": {
     "title": "Work Log Management",
@@ -1426,10 +1431,12 @@
       "createdAt": "Created Date"
     },
     "status": {
-      "execute_cracks": "Execute crack repairs",
-      "confirm_no_pending_issues": "Confirm no pending issues",
-      "final_review": "Final review",
-      "wait_for_deposit": "Waiting for deposit"
+      "init_inspection": "Create Initial Inspection",
+      "wait_for_deposit": "Waiting for Resident Deposit",
+      "execute_cracks": "Execute Crack Repairs",
+      "confirm_no_pending_issues": "Confirm No Pending Issues",
+      "final_review": "Final Review",
+      "cancelled": "Cancelled"
     }
   },
   "calendar": {
@@ -1719,6 +1726,8 @@
       "title": "Add New Building",
       "subtitle": "Fill in the information below to add a new building",
       "name": "Building Name",
+      "imageURLPlaceholder": "Link Building Image",
+      "imageURL": "Building Cover Image",
       "namePlaceholder": "Enter building name",
       "nameRequired": "Building name is required",
       "description": "Description",

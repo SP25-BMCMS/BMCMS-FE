@@ -390,6 +390,10 @@ const BuildingDetail: React.FC = () => {
     return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300'
   }
 
+  const getStatusTranslation = (status: string) => {
+    return t(`buildingDetail.buildingStatus.${status}`)
+  }
+
   return (
     <div className="w-full">
       <div className="bg-white-900 dark:bg-gray-800 dark:text-white p-4 flex items-center">
@@ -416,7 +420,7 @@ const BuildingDetail: React.FC = () => {
               <span
                 className={`ml-4 px-3 py-1 text-xs font-medium rounded-full ${getStatusStyle(buildingDetail.building.Status)}`}
               >
-                {getStatusLabel(buildingDetail.building.Status)}
+                {getStatusTranslation(buildingDetail.building.Status)}
               </span>
             )}
           </div>
@@ -482,7 +486,7 @@ const BuildingDetail: React.FC = () => {
                       : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
                       }`}
                   >
-                    {getStatusLabel(buildingDetail.building.Status)}
+                    {getStatusTranslation(buildingDetail.building.Status)}
                   </span>
                 </p>
               )}
@@ -577,7 +581,7 @@ const BuildingDetail: React.FC = () => {
               <div className="flex justify-between items-center mb-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                   <ArrowUpDown className="h-4 w-4 mr-1.5" />
-                  {t('buildingDetail.showingRecords')}: { maintenanceHistory.length }
+                  {t('buildingDetail.showingRecords')}: {maintenanceHistory.length}
                 </p>
               </div>
 

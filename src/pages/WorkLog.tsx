@@ -11,21 +11,30 @@ import {
   FaHourglassHalf,
   FaTools,
   FaSearch,
+  FaClipboardCheck,
+  FaMoneyBillWave,
+  FaBan
 } from 'react-icons/fa'
 import { Tooltip } from '@/components/Tooltip'
 import { useTranslation } from 'react-i18next'
 
 const statusIcons: Record<string, JSX.Element> = {
+  INIT_INSPECTION: <FaClipboardCheck className="text-indigo-500" />,
+  WAIT_FOR_DEPOSIT: <FaMoneyBillWave className="text-yellow-500" />,
   EXECUTE_CRACKS: <FaTools className="text-blue-500" />,
   CONFIRM_NO_PENDING_ISSUES: <FaCheckCircle className="text-green-500" />,
   FINAL_REVIEW: <FaHourglassHalf className="text-purple-500" />,
+  CANCELLED: <FaBan className="text-red-500" />,
   DEFAULT: <FaExclamationTriangle className="text-yellow-500" />,
 }
 
 const statusColors: Record<string, string> = {
+  INIT_INSPECTION: 'bg-indigo-100 text-indigo-800',
+  WAIT_FOR_DEPOSIT: 'bg-yellow-100 text-yellow-800',
   EXECUTE_CRACKS: 'bg-blue-100 text-blue-800',
   CONFIRM_NO_PENDING_ISSUES: 'bg-green-100 text-green-800',
   FINAL_REVIEW: 'bg-purple-100 text-purple-800',
+  CANCELLED: 'bg-red-100 text-red-800',
   DEFAULT: 'bg-yellow-100 text-yellow-800',
 }
 

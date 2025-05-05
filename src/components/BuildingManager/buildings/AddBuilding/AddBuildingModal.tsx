@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { addBuilding } from '@/services/building';
-import { getAreaList } from '@/services/areas';
-import { getAllStaff } from '@/services/staff';
-import { Area, StaffData } from '@/types';
-import toast from 'react-hot-toast';
-import { Loader2, UserIcon, ShieldCheck, X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react'
+import { addBuilding } from '@/services/building'
+import { getAreaList } from '@/services/areas'
+import { getAllStaff } from '@/services/staff'
+import { Area, StaffData } from '@/types'
+import toast from 'react-hot-toast'
+import { Loader2, UserIcon, ShieldCheck, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface AddBuildingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
+  isOpen: boolean
+  onClose: () => void
+  onSuccess: () => void
 }
 
 const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const { t } = useTranslation();
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [staff, setStaff] = useState<StaffData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation()
+  const [areas, setAreas] = useState<Area[]>([])
+  const [staff, setStaff] = useState<StaffData[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -29,11 +29,11 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
     completion_date: new Date().toLocaleDateString('en-CA'),
     Warranty_date: '',
     status: 'operational',
-  });
+  })
 
   const [errors, setErrors] = useState<{
-    [key: string]: string;
-  }>({});
+    [key: string]: string
+  }>({})
 
   useEffect(() => {
     if (formData.status === 'under_construction') {
@@ -42,46 +42,49 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         completion_date: 'dd/mm/yyyy',
         manager_id: '', // Reset manager_id when under construction
         Warranty_date: '', // Reset warranty date when under construction
-      }));
+      }))
     }
-  }, [formData.status]);
+  }, [formData.status])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch areas
-        const areasData = await getAreaList();
-        setAreas(areasData);
+        const areasData = await getAreaList()
+        setAreas(areasData)
         if (areasData.length > 0) {
-          setFormData(prev => ({ ...prev, areaId: areasData[0].areaId }));
+          setFormData(prev => ({ ...prev, areaId: areasData[0].areaId }))
         }
 
-        // Fetch staff for manager selection
-        const staffResponse = await getAllStaff();
+        // Fetch staff for manager selection with pagination
+        const staffResponse = await getAllStaff({
+          page: '1',
+          limit: '100' // Set a reasonable limit to get all managers
+        })
         if (staffResponse && staffResponse.data) {
-          setStaff(staffResponse.data);
+          setStaff(staffResponse.data)
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Unable to load required data!');
+        console.error('Error fetching data:', error)
+        toast.error(t('building.add.error'))
       }
-    };
+    }
 
     if (isOpen) {
-      fetchData();
+      fetchData()
     }
-  }, [isOpen]);
+  }, [isOpen, t])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
 
     if (name === 'numberFloor') {
       setFormData(prev => ({
         ...prev,
         [name]: parseInt(value) || 1,
-      }));
+      }))
     } else if (name === 'status') {
       if (value === 'under_construction') {
         setFormData(prev => ({
@@ -90,19 +93,19 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
           completion_date: 'dd/mm/yyyy',
           manager_id: '', // Clear manager when status is under construction
           Warranty_date: '', // Clear warranty date when status is under construction
-        }));
+        }))
       } else {
         setFormData(prev => ({
           ...prev,
           status: value,
           completion_date: new Date().toLocaleDateString('en-CA'),
-        }));
+        }))
       }
     } else {
       setFormData(prev => ({
         ...prev,
         [name]: value,
-      }));
+      }))
     }
 
     // Clear error when user types
@@ -110,43 +113,43 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
       setErrors(prev => ({
         ...prev,
         [name]: undefined,
-      }));
+      }))
     }
-  };
+  }
 
   const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
+    const newErrors: { [key: string]: string } = {}
 
     if (!formData.name.trim()) {
-      newErrors.name = t('building.add.nameRequired');
+      newErrors.name = t('building.add.nameRequired')
     }
 
     if (!formData.areaId) {
-      newErrors.areaId = t('building.add.areaRequired');
+      newErrors.areaId = t('building.add.areaRequired')
     }
 
     if (!formData.construction_date) {
-      newErrors.construction_date = t('building.add.constructionDateRequired');
+      newErrors.construction_date = t('building.add.constructionDateRequired')
     }
 
     if (formData.status === 'operational' && !formData.completion_date) {
-      newErrors.completion_date = t('building.add.completionDateRequired');
+      newErrors.completion_date = t('building.add.completionDateRequired')
     }
 
     if (formData.status === 'operational' && !formData.Warranty_date) {
-      newErrors.Warranty_date = t('building.add.warrantyDateRequired');
+      newErrors.Warranty_date = t('building.add.warrantyDateRequired')
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      return;
+      return
     }
 
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       const buildingData = {
         name: formData.name,
@@ -163,11 +166,11 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         ...(formData.status === 'operational' && formData.Warranty_date
           ? { Warranty_date: formData.Warranty_date }
           : {}),
-      };
+      }
 
-      await addBuilding(buildingData);
+      await addBuilding(buildingData)
 
-      toast.success(t('building.add.success'));
+      toast.success(t('building.add.success'))
 
       // Reset form
       setFormData({
@@ -181,19 +184,19 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         completion_date: new Date().toLocaleDateString('en-CA'),
         Warranty_date: '',
         status: 'operational',
-      });
+      })
 
-      onSuccess();
-      onClose();
+      onSuccess()
+      onClose()
     } catch (err) {
-      console.error('Error adding building:', err);
-      toast.error(t('building.add.error'));
+      console.error('Error adding building:', err)
+      toast.error(t('building.add.error'))
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -221,8 +224,8 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         <div className="overflow-y-auto p-4 flex-1">
           <form
             onSubmit={e => {
-              e.preventDefault();
-              handleSubmit();
+              e.preventDefault()
+              handleSubmit()
             }}
             className="space-y-4"
           >
@@ -238,11 +241,10 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                   value={formData.name}
                   onChange={handleChange}
                   placeholder={t('building.add.namePlaceholder')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                    errors.name
-                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.name
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                    }`}
                 />
                 {errors.name && (
                   <p className="text-red-500 dark:text-red-400 text-xs">{errors.name}</p>
@@ -260,11 +262,12 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                   value={formData.numberFloor}
                   onChange={handleChange}
                   min="1"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                    errors.numberFloor
-                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
+                  aria-label={t('building.add.numberFloors')}
+                  title={t('building.add.numberFloors')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.numberFloor
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                    }`}
                 />
                 {errors.numberFloor && (
                   <p className="text-red-500 dark:text-red-400 text-xs">{errors.numberFloor}</p>
@@ -282,11 +285,10 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                   value={formData.imageCover}
                   onChange={handleChange}
                   placeholder={t('building.add.imageURLPlaceholder')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                    errors.imageCover
-                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.imageCover
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                    }`}
                 />
                 {errors.imageCover && (
                   <p className="text-red-500 dark:text-red-400 text-xs">{errors.imageCover}</p>
@@ -302,11 +304,12 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                   name="areaId"
                   value={formData.areaId}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                    errors.areaId
-                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
+                  aria-label={t('building.add.area')}
+                  title={t('building.add.area')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.areaId
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                    }`}
                 >
                   <option value="">{t('building.add.selectArea')}</option>
                   {areas.map(area => (
@@ -330,11 +333,12 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                   name="construction_date"
                   value={formData.construction_date}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                    errors.construction_date
-                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
+                  aria-label={t('building.add.constructionDate')}
+                  title={t('building.add.constructionDate')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.construction_date
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                    }`}
                 />
                 {errors.construction_date && (
                   <p className="text-red-500 dark:text-red-400 text-xs">
@@ -384,6 +388,8 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                     type="text"
                     name="completion_date"
                     value={formData.completion_date}
+                    aria-label={t('building.add.completionDate')}
+                    title={t('building.add.completionDate')}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm 
                            bg-gray-50 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
                     disabled
@@ -394,11 +400,12 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                     name="completion_date"
                     value={formData.completion_date}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                      errors.completion_date
-                        ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                        : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                    }`}
+                    aria-label={t('building.add.completionDate')}
+                    title={t('building.add.completionDate')}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.completion_date
+                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                      }`}
                   />
                 )}
                 {errors.completion_date && (
@@ -420,11 +427,12 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                     name="Warranty_date"
                     value={formData.Warranty_date}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                      errors.Warranty_date
-                        ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                        : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                    }`}
+                    aria-label={t('building.add.warrantyDate')}
+                    title={t('building.add.warrantyDate')}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.Warranty_date
+                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                      }`}
                   />
                   {errors.Warranty_date && (
                     <p className="text-red-500 dark:text-red-400 text-xs">
@@ -445,6 +453,8 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                     name="manager_id"
                     value={formData.manager_id}
                     onChange={handleChange}
+                    aria-label={t('building.add.buildingManager')}
+                    title={t('building.add.buildingManager')}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:text-gray-100"
                   >
                     <option value="">{t('building.add.selectManager')}</option>
@@ -472,11 +482,10 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
                   value={formData.description}
                   onChange={handleChange}
                   placeholder={t('building.add.descriptionPlaceholder')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                    errors.description
-                      ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                      : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.description
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                    }`}
                   rows={3}
                 />
                 {errors.description && (
@@ -515,7 +524,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddBuildingModal;
+export default AddBuildingModal

@@ -1344,7 +1344,12 @@
     "warrantyUntil": "Bảo hành đến",
     "created": "Đã tạo",
     "construction": "Xây dựng",
-    "completion": "Hoàn thành"
+    "completion": "Hoàn thành",
+    "buildingStatus": {
+      "under_construction": "Đang xây dựng",
+      "operational": "Đang hoạt động",
+      "completion_date": "Đã hoàn thành"
+    }
   },
   "workLog": {
     "title": "Quản lý nhật ký công việc",
@@ -1363,10 +1368,12 @@
       "createdAt": "Ngày tạo"
     },
     "status": {
+      "init_inspection": "Tạo kiểm tra ban đầu",
+      "wait_for_deposit": "Chờ đặt cọc từ cư dân",
       "execute_cracks": "Thực hiện sửa chữa vết nứt",
       "confirm_no_pending_issues": "Xác nhận không có vấn đề tồn đọng",
-      "final_review": "Xem xét cuối cùng",
-      "wait_for_deposit": "Chờ đặt cọc"
+      "final_review": "Kiểm tra lần cuối",
+      "cancelled": "Đã hủy"
     }
   },
   "calendar": {
@@ -1654,6 +1661,8 @@
     "title": "Quản lý tòa nhà",
     "add": {
       "title": "Thêm tòa nhà mới",
+      "imageURLPlaceholder": "Nhập URL hình ảnh",
+      "imageURL": "Hình ảnh chung cư",
       "subtitle": "Điền thông tin bên dưới để thêm tòa nhà mới",
       "name": "Tên tòa nhà",
       "namePlaceholder": "Nhập tên tòa nhà",
