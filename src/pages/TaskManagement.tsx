@@ -415,6 +415,16 @@ const TaskManagement: React.FC = () => {
                 textColor = STATUS_COLORS.RESOLVED.TEXT
                 borderColor = STATUS_COLORS.RESOLVED.BORDER
                 break
+              case 'WaitingConfirm':
+                bgColor = STATUS_COLORS.WAITING_CONFIRM.BG
+                textColor = STATUS_COLORS.WAITING_CONFIRM.TEXT
+                borderColor = STATUS_COLORS.WAITING_CONFIRM.BORDER
+                break
+              case 'InFixing':
+                bgColor = STATUS_COLORS.IN_FIXING.BG
+                textColor = STATUS_COLORS.IN_FIXING.TEXT
+                borderColor = STATUS_COLORS.IN_FIXING.BORDER
+                break
               default:
                 bgColor = 'rgba(128, 128, 128, 0.35)'
                 textColor = '#808080'

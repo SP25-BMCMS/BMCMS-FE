@@ -353,6 +353,8 @@
     "crackStatus": {
       "rejected": "Từ chối",
       "reviewing": "Đang xem xét",
+      "infixing": "Đang sửa chữa",
+      "waitingConfirm": "Chờ xác nhận",
       "pending": "Chờ xử lý",
       "inprogress": "Đang thực hiện",
       "completed": "Hoàn thành"

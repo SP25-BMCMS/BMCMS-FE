@@ -5,42 +5,83 @@ import DropdownMenu from '@/components/DropDownMenu'
 import SearchInput from '@/components/SearchInput'
 import FilterDropdown from '@/components/FilterDropdown'
 import Pagination from '@/components/Pagination'
-import { CrackReportResponse, Crack, CrackListParams, CrackListPaginationResponse } from '@/types'
+import { CrackListParams, CrackListPaginationResponse } from '@/types'
 import crackApi from '@/services/cracks'
 import StatusCrack from '@/components/crackManager/StatusCrack'
 import { useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 import { AxiosError } from 'axios'
-import { STATUS_COLORS } from '@/constants/colors'
 import { useTranslation } from 'react-i18next'
 
 interface ErrorResponse {
   message: string
 }
 
-interface ApiResponse {
-  isSuccess: boolean
-  message: string
-  data: {
-    data: CrackReportResponse[]
-    pagination: CrackListPaginationResponse['pagination']
+// API Response interface
+interface CrackReportResponseType {
+  crackReportId: string
+  buildingDetailId: string
+  description: string
+  isPrivatesAsset: boolean
+  position: string
+  status: string
+  statusLabel: string
+  reportedBy: {
+    userId: string
+    username: string
+  } | string
+  verifiedBy: {
+    userId: string
+    username: string
+  } | null
+  createdAt: string
+  updatedAt: string
+  crackDetails: Array<{
+    crackDetailsId: string
+    photoUrl: string
+    aiDetectionUrl: string
+    severity: string
+    severityLabel: string
+  }>
+  building: {
+    buildingId: string
+    name: string
+    area: {
+      areaId: string
+      name: string
+    }
+  }
+  buildingDetail: {
+    buildingDetailId: string
+    name: string
+  }
+}
+
+// Define local Crack interface for UI
+interface CrackUI {
+  id: string
+  reportDescription: string
+  createdDate: string
+  status: string
+  residentId: string
+  residentName: string
+  description: string
+  originalImage: string
+  aiDetectedImage: string
+  buildingInfo: {
+    buildingName: string
+    buildingDetailName: string
+    areaName: string
   }
 }
 
 // Map API response to UI model
-const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
+const mapCrackResponseToCrack = (response: CrackReportResponseType): CrackUI => {
   return {
     id: response.crackReportId,
     reportDescription: response.description,
     createdDate: new Date(response.createdAt).toLocaleDateString(),
-    status:
-      response.status === 'Pending'
-        ? 'pending'
-        : response.status === 'InProgress'
-          ? 'InProgress'
-          : response.status === 'Reviewing'
-            ? 'Reviewing'
-            : 'resolved',
+    status: response.status,
     residentId:
       typeof response.reportedBy === 'object' ? response.reportedBy.userId : response.reportedBy,
     residentName:
@@ -48,12 +89,64 @@ const mapCrackResponseToCrack = (response: CrackReportResponse): Crack => {
     description: response.description,
     originalImage: response.crackDetails[0]?.photoUrl,
     aiDetectedImage: response.crackDetails[0]?.aiDetectionUrl,
+    buildingInfo: {
+      buildingName: response.building?.name || 'N/A',
+      buildingDetailName: response.buildingDetail?.name || 'N/A',
+      areaName: response.building?.area?.name || 'N/A'
+    }
+  }
+}
+
+interface ApiResponse {
+  isSuccess: boolean
+  message: string
+  data: {
+    data: CrackReportResponseType[]
+    pagination: CrackListPaginationResponse['pagination']
   }
 }
 
 interface CracksQueryData {
-  cracks: Crack[]
+  cracks: CrackUI[]
   pagination: CrackListPaginationResponse['pagination']
+}
+
+const STATUS_COLORS_MAP = {
+  Pending: {
+    BG: 'rgba(254, 164, 19, 0.35)',
+    TEXT: '#FFA500',
+    BORDER: '#FFA500'
+  },
+  InProgress: {
+    BG: 'rgba(54, 10, 254, 0.35)',
+    TEXT: '#360AFE',
+    BORDER: '#360AFE'
+  },
+  Reviewing: {
+    BG: 'rgba(88, 86, 214, 0.35)',
+    TEXT: '#5856D6',
+    BORDER: '#5856D6'
+  },
+  Completed: {
+    BG: 'rgba(80, 241, 134, 0.35)',
+    TEXT: '#50F186',
+    BORDER: '#50F186'
+  },
+  Rejected: {
+    BG: 'rgba(248, 8, 8, 0.3)',
+    TEXT: '#ff0000',
+    BORDER: '#f80808'
+  },
+  InFixing: {
+    BG: 'rgba(254, 164, 19, 0.35)',
+    TEXT: '#FFA500',
+    BORDER: '#FFA500'
+  },
+  WaitingConfirm: {
+    BG: 'rgba(254, 164, 19, 0.35)',
+    TEXT: '#FFA500',
+    BORDER: '#FFA500'
+  }
 }
 
 const CrackManagement: React.FC = () => {
@@ -66,7 +159,7 @@ const CrackManagement: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
   const [selectedSeverity, setSelectedSeverity] = useState<string>('all')
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
-  const [selectedCrack, setSelectedCrack] = useState<Crack | null>(null)
+  const [selectedCrack, setSelectedCrack] = useState<CrackUI | null>(null)
 
   const severityOptions = [
     { value: 'all', label: t('crackManagement.filterOptions.all') },
@@ -78,7 +171,7 @@ const CrackManagement: React.FC = () => {
   // Get status animation class
   const getStatusAnimationClass = (status: string) => {
     switch (status) {
-      case 'resolved':
+      case 'Completed':
         return ''
       case 'InProgress':
         return 'animate-pulse'
@@ -160,12 +253,12 @@ const CrackManagement: React.FC = () => {
   }
 
   // Handle status update with staff assignment
-  const handleStatusUpdate = (crack: Crack) => {
+  const handleStatusUpdate = (crack: CrackUI) => {
     setSelectedCrack(crack)
     setIsStatusModalOpen(true)
   }
 
-  const columns: Column<Crack>[] = [
+  const columns: Column<CrackUI>[] = [
     {
       key: 'index',
       title: t('crackManagement.table.no'),
@@ -182,6 +275,18 @@ const CrackManagement: React.FC = () => {
       render: item => (
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
           {item.reportDescription}
+        </div>
+      ),
+    },
+    {
+      key: 'buildingInfo',
+      title: t('common.building'),
+      render: item => (
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="font-medium">{item.buildingInfo.buildingDetailName}</div>
+          <div className="text-xs opacity-75">
+            {item.buildingInfo.buildingName} - {item.buildingInfo.areaName}
+          </div>
         </div>
       ),
     },
@@ -203,18 +308,11 @@ const CrackManagement: React.FC = () => {
       key: 'status',
       title: t('crackManagement.table.status'),
       render: item => {
-        const statusColors =
-          item.status === 'resolved'
-            ? STATUS_COLORS.RESOLVED
-            : item.status === 'InProgress'
-              ? STATUS_COLORS.IN_PROGRESS
-              : item.status === 'Reviewing'
-                ? STATUS_COLORS.REVIEWING
-                : STATUS_COLORS.PENDING
+        const statusColors = STATUS_COLORS_MAP[item.status as keyof typeof STATUS_COLORS_MAP] || STATUS_COLORS_MAP.Pending
 
         return (
           <span
-            className="px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full"
+            className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full`}
             style={{
               backgroundColor: statusColors.BG,
               color: statusColors.TEXT,
@@ -228,7 +326,7 @@ const CrackManagement: React.FC = () => {
                   backgroundColor: statusColors.TEXT,
                 }}
               ></span>
-              {item.status !== 'resolved' && (
+              {item.status !== 'Completed' && (
                 <span
                   className="absolute -inset-0.5 rounded-full opacity-30 animate-ping"
                   style={{
@@ -237,13 +335,7 @@ const CrackManagement: React.FC = () => {
                 ></span>
               )}
             </span>
-            {item.status === 'resolved'
-              ? t('crackManagement.status.resolved')
-              : item.status === 'InProgress'
-                ? t('crackManagement.status.inProgress')
-                : item.status === 'Reviewing'
-                  ? t('crackManagement.status.reviewing')
-                  : t('crackManagement.status.pending')}
+            {t(`crackManagement.status.${item.status.toLowerCase()}`)}
           </span>
         )
       },
@@ -256,7 +348,7 @@ const CrackManagement: React.FC = () => {
           <DropdownMenu
             onViewDetail={() => navigate(`/crack/detail/${item.id}`)}
             onChangeStatus={
-              ['InProgress', 'resolved', 'Reviewing'].includes(item.status)
+              ['InProgress', 'Completed', 'Reviewing'].includes(item.status)
                 ? undefined
                 : () => handleStatusUpdate(item)
             }
@@ -297,11 +389,11 @@ const CrackManagement: React.FC = () => {
               <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
                 <span
                   className="inline-block w-2 h-2 rounded-full animate-pulse-fast"
-                  style={{ backgroundColor: STATUS_COLORS.PENDING.TEXT }}
+                  style={{ backgroundColor: STATUS_COLORS_MAP.Pending.TEXT }}
                 ></span>
                 <span
                   className="absolute -inset-0.5 rounded-full opacity-30 animate-ping"
-                  style={{ backgroundColor: STATUS_COLORS.PENDING.TEXT }}
+                  style={{ backgroundColor: STATUS_COLORS_MAP.Pending.TEXT }}
                 ></span>
               </span>
               <span className="text-sm text-gray-600 dark:text-gray-300">{t('crackManagement.status.pending')}</span>
@@ -312,11 +404,11 @@ const CrackManagement: React.FC = () => {
               <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
                 <span
                   className="inline-block w-2 h-2 rounded-full animate-pulse"
-                  style={{ backgroundColor: STATUS_COLORS.IN_PROGRESS.TEXT }}
+                  style={{ backgroundColor: STATUS_COLORS_MAP.InProgress.TEXT }}
                 ></span>
                 <span
                   className="absolute -inset-0.5 rounded-full opacity-30 animate-ping"
-                  style={{ backgroundColor: STATUS_COLORS.IN_PROGRESS.TEXT }}
+                  style={{ backgroundColor: STATUS_COLORS_MAP.InProgress.TEXT }}
                 ></span>
               </span>
               <span className="text-sm text-gray-600 dark:text-gray-300">{t('crackManagement.status.inProgress')}</span>
@@ -327,23 +419,23 @@ const CrackManagement: React.FC = () => {
               <span className="relative mr-1.5 flex items-center justify-center w-3 h-3">
                 <span
                   className="inline-block w-2 h-2 rounded-full animate-pulse"
-                  style={{ backgroundColor: STATUS_COLORS.REVIEWING.TEXT }}
+                  style={{ backgroundColor: STATUS_COLORS_MAP.Reviewing.TEXT }}
                 ></span>
                 <span
                   className="absolute -inset-0.5 rounded-full opacity-30 animate-ping"
-                  style={{ backgroundColor: STATUS_COLORS.REVIEWING.TEXT }}
+                  style={{ backgroundColor: STATUS_COLORS_MAP.Reviewing.TEXT }}
                 ></span>
               </span>
               <span className="text-sm text-gray-600 dark:text-gray-300">{t('crackManagement.status.reviewing')}</span>
             </div>
 
-            {/* Resolved */}
+            {/* Completed */}
             <div className="flex items-center">
               <span
                 className="inline-block w-2 h-2 rounded-full mr-1.5"
-                style={{ backgroundColor: STATUS_COLORS.RESOLVED.TEXT }}
+                style={{ backgroundColor: STATUS_COLORS_MAP.Completed.TEXT }}
               ></span>
-              <span className="text-sm text-gray-600 dark:text-gray-300">{t('crackManagement.status.resolved')}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">{t('crackManagement.status.completed')}</span>
             </div>
           </div>
 
@@ -354,7 +446,7 @@ const CrackManagement: React.FC = () => {
         </div>
       </div>
 
-      <Table<Crack>
+      <Table<CrackUI>
         data={cracksData?.cracks || []}
         columns={columns}
         keyExtractor={item => item.id}
