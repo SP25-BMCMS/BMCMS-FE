@@ -31,6 +31,10 @@
     "sending": "Đang gửi...",
     "crackStatus": {
       "title": "Trạng thái vết nứt",
+      "rejected": "Từ chối",
+      "infixing": "Đang sửa chữa",
+      "waitingConfirm": "Chờ xác nhận",
+      "waitingconfirm": "Chờ xác nhận",
       "processing": "Đang xử lý",
       "reviewing": "Đang xem xét",
       "pending": "Chờ xử lý",
@@ -1134,6 +1138,7 @@
       "pending": "Chờ xử lý",
       "inprogress": "Đang xử lý",
       "inProgress": "Đang xử lý",
+      "waitingconfirm": "Chờ xác nhận",
       "reviewing": "Đang kiểm tra",
       "rejected": "Từ chối",
       "completed": "Hoàn tất",
