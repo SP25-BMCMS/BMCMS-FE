@@ -411,6 +411,7 @@
       "reviewing": "Reviewing",
       "inFixing": "In Fixing",
       "waitingConfirm": "Waiting Confirm",
+      "waitingconfirm": "Waiting Confirm",
       "pending": "Pending",
       "inprogress": "In Progress",
       "completed": "Completed"
