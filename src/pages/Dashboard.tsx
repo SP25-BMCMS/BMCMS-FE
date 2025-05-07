@@ -41,6 +41,7 @@ import dashboardService, {
   Feedback,
   FeedbacksResponse,
 } from '@/services/dashboard'
+import { getAllResidents } from '@/services/residents'
 import { FORMAT_DATE_TIME } from '@/utils/format'
 import { useNavigate } from 'react-router-dom'
 import { Tooltip as UITooltip } from '@/components/Tooltip'
@@ -62,6 +63,9 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [errorMessage, setErrorMessage] = useState<string>('')
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [currentTaskPage, setCurrentTaskPage] = useState<number>(1)
+  const itemsPerPage = 5
 
   const {
     data: dashboardData,
@@ -81,9 +85,48 @@ const Dashboard: React.FC = () => {
     error: feedbacksError,
   } = useQuery<FeedbacksResponse>({
     queryKey: ['feedbacks'],
-    queryFn: () => dashboardService.getFeedbacks({ limit: 5 }),
+    queryFn: () => dashboardService.getFeedbacks({ limit: 999999 }),
     retry: 1,
   })
+
+  const {
+    data: residentsData,
+    isLoading: isResidentsLoading,
+    isError: isResidentsError,
+    error: residentsError,
+  } = useQuery({
+    queryKey: ['residents'],
+    queryFn: () => getAllResidents({ limit: 99999 }),
+    retry: 1,
+  })
+
+  // Create a map of resident IDs to names for quick lookup
+  const residentNameMap = React.useMemo(() => {
+    if (!residentsData?.data) return new Map()
+    return new Map(residentsData.data.map(resident => [resident.userId, resident.username]))
+  }, [residentsData])
+
+  // Calculate pagination
+  const totalPages = feedbacksData?.data ? Math.ceil(feedbacksData.data.length / itemsPerPage) : 0
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentFeedbacks = feedbacksData?.data?.slice(startIndex, endIndex) || []
+
+  // Calculate task pagination
+  const totalTaskPages = dashboardData?.taskStats?.recentTasks ? Math.ceil(dashboardData.taskStats.recentTasks.length / itemsPerPage) : 0
+  const taskStartIndex = (currentTaskPage - 1) * itemsPerPage
+  const taskEndIndex = taskStartIndex + itemsPerPage
+  const currentTasks = dashboardData?.taskStats?.recentTasks?.slice(taskStartIndex, taskEndIndex) || []
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  // Handle task page change
+  const handleTaskPageChange = (page: number) => {
+    setCurrentTaskPage(page)
+  }
 
   useEffect(() => {
     if (dashboardError) {
@@ -190,6 +233,72 @@ const Dashboard: React.FC = () => {
   const getStatusColor = (status: string) => {
     return STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.default
   }
+
+  // Update the feedback display to include resident names
+  const renderFeedbackRow = (feedback: any) => (
+    <tr
+      key={feedback.feedback_id}
+      className="hover:bg-gray-50 dark:hover:bg-gray-700"
+    >
+      <td className="px-6 py-4">
+        <UITooltip
+          content={feedback.task?.description || t('dashboard.noTaskDescription')}
+          position="top"
+        >
+          <div className="flex items-center">
+            <div className="flex-shrink-0 mr-3">
+              <FaRegFileAlt className="text-blue-500 dark:text-blue-400 text-lg" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-gray-900 dark:text-white max-w-[200px] truncate">
+                {feedback.task?.title || 'Task #' + feedback.task_id?.substring(0, 8)}
+              </div>
+            </div>
+          </div>
+        </UITooltip>
+      </td>
+      <td className="px-6 py-4">
+        <UITooltip content={feedback.comments} position="top">
+          <div className="text-sm text-gray-900 dark:text-white max-w-[200px] truncate">
+            {feedback.comments}
+          </div>
+        </UITooltip>
+      </td>
+      <td className="px-6 py-4">
+        <div className="text-sm text-gray-900 dark:text-white">
+          {feedback.feedback_by ? residentNameMap.get(feedback.feedback_by) || t('dashboard.unknownUser') : t('dashboard.unknownUser')}
+        </div>
+      </td>
+      <td className="px-6 py-4">
+        <div className="flex items-center">
+          {[...Array(5)].map((_, index) => (
+            <FaStar
+              key={index}
+              className={`${index < feedback.rating
+                ? 'text-yellow-400'
+                : 'text-gray-300 dark:text-gray-600'
+                } w-4 h-4`}
+            />
+          ))}
+        </div>
+      </td>
+      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+        <UITooltip
+          content={`${t('common.created')}: ${FORMAT_DATE_TIME(feedback.created_at)}`}
+          position="left"
+        >
+          <div className="flex flex-col">
+            <span className="font-medium">
+              {FORMAT_DATE_TIME(feedback.created_at).split(',')[0]}
+            </span>
+            <span className="text-xs">
+              {FORMAT_DATE_TIME(feedback.created_at).split(',')[1]?.trim()}
+            </span>
+          </div>
+        </UITooltip>
+      </td>
+    </tr>
+  )
 
   return (
     <div className="space-y-6">
@@ -426,7 +535,7 @@ const Dashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {(dashboardData.taskStats?.recentTasks || []).slice(0, 5).map(task => (
+              {currentTasks.map(task => (
                 <tr key={task.task_id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4">
                     <UITooltip content={task.description} position="top">
@@ -520,6 +629,50 @@ const Dashboard: React.FC = () => {
                 )}
             </tbody>
           </table>
+          {/* Task Pagination Controls */}
+          {dashboardData?.taskStats?.recentTasks && dashboardData.taskStats.recentTasks.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {t('common.pagination.showing')} {taskStartIndex + 1}-{Math.min(taskEndIndex, dashboardData.taskStats.recentTasks.length)} {t('common.pagination.of')} {dashboardData.taskStats.recentTasks.length} {t('common.pagination.items')}
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleTaskPageChange(currentTaskPage - 1)}
+                    disabled={currentTaskPage === 1}
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${currentTaskPage === 1
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                      }`}
+                  >
+                    {t('common.pagination.previous')}
+                  </button>
+                  {[...Array(totalTaskPages)].map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleTaskPageChange(index + 1)}
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${currentTaskPage === index + 1
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handleTaskPageChange(currentTaskPage + 1)}
+                    disabled={currentTaskPage === totalTaskPages}
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${currentTaskPage === totalTaskPages
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                      }`}
+                  >
+                    {t('common.pagination.next')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -584,71 +737,8 @@ const Dashboard: React.FC = () => {
                     {t('dashboard.feedbacksLoadError')}
                   </td>
                 </tr>
-              ) : feedbacksData?.data && feedbacksData.data.length > 0 ? (
-                feedbacksData.data.map(feedback => (
-                  <tr
-                    key={feedback.feedback_id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    <td className="px-6 py-4">
-                      <UITooltip
-                        content={feedback.task?.description || t('dashboard.noTaskDescription')}
-                        position="top"
-                      >
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 mr-3">
-                            <FaRegFileAlt className="text-blue-500 dark:text-blue-400 text-lg" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900 dark:text-white max-w-[200px] truncate">
-                              {feedback.task?.title || 'Task #' + feedback.task_id?.substring(0, 8)}
-                            </div>
-                          </div>
-                        </div>
-                      </UITooltip>
-                    </td>
-                    <td className="px-6 py-4">
-                      <UITooltip content={feedback.comments} position="top">
-                        <div className="text-sm text-gray-900 dark:text-white max-w-[200px] truncate">
-                          {feedback.comments}
-                        </div>
-                      </UITooltip>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 dark:text-white">
-                        {feedback.user?.username || t('dashboard.unknownUser')}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, index) => (
-                          <FaStar
-                            key={index}
-                            className={`${index < feedback.rating
-                              ? 'text-yellow-400'
-                              : 'text-gray-300 dark:text-gray-600'
-                              } w-4 h-4`}
-                          />
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      <UITooltip
-                        content={`${t('common.created')}: ${FORMAT_DATE_TIME(feedback.created_at)}`}
-                        position="left"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {FORMAT_DATE_TIME(feedback.created_at).split(',')[0]}
-                          </span>
-                          <span className="text-xs">
-                            {FORMAT_DATE_TIME(feedback.created_at).split(',')[1]?.trim()}
-                          </span>
-                        </div>
-                      </UITooltip>
-                    </td>
-                  </tr>
-                ))
+              ) : currentFeedbacks.length > 0 ? (
+                currentFeedbacks.map(renderFeedbackRow)
               ) : (
                 <tr>
                   <td
@@ -661,6 +751,50 @@ const Dashboard: React.FC = () => {
               )}
             </tbody>
           </table>
+          {/* Pagination Controls */}
+          {!isFeedbacksLoading && !isFeedbacksError && feedbacksData?.data && feedbacksData.data.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {t('common.pagination.showing')} {startIndex + 1}-{Math.min(endIndex, feedbacksData.data.length)} {t('common.pagination.of')} {feedbacksData.data.length} {t('common.pagination.items')}
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${currentPage === 1
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                      }`}
+                  >
+                    {t('common.pagination.previous')}
+                  </button>
+                  {[...Array(totalPages)].map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${currentPage === index + 1
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${currentPage === totalPages
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                      }`}
+                  >
+                    {t('common.pagination.next')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       {/* Feedback Ratings Chart */}

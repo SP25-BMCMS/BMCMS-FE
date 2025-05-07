@@ -1,5 +1,7 @@
 {
   "common": {
+    "showMore": "Show more",
+    "showLess": "Show less",
     "usernamePlaceholder": "Username",
     "passwordPlaceholder": "Password",
     "pagination": {
@@ -8,6 +10,8 @@
       "items": "items",
       "previousPage": "Previous page",
       "nextPage": "Next page",
+      "previous": "Previous page",
+      "next": "Next page",
       "page": "Page",
       "currentPage": "Current page",
       "showing": "Showing",
@@ -2172,6 +2176,7 @@
         "device": "Device",
         "devices": "Devices",
         "noDevices": "No devices available",
+        "moreDevices": "View more devices",
         "noDevicesMessage": "This building currently has no registered devices in the system.",
         "model": "Model",
         "manufacturer": "Manufacturer"
@@ -2180,6 +2185,8 @@
         "title": "Contracts Information",
         "loading": "Loading contracts...",
         "error": "Error loading contracts",
+        "searchDevices": "Search devices",
+        "moreDevices": "View more devices",
         "errorMessage": "There was an error fetching contracts information.",
         "noContracts": "No contracts found for this building",
         "noContractInfo": "Cannot find contract information",

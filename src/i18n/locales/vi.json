@@ -1,5 +1,7 @@
 {
   "common": {
+    "showMore": "Xem thêm",
+    "showLess": "Thu gọn",
     "usernamePlaceholder": "Tên đăng nhập",
     "passwordPlaceholder": "Mật khẩu",
     "pagination": {
@@ -8,6 +10,8 @@
       "items": "mục",
       "previousPage": "Trang trước",
       "nextPage": "Trang sau",
+      "previous": "Trang trước",
+      "next": "Trang sau",
       "page": "Trang",
       "currentPage": "Trang hiện tại",
       "showing": "Hiển thị",
@@ -2078,6 +2082,7 @@
         "device": "Thiết bị",
         "devices": "Thiết bị",
         "noDevices": "Không có thiết bị",
+        "moreDevices": "Xem thêm thiết bị",
         "noDevicesMessage": "Hiện tòa nhà này không có thiết bị nào được đăng ký trong hệ thống.",
         "model": "Model",
         "manufacturer": "Nhà sản xuất"
@@ -2085,6 +2090,8 @@
       "contracts": {
         "title": "Thông tin hợp đồng",
         "loading": "Đang tải hợp đồng...",
+        "searchDevices": "Tìm kiếm thiết bị",
+        "moreDevices": "Xem thêm thiết bị",
         "error": "Lỗi tải hợp đồng",
         "errorMessage": "Đã xảy ra lỗi khi tải thông tin hợp đồng.",
         "noContracts": "Không tìm thấy hợp đồng cho tòa nhà này",

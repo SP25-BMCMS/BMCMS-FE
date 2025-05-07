@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import Modal from './Modal';
-import { getBuildingDetail } from '@/services/building';
-import { toast } from 'react-hot-toast';
-import { Building, MapPin, Calendar, Home, Layers, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react'
+import Modal from './Modal'
+import { getBuildingDetail } from '@/services/building'
+import { toast } from 'react-hot-toast'
+import { Building, MapPin, Calendar, Home, Layers, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface ViewBuildingDetailProps {
-  isOpen: boolean;
-  onClose: () => void;
-  buildingDetailId: string | null;
-  buildingDetailOptions?: any[];
-  onChangeDetail?: (buildingDetailId: string) => void;
+  isOpen: boolean
+  onClose: () => void
+  buildingDetailId: string | null
+  buildingDetailOptions?: any[]
+  onChangeDetail?: (buildingDetailId: string) => void
 }
 
 const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
@@ -20,42 +21,48 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
   buildingDetailOptions = [],
   onChangeDetail,
 }) => {
-  const [buildingDetail, setBuildingDetail] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation()
+  const [buildingDetail, setBuildingDetail] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Pagination states
+  const [currentDevicePage, setCurrentDevicePage] = useState(1)
+  const [currentContractPage, setCurrentContractPage] = useState(1)
+  const itemsPerPage = 6
 
   // Reset state when modal closes or buildingDetailId changes
   useEffect(() => {
-    setBuildingDetail(null);
-    setError(null);
+    setBuildingDetail(null)
+    setError(null)
 
     // Chỉ fetch khi modal mở và có buildingDetailId
     if (isOpen && buildingDetailId) {
-      fetchBuildingDetail();
+      fetchBuildingDetail()
     }
-  }, [isOpen, buildingDetailId]);
+  }, [isOpen, buildingDetailId])
 
   const fetchBuildingDetail = async () => {
-    if (!buildingDetailId) return;
+    if (!buildingDetailId) return
 
-    setIsLoading(true);
+    setIsLoading(true)
 
     try {
-      const response = await getBuildingDetail(buildingDetailId);
+      const response = await getBuildingDetail(buildingDetailId)
       if (response.data) {
-        setBuildingDetail(response.data);
+        setBuildingDetail(response.data)
       } else {
-        setError('An error occurred');
-        toast.error('An error occurred');
+        setError('An error occurred')
+        toast.error('An error occurred')
       }
     } catch (error: any) {
-      console.error('Error fetching building detail:', error);
-      setError(error.message || 'An error occurred');
-      toast.error(error.message || 'An error occurred');
+      console.error('Error fetching building detail:', error)
+      setError(error.message || 'An error occurred')
+      toast.error(error.message || 'An error occurred')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -64,22 +71,67 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-      });
+      })
     } catch (error) {
-      return dateString;
+      return dateString
     }
-  };
+  }
 
   // Define building status styles
   const getStatusStyle = (status: string) => {
     if (status === 'operational') {
-      return 'bg-green-500 text-white';
+      return 'bg-green-500 text-white'
     }
-    return 'bg-amber-500 text-white';
-  };
+    return 'bg-amber-500 text-white'
+  }
+
+  // Pagination functions
+  const handleDevicePageChange = (page: number) => {
+    setCurrentDevicePage(page)
+  }
+
+  const handleContractPageChange = (page: number) => {
+    setCurrentContractPage(page)
+  }
+
+  // Calculate pagination for devices
+  const getDevicesPagination = () => {
+    const devices = buildingDetail?.devices || []
+    const totalDevices = devices.length
+    const totalDevicePages = Math.ceil(totalDevices / itemsPerPage)
+    const startIndex = (currentDevicePage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const currentDevices = devices.slice(startIndex, endIndex)
+
+    return {
+      currentDevices,
+      totalDevices,
+      totalDevicePages,
+      startIndex,
+      endIndex
+    }
+  }
+
+  // Calculate pagination for contracts
+  const getContractsPagination = () => {
+    const contracts = buildingDetail?.contracts || []
+    const totalContracts = contracts.length
+    const totalContractPages = Math.ceil(totalContracts / itemsPerPage)
+    const startIndex = (currentContractPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const currentContracts = contracts.slice(startIndex, endIndex)
+
+    return {
+      currentContracts,
+      totalContracts,
+      totalContractPages,
+      startIndex,
+      endIndex
+    }
+  }
 
   if (!buildingDetailId) {
-    return null;
+    return null
   }
 
   // Animation variants
@@ -91,7 +143,7 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
         staggerChildren: 0.1,
       },
     },
-  };
+  }
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -100,7 +152,7 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
       opacity: 1,
       transition: { type: 'spring', stiffness: 100 },
     },
-  };
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Chi tiết tòa nhà" size="xl">
@@ -350,6 +402,200 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
             </motion.div>
           )}
 
+          {/* Devices Section */}
+          {buildingDetail?.devices && buildingDetail.devices.length > 0 && (
+            <motion.div
+              className="mt-6 bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm"
+              variants={itemVariants}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Building className="h-5 w-5 text-blue-500" />
+                Thiết bị ({buildingDetail.devices.length})
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getDevicesPagination().currentDevices.map((device: any) => (
+                  <div
+                    key={device.id}
+                    className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">{device.name}</span>
+                    </div>
+
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center">
+                        <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
+                        <span className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Loại:</span> {device.type}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center">
+                        <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
+                        <span className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Model:</span> {device.model}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center">
+                        <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
+                        <span className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Nhà sản xuất:</span> {device.manufacturer}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Devices Pagination */}
+              {buildingDetail.devices.length > itemsPerPage && (
+                <div className="mt-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {t('common.pagination.showing')} {getDevicesPagination().startIndex + 1}-
+                    {Math.min(getDevicesPagination().endIndex, buildingDetail.devices.length)} {t('common.pagination.of')}{' '}
+                    {buildingDetail.devices.length} {t('common.pagination.items')}
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleDevicePageChange(currentDevicePage - 1)}
+                      disabled={currentDevicePage === 1}
+                      aria-label={t('common.previous')}
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === 1
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    {[...Array(getDevicesPagination().totalDevicePages)].map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleDevicePageChange(index + 1)}
+                        className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === index + 1
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                          }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => handleDevicePageChange(currentDevicePage + 1)}
+                      disabled={currentDevicePage === getDevicesPagination().totalDevicePages}
+                      aria-label={t('common.next')}
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === getDevicesPagination().totalDevicePages
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Contracts Section */}
+          {buildingDetail?.contracts && buildingDetail.contracts.length > 0 && (
+            <motion.div
+              className="mt-6 bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm"
+              variants={itemVariants}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-blue-500" />
+                Hợp đồng ({buildingDetail.contracts.length})
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getContractsPagination().currentContracts.map((contract: any) => (
+                  <div
+                    key={contract.id}
+                    className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">{contract.title}</span>
+                    </div>
+
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center">
+                        <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
+                        <span className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Ngày bắt đầu:</span>{' '}
+                          {formatDate(contract.startDate)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center">
+                        <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
+                        <span className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Ngày kết thúc:</span>{' '}
+                          {formatDate(contract.endDate)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center">
+                        <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
+                        <span className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Trạng thái:</span> {contract.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Contracts Pagination */}
+              {buildingDetail.contracts.length > itemsPerPage && (
+                <div className="mt-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {t('common.pagination.showing')} {getContractsPagination().startIndex + 1}-
+                    {Math.min(getContractsPagination().endIndex, buildingDetail.contracts.length)}{' '}
+                    {t('common.pagination.of')} {buildingDetail.contracts.length} {t('common.pagination.items')}
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleContractPageChange(currentContractPage - 1)}
+                      disabled={currentContractPage === 1}
+                      aria-label={t('common.previous')}
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${currentContractPage === 1
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    {[...Array(getContractsPagination().totalContractPages)].map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleContractPageChange(index + 1)}
+                        className={`px-3 py-1 rounded-md text-sm font-medium ${currentContractPage === index + 1
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                          }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => handleContractPageChange(currentContractPage + 1)}
+                      disabled={currentContractPage === getContractsPagination().totalContractPages}
+                      aria-label={t('common.next')}
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${currentContractPage === getContractsPagination().totalContractPages
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {/* Footer button */}
           <motion.div
             className="flex justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"
@@ -365,7 +611,7 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
         </motion.div>
       ) : null}
     </Modal>
-  );
-};
+  )
+}
 
-export default ViewBuildingDetail;
+export default ViewBuildingDetail

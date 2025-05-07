@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { getBuildingById, getBuildingDetail, getAllBuildingDetails } from '@/services/building';
-import { getAllStaff } from '@/services/staff';
-import { getContractsByBuildingDetailId, Contract } from '@/services/contracts';
-import { toast } from 'react-hot-toast';
+import React, { useState, useEffect, useRef } from 'react'
+import { getBuildingById, getBuildingDetail, getAllBuildingDetails } from '@/services/building'
+import { getAllStaff } from '@/services/staff'
+import { getContractsByBuildingDetailId, Contract } from '@/services/contracts'
+import { toast } from 'react-hot-toast'
 import {
   Building,
   MapPin,
@@ -17,37 +17,42 @@ import {
   FileText,
   Download,
   Eye,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
-import { FORMAT_DATE } from '@/utils/format';
-import { useTranslation } from 'react-i18next';
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Search,
+} from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
+import { FORMAT_DATE } from '@/utils/format'
+import { useTranslation } from 'react-i18next'
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  children: React.ReactNode;
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  children: React.ReactNode
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, size = 'md', children }) => {
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const getMaxWidth = () => {
     switch (size) {
       case 'sm':
-        return 'max-w-md';
+        return 'max-w-md'
       case 'md':
-        return 'max-w-2xl';
+        return 'max-w-2xl'
       case 'lg':
-        return 'max-w-4xl';
+        return 'max-w-4xl'
       case 'xl':
-        return 'max-w-6xl';
+        return 'max-w-6xl'
       default:
-        return 'max-w-2xl';
+        return 'max-w-2xl'
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
@@ -75,20 +80,20 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, size = 'md', chil
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 interface ViewBuildingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  buildingId: string | null;
+  isOpen: boolean
+  onClose: () => void
+  buildingId: string | null
 }
 
 interface BuildingDetailColumn {
-  field: string;
-  label: string;
-  width: number;
-  pinned?: boolean;
+  field: string
+  label: string
+  width: number
+  pinned?: boolean
 }
 
 const buildingDetailColumns: BuildingDetailColumn[] = [
@@ -101,20 +106,70 @@ const buildingDetailColumns: BuildingDetailColumn[] = [
   { field: 'numOfFloors', label: 'Number of Floors', width: 150 },
   { field: 'managerName', label: 'Manager', width: 180 },
   { field: 'description', label: 'Description', width: 300 },
-];
+]
 
 const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, buildingId }) => {
-  const { t } = useTranslation();
-  const [buildingDetail, setBuildingDetail] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [leftColumnWidth, setLeftColumnWidth] = useState<number>(30); // Default width percentage
-  const [isResizing, setIsResizing] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [managerName, setManagerName] = useState<string>('Not assigned');
+  const { t } = useTranslation()
+  const [buildingDetail, setBuildingDetail] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+  const [leftColumnWidth, setLeftColumnWidth] = useState<number>(30) // Default width percentage
+  const [isResizing, setIsResizing] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [managerName, setManagerName] = useState<string>('Not assigned')
 
   // State cho TanStack Query
-  const [buildingDetailId, setBuildingDetailId] = useState<string | null>(null);
+  const [buildingDetailId, setBuildingDetailId] = useState<string | null>(null)
+
+  // Pagination states
+  const [currentDevicePage, setCurrentDevicePage] = useState(1)
+  const [currentContractPage, setCurrentContractPage] = useState(1)
+  const itemsPerPage = 6
+
+  // Pagination functions
+  const handleDevicePageChange = (page: number) => {
+    setCurrentDevicePage(page)
+  }
+
+  const handleContractPageChange = (page: number) => {
+    setCurrentContractPage(page)
+  }
+
+  // Calculate pagination for devices
+  const getDevicesPagination = () => {
+    const devices = buildingDetail?.device || []
+    const totalDevices = devices.length
+    const totalDevicePages = Math.ceil(totalDevices / itemsPerPage)
+    const startIndex = (currentDevicePage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const currentDevices = devices.slice(startIndex, endIndex)
+
+    return {
+      currentDevices,
+      totalDevices,
+      totalDevicePages,
+      startIndex,
+      endIndex
+    }
+  }
+
+  // Calculate pagination for contracts
+  const getContractsPagination = () => {
+    const contracts = contractsData || []
+    const totalContracts = contracts.length
+    const totalContractPages = Math.ceil(totalContracts / itemsPerPage)
+    const startIndex = (currentContractPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const currentContracts = contracts.slice(startIndex, endIndex)
+
+    return {
+      currentContracts,
+      totalContracts,
+      totalContractPages,
+      startIndex,
+      endIndex
+    }
+  }
 
   // Truy vấn contracts data
   const {
@@ -126,70 +181,105 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
     queryFn: () => getContractsByBuildingDetailId(buildingDetailId || ''),
     enabled: !!buildingDetailId, // Chỉ query khi có buildingDetailId
     staleTime: 5 * 60 * 1000, // 5 phút
-  });
+  })
+
+  // Add this inside the component before the return statement
+  const [expandedContracts, setExpandedContracts] = useState<{ [key: string]: boolean }>({})
+  const INITIAL_DEVICES_SHOWN = 2
+
+  const toggleContractDevices = (contractId: string) => {
+    setExpandedContracts(prev => ({
+      ...prev,
+      [contractId]: !prev[contractId]
+    }))
+  }
+
+  // Inside component, add new state
+  const [deviceSearches, setDeviceSearches] = useState<{ [key: string]: string }>({})
+
+  // Add search handler function
+  const handleDeviceSearch = (contractId: string, searchTerm: string) => {
+    setDeviceSearches(prev => ({
+      ...prev,
+      [contractId]: searchTerm
+    }))
+  }
+
+  // Add function to filter devices
+  const getFilteredDevices = (devices: any[], contractId: string) => {
+    const searchTerm = deviceSearches[contractId]?.toLowerCase() || ''
+    if (!searchTerm) return devices
+
+    return devices.filter(device =>
+      device.name.toLowerCase().includes(searchTerm) ||
+      device.model.toLowerCase().includes(searchTerm) ||
+      device.manufacturer.toLowerCase().includes(searchTerm) ||
+      device.type.toLowerCase().includes(searchTerm)
+    )
+  }
 
   useEffect(() => {
-    setBuildingDetail(null);
-    setError(null);
+    setBuildingDetail(null)
+    setError(null)
 
     if (isOpen && buildingId) {
-      fetchBuildingDetail();
+      fetchBuildingDetail()
     }
-  }, [isOpen, buildingId]);
+  }, [isOpen, buildingId])
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  };
+    e.preventDefault()
+    setIsResizing(true)
+  }
 
   // Add resizer functionality
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const container = containerRef.current
+    if (!container) return
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing || !container) return;
+      if (!isResizing || !container) return
 
-      const containerRect = container.getBoundingClientRect();
-      const containerWidth = containerRect.width;
-      const mouseX = e.clientX - containerRect.left;
+      const containerRect = container.getBoundingClientRect()
+      const containerWidth = containerRect.width
+      const mouseX = e.clientX - containerRect.left
 
       // Calculate percentage (constrain between 20% and 80%)
-      let newWidthPercent = (mouseX / containerWidth) * 100;
-      newWidthPercent = Math.max(20, Math.min(newWidthPercent, 80));
+      let newWidthPercent = (mouseX / containerWidth) * 100
+      newWidthPercent = Math.max(20, Math.min(newWidthPercent, 80))
 
-      setLeftColumnWidth(newWidthPercent);
-    };
+      setLeftColumnWidth(newWidthPercent)
+    }
 
     const handleMouseUp = () => {
-      setIsResizing(false);
-    };
+      setIsResizing(false)
+    }
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing]);
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isResizing])
 
   const fetchBuildingDetail = async () => {
-    if (!buildingId) return;
+    if (!buildingId) return
 
-    setIsLoading(true);
+    setIsLoading(true)
 
     try {
       // Fetch building detail by buildingId
-      const buildingResponse = await getBuildingById(buildingId);
+      const buildingResponse = await getBuildingById(buildingId)
 
       // Fetch all building details
-      const allBuildingDetailsResponse = await getAllBuildingDetails();
+      const allBuildingDetailsResponse = await getAllBuildingDetails()
 
       // Find the correct buildingDetailId using buildingId
       const buildingDetail = allBuildingDetailsResponse.data.find(
         (detail: any) => detail.buildingId === buildingId
-      );
+      )
 
       if (!buildingDetail) {
         // Trường hợp không tìm thấy buildingDetailId, chỉ hiển thị thông tin cơ bản
@@ -202,95 +292,95 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
             total_apartments: 0,
             // Thông tin tòa nhà
             building: buildingResponse.data,
-          });
+          })
 
           // Reset buildingDetailId state để không gọi API contracts
-          setBuildingDetailId(null);
+          setBuildingDetailId(null)
 
           // Kiểm tra manager_id
-          const managerId = buildingResponse.data.manager_id;
+          const managerId = buildingResponse.data.manager_id
           if (managerId) {
-            fetchManagerInfo(managerId);
+            fetchManagerInfo(managerId)
           }
-          return;
+          return
         } else {
-          setError('cannot find any information this building');
-          toast.error('cannot find any information this building');
-          return;
+          setError('cannot find any information this building')
+          toast.error('cannot find any information this building')
+          return
         }
       }
 
       // Đặt buildingDetailId để TanStack Query có thể gọi API contracts
-      setBuildingDetailId(buildingDetail.buildingDetailId);
+      setBuildingDetailId(buildingDetail.buildingDetailId)
 
       // Fetch specific building detail using buildingDetailId
-      const buildingDetailResponse = await getBuildingDetail(buildingDetail.buildingDetailId);
+      const buildingDetailResponse = await getBuildingDetail(buildingDetail.buildingDetailId)
 
       if (buildingResponse.data && buildingDetailResponse.data) {
         // Combine data from both responses
         const combinedData = {
           ...buildingResponse.data,
           ...buildingDetailResponse.data,
-        };
-        setBuildingDetail(combinedData);
+        }
+        setBuildingDetail(combinedData)
 
         // Check for manager_id in different possible locations in the data structure
         const managerId =
           (buildingResponse.data && buildingResponse.data.manager_id) ||
-          (combinedData.building && combinedData.building.manager_id);
+          (combinedData.building && combinedData.building.manager_id)
 
         if (managerId) {
-          fetchManagerInfo(managerId);
+          fetchManagerInfo(managerId)
         }
       } else {
-        setError('Unable to load building details');
-        toast.error('Unable to load building details');
+        setError('Unable to load building details')
+        toast.error('Unable to load building details')
       }
     } catch (error: any) {
-      console.error('Error fetching building detail:', error);
-      setError(error.message || 'An error occurred');
-      toast.error(error.message || 'Unable to load building details');
+      console.error('Error fetching building detail:', error)
+      setError(error.message || 'An error occurred')
+      toast.error(error.message || 'Unable to load building details')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Function to fetch manager information
   const fetchManagerInfo = async (managerId: string) => {
     try {
-      const staffResponse = await getAllStaff({ page: '1', limit: '9999' });
+      const staffResponse = await getAllStaff({ page: '1', limit: '9999' })
 
       if (staffResponse && staffResponse.data) {
-        const manager = staffResponse.data.find((staff: any) => staff.userId === managerId);
+        const manager = staffResponse.data.find((staff: any) => staff.userId === managerId)
 
         if (manager) {
-          setManagerName(manager.username);
+          setManagerName(manager.username)
         }
       }
     } catch (error) {
-      console.error('Error fetching manager info:', error);
+      console.error('Error fetching manager info:', error)
       // We don't set an error state here to avoid disrupting the main view
     }
-  };
+  }
 
   // Format date
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
+    if (!dateString) return '-'
+    const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
-    });
-  };
+    })
+  }
 
   // Define building status styles
   const getStatusStyle = (status: string) => {
     if (status === 'operational') {
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
     }
-    return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
-  };
+    return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300'
+  }
 
   // Helper function to get device icon based on type
   const getDeviceIcon = (deviceType: string) => {
@@ -316,7 +406,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               d="M15 11h.01M12 11h.01M9 11h.01"
             />
           </svg>
-        );
+        )
       case 'elevator':
         return (
           <svg
@@ -332,7 +422,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               d="M19 14l-7 7m0 0l-7-7m7 7V3"
             />
           </svg>
-        );
+        )
       case 'cctv':
         return (
           <svg
@@ -348,7 +438,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
             />
           </svg>
-        );
+        )
       case 'plumbing':
         return (
           <svg
@@ -364,7 +454,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
             />
           </svg>
-        );
+        )
       case 'electrical':
         return (
           <svg
@@ -380,7 +470,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               d="M13 10V3L4 14h7v7l9-11h-7z"
             />
           </svg>
-        );
+        )
       case 'fireprotection':
         return (
           <svg
@@ -402,7 +492,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"
             />
           </svg>
-        );
+        )
       default:
         return (
           <svg
@@ -418,12 +508,12 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
               d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
             />
           </svg>
-        );
+        )
     }
-  };
+  }
 
   if (!buildingId) {
-    return null;
+    return null
   }
 
   // Animation variants
@@ -435,7 +525,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
         staggerChildren: 0.1,
       },
     },
-  };
+  }
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -444,7 +534,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
       opacity: 1,
       transition: { type: 'spring', stiffness: 100 },
     },
-  };
+  }
 
   const buildingData = {
     buildingName: buildingDetail?.name || '-',
@@ -456,7 +546,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
     numOfFloors: buildingDetail?.numberFloor?.toString() || '-',
     managerName: managerName || '-',
     description: buildingDetail?.description || '-',
-  };
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t('buildingManager.viewBuilding.title')} size="xl">
@@ -500,7 +590,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                 <img
                   src={
                     buildingDetail.imageCover
-                      ? `${import.meta.env.VITE_API_SECRET}/uploads/${buildingDetail.imageCover}`
+                      ? `${buildingDetail.imageCover}`
                       : 'https://via.placeholder.com/128?text=No+Image'
                   }
                   alt={buildingDetail.name}
@@ -513,8 +603,8 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-semibold shadow-sm ${getStatusStyle(buildingDetail.Status)}`}
                   >
-                    {buildingDetail.Status === 'operational' 
-                      ? t('buildingManager.viewBuilding.status.operational') 
+                    {buildingDetail.Status === 'operational'
+                      ? t('buildingManager.viewBuilding.status.operational')
                       : t('buildingManager.viewBuilding.status.underConstruction')}
                   </span>
 
@@ -778,15 +868,15 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
                       {t('buildingManager.viewBuilding.devices.count', {
                         count: buildingDetail.device.length,
-                        deviceLabel: buildingDetail.device.length === 1 
-                          ? t('buildingManager.viewBuilding.devices.device') 
+                        deviceLabel: buildingDetail.device.length === 1
+                          ? t('buildingManager.viewBuilding.devices.device')
                           : t('buildingManager.viewBuilding.devices.devices')
                       })}
                     </span>
                   </div>
 
                   <div className="space-y-4">
-                    {buildingDetail.device.map((device: any) => (
+                    {getDevicesPagination().currentDevices.map((device: any) => (
                       <motion.div
                         key={device.device_id}
                         className="py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-md transition-all bg-gray-50 dark:bg-gray-700"
@@ -826,13 +916,60 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                           </div>
                           {device.contract_id && (
                             <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600 col-span-2">
-                              
+
                             </div>
                           )}
                         </div>
                       </motion.div>
                     ))}
                   </div>
+
+                  {/* Devices Pagination */}
+                  {buildingDetail.device.length > itemsPerPage && (
+                    <div className="mt-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {t('common.pagination.showing')} {getDevicesPagination().startIndex + 1}-
+                        {Math.min(getDevicesPagination().endIndex, buildingDetail.device.length)} {t('common.pagination.of')}{' '}
+                        {buildingDetail.device.length} {t('common.pagination.items')}
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleDevicePageChange(currentDevicePage - 1)}
+                          disabled={currentDevicePage === 1}
+                          aria-label={t('common.previous')}
+                          className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === 1
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                            : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </button>
+                        {[...Array(getDevicesPagination().totalDevicePages)].map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleDevicePageChange(index + 1)}
+                            className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === index + 1
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                              }`}
+                          >
+                            {index + 1}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => handleDevicePageChange(currentDevicePage + 1)}
+                          disabled={currentDevicePage === getDevicesPagination().totalDevicePages}
+                          aria-label={t('common.next')}
+                          className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === getDevicesPagination().totalDevicePages
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                            : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               ) : (
                 <motion.div
@@ -888,7 +1025,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                   </div>
                 ) : contractsData && contractsData.length > 0 ? (
                   <div className="space-y-4">
-                    {contractsData.map(contract => (
+                    {getContractsPagination().currentContracts.map(contract => (
                       <div
                         key={contract.contract_id}
                         className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
@@ -905,48 +1042,123 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
 
                         {/* Devices Information */}
                         <div className="mt-2 mb-3">
-                          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 mr-1 text-blue-500"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
-                              />
-                            </svg>
-                            {t('buildingManager.viewBuilding.contracts.devices')} ({contract.devices.length})
+                          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
+                            <div className="flex items-center">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 mr-1 text-blue-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                />
+                              </svg>
+                              {t('buildingManager.viewBuilding.contracts.devices')} ({contract.devices.length})
+                            </div>
+                            {contract.devices.length > INITIAL_DEVICES_SHOWN && (
+                              <button
+                                onClick={() => toggleContractDevices(contract.contract_id)}
+                                className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
+                              >
+                                {expandedContracts[contract.contract_id] ? (
+                                  <>
+                                    {t('common.showLess')} <ChevronUp className="h-4 w-4 ml-1" />
+                                  </>
+                                ) : (
+                                  <>
+                                    {t('common.showMore')} <ChevronDown className="h-4 w-4 ml-1" />
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Search input */}
+                          <div className="relative mb-3">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <Search className="h-4 w-4 text-gray-400" />
+                            </div>
+                            <input
+                              type="text"
+                              value={deviceSearches[contract.contract_id] || ''}
+                              onChange={(e) => handleDeviceSearch(contract.contract_id, e.target.value)}
+                              placeholder={t('buildingManager.viewBuilding.contracts.searchDevices')}
+                              className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            />
                           </div>
 
                           <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2">
-                            {contract.devices.map(device => (
-                              <div
-                                key={device.device_id}
-                                className={`text-xs p-2 mb-1 last:mb-0 rounded border-l-2 ${
-                                  device.buildingDetailId === buildingDetailId
-                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                    : 'border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700'
-                                }`}
-                              >
-                                <div className="flex justify-between items-center">
-                                  <span className="font-medium">{device.name}</span>
-                                  <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300">
-                                    {device.type}
+                            <div className="grid gap-2">
+                              {(() => {
+                                const filteredDevices = getFilteredDevices(contract.devices, contract.contract_id)
+                                const displayedDevices = expandedContracts[contract.contract_id]
+                                  ? filteredDevices
+                                  : filteredDevices.slice(0, INITIAL_DEVICES_SHOWN)
+
+                                if (filteredDevices.length === 0) {
+                                  return (
+                                    <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+                                      {t('buildingManager.viewBuilding.contracts.noDevicesFound')}
+                                    </div>
+                                  )
+                                }
+
+                                return displayedDevices.map(device => (
+                                  <div
+                                    key={device.device_id}
+                                    className={`text-sm p-2.5 rounded border-l-2 ${device.buildingDetailId === buildingDetailId
+                                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                      : 'border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700'
+                                      }`}
+                                  >
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium truncate">{device.name}</span>
+                                        <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs text-gray-700 dark:text-gray-300">
+                                          {device.type}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                        <span className="flex items-center">
+                                          <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                          </svg>
+                                          {device.model}
+                                        </span>
+                                        <span className="flex items-center">
+                                          <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
+                                          </svg>
+                                          {device.manufacturer}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))
+                              })()}
+                            </div>
+
+                            {!expandedContracts[contract.contract_id] &&
+                              getFilteredDevices(contract.devices, contract.contract_id).length > INITIAL_DEVICES_SHOWN && (
+                                <div className="mt-2 text-center">
+                                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                                    {t('buildingManager.viewBuilding.devices.moreDevices', {
+                                      count: getFilteredDevices(contract.devices, contract.contract_id).length - INITIAL_DEVICES_SHOWN
+                                    })}
                                   </span>
                                 </div>
-                              </div>
-                            ))}
+                              )}
                           </div>
                         </div>
 
                         <div className="flex flex-wrap gap-2 mt-3">
                           <a
-                            href={`${import.meta.env.VITE_API_SECRET}${contract.fileUrl}`}
+                            href={`${contract.fileUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
@@ -955,7 +1167,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                             {t('buildingManager.viewBuilding.contracts.actions.download')}
                           </a>
                           <a
-                            href={`${import.meta.env.VITE_API_SECRET}${contract.viewUrl}`}
+                            href={`${contract.viewUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
@@ -964,7 +1176,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                             {t('buildingManager.viewBuilding.contracts.actions.view')}
                           </a>
                           <a
-                            href={`${import.meta.env.VITE_API_SECRET}${contract.directFileUrl}`}
+                            href={`${contract.directFileUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-800 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
@@ -986,6 +1198,53 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                     </p>
                   </div>
                 )}
+
+                {/* Contracts Pagination */}
+                {contractsData && contractsData.length > itemsPerPage && (
+                  <div className="mt-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {t('common.pagination.showing')} {getContractsPagination().startIndex + 1}-
+                      {Math.min(getContractsPagination().endIndex, contractsData.length)} {t('common.pagination.of')}{' '}
+                      {contractsData.length} {t('common.pagination.items')}
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleContractPageChange(currentContractPage - 1)}
+                        disabled={currentContractPage === 1}
+                        aria-label={t('common.previous')}
+                        className={`px-3 py-1 rounded-md text-sm font-medium ${currentContractPage === 1
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                          }`}
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      {[...Array(getContractsPagination().totalContractPages)].map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleContractPageChange(index + 1)}
+                          className={`px-3 py-1 rounded-md text-sm font-medium ${currentContractPage === index + 1
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                          {index + 1}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => handleContractPageChange(currentContractPage + 1)}
+                        disabled={currentContractPage === getContractsPagination().totalContractPages}
+                        aria-label={t('common.next')}
+                        className={`px-3 py-1 rounded-md text-sm font-medium ${currentContractPage === getContractsPagination().totalContractPages
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                          }`}
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             </motion.div>
           </div>
@@ -998,7 +1257,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
         </motion.div>
       ) : null}
     </Modal>
-  );
-};
+  )
+}
 
-export default ViewBuildingModal;
+export default ViewBuildingModal
