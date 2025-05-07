@@ -258,7 +258,7 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
   // Function to fetch manager information
   const fetchManagerInfo = async (managerId: string) => {
     try {
-      const staffResponse = await getAllStaff();
+      const staffResponse = await getAllStaff({ page: '1', limit: '9999' });
 
       if (staffResponse && staffResponse.data) {
         const manager = staffResponse.data.find((staff: any) => staff.userId === managerId);

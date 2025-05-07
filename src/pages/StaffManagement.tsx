@@ -56,8 +56,8 @@ const StaffManagement: React.FC = () => {
     queryKey: ['staff', searchTerm, currentPage, itemsPerPage, selectedRole],
     queryFn: async () => {
       const params = {
-        page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
+        page: currentPage,
+        limit: itemsPerPage,
         search: searchTerm,
         role: selectedRole !== 'all' ? selectedRole : undefined
       }

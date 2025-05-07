@@ -59,7 +59,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
         // Fetch staff for manager selection with pagination
         const staffResponse = await getAllStaff({
           page: '1',
-          limit: '100' // Set a reasonable limit to get all managers
+          limit: '9999' // Set a reasonable limit to get all managers
         })
         if (staffResponse && staffResponse.data) {
           setStaff(staffResponse.data)

@@ -79,7 +79,7 @@ const Building: React.FC = () => {
   // Fetch staff with React Query
   const { data: staffData } = useQuery({
     queryKey: ['staff'],
-    queryFn: getAllStaff,
+    queryFn: () => getAllStaff({ page: '1', limit: '9999' }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,

@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { AddStaffData } from '@/services/staffs';
-import { Loader2 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react'
+import { AddStaffData } from '@/services/staffs'
+import { Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface AddStaffProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAdd: (staffData: AddStaffData) => Promise<void>;
-  isLoading: boolean;
+  isOpen: boolean
+  onClose: () => void
+  onAdd: (staffData: AddStaffData) => Promise<void>
+  isLoading: boolean
 }
 
 const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const [formData, setFormData] = useState<AddStaffData>({
     username: '',
     email: '',
@@ -20,103 +20,121 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
     role: 'Staff',
     dateOfBirth: '',
     gender: 'Male',
-  });
+  })
 
   const [errors, setErrors] = useState<{
-    [key in keyof AddStaffData]?: string;
-  }>({});
+    [key in keyof AddStaffData]?: string
+  }>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
       [name]: value,
-    }));
+    }))
 
     if (errors[name as keyof AddStaffData]) {
       setErrors(prev => ({
         ...prev,
         [name]: undefined,
-      }));
+      }))
     }
-  };
+  }
 
   const handleSelectChange = (field: keyof AddStaffData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
-    }));
+    }))
 
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
         [field]: undefined,
-      }));
+      }))
     }
-  };
+  }
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const dateValue = e.target.value;
-    const isoDate = dateValue ? new Date(dateValue).toISOString() : '';
+    const dateValue = e.target.value
+    const selectedDate = new Date(dateValue)
+    const today = new Date()
+    const age = today.getFullYear() - selectedDate.getFullYear()
+    const monthDiff = today.getMonth() - selectedDate.getMonth()
+
+    // Kiểm tra độ tuổi
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+      age--
+    }
+
+    if (age < 18) {
+      setErrors(prev => ({
+        ...prev,
+        dateOfBirth: 'Staff must be at least 18 years old'
+      }))
+      return
+    }
+
+    const isoDate = dateValue ? new Date(dateValue).toISOString() : ''
 
     setFormData(prev => ({
       ...prev,
       dateOfBirth: isoDate,
-    }));
+    }))
 
     if (errors.dateOfBirth) {
       setErrors(prev => ({
         ...prev,
         dateOfBirth: undefined,
-      }));
+      }))
     }
-  };
+  }
 
   const validateForm = () => {
-    const newErrors: { [key in keyof AddStaffData]?: string } = {};
+    const newErrors: { [key in keyof AddStaffData]?: string } = {}
 
     if (!formData.username.trim()) {
-      newErrors.username = t('staffManagement.addStaff.form.username.required');
+      newErrors.username = t('staffManagement.addStaff.form.username.required')
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = t('staffManagement.addStaff.form.email.required');
+      newErrors.email = t('staffManagement.addStaff.form.email.required')
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = t('staffManagement.addStaff.form.email.invalid');
+      newErrors.email = t('staffManagement.addStaff.form.email.invalid')
     }
 
     if (!formData.password) {
-      newErrors.password = t('staffManagement.addStaff.form.password.required');
+      newErrors.password = t('staffManagement.addStaff.form.password.required')
     } else if (formData.password.length < 6) {
-      newErrors.password = t('staffManagement.addStaff.form.password.minLength');
+      newErrors.password = t('staffManagement.addStaff.form.password.minLength')
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = t('staffManagement.addStaff.form.phone.required');
+      newErrors.phone = t('staffManagement.addStaff.form.phone.required')
     } else if (!/^\d{10,11}$/.test(formData.phone)) {
-      newErrors.phone = t('staffManagement.addStaff.form.phone.invalid');
+      newErrors.phone = t('staffManagement.addStaff.form.phone.invalid')
     }
 
     if (!formData.role) {
-      newErrors.role = t('staffManagement.addStaff.form.role.required');
+      newErrors.role = t('staffManagement.addStaff.form.role.required')
     }
 
     if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = t('staffManagement.addStaff.form.dateOfBirth.required');
+      newErrors.dateOfBirth = t('staffManagement.addStaff.form.dateOfBirth.required')
     }
 
     if (!formData.gender) {
-      newErrors.gender = t('staffManagement.addStaff.form.gender.required');
+      newErrors.gender = t('staffManagement.addStaff.form.gender.required')
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (validateForm()) {
-      await onAdd(formData);
+      await onAdd(formData)
       setFormData({
         username: '',
         email: '',
@@ -125,11 +143,11 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
         role: 'Staff',
         dateOfBirth: '',
         gender: 'Male',
-      });
+      })
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -174,11 +192,10 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 value={formData.username}
                 onChange={handleChange}
                 placeholder={t('staffManagement.addStaff.form.username.placeholder')}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.username
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.username
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                  : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
               />
               {errors.username && (
                 <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.username}</p>
@@ -199,11 +216,10 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 value={formData.email}
                 onChange={handleChange}
                 placeholder={t('staffManagement.addStaff.form.email.placeholder')}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.email
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.email
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                  : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
               />
               {errors.email && (
                 <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.email}</p>
@@ -224,11 +240,10 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 value={formData.password}
                 onChange={handleChange}
                 placeholder={t('staffManagement.addStaff.form.password.placeholder')}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.password
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.password
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                  : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
               />
               {errors.password && (
                 <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.password}</p>
@@ -249,11 +264,10 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder={t('staffManagement.addStaff.form.phone.placeholder')}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${
-                  errors.phone
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 ${errors.phone
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                  : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
               />
               {errors.phone && (
                 <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.phone}</p>
@@ -272,14 +286,12 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 name="role"
                 value={formData.role}
                 onChange={e => handleSelectChange('role', e.target.value)}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                  errors.role
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.role
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                  : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
               >
                 <option value="Staff">{t('staffManagement.addStaff.form.role.options.staff')}</option>
-                <option value="Leader">{t('staffManagement.addStaff.form.role.options.leader')}</option>
                 <option value="Manager">{t('staffManagement.addStaff.form.role.options.manager')}</option>
               </select>
               {errors.role && (
@@ -299,11 +311,10 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 name="gender"
                 value={formData.gender}
                 onChange={e => handleSelectChange('gender', e.target.value)}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                  errors.gender
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.gender
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                  : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
               >
                 <option value="Male">{t('staffManagement.addStaff.form.gender.options.male')}</option>
                 <option value="Female">{t('staffManagement.addStaff.form.gender.options.female')}</option>
@@ -325,11 +336,11 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
                 name="dateOfBirth"
                 type="date"
                 onChange={handleDateChange}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${
-                  errors.dateOfBirth
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
-                    : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
+                value={formData.dateOfBirth ? new Date(formData.dateOfBirth).toLocaleDateString('en-CA') : ''}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 ${errors.dateOfBirth
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900 dark:bg-opacity-20'
+                  : 'border-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
               />
               {errors.dateOfBirth && (
                 <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.dateOfBirth}</p>
@@ -363,7 +374,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddStaff;
+export default AddStaff
