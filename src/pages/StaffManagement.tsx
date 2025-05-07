@@ -19,6 +19,7 @@ import FilterDropdown from '@/components/FilterDropdown'
 import { useTranslation } from 'react-i18next'
 import Tooltip from '@/components/Tooltip'
 import { FORMAT_DATE } from '@/utils/format'
+import { useDebounce } from '@/hooks/useDebounce'
 
 interface StaffResponse {
   isSuccess: boolean
@@ -44,6 +45,8 @@ const StaffManagement: React.FC = () => {
 
   const queryClient = useQueryClient()
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 1500)
+
   // Define role filter options
   const roleOptions = [
     { value: 'all', label: t('staffManagement.filterOptions.all') },
@@ -54,12 +57,12 @@ const StaffManagement: React.FC = () => {
 
   // Fetch staff with React Query
   const { data: staffResponse, isLoading: isLoadingStaff } = useQuery<StaffResponse>({
-    queryKey: ['staff', searchTerm, currentPage, itemsPerPage, selectedRole],
+    queryKey: ['staff', debouncedSearchTerm, currentPage, itemsPerPage, selectedRole],
     queryFn: async () => {
       const params = {
         page: currentPage,
         limit: itemsPerPage,
-        search: searchTerm,
+        search: debouncedSearchTerm,
         role: selectedRole !== 'all' ? selectedRole : undefined
       }
       const response = await getAllStaff(params)
