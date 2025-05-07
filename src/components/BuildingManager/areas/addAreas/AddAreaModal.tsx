@@ -3,6 +3,7 @@ import { addNewArea } from '@/services/areas'
 import toast from 'react-hot-toast'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { FORMAT_DATE } from '@/utils/format'
 
 interface AddAreaModalProps {
   isOpen: boolean
@@ -16,7 +17,7 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    createdDate: new Date().toLocaleDateString('en-CA'),
+    createdDate: FORMAT_DATE(new Date().toLocaleDateString('vi')),
   })
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<{
@@ -65,7 +66,7 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess 
       setFormData({
         name: '',
         description: '',
-        createdDate: new Date().toLocaleDateString('en-CA'),
+        createdDate: FORMAT_DATE(new Date().toLocaleDateString('vi')),
       })
 
       onSuccess()
@@ -135,11 +136,11 @@ const AddAreaModal: React.FC<AddAreaModalProps> = ({ isOpen, onClose, onSuccess 
               <input
                 type="text"
                 name="createdDate"
-                value={formData.createdDate}
+                value={FORMAT_DATE(formData.createdDate)}
                 className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm 
                          bg-gray-50 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
                 disabled
-                aria-label={t('area.add.createdDate')}
+                aria-label={FORMAT_DATE(t('area.add.createdDate'))}
               />
             </div>
 

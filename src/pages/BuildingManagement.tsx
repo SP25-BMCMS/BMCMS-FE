@@ -22,6 +22,7 @@ import { motion } from 'framer-motion'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import Tooltip from '@/components/Tooltip'
+import { FORMAT_DATE } from '@/utils/format'
 
 const Building: React.FC = () => {
   const { t } = useTranslation()
@@ -247,7 +248,7 @@ const Building: React.FC = () => {
       render: item => (
         <Tooltip content={new Date(item.createdAt).toLocaleDateString()} position="bottom" delay={200}>
           <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[100px]">
-            {new Date(item.createdAt).toLocaleDateString()}
+            {FORMAT_DATE(new Date(item.createdAt).toLocaleDateString())}
           </div>
         </Tooltip>
       ),
@@ -262,7 +263,7 @@ const Building: React.FC = () => {
           delay={200}
         >
           <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[100px]">
-            {item.completion_date ? new Date(item.completion_date).toLocaleDateString() : 'N/A'}
+            {item.completion_date ? FORMAT_DATE(new Date(item.completion_date).toLocaleDateString()) : 'N/A'}
           </div>
         </Tooltip>
       ),

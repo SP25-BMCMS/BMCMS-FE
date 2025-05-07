@@ -12,6 +12,7 @@ import { useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query
 import { toast } from 'react-hot-toast'
 import { AxiosError } from 'axios'
 import { useTranslation } from 'react-i18next'
+import { FORMAT_DATE } from '@/utils/format'
 
 interface ErrorResponse {
   message: string
@@ -301,7 +302,7 @@ const CrackManagement: React.FC = () => {
       key: 'createdDate',
       title: t('crackManagement.table.createdDate'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.createdDate}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{FORMAT_DATE(item.createdDate)}</div>
       ),
     },
     {

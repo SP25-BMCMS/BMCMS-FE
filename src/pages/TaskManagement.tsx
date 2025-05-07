@@ -18,6 +18,7 @@ import ChangeStatusModal from '@/components/TaskManager/ChangeStatusModal'
 import { FaTools, FaCalendarAlt, FaBuilding } from 'react-icons/fa'
 import Tooltip from '@/components/Tooltip'
 import { useTranslation } from 'react-i18next'
+import { FORMAT_DATE } from '@/utils/format'
 
 interface TasksCacheData {
   data: TaskResponse[]
@@ -639,7 +640,7 @@ const TaskManagement: React.FC = () => {
       title: t('taskManagement.table.createdDate'),
       render: item => (
         <div className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-          {new Date(item.created_at).toLocaleDateString()}
+          {FORMAT_DATE(item.created_at)}
         </div>
       ),
       width: '90px xs:100px sm:110px',

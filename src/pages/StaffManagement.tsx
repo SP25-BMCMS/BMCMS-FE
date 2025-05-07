@@ -18,6 +18,7 @@ import Pagination from '@/components/Pagination'
 import FilterDropdown from '@/components/FilterDropdown'
 import { useTranslation } from 'react-i18next'
 import Tooltip from '@/components/Tooltip'
+import { FORMAT_DATE } from '@/utils/format'
 
 interface StaffResponse {
   isSuccess: boolean
@@ -247,7 +248,7 @@ const StaffManagement: React.FC = () => {
       key: 'dateOfBirth',
       title: t('staffManagement.table.dateOfBirth'),
       render: item => (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{item.dateOfBirth}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{FORMAT_DATE(item.dateOfBirth)}</div>
       ),
     },
     {

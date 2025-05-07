@@ -59,7 +59,7 @@ const AddStaff: React.FC<AddStaffProps> = ({ isOpen, onClose, onAdd, isLoading }
     const dateValue = e.target.value
     const selectedDate = new Date(dateValue)
     const today = new Date()
-    const age = today.getFullYear() - selectedDate.getFullYear()
+    let age = today.getFullYear() - selectedDate.getFullYear()
     const monthDiff = today.getMonth() - selectedDate.getMonth()
 
     // Kiểm tra độ tuổi
