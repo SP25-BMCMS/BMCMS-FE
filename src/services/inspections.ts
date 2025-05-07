@@ -119,9 +119,30 @@ const updateInspectionReportStatus = async (
   }
 }
 
+interface InspectionPdfResponse {
+  isSuccess: boolean
+  message: string
+  data: Array<{
+    inspection_id: string
+    uploadFile: string | null
+    downloadUrl?: string
+    viewUrl?: string
+  }>
+}
+
+export const getInspectionPdf = async (taskAssignmentId: string): Promise<InspectionPdfResponse> => {
+  try {
+    const response = await apiInstance.get(`/inspections/inspection-pdf/${taskAssignmentId}`)
+    return response.data
+  } catch (error) {
+    throw error
+  }
+}
+
 const inspectionsApi = {
   getInspectionsByAssignmentId,
   updateInspectionReportStatus,
+  getInspectionPdf,
 }
 
 export default inspectionsApi

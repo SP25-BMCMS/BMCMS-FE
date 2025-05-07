@@ -173,7 +173,7 @@ const Calendar: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedules'] })
-      toast.success('Schedule updated successfully')
+      toast.success(t('calendar.messages.updateSuccess'))
       setIsModalOpen(false)
     },
     onError: () => {
@@ -527,7 +527,13 @@ const Calendar: React.FC = () => {
       cycle_id: string
       schedule_status: 'Pending' | 'InProgress' | 'Completed' | 'Cancel'
     }) => {
-      if (!selectedEvent) return
+      console.log('handleUpdateEvent called with:', formData)
+      console.log('selectedEvent:', selectedEvent)
+
+      if (!selectedEvent) {
+        console.log('No selectedEvent, returning')
+        return
+      }
 
       // Convert local datetime to UTC for API
       const startDateObj = new Date(formData.start_date)
@@ -565,6 +571,7 @@ const Calendar: React.FC = () => {
         buildingDetailIds: formData.buildingDetailIds,
       }
 
+      console.log('Calling updateScheduleMutation with:', { id: selectedEvent.id, data: updateData })
       updateScheduleMutation.mutate({ id: selectedEvent.id, data: updateData as any })
     },
     [selectedEvent, updateScheduleMutation]

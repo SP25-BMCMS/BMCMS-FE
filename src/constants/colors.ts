@@ -48,6 +48,7 @@ export const STATUS_COLORS = {
     BG: 'rgba(254, 164, 19, 0.35)', // Màu nền từ FEA413 nhạt 35%
     TEXT: '#FFA500', // Màu chữ cam/vàng đậm
     BORDER: '#FFA500', // Màu viền cam/vàng đậm
-  },}
+  },
+}
 export const ACTIVE = 'bg-[rgba(80,241,134,0.35)] text-[#50F186] border border-[#50F186]'
 export const INACTIVE = 'bg-[rgba(248,8,8,0.3)] text-[#ff0000] border border-[#f80808]'

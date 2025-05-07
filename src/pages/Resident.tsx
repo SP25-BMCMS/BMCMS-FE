@@ -338,16 +338,18 @@ const Resident: React.FC = () => {
       </div>
 
       <div className="w-full overflow-x-auto">
-        <Table<Residents>
-          data={residentsResponse?.data || []}
-          columns={columns}
-          keyExtractor={item => item.userId}
-          onRowClick={item => { }}
-          className="w-full"
-          tableClassName="w-full min-w-[750px]"
-          isLoading={isLoadingResidents}
-          emptyText="No resident data found"
-        />
+        <div className="min-w-[750px] h-[calc(100vh-340px)] overflow-y-auto">
+          <Table<Residents>
+            data={residentsResponse?.data || []}
+            columns={columns}
+            keyExtractor={item => item.userId}
+            onRowClick={item => { }}
+            className="w-full"
+            tableClassName="w-full"
+            isLoading={isLoadingResidents}
+            emptyText="No resident data found"
+          />
+        </div>
       </div>
 
       <div className="w-full mt-4">
@@ -360,6 +362,41 @@ const Resident: React.FC = () => {
           onLimitChange={setItemsPerPage}
         />
       </div>
+
+      <style>
+        {`
+          /* Table scrollbar styles */
+          .min-w-\\[750px\\]::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+
+          .min-w-\\[750px\\]::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .min-w-\\[750px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+          }
+
+          .dark .min-w-\\[750px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.5);
+          }
+
+          /* Ensure table header stays fixed */
+          thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+          }
+
+          .dark thead {
+            background: #1f2937;
+          }
+        `}
+      </style>
 
       {/* <AddResident
         isOpen={isModalOpen}

@@ -56,11 +56,23 @@ const getStaffLeaderByCrackId = async (crackReportId: string) => {
   }
 }
 
+const deleteCrackReport = async (id: string) => {
+  try {
+    const { data } = await apiInstance.delete(
+      import.meta.env.VITE_DELETE_CRACK_REPORT.replace('{id}', id)
+    )
+    return data
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to delete crack report')
+  }
+}
+
 const crackApi = {
   getCrackList,
   getCrackDetail,
   updateCrackStatus,
   getStaffLeaderByCrackId,
+  deleteCrackReport,
 }
 
 export default crackApi
@@ -77,6 +89,14 @@ export const useUpdateCrackStatus = () => {
       staffId: string
     }) => {
       return updateCrackStatus(crackId, status, staffId)
+    },
+  })
+}
+
+export const useDeleteCrackReport = () => {
+  return useMutation({
+    mutationFn: (crackId: string) => {
+      return deleteCrackReport(crackId)
     },
   })
 }

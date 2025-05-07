@@ -19,6 +19,8 @@ import { FaTools, FaCalendarAlt, FaBuilding } from 'react-icons/fa'
 import Tooltip from '@/components/Tooltip'
 import { useTranslation } from 'react-i18next'
 import { FORMAT_DATE } from '@/utils/format'
+import ViewPdfModal from '@/components/TaskManager/ViewPdfModal'
+import ConfirmModal from '@/components/ConfirmModal'
 
 interface TasksCacheData {
   data: TaskResponse[]
@@ -140,6 +142,11 @@ const TaskManagement: React.FC = () => {
   const [taskType, setTaskType] = useState<'crack' | 'schedule'>('crack')
   const [isNavigating, setIsNavigating] = useState(false)
   const navigate = useNavigate()
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [selectedTaskAssignmentId, setSelectedTaskAssignmentId] = useState<string | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
 
   const queryClient = useQueryClient()
 
@@ -253,6 +260,25 @@ const TaskManagement: React.FC = () => {
     onError: error => {
       console.error('Export PDF error:', error)
       toast.error('Failed to export PDF')
+    },
+  })
+
+  // Add viewPdf mutation
+  const viewPdfMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      return await tasksApi.exportTaskCostPdf(taskId)
+    },
+    onSuccess: data => {
+      // Create a blob URL and open in new tab
+      const url = window.URL.createObjectURL(new Blob([data]))
+      window.open(url, '_blank')
+
+      // Clean up
+      window.URL.revokeObjectURL(url)
+    },
+    onError: error => {
+      console.error('View PDF error:', error)
+      toast.error(t('taskManagement.viewPdfError'))
     },
   })
 
@@ -395,6 +421,72 @@ const TaskManagement: React.FC = () => {
     prefetchTaskDetails(taskId).catch(error => {
       console.log('Error prefetching on hover:', error)
     })
+  }
+
+  // Update handleViewPdf function
+  const handleViewPdf = async (taskId: string) => {
+    try {
+      // Get task assignments for this task
+      const response = await tasksApi.getTaskAssignmentsByTaskId(taskId)
+      if (response?.data?.taskAssignments) {
+        // Find the fixed assignment
+        const fixedAssignment = response.data.taskAssignments.find(
+          assignment => assignment.status === 'Fixed'
+        )
+
+        if (fixedAssignment) {
+          setSelectedTaskAssignmentId(fixedAssignment.assignment_id)
+          setIsPdfModalOpen(true)
+        } else {
+          toast.error(t('taskManagement.noVerifiedAssignments'))
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching task assignments:', error)
+      toast.error(t('taskManagement.errorFetchingAssignments'))
+    }
+  }
+
+  // Update handleClosePdfModal
+  const handleClosePdfModal = () => {
+    setIsPdfModalOpen(false)
+    setSelectedTaskAssignmentId(null)
+  }
+
+  // Add delete task mutation
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      return await tasksApi.deleteTask(taskId)
+    },
+    onSuccess: () => {
+      toast.success(t('taskManagement.deleteSuccess'))
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    },
+    onError: (error) => {
+      console.error('Delete task error:', error)
+      toast.error(t('taskManagement.deleteError'))
+    },
+  })
+
+  // Update handleDeleteTask function
+  const handleDeleteTask = (taskId: string) => {
+    setTaskToDelete(taskId)
+    setIsDeleteModalOpen(true)
+  }
+
+  // Add handleConfirmDelete function
+  const handleConfirmDelete = () => {
+    if (taskToDelete) {
+      deleteTaskMutation.mutate(taskToDelete)
+      setIsDeleteModalOpen(false)
+      setTaskToDelete(null)
+    }
+  }
+
+  // Add handleCloseDeleteModal function
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+    setTaskToDelete(null)
   }
 
   const columns: Column<TaskResponse>[] = [
@@ -671,9 +763,11 @@ const TaskManagement: React.FC = () => {
           <DropdownMenu
             onViewDetail={() => handleNavigateToDetail(item.task_id)}
             onChangeStatus={() => handleTaskStatusChange(item)}
-            onRemove={() => console.log('Remove', item)}
+            onRemove={item.status !== 'Completed' ? () => handleDeleteTask(item.task_id) : undefined}
             showExportPdf={item.status === 'Completed'}
             onExportPdf={() => handleExportPdf(item.task_id)}
+            showViewPdf={item.status === 'Completed'}
+            onViewPdf={() => handleViewPdf(item.task_id)}
           />
         </div>
       ),
@@ -757,7 +851,7 @@ const TaskManagement: React.FC = () => {
           <ErrorMessage />
         ) : (
           <div className="overflow-x-auto">
-            <div className="min-w-[1024px]">
+            <div className="min-w-[1024px] h-[calc(100vh-400px)] overflow-y-auto">
               <Table<TaskResponse>
                 data={tasksData?.data || []}
                 columns={columns}
@@ -799,6 +893,61 @@ const TaskManagement: React.FC = () => {
           }
         />
       )}
+
+      {/* PDF Modal */}
+      {selectedTaskAssignmentId && (
+        <ViewPdfModal
+          isOpen={isPdfModalOpen}
+          onClose={handleClosePdfModal}
+          taskAssignmentId={selectedTaskAssignmentId}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title={t('taskManagement.deleteConfirmTitle')}
+        message={t('taskManagement.deleteConfirmMessage')}
+        confirmText={t('taskManagement.delete')}
+        cancelText={t('taskManagement.cancel')}
+      />
+
+      <style>
+        {`
+          /* Table scrollbar styles */
+          .min-w-\\[1024px\\]::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+
+          .min-w-\\[1024px\\]::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .min-w-\\[1024px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+          }
+
+          .dark .min-w-\\[1024px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.5);
+          }
+
+          /* Ensure table header stays fixed */
+          thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+          }
+
+          .dark thead {
+            background: #1f2937;
+          }
+        `}
+      </style>
     </div>
   )
 }

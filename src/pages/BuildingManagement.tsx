@@ -8,7 +8,7 @@ import { PiMapPinAreaBold } from 'react-icons/pi'
 import { FaRegBuilding } from 'react-icons/fa'
 import { User } from 'lucide-react'
 import AddBuildingModal from '@/components/BuildingManager/buildings/AddBuilding/AddBuildingModal'
-import RemoveBuilding from '@/components/BuildingManager/buildings/DeleteBuilding/RemoveBuilding'
+import ConfirmModal from '@/components/ConfirmModal'
 import ViewBuildingModal from '@/components/BuildingManager/buildings/ViewBuilding/ViewBuildingModal'
 import EditBuildingModal from '@/components/BuildingManager/buildings/EditBuilding/EditBuildingModal'
 import DropdownMenu from '@/components/DropDownMenu'
@@ -29,11 +29,10 @@ const Building: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false)
   const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false)
-  const [isRemoveBuildingModalOpen, setIsRemoveBuildingModalOpen] = useState(false)
   const [isViewBuildingModalOpen, setIsViewBuildingModalOpen] = useState(false)
   const [isEditBuildingModalOpen, setIsEditBuildingModalOpen] = useState(false)
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingResponse | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
@@ -111,14 +110,17 @@ const Building: React.FC = () => {
       const previousBuildings = queryClient.getQueryData(['buildings'])
 
       // Optimistically update to the new value
-      queryClient.setQueryData(['buildings'], (old: any) => ({
-        ...old,
-        data: old.data.filter((building: BuildingResponse) => building.buildingId !== buildingId),
-        pagination: {
-          ...old.pagination,
-          total: old.pagination.total - 1,
-        },
-      }))
+      queryClient.setQueryData(['buildings'], (old: any) => {
+        if (!old) return old
+        return {
+          ...old,
+          data: old.data?.filter((building: BuildingResponse) => building.buildingId !== buildingId) || [],
+          pagination: {
+            ...old.pagination,
+            total: (old.pagination?.total || 0) - 1,
+          },
+        }
+      })
 
       return { previousBuildings }
     },
@@ -127,7 +129,12 @@ const Building: React.FC = () => {
       if (context?.previousBuildings) {
         queryClient.setQueryData(['buildings'], context.previousBuildings)
       }
-      toast.error('Failed to delete building!')
+      toast.error(t('buildingManagement.deleteError'))
+    },
+    onSuccess: () => {
+      toast.success(t('buildingManagement.deleteSuccess'))
+      setIsDeleteModalOpen(false)
+      setSelectedBuilding(null)
     },
     onSettled: () => {
       // Invalidate and refetch
@@ -165,23 +172,12 @@ const Building: React.FC = () => {
 
   const handleRemoveBuilding = (building: BuildingResponse) => {
     setSelectedBuilding(building)
-    setIsRemoveBuildingModalOpen(true)
+    setIsDeleteModalOpen(true)
   }
 
-  const confirmRemoveBuilding = async () => {
+  const handleConfirmDelete = async () => {
     if (!selectedBuilding) return
-
-    setIsDeleting(true)
-    try {
-      await deleteBuildingMutation.mutateAsync(selectedBuilding.buildingId)
-      toast.success(t('buildingManagement.deleteSuccess'))
-      setIsRemoveBuildingModalOpen(false)
-    } catch (error) {
-      console.error('Failed to delete building:', error)
-      toast.error(t('buildingManagement.deleteError'))
-    } finally {
-      setIsDeleting(false)
-    }
+    await deleteBuildingMutation.mutateAsync(selectedBuilding.buildingId)
   }
 
   const filterOptions = [
@@ -363,7 +359,7 @@ const Building: React.FC = () => {
       ) : (
         <>
           <div className="w-full overflow-x-auto">
-            <div className="min-w-[1024px]">
+            <div className="min-w-[1024px] h-[calc(100vh-340px)] overflow-y-auto">
               <Table<BuildingResponse>
                 data={buildingsData?.data || []}
                 columns={columns}
@@ -387,6 +383,41 @@ const Building: React.FC = () => {
         </>
       )}
 
+      <style>
+        {`
+          /* Table scrollbar styles */
+          .min-w-\\[1024px\\]::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+
+          .min-w-\\[1024px\\]::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .min-w-\\[1024px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+          }
+
+          .dark .min-w-\\[1024px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.5);
+          }
+
+          /* Ensure table header stays fixed */
+          thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+          }
+
+          .dark thead {
+            background: #1f2937;
+          }
+        `}
+      </style>
+
       {/* Add Area Modal */}
       <AddAreaModal
         isOpen={isAddAreaModalOpen}
@@ -409,13 +440,21 @@ const Building: React.FC = () => {
         buildingId={selectedBuilding?.buildingId || null}
       />
 
-      {/* Remove Building Modal */}
-      <RemoveBuilding
-        isOpen={isRemoveBuildingModalOpen}
-        onClose={() => setIsRemoveBuildingModalOpen(false)}
-        onConfirm={confirmRemoveBuilding}
-        isLoading={isDeleting}
-        building={selectedBuilding}
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onCancel={() => {
+          setIsDeleteModalOpen(false)
+          setSelectedBuilding(null)
+        }}
+        onConfirm={handleConfirmDelete}
+        title={t('buildingManagement.deleteConfirmTitle')}
+        message={t('buildingManagement.deleteConfirmMessage', {
+          buildingName: selectedBuilding?.name || '',
+        })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        isLoading={deleteBuildingMutation.isPending}
       />
 
       {/* View Building Modal */}

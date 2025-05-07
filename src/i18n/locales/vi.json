@@ -1,5 +1,7 @@
 {
   "common": {
+    "processing": "Đang xử lý...",
+    "noResults": "Không tìm thấy kết quả",
     "showMore": "Xem thêm",
     "showLess": "Thu gọn",
     "usernamePlaceholder": "Tên đăng nhập",
@@ -336,11 +338,13 @@
       "viewDetail": "Xem chi tiết",
       "notAvailable": "Không khả dụng",
       "exportPdf": "Xuất PDF",
+      "viewPdf": "Xem PDF đã tải lên",
       "changeStatus": "Thay đổi trạng thái",
       "remove": "Xóa"
     }
   },
   "taskManagement": {
+    "noVerifiedAssignments": "Không có file PDF nào được tải lên",
     "title": "Quản lý nhiệm vụ",
     "crackRepairTasks": "Nhiệm vụ sửa chữa vết nứt",
     "scheduledMaintenanceTasks": "Nhiệm vụ bảo trì định kỳ",
@@ -371,6 +375,7 @@
     "scheduleStatus": {
       "pending": "Chờ xử lý",
       "inprogress": "Đang thực hiện",
+      "reviewing": "Đang xem xét",
       "completed": "Hoàn thành",
       "cancelled": "Đã hủy",
       "cancel": "Đã hủy"
@@ -412,6 +417,7 @@
       "reportedBy": "Người báo cáo",
       "verifiedBy": "Người xác minh",
       "selectSchedule": "Chọn lịch trình",
+      "searchSchedules": "Tìm kiếm lịch trình",
       "scheduleRequired": "Chọn lịch trình công việc",
       "selectScheduleLabel": "Chọn lịch trình",
       "location": "Vị trí",
@@ -561,6 +567,10 @@
     }
   },
   "buildingManagement": {
+    "deleteConfirmTitle": "Xóa tòa nhà",
+    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa tòa nhà này? Hành động này không thể hoàn tác.",
+    "deleteConfirmButton": "Xóa",
+    "deleteCancelButton": "Hủy",
     "title": "Quản lý tòa nhà",
     "addBuilding": "Thêm tòa nhà",
     "addArea": "Thêm khu vực",
@@ -950,6 +960,12 @@
     }
   },
   "maintenanceCycle": {
+    "success": {
+      "delete": "Đã xóa chu kỳ bảo trì thành công",
+      "cancel": "Đã hủy chu kỳ bảo trì thành công",
+      "create": "Đã tạo chu kỳ bảo trì thành công",
+      "update": "Đã cập nhật chu kỳ bảo trì thành công"
+    },
     "title": "Chu kỳ bảo trì",
     "createCycle": "Tạo chu kỳ",
     "editCycle": "Sửa chu kỳ",
@@ -1118,6 +1134,12 @@
     }
   },
   "crackManagement": {
+    "deleteConfirmTitle": "Xóa báo cáo vết nứt",
+    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa báo cáo vết nứt này? Hành động này không thể hoàn tác.",
+    "deleteConfirmButton": "Xóa",
+    "deleteCancelButton": "Hủy",
+    "deleteSuccess": "Đã xóa báo cáo vết nứt thành công",
+    "deleteError": "Không thể xóa báo cáo vết nứt",
     "title": "Quản lý vết nứt",
     "severity": "Mức độ nghiêm trọng",
     "totalCracks": "Tổng số vết nứt: {{count}}",
@@ -1304,6 +1326,7 @@
     "noFeedbackData": "Không có dữ liệu phản hồi"
   },
   "buildingDetail": {
+    "searchDevices": "Tìm kiếm thiết bị",
     "title": "Chi tiết tòa nhà",
     "goBack": "Quay lại",
     "error": "Lỗi tải chi tiết tòa nhà",
@@ -1353,7 +1376,7 @@
     "noDevices": "Không có thiết bị nào cho tòa nhà này",
     "noMaintenance": "Không có lịch sử bảo trì cho tòa nhà này",
     "noCracks": "Không có bản ghi vết nứt cho tòa nhà này",
-    "showingRecords": "Hiển thị {count} bản ghi",
+    "showingRecords": "Hiển thị {{count}} bản ghi",
     "errorLoadingCracks": "Lỗi tải bản ghi vết nứt:",
     "errorLoadingMaintenance": "Lỗi tải lịch sử bảo trì:",
     "unknownError": "Lỗi không xác định",
@@ -1404,6 +1427,9 @@
       "inProgress": "Đang thực hiện",
       "completed": "Hoàn thành",
       "cancel": "Đã hủy"
+    },
+    "messages": {
+      "updateSuccess": "Lịch trình đã được cập nhật thành công"
     },
     "statusLabels": {
       "inProgress": "Đang thực hiện",
@@ -1975,6 +2001,11 @@
   },
   "buildingManager": {
     "technicalRecord": {
+      "search": {
+        "placeholder": "Tìm kiếm hồ sơ kỹ thuật",
+        "noResults": "Không tìm thấy hồ sơ kỹ thuật",
+        "tryDifferent": "Thử tìm kiếm với từ khóa khác"
+      },
       "title": "Hồ sơ Kỹ thuật",
       "upload": {
         "title": "Tải lên Hồ sơ Kỹ thuật",
@@ -2027,6 +2058,7 @@
           "building": "Tòa nhà:"
         },
         "actions": {
+          "view": "Xem",
           "download": "Tải xuống"
         },
         "uploadDate": "Tải lên vào {{date}}"

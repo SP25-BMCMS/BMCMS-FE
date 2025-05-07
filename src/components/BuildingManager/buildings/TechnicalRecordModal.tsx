@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TechnicalRecord } from '@/services/technicalRecord'
 import { Download, Eye, FileText, FileIcon, BookOpen, Upload, Plus, X } from 'lucide-react'
@@ -6,6 +6,9 @@ import { motion } from 'framer-motion'
 import apiInstance from '@/lib/axios'
 import { toast } from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
+import Pagination from '@/components/Pagination'
+import SearchInput from '@/components/SearchInput'
+import { useDebounce } from '@/hooks/useDebounce'
 
 interface ModalProps {
   isOpen: boolean
@@ -392,6 +395,11 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
 }) => {
   const { t } = useTranslation()
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(5)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   // Function to fetch technical records by building ID using the new API endpoint
   const fetchTechnicalRecordsByBuildingId = async (buildingId: string) => {
@@ -500,6 +508,43 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
     },
   }
 
+  // Filter records based on search term
+  const getFilteredRecords = () => {
+    if (!technicalRecords) return []
+
+    return technicalRecords.filter(record => {
+      const searchString = debouncedSearchTerm.toLowerCase()
+      return (
+        record.file_name.toLowerCase().includes(searchString) ||
+        record.file_type.toLowerCase().includes(searchString) ||
+        record.device.name.toLowerCase().includes(searchString) ||
+        record.device.type.toLowerCase().includes(searchString)
+      )
+    })
+  }
+
+  // Update pagination calculation to use filtered records
+  const getPaginatedRecords = () => {
+    const filteredRecords = getFilteredRecords()
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const currentRecords = filteredRecords.slice(startIndex, endIndex)
+    const totalPages = Math.ceil(filteredRecords.length / itemsPerPage)
+
+    return {
+      currentRecords,
+      totalPages,
+      startIndex,
+      endIndex,
+      totalItems: filteredRecords.length
+    }
+  }
+
+  // Reset page when search term changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedSearchTerm])
+
   // If upload modal is open, show it instead of the main content
   if (isUploadModalOpen) {
     return (
@@ -583,19 +628,29 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
           animate="visible"
         >
           <div className="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white">
-              {t('buildingManager.technicalRecord.list.count', { count: technicalRecords?.length || 0 })}
-            </h4>
-            <button
-              onClick={handleOpenUploadModal}
-              className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4 mr-1.5" />
-              {t('buildingManager.technicalRecord.list.uploadNew')}
-            </button>
+            <div className="flex-1 mr-4">
+              <SearchInput
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={t('buildingManager.technicalRecord.search.placeholder')}
+                className="w-full max-w-xs"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {t('buildingManager.technicalRecord.list.count', { count: getPaginatedRecords().totalItems })}
+              </span>
+              <button
+                onClick={handleOpenUploadModal}
+                className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-1.5" />
+                {t('buildingManager.technicalRecord.list.uploadNew')}
+              </button>
+            </div>
           </div>
 
-          {!technicalRecords || technicalRecords.length === 0 ? (
+          {!technicalRecords || getPaginatedRecords().totalItems === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -605,77 +660,146 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
                 <FileText className="h-8 w-8" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                {t('buildingManager.technicalRecord.list.noRecords.title')}
+                {searchTerm
+                  ? t('buildingManager.technicalRecord.search.noResults')
+                  : t('buildingManager.technicalRecord.list.noRecords.title')}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                {t('buildingManager.technicalRecord.list.noRecords.description')}
+                {searchTerm
+                  ? t('buildingManager.technicalRecord.search.tryDifferent')
+                  : t('buildingManager.technicalRecord.list.noRecords.description')}
               </p>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 gap-6">
-              {technicalRecords.map((record: TechnicalRecord) => (
-                <motion.div
-                  key={record.record_id}
-                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 hover:shadow-md transition-shadow"
-                  variants={itemVariants}
-                >
-                  <div className="flex flex-wrap justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      {getFileTypeIcon(record.file_type)}
-                      <div>
-                        <h5 className="text-base font-medium text-gray-900 dark:text-white">
-                          {extractFilename(record.file_name)}
-                        </h5>
-                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
-                          <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded-md text-xs font-medium mr-2">
-                            {record.file_type}
-                          </span>
-                          <span>{t('buildingManager.technicalRecord.list.uploadDate', { date: formatDate(record.upload_date) })}</span>
+            <>
+              <div className="h-[calc(100vh-400px)] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="grid grid-cols-1 gap-6">
+                  {getPaginatedRecords().currentRecords.map((record: TechnicalRecord) => (
+                    <motion.div
+                      key={record.record_id}
+                      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 hover:shadow-md transition-shadow"
+                      variants={itemVariants}
+                    >
+                      <div className="flex flex-wrap justify-between items-start mb-4">
+                        <div className="flex items-center gap-3">
+                          {getFileTypeIcon(record.file_type)}
+                          <div>
+                            <h5 className="text-base font-medium text-gray-900 dark:text-white">
+                              {extractFilename(record.file_name)}
+                            </h5>
+                            <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                              <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded-md text-xs font-medium mr-2">
+                                {record.file_type}
+                              </span>
+                              <span>{t('buildingManager.technicalRecord.list.uploadDate', { date: formatDate(record.upload_date) })}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-4">
-                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t('buildingManager.technicalRecord.list.deviceInfo.title')}
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="flex items-center">
-                        <span className="text-gray-500 dark:text-gray-400 mr-2">{t('buildingManager.technicalRecord.list.deviceInfo.device')}</span>
-                        <span className="text-gray-900 dark:text-white font-medium">
-                          {record.device.name}
-                        </span>
+                      <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-4">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          {t('buildingManager.technicalRecord.list.deviceInfo.title')}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="flex items-center">
+                            <span className="text-gray-500 dark:text-gray-400 mr-2">{t('buildingManager.technicalRecord.list.deviceInfo.device')}</span>
+                            <span className="text-gray-900 dark:text-white font-medium">
+                              {record.device.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-500 dark:text-gray-400 mr-2">{t('buildingManager.technicalRecord.list.deviceInfo.type')}</span>
+                            <span className="text-gray-900 dark:text-white font-medium">
+                              {record.device.type}
+                            </span>
+                          </div>
+                          <div className="flex items-center md:col-span-2">
+                            <span className="text-gray-500 dark:text-gray-400 mr-2">{t('buildingManager.technicalRecord.list.deviceInfo.building')}</span>
+                            <span className="text-gray-900 dark:text-white font-medium">
+                              {record.device.buildingDetail.building.name} ({record.device.buildingDetail.name})
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center">
-                        <span className="text-gray-500 dark:text-gray-400 mr-2">{t('buildingManager.technicalRecord.list.deviceInfo.type')}</span>
-                        <span className="text-gray-900 dark:text-white font-medium">
-                          {record.device.type}
-                        </span>
-                      </div>
-                      <div className="flex items-center md:col-span-2">
-                        <span className="text-gray-500 dark:text-gray-400 mr-2">{t('buildingManager.technicalRecord.list.deviceInfo.building')}</span>
-                        <span className="text-gray-900 dark:text-white font-medium">
-                          {record.device.buildingDetail.building.name} ({record.device.buildingDetail.name})
-                        </span>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={record.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-                    >
-                      <Download className="w-4 h-4 mr-1.5" />
-                      {t('buildingManager.technicalRecord.list.actions.download')}
-                    </a>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                      <div className="flex flex-wrap gap-2">
+                        <a
+                          href={record.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                        >
+                          <Download className="w-4 h-4 mr-1.5" />
+                          {t('buildingManager.technicalRecord.list.actions.download')}
+                        </a>
+                        <a
+                          href={record.viewUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
+                        >
+                          <Eye className="w-4 h-4 mr-1.5" />
+                          {t('buildingManager.technicalRecord.list.actions.view')}
+                        </a>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {technicalRecords && technicalRecords.length > 0 && (
+                <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={getPaginatedRecords().totalPages}
+                    onPageChange={setCurrentPage}
+                    totalItems={getPaginatedRecords().totalItems}
+                    itemsPerPage={itemsPerPage}
+                    onLimitChange={setItemsPerPage}
+                    limitOptions={[5, 10, 20, 50]}
+                  />
+                </div>
+              )}
+
+              <style>
+                {`
+                  /* Custom scrollbar styles */
+                  .custom-scrollbar::-webkit-scrollbar {
+                    width: 8px;
+                  }
+
+                  .custom-scrollbar::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 4px;
+                  }
+
+                  .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #888;
+                    border-radius: 4px;
+                    border: 2px solid #f1f1f1;
+                  }
+
+                  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #555;
+                  }
+
+                  /* Dark mode */
+                  .dark .custom-scrollbar::-webkit-scrollbar-track {
+                    background: #374151;
+                  }
+
+                  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #4B5563;
+                    border: 2px solid #374151;
+                  }
+
+                  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #6B7280;
+                  }
+                `}
+              </style>
+            </>
           )}
         </motion.div>
       )}
@@ -684,3 +808,4 @@ const TechnicalRecordModal: React.FC<TechnicalRecordModalProps> = ({
 }
 
 export default TechnicalRecordModal
+

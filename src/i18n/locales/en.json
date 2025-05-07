@@ -1,5 +1,7 @@
 {
   "common": {
+    "processing": "Processing...",
+    "noResults": "No results found",
     "showMore": "Show more",
     "showLess": "Show less",
     "usernamePlaceholder": "Username",
@@ -46,6 +48,7 @@
     "crackStatus": {
       "title": "Crack status",
       "reviewing": "Reviewing",
+      "infixing": "In Fixing",
       "pending": "Pending",
       "inprogress": "In Progress",
       "completed": "Completed",
@@ -295,6 +298,7 @@
       "viewDetail": "View detail",
       "notAvailable": "Not available",
       "exportPdf": "Export PDF",
+      "viewPdf": "View uploaded PDF",
       "changeStatus": "Change status",
       "remove": "Remove"
     },
@@ -393,6 +397,7 @@
     }
   },
   "taskManagement": {
+    "noVerifiedAssignments": "No PDF files uploaded",
     "title": "Task Management",
     "crackRepairTasks": "Crack Repair Tasks",
     "scheduledMaintenanceTasks": "Scheduled Maintenance Tasks",
@@ -413,7 +418,7 @@
     "crackStatus": {
       "rejected": "Rejected",
       "reviewing": "Reviewing",
-      "inFixing": "In Fixing",
+      "infixing": "In Fixing",
       "waitingConfirm": "Waiting Confirm",
       "waitingconfirm": "Waiting Confirm",
       "pending": "Pending",
@@ -423,6 +428,7 @@
     "scheduleStatus": {
       "pending": "Pending",
       "inprogress": "In Progress",
+      "reviewing": "Reviewing",
       "completed": "Completed",
       "cancelled": "Cancelled",
       "cancel": "Cancelled"
@@ -458,6 +464,7 @@
     "detail": {
       "title": "Task Details",
       "backButton": "Back",
+      "searchSchedules": "Search schedules",
       "taskReference": "Task Reference",
       "created": "Created",
       "updated": "Updated",
@@ -608,6 +615,10 @@
     }
   },
   "buildingManagement": {
+    "deleteConfirmTitle": "Delete Building",
+    "deleteConfirmMessage": "Are you sure you want to delete this building? This action cannot be undone.",
+    "deleteConfirmButton": "Delete",
+    "deleteCancelButton": "Cancel",
     "title": "Building Management",
     "addBuilding": "Add Building",
     "addArea": "Add Area",
@@ -1010,6 +1021,12 @@
     }
   },
   "maintenanceCycle": {
+    "success": {
+      "delete": "Maintenance cycle deleted successfully",
+      "cancel": "Maintenance cycle cancelled successfully",
+      "create": "Maintenance cycle created successfully",
+      "update": "Maintenance cycle updated successfully"
+    },
     "title": "Maintenance Cycle",
     "createCycle": "Create Cycle",
     "editCycle": "Edit Cycle",
@@ -1173,6 +1190,12 @@
     }
   },
   "crackManagement": {
+    "deleteConfirmTitle": "Delete Crack Report",
+    "deleteConfirmMessage": "Are you sure you want to delete this crack report? This action cannot be undone.",
+    "deleteConfirmButton": "Delete",
+    "deleteCancelButton": "Cancel",
+    "deleteSuccess": "Crack report deleted successfully",
+    "deleteError": "Unable to delete crack report",
     "title": "Crack Management",
     "severity": "Severity",
     "totalCracks": "Total cracks: {{count}}",
@@ -1359,6 +1382,7 @@
     "noFeedbackData": "No feedback data"
   },
   "buildingDetail": {
+    "searchDevices": "Search devices",
     "title": "Building Details",
     "goBack": "Go Back",
     "error": "Error loading building details",
@@ -1459,6 +1483,9 @@
       "inProgress": "In Progress",
       "completed": "Completed",
       "cancel": "Cancelled"
+    },
+    "messages": {
+      "updateSuccess": "Schedule updated successfully"
     },
     "statusLabels": {
       "inProgress": "In Progress",
@@ -2069,6 +2096,11 @@
   },
   "buildingManager": {
     "technicalRecord": {
+      "search": {
+        "placeholder": "Search technical records",
+        "noResults": "No technical records found",
+        "tryDifferent": "Try different keywords"
+      },
       "title": "Technical Records",
       "upload": {
         "title": "Upload Technical Record",
@@ -2121,6 +2153,7 @@
           "building": "Building:"
         },
         "actions": {
+          "view": "View",
           "download": "Download"
         },
         "uploadDate": "Uploaded on {{date}}"

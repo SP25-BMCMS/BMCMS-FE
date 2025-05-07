@@ -102,7 +102,7 @@ const DashboardLayout = () => {
         </div>
 
         {/* Outlet để render các trang con */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto relative">
           <Outlet />
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { RiEyeLine, RiFilterLine, RiDeleteBinLine, RiFileDownloadLine } from 'react-icons/ri'
+import { RiEyeLine, RiFilterLine, RiDeleteBinLine, RiFileDownloadLine, RiFilePdfLine } from 'react-icons/ri'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
@@ -8,9 +8,11 @@ interface DropdownMenuProps {
   onChangeStatus?: () => void
   onRemove?: () => void
   onExportPdf?: () => void
+  onViewPdf?: () => void
   changeStatusTitle?: string
   viewDetailDisabled?: boolean
   showExportPdf?: boolean
+  showViewPdf?: boolean
   className?: string
 }
 
@@ -19,9 +21,11 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
   onChangeStatus,
   onRemove,
   onExportPdf,
+  onViewPdf,
   changeStatusTitle = 'Change Status',
   viewDetailDisabled = false,
   showExportPdf = false,
+  showViewPdf = false,
   className = '',
 }) => {
   const { t } = useTranslation()
@@ -37,6 +41,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
     if (showExportPdf && onExportPdf) count++
     if (onChangeStatus) count++
     if (onRemove) count++
+    if (showViewPdf && onViewPdf) count++
     return count
   }
 
@@ -162,6 +167,18 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
                 {t('common.dropdown.viewDetail')}
                 {viewDetailDisabled && <span className="ml-1 text-xs">({t('common.dropdown.notAvailable')})</span>}
               </button>
+
+              {showViewPdf && onViewPdf && (
+                <button
+                  onClick={() => {
+                    onViewPdf()
+                    setIsOpen(false)
+                  }}
+                  className="flex items-center w-full px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <RiFilePdfLine className="mr-2" /> {t('common.dropdown.viewPdf')}
+                </button>
+              )}
 
               {showExportPdf && onExportPdf && (
                 <button

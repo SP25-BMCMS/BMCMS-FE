@@ -6,13 +6,14 @@ import SearchInput from '@/components/SearchInput'
 import FilterDropdown from '@/components/FilterDropdown'
 import Pagination from '@/components/Pagination'
 import { CrackListParams, CrackListPaginationResponse } from '@/types'
-import crackApi from '@/services/cracks'
+import crackApi, { useDeleteCrackReport } from '@/services/cracks'
 import StatusCrack from '@/components/crackManager/StatusCrack'
 import { useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 import { AxiosError } from 'axios'
 import { useTranslation } from 'react-i18next'
 import { FORMAT_DATE } from '@/utils/format'
+import ConfirmModal from '@/components/ConfirmModal'
 
 interface ErrorResponse {
   message: string
@@ -161,6 +162,8 @@ const CrackManagement: React.FC = () => {
   const [selectedSeverity, setSelectedSeverity] = useState<string>('all')
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
   const [selectedCrack, setSelectedCrack] = useState<CrackUI | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [crackToDelete, setCrackToDelete] = useState<CrackUI | null>(null)
 
   const severityOptions = [
     { value: 'all', label: t('crackManagement.filterOptions.all') },
@@ -237,6 +240,8 @@ const CrackManagement: React.FC = () => {
 
   const { data: cracksData, isLoading, isFetching } = useQuery<CracksQueryData>(queryOptions)
 
+  const deleteCrackMutation = useDeleteCrackReport()
+
   // Handle search with debounce
   const handleSearch = (value: string) => {
     setSearchTerm(value)
@@ -257,6 +262,27 @@ const CrackManagement: React.FC = () => {
   const handleStatusUpdate = (crack: CrackUI) => {
     setSelectedCrack(crack)
     setIsStatusModalOpen(true)
+  }
+
+  const handleDeleteClick = (crack: CrackUI) => {
+    setCrackToDelete(crack)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!crackToDelete) return
+
+    try {
+      await deleteCrackMutation.mutateAsync(crackToDelete.id)
+      toast.success(t('crackManagement.deleteSuccess'))
+      queryClient.invalidateQueries({ queryKey: ['cracks'] })
+      setIsDeleteModalOpen(false)
+      setCrackToDelete(null)
+    } catch (error) {
+      const axiosError = error as AxiosError<ErrorResponse>
+      const errorMessage = axiosError.response?.data?.message || t('crackManagement.deleteError')
+      toast.error(errorMessage)
+    }
   }
 
   const columns: Column<CrackUI>[] = [
@@ -353,7 +379,7 @@ const CrackManagement: React.FC = () => {
                 ? undefined
                 : () => handleStatusUpdate(item)
             }
-            onRemove={() => { }}
+            onRemove={() => handleDeleteClick(item)}
           />
         </div>
       ),
@@ -448,7 +474,7 @@ const CrackManagement: React.FC = () => {
       </div>
 
       <div className="w-full overflow-x-auto">
-        <div className="min-w-[1024px]">
+        <div className="min-w-[1024px] h-[calc(100vh-400px)] overflow-y-auto">
           <Table<CrackUI>
             data={cracksData?.cracks || []}
             columns={columns}
@@ -486,6 +512,122 @@ const CrackManagement: React.FC = () => {
           }}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onCancel={() => {
+          setIsDeleteModalOpen(false)
+          setCrackToDelete(null)
+        }}
+        onConfirm={handleConfirmDelete}
+        title={t('crackManagement.deleteConfirmTitle')}
+        message={t('crackManagement.deleteConfirmMessage')}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        isLoading={deleteCrackMutation.isPending}
+      />
+
+      <style>
+        {`
+          /* Fix dropdown menu positioning */
+          .dropdown-menu {
+            position: fixed;
+            z-index: 50;
+            min-width: 160px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            transform: translateY(0);
+          }
+
+          .dark .dropdown-menu {
+            background: #1f2937;
+            border-color: #374151;
+          }
+
+          /* Ensure dropdown is visible when near bottom of table */
+          .table-container {
+            position: relative;
+          }
+
+          /* Fix overflow issues */
+          .overflow-x-auto {
+            overflow-x: auto;
+            overflow-y: visible;
+          }
+
+          /* Ensure dropdown items are visible */
+          .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 1rem;
+            clear: both;
+            font-weight: 400;
+            color: #374151;
+            text-align: inherit;
+            white-space: nowrap;
+            background-color: transparent;
+            border: 0;
+            cursor: pointer;
+          }
+
+          .dark .dropdown-item {
+            color: #e5e7eb;
+          }
+
+          .dropdown-item:hover {
+            background-color: #f3f4f6;
+          }
+
+          .dark .dropdown-item:hover {
+            background-color: #374151;
+          }
+
+          /* Add styles for dropdown button container */
+          .dropdown-button-container {
+            position: relative;
+            display: inline-block;
+          }
+
+          /* Fix table cell positioning */
+          td {
+            position: relative;
+          }
+
+          /* Table scrollbar styles */
+          .min-w-\\[1024px\\]::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+
+          .min-w-\\[1024px\\]::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .min-w-\\[1024px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+          }
+
+          .dark .min-w-\\[1024px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.5);
+          }
+
+          /* Ensure table header stays fixed */
+          thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+          }
+
+          .dark thead {
+            background: #1f2937;
+          }
+        `}
+      </style>
     </div>
   )
 }

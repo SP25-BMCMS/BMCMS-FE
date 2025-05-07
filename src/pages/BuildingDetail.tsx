@@ -30,6 +30,7 @@ import {
   Cpu,
   ToyBrick,
   Cog,
+  Search,
 } from 'lucide-react'
 import Pagination from '@/components/Pagination'
 import { toast } from 'react-hot-toast'
@@ -87,6 +88,9 @@ const BuildingDetail: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState<number>(10)
   const [maintenanceCurrentPage, setMaintenanceCurrentPage] = useState<number>(1)
   const [maintenanceItemsPerPage, setMaintenanceItemsPerPage] = useState<number>(10)
+  const [deviceCurrentPage, setDeviceCurrentPage] = useState<number>(1)
+  const [deviceItemsPerPage, setDeviceItemsPerPage] = useState<number>(6)
+  const [deviceSearch, setDeviceSearch] = useState<string>('')
 
   // Fetch building detail
   const {
@@ -350,6 +354,39 @@ const BuildingDetail: React.FC = () => {
     }
   }
 
+  // Add function to filter devices
+  const getFilteredDevices = () => {
+    const devices = buildingDetail?.device || []
+    const searchTerm = deviceSearch.toLowerCase()
+
+    if (!searchTerm) return devices
+
+    return devices.filter(device =>
+      device.name.toLowerCase().includes(searchTerm) ||
+      device.type.toLowerCase().includes(searchTerm) ||
+      device.model.toLowerCase().includes(searchTerm) ||
+      device.manufacturer.toLowerCase().includes(searchTerm)
+    )
+  }
+
+  // Add function to get paginated devices
+  const getPaginatedDevices = () => {
+    const filteredDevices = getFilteredDevices()
+    const totalDevices = filteredDevices.length
+    const totalPages = Math.ceil(totalDevices / deviceItemsPerPage)
+    const startIndex = (deviceCurrentPage - 1) * deviceItemsPerPage
+    const endIndex = startIndex + deviceItemsPerPage
+    const currentDevices = filteredDevices.slice(startIndex, endIndex)
+
+    return {
+      currentDevices,
+      totalDevices,
+      totalPages,
+      startIndex,
+      endIndex
+    }
+  }
+
   if (isLoadingBuildingDetail) {
     return <LoadingIndicator />
   }
@@ -536,20 +573,61 @@ const BuildingDetail: React.FC = () => {
         {/* Device Table Section */}
         {buildingDetail.device && buildingDetail.device.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-              <Cpu className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
-              {t('buildingDetail.devices')} ({buildingDetail.device.length})
-            </h2>
+            <div className="flex flex-col space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                  <Cpu className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
+                  {t('buildingDetail.devices')} ({buildingDetail.device.length})
+                </h2>
+              </div>
 
-            <Table<Device>
-              data={buildingDetail.device}
-              columns={deviceColumns}
-              keyExtractor={item => item.device_id}
-              isLoading={false}
-              emptyText={t('buildingDetail.noDevices')}
-              tableClassName="w-full"
-              className="w-full"
-            />
+              {/* Search input */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={deviceSearch}
+                  onChange={(e) => {
+                    setDeviceSearch(e.target.value)
+                    setDeviceCurrentPage(1) // Reset to first page when searching
+                  }}
+                  placeholder={t('buildingDetail.searchDevices')}
+                  className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {getPaginatedDevices().currentDevices.length === 0 ? (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  {deviceSearch ? t('buildingDetail.noDevicesFound') : t('buildingDetail.noDevices')}
+                </div>
+              ) : (
+                <>
+                  <Table<Device>
+                    data={getPaginatedDevices().currentDevices}
+                    columns={deviceColumns}
+                    keyExtractor={item => item.device_id}
+                    isLoading={false}
+                    emptyText={t('buildingDetail.noDevices')}
+                    tableClassName="w-full"
+                    className="w-full"
+                  />
+
+                  {getPaginatedDevices().totalDevices > deviceItemsPerPage && (
+                    <Pagination
+                      currentPage={deviceCurrentPage}
+                      totalPages={getPaginatedDevices().totalPages}
+                      onPageChange={setDeviceCurrentPage}
+                      totalItems={getPaginatedDevices().totalDevices}
+                      itemsPerPage={deviceItemsPerPage}
+                      onLimitChange={setDeviceItemsPerPage}
+                      className="mt-4"
+                    />
+                  )}
+                </>
+              )}
+            </div>
           </div>
         )}
 
@@ -581,7 +659,7 @@ const BuildingDetail: React.FC = () => {
               <div className="flex justify-between items-center mb-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                   <ArrowUpDown className="h-4 w-4 mr-1.5" />
-                  {t('buildingDetail.showingRecords')}: {maintenanceHistory.length}
+                  {t('buildingDetail.showingRecords', { count: maintenanceHistory.length })}
                 </p>
               </div>
 

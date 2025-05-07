@@ -875,53 +875,55 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                     </span>
                   </div>
 
-                  <div className="space-y-4">
-                    {getDevicesPagination().currentDevices.map((device: any) => (
-                      <motion.div
-                        key={device.device_id}
-                        className="py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-md transition-all bg-gray-50 dark:bg-gray-700"
-                        whileHover={{
-                          scale: 1.01,
-                          boxShadow:
-                            '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                        }}
-                        transition={{ type: 'spring', stiffness: 300 }}
-                      >
-                        <div className="flex justify-between items-center mb-3">
-                          <div className="flex items-center">
-                            {getDeviceIcon(device.type)}
-                            <span className="font-medium text-base text-gray-900 dark:text-white ml-2">
-                              {device.name}
-                            </span>
-                          </div>
-                          <span className="px-2.5 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 font-medium">
-                            {device.type}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300 mt-3">
-                          <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600">
-                            <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
-                              {t('buildingManager.viewBuilding.devices.model')}:
-                            </span>
-                            <span className="text-gray-900 dark:text-gray-100">{device.model}</span>
-                          </div>
-                          <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600">
-                            <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
-                              {t('buildingManager.viewBuilding.devices.manufacturer')}:
-                            </span>
-                            <span className="text-gray-900 dark:text-gray-100">
-                              {device.manufacturer}
-                            </span>
-                          </div>
-                          {device.contract_id && (
-                            <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600 col-span-2">
-
+                  <div className="h-[calc(100vh-500px)] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-4">
+                      {getDevicesPagination().currentDevices.map((device: any) => (
+                        <motion.div
+                          key={device.device_id}
+                          className="py-3 px-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-md transition-all bg-gray-50 dark:bg-gray-700"
+                          whileHover={{
+                            scale: 1.01,
+                            boxShadow:
+                              '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                          }}
+                          transition={{ type: 'spring', stiffness: 300 }}
+                        >
+                          <div className="flex justify-between items-center mb-3">
+                            <div className="flex items-center">
+                              {getDeviceIcon(device.type)}
+                              <span className="font-medium text-base text-gray-900 dark:text-white ml-2">
+                                {device.name}
+                              </span>
                             </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    ))}
+                            <span className="px-2.5 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 font-medium">
+                              {device.type}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300 mt-3">
+                            <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600">
+                              <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
+                                {t('buildingManager.viewBuilding.devices.model')}:
+                              </span>
+                              <span className="text-gray-900 dark:text-gray-100">{device.model}</span>
+                            </div>
+                            <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600">
+                              <span className="font-medium mr-2 text-gray-500 dark:text-gray-400">
+                                {t('buildingManager.viewBuilding.devices.manufacturer')}:
+                              </span>
+                              <span className="text-gray-900 dark:text-gray-100">
+                                {device.manufacturer}
+                              </span>
+                            </div>
+                            {device.contract_id && (
+                              <div className="flex items-center bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-100 dark:border-gray-600 col-span-2">
+
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Devices Pagination */}
@@ -1024,169 +1026,171 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
                     </p>
                   </div>
                 ) : contractsData && contractsData.length > 0 ? (
-                  <div className="space-y-4">
-                    {getContractsPagination().currentContracts.map(contract => (
-                      <div
-                        key={contract.contract_id}
-                        className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-                      >
-                        <div className="flex flex-wrap justify-between items-center mb-3">
-                          <h4 className="text-base font-medium text-gray-900 dark:text-white">
-                            {contract.vendor}
-                          </h4>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {new Date(contract.start_date).toLocaleDateString()} -{' '}
-                            {new Date(contract.end_date).toLocaleDateString()}
-                          </span>
-                        </div>
-
-                        {/* Devices Information */}
-                        <div className="mt-2 mb-3">
-                          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
-                            <div className="flex items-center">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 mr-1 text-blue-500"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                />
-                              </svg>
-                              {t('buildingManager.viewBuilding.contracts.devices')} ({contract.devices.length})
-                            </div>
-                            {contract.devices.length > INITIAL_DEVICES_SHOWN && (
-                              <button
-                                onClick={() => toggleContractDevices(contract.contract_id)}
-                                className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
-                              >
-                                {expandedContracts[contract.contract_id] ? (
-                                  <>
-                                    {t('common.showLess')} <ChevronUp className="h-4 w-4 ml-1" />
-                                  </>
-                                ) : (
-                                  <>
-                                    {t('common.showMore')} <ChevronDown className="h-4 w-4 ml-1" />
-                                  </>
-                                )}
-                              </button>
-                            )}
+                  <div className="h-[calc(100vh-500px)] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-4">
+                      {getContractsPagination().currentContracts.map(contract => (
+                        <div
+                          key={contract.contract_id}
+                          className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                        >
+                          <div className="flex flex-wrap justify-between items-center mb-3">
+                            <h4 className="text-base font-medium text-gray-900 dark:text-white">
+                              {contract.vendor}
+                            </h4>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(contract.start_date).toLocaleDateString()} -{' '}
+                              {new Date(contract.end_date).toLocaleDateString()}
+                            </span>
                           </div>
 
-                          {/* Search input */}
-                          <div className="relative mb-3">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <Search className="h-4 w-4 text-gray-400" />
-                            </div>
-                            <input
-                              type="text"
-                              value={deviceSearches[contract.contract_id] || ''}
-                              onChange={(e) => handleDeviceSearch(contract.contract_id, e.target.value)}
-                              placeholder={t('buildingManager.viewBuilding.contracts.searchDevices')}
-                              className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                            />
-                          </div>
-
-                          <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2">
-                            <div className="grid gap-2">
-                              {(() => {
-                                const filteredDevices = getFilteredDevices(contract.devices, contract.contract_id)
-                                const displayedDevices = expandedContracts[contract.contract_id]
-                                  ? filteredDevices
-                                  : filteredDevices.slice(0, INITIAL_DEVICES_SHOWN)
-
-                                if (filteredDevices.length === 0) {
-                                  return (
-                                    <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
-                                      {t('buildingManager.viewBuilding.contracts.noDevicesFound')}
-                                    </div>
-                                  )
-                                }
-
-                                return displayedDevices.map(device => (
-                                  <div
-                                    key={device.device_id}
-                                    className={`text-sm p-2.5 rounded border-l-2 ${device.buildingDetailId === buildingDetailId
-                                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                      : 'border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700'
-                                      }`}
-                                  >
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-medium truncate">{device.name}</span>
-                                        <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs text-gray-700 dark:text-gray-300">
-                                          {device.type}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                                        <span className="flex items-center">
-                                          <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                          </svg>
-                                          {device.model}
-                                        </span>
-                                        <span className="flex items-center">
-                                          <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
-                                          </svg>
-                                          {device.manufacturer}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))
-                              })()}
-                            </div>
-
-                            {!expandedContracts[contract.contract_id] &&
-                              getFilteredDevices(contract.devices, contract.contract_id).length > INITIAL_DEVICES_SHOWN && (
-                                <div className="mt-2 text-center">
-                                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                                    {t('buildingManager.viewBuilding.devices.moreDevices', {
-                                      count: getFilteredDevices(contract.devices, contract.contract_id).length - INITIAL_DEVICES_SHOWN
-                                    })}
-                                  </span>
-                                </div>
+                          {/* Devices Information */}
+                          <div className="mt-2 mb-3">
+                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
+                              <div className="flex items-center">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 mr-1 text-blue-500"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                  />
+                                </svg>
+                                {t('buildingManager.viewBuilding.contracts.devices')} ({contract.devices.length})
+                              </div>
+                              {contract.devices.length > INITIAL_DEVICES_SHOWN && (
+                                <button
+                                  onClick={() => toggleContractDevices(contract.contract_id)}
+                                  className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
+                                >
+                                  {expandedContracts[contract.contract_id] ? (
+                                    <>
+                                      {t('common.showLess')} <ChevronUp className="h-4 w-4 ml-1" />
+                                    </>
+                                  ) : (
+                                    <>
+                                      {t('common.showMore')} <ChevronDown className="h-4 w-4 ml-1" />
+                                    </>
+                                  )}
+                                </button>
                               )}
+                            </div>
+
+                            {/* Search input */}
+                            <div className="relative mb-3">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Search className="h-4 w-4 text-gray-400" />
+                              </div>
+                              <input
+                                type="text"
+                                value={deviceSearches[contract.contract_id] || ''}
+                                onChange={(e) => handleDeviceSearch(contract.contract_id, e.target.value)}
+                                placeholder={t('buildingManager.viewBuilding.contracts.searchDevices')}
+                                className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+
+                            <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2">
+                              <div className="grid gap-2">
+                                {(() => {
+                                  const filteredDevices = getFilteredDevices(contract.devices, contract.contract_id)
+                                  const displayedDevices = expandedContracts[contract.contract_id]
+                                    ? filteredDevices
+                                    : filteredDevices.slice(0, INITIAL_DEVICES_SHOWN)
+
+                                  if (filteredDevices.length === 0) {
+                                    return (
+                                      <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+                                        {t('buildingManager.viewBuilding.contracts.noDevicesFound')}
+                                      </div>
+                                    )
+                                  }
+
+                                  return displayedDevices.map(device => (
+                                    <div
+                                      key={device.device_id}
+                                      className={`text-sm p-2.5 rounded border-l-2 ${device.buildingDetailId === buildingDetailId
+                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                        : 'border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700'
+                                        }`}
+                                    >
+                                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium truncate">{device.name}</span>
+                                          <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs text-gray-700 dark:text-gray-300">
+                                            {device.type}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                          <span className="flex items-center">
+                                            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                            {device.model}
+                                          </span>
+                                          <span className="flex items-center">
+                                            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
+                                            </svg>
+                                            {device.manufacturer}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))
+                                })()}
+                              </div>
+
+                              {!expandedContracts[contract.contract_id] &&
+                                getFilteredDevices(contract.devices, contract.contract_id).length > INITIAL_DEVICES_SHOWN && (
+                                  <div className="mt-2 text-center">
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                      {t('buildingManager.viewBuilding.devices.moreDevices', {
+                                        count: getFilteredDevices(contract.devices, contract.contract_id).length - INITIAL_DEVICES_SHOWN
+                                      })}
+                                    </span>
+                                  </div>
+                                )}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            <a
+                              href={`${contract.fileUrl}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                              <Download className="w-3.5 h-3.5 mr-1" />
+                              {t('buildingManager.viewBuilding.contracts.actions.download')}
+                            </a>
+                            <a
+                              href={`${contract.viewUrl}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5 mr-1" />
+                              {t('buildingManager.viewBuilding.contracts.actions.view')}
+                            </a>
+                            <a
+                              href={`${contract.directFileUrl}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-800 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            >
+                              <FileText className="w-3.5 h-3.5 mr-1" />
+                              {t('buildingManager.viewBuilding.contracts.actions.directFile')}
+                            </a>
                           </div>
                         </div>
-
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          <a
-                            href={`${contract.fileUrl}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-                          >
-                            <Download className="w-3.5 h-3.5 mr-1" />
-                            {t('buildingManager.viewBuilding.contracts.actions.download')}
-                          </a>
-                          <a
-                            href={`${contract.viewUrl}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
-                          >
-                            <Eye className="w-3.5 h-3.5 mr-1" />
-                            {t('buildingManager.viewBuilding.contracts.actions.view')}
-                          </a>
-                          <a
-                            href={`${contract.directFileUrl}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-800 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                          >
-                            <FileText className="w-3.5 h-3.5 mr-1" />
-                            {t('buildingManager.viewBuilding.contracts.actions.directFile')}
-                          </a>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -1256,6 +1260,44 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
           ></motion.div>
         </motion.div>
       ) : null}
+
+      <style>
+        {`
+          /* Custom scrollbar styles */
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+          }
+
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+          }
+
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+            border: 2px solid #f1f1f1;
+          }
+
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+          }
+
+          /* Dark mode */
+          .dark .custom-scrollbar::-webkit-scrollbar-track {
+            background: #374151;
+          }
+
+          .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4B5563;
+            border: 2px solid #374151;
+          }
+
+          .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #6B7280;
+          }
+        `}
+      </style>
     </Modal>
   )
 }

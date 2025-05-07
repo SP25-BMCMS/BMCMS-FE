@@ -262,7 +262,6 @@ const StaffManagement: React.FC = () => {
           <DropdownMenu
             onViewDetail={() => handleViewDetail(item)}
             onChangeStatus={() => handleOpenDeptPosModal(item)}
-            onRemove={() => { }}
             changeStatusTitle={t('staffManagement.changeDepartment')}
           />
         </div>
@@ -317,21 +316,25 @@ const StaffManagement: React.FC = () => {
             label={t('staffManagement.addStaff1')}
             icon={<FiUserPlus />}
             onClick={openModal}
-            className="min-w-[160px] whitespace-nowrap"
+            className="min-w-[170px] whitespace-nowrap"
           />
         </div>
       </div>
 
-      <Table<Staff>
-        data={staffList}
-        columns={columns}
-        keyExtractor={item => item.id}
-        onRowClick={item => { }}
-        className="w-[95%] mx-auto"
-        tableClassName="w-full"
-        isLoading={isLoadingStaff}
-        emptyText={t('staffManagement.noData')}
-      />
+      <div className="w-[95%] mx-auto overflow-x-auto">
+        <div className="min-w-[750px] h-[calc(100vh-340px)] overflow-y-auto">
+          <Table<Staff>
+            data={staffList}
+            columns={columns}
+            keyExtractor={item => item.id}
+            onRowClick={item => { }}
+            className="w-full"
+            tableClassName="w-full"
+            isLoading={isLoadingStaff}
+            emptyText={t('staffManagement.noData')}
+          />
+        </div>
+      </div>
 
       {staffResponse && (
         <div className="w-[95%] mx-auto mt-4">
@@ -376,6 +379,41 @@ const StaffManagement: React.FC = () => {
           staffId={selectedStaff.id}
         />
       )}
+
+      <style>
+        {`
+          /* Table scrollbar styles */
+          .min-w-\\[750px\\]::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+
+          .min-w-\\[750px\\]::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .min-w-\\[750px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+          }
+
+          .dark .min-w-\\[750px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.5);
+          }
+
+          /* Ensure table header stays fixed */
+          thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+          }
+
+          .dark thead {
+            background: #1f2937;
+          }
+        `}
+      </style>
     </div>
   )
 }

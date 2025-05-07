@@ -416,7 +416,7 @@ const MaterialManagement: React.FC = () => {
       </div>
 
       <div className="w-full overflow-x-auto">
-        <div className="min-w-[800px]">
+        <div className="min-w-[800px] h-[calc(100vh-400px)] overflow-y-auto">
           <Table<Material>
             data={filteredMaterials}
             columns={columns}
@@ -441,6 +441,41 @@ const MaterialManagement: React.FC = () => {
           />
         </div>
       )}
+
+      <style>
+        {`
+          /* Table scrollbar styles */
+          .min-w-\\[800px\\]::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+
+          .min-w-\\[800px\\]::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .min-w-\\[800px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+          }
+
+          .dark .min-w-\\[800px\\]::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.5);
+          }
+
+          /* Ensure table header stays fixed */
+          thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+          }
+
+          .dark thead {
+            background: #1f2937;
+          }
+        `}
+      </style>
 
       <CreateMaterialModal
         isOpen={isCreateModalOpen}

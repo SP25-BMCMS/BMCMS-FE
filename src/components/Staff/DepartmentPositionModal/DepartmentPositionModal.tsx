@@ -1,16 +1,16 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import DepartmentPositionSelect from '../DepartmentPositionSelect';
+import React from 'react'
+import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import DepartmentPositionSelect from '../DepartmentPositionSelect'
 
 interface DepartmentPositionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  staffId: string;
-  staffName: string;
-  onSaveSuccess?: () => void;
-  initialDepartmentId?: string;
-  initialPositionId?: string;
+  isOpen: boolean
+  onClose: () => void
+  staffId: string
+  staffName: string
+  onSaveSuccess?: () => void
+  initialDepartmentId?: string
+  initialPositionId?: string
 }
 
 const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
@@ -22,18 +22,18 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
   initialDepartmentId,
   initialPositionId,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const handleSaveSuccess = () => {
-    if (onSaveSuccess) onSaveSuccess();
-    onClose();
-  };
+    if (onSaveSuccess) onSaveSuccess()
+    onClose()
+  }
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
         </div>
@@ -55,24 +55,27 @@ const DepartmentPositionModal: React.FC<DepartmentPositionModalProps> = ({
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-500 focus:outline-none"
+              aria-label={t('common.close')}
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="px-6 py-4">
-            <DepartmentPositionSelect
-              staffId={staffId}
-              onSaveSuccess={handleSaveSuccess}
-              onCancel={onClose}
-              initialDepartmentId={initialDepartmentId}
-              initialPositionId={initialPositionId}
-            />
+          <div className="px-6 py-6 min-h-[300px] flex flex-col">
+            <div className="flex-grow">
+              <DepartmentPositionSelect
+                staffId={staffId}
+                onSaveSuccess={handleSaveSuccess}
+                onCancel={onClose}
+                initialDepartmentId={initialDepartmentId}
+                initialPositionId={initialPositionId}
+              />
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DepartmentPositionModal;
+export default DepartmentPositionModal

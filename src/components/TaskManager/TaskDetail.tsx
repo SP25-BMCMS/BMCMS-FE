@@ -1,33 +1,34 @@
-import React, { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
-import tasksApi from '@/services/tasks'
-import scheduleJobsApi, { ScheduleJob } from '@/services/scheduleJobs'
-import { getAllStaff } from '@/services/staff'
-import { motion } from 'framer-motion'
-import { FORMAT_DATE_TIME } from '@/utils/helpers'
-import { STATUS_COLORS } from '@/constants/colors'
-import { IoArrowBack } from 'react-icons/io5'
-import {
-  FaUser,
-  FaCalendarAlt,
-  FaClipboardList,
-  FaCheckCircle,
-  FaExchangeAlt,
-  FaTools,
-  FaCheck,
-  FaFileAlt,
-  FaMapMarkerAlt,
-  FaMailBulk,
-  FaBuilding,
-} from 'react-icons/fa'
-import SimpleInspectionModal from '@/components/TaskManager/SimpleInspectionModal'
 import InspectionDetails from '@/components/TaskManager/InspectionDetails'
-import { StaffData, TaskAssignment, TaskResponse } from '@/types'
-import { toast } from 'react-hot-toast'
+import SimpleInspectionModal from '@/components/TaskManager/SimpleInspectionModal'
+import { STATUS_COLORS } from '@/constants/colors'
 import apiInstance from '@/lib/axios'
-import { useTranslation } from 'react-i18next'
 import buildingDetailsApi, { BuildingDetail } from '@/services/buildingDetails'
+import { getAllStaff } from '@/services/staff'
+import tasksApi from '@/services/tasks'
+import { StaffData, TaskAssignment, TaskResponse } from '@/types'
+import { FORMAT_DATE } from '@/utils/format'
+import { FORMAT_DATE_TIME } from '@/utils/helpers'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
+import { Search } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+import { toast } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
+import {
+  FaBuilding,
+  FaCalendarAlt,
+  FaCheck,
+  FaCheckCircle,
+  FaClipboardList,
+  FaExchangeAlt,
+  FaFileAlt,
+  FaMailBulk,
+  FaMapMarkerAlt,
+  FaTools,
+  FaUser,
+} from 'react-icons/fa'
+import { IoArrowBack } from 'react-icons/io5'
+import { useNavigate, useParams } from 'react-router-dom'
 
 // Extended task data interface that includes both task assignment and crack info
 interface ExtendedTaskData {
@@ -60,7 +61,7 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ loadingText }) => {
   )
 }
 
-// Update StyledSelect component
+// Update StyledSelect interface
 interface StyledSelectProps {
   value: string
   onChange: (value: string) => void
@@ -71,8 +72,12 @@ interface StyledSelectProps {
   label: string
   error?: string
   loadingText?: string
+  onSearch?: (value: string) => void
+  searchValue?: string
+  searchPlaceholder?: string
 }
 
+// Update StyledSelect component
 const StyledSelect: React.FC<StyledSelectProps> = ({
   value,
   onChange,
@@ -82,40 +87,109 @@ const StyledSelect: React.FC<StyledSelectProps> = ({
   isLoading,
   label,
   error,
-  loadingText
-}) => (
-  <div className="space-y-2">
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
-      {label}
-    </label>
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-md dark:bg-gray-700 dark:text-gray-300 transition-all duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        aria-label={label}
-        disabled={isLoading}
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-        <Icon className="h-5 w-5 text-gray-400" />
+  loadingText,
+  onSearch,
+  searchValue,
+  searchPlaceholder
+}) => {
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+  const selectRef = useRef<HTMLDivElement>(null)
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div className="space-y-2" ref={selectRef}>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+        {label}
+      </label>
+      <div className="relative">
+        <div
+          className="w-full cursor-pointer"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <div className={`block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-md dark:bg-gray-700 dark:text-gray-300 transition-all duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            {value ? options.find(opt => opt.value === value)?.label : placeholder}
+          </div>
+          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+            <Icon className="h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+
+        {/* Dropdown */}
+        {isOpen && !isLoading && (
+          <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+            {/* Search input inside dropdown */}
+            {onSearch && (
+              <div className="sticky top-0 p-2 bg-white dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => onSearch(e.target.value)}
+                    placeholder={searchPlaceholder}
+                    className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Options */}
+            <div className="py-1">
+              {options.length === 0 ? (
+                <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                  {t('common.noResults')}
+                </div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option.value}
+                    className={`px-4 py-2 text-sm cursor-pointer ${value === option.value
+                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
+                      }`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onChange(option.value)
+                      // Close dropdown after selection
+                      setIsOpen(false)
+                      // Clear search when closing
+                      if (onSearch) {
+                        onSearch('')
+                      }
+                    }}
+                  >
+                    {option.label}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </div>
+      {isLoading && <LoadingIndicator loadingText={loadingText} />}
+      {error && !isLoading && (
+        <p className="mt-1 text-xs text-red-500">
+          {error}
+        </p>
+      )}
     </div>
-    {isLoading && <LoadingIndicator loadingText={loadingText} />}
-    {error && !isLoading && (
-      <p className="mt-1 text-xs text-red-500">
-        {error}
-      </p>
-    )}
-  </div>
-)
+  )
+}
 
 // Add function to get user data from localStorage
 const getUserFromLocalStorage = () => {
@@ -139,6 +213,7 @@ const TaskDetail: React.FC = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [selectedScheduleId, setSelectedScheduleId] = useState<string>('')
   const [selectedScheduleJobId, setSelectedScheduleJobId] = useState<string>('')
+  const [scheduleSearch, setScheduleSearch] = useState<string>('')
 
   // Get user data from localStorage
   const user = getUserFromLocalStorage()
@@ -355,12 +430,12 @@ const TaskDetail: React.FC = () => {
     },
   })
 
-  // Update schedules query to log response
+  // Update schedules query to include limit 9999
   const { data: schedules, isLoading: isLoadingSchedules } = useQuery({
     queryKey: ['schedules'],
     queryFn: async () => {
       try {
-        const response = await apiInstance.get('/schedules')
+        const response = await apiInstance.get('/schedules?limit=9999')
         console.log('Raw Schedules Response:', response.data)
         return response.data.data
       } catch (error) {
@@ -533,6 +608,21 @@ const TaskDetail: React.FC = () => {
   // Add handler for navigating to schedule job creation
   const handleNavigateToScheduleJob = () => {
     navigate('/maintenance-cycles')
+  }
+
+  // Add function to filter schedules
+  const getFilteredSchedules = () => {
+    if (!schedules) return []
+    const searchTerm = scheduleSearch.toLowerCase()
+    if (!searchTerm) return schedules
+
+    return schedules.filter(schedule => {
+      const cycleInfo = schedule.cycle
+        ? `${schedule.cycle.device_type} - ${schedule.cycle.frequency} (${schedule.cycle.basis})`
+        : ''
+      const scheduleText = `${schedule.schedule_name} ${cycleInfo}`.toLowerCase()
+      return scheduleText.includes(searchTerm)
+    })
   }
 
   return (
@@ -912,21 +1002,21 @@ const TaskDetail: React.FC = () => {
                         setSelectedScheduleId(value)
                         setSelectedScheduleJobId('')
                       }}
-                      options={schedules?.map(schedule => {
-                        const cycleInfo = schedule.cycle
-                          ? `${schedule.cycle.device_type} - ${schedule.cycle.frequency} (${schedule.cycle.basis})`
-                          : ''
+                      options={getFilteredSchedules().map(schedule => {
                         return {
                           value: schedule.schedule_id,
-                          label: `${schedule.schedule_name} - ${cycleInfo} (${new Date(schedule.start_date).toLocaleDateString()})`
+                          label: `${schedule.schedule_name} -  (${FORMAT_DATE(schedule.start_date)})`
                         }
-                      }) || []}
+                      })}
                       placeholder={t('taskManagement.detail.selectSchedule')}
                       icon={FaCalendarAlt}
                       isLoading={isLoadingSchedules}
                       label={t('taskManagement.detail.selectScheduleLabel')}
                       error={!selectedScheduleId && !isLoadingSchedules ? t('taskManagement.detail.scheduleRequired') : undefined}
                       loadingText={t('taskManagement.detail.loadingSchedules')}
+                      onSearch={setScheduleSearch}
+                      searchValue={scheduleSearch}
+                      searchPlaceholder={t('taskManagement.detail.searchSchedules')}
                     />
                   )}
                 </div>
@@ -939,31 +1029,25 @@ const TaskDetail: React.FC = () => {
                       onChange={(value) => setSelectedScheduleJobId(value)}
                       options={schedules
                         ?.find(s => s.schedule_id === selectedScheduleId)
-                        ?.schedule_job?.map(job => {
-                          let label = 'Unknown Building'
-                          let locationInfoText = ''
-
+                        ?.schedule_job
+                        ?.filter(job => {
+                          // Filter out jobs with unknown building details
+                          const mappedBuildingDetail = job.buildingDetailId ? buildingDetailMap.get(job.buildingDetailId) : null
+                          const jobBuildingDetail = job.buildingDetail
+                          return mappedBuildingDetail || (jobBuildingDetail && jobBuildingDetail.name)
+                        })
+                        ?.map(job => {
+                          let label = ''
                           // Try to get building detail from the map
                           const mappedBuildingDetail = job.buildingDetailId ? buildingDetailMap.get(job.buildingDetailId) : null
-
                           // Try to get building detail from the job
                           const jobBuildingDetail = job.buildingDetail
-
                           if (jobBuildingDetail?.name) {
                             label = jobBuildingDetail.name
                           } else if (mappedBuildingDetail) {
                             label = mappedBuildingDetail.name
-                            locationInfoText = mappedBuildingDetail.locationDetails
-                              ?.map(loc => `${loc.floorNumber}-${loc.roomNumber}`)
-                              .join(', ') || ''
                           }
-
-                          if (locationInfoText) {
-                            label += ` (${locationInfoText})`
-                          }
-
-                          label += ` - ${new Date(job.run_date).toLocaleDateString()}`
-
+                          label += ` - ${FORMAT_DATE(job.run_date)}`
                           return {
                             value: job.schedule_job_id,
                             label

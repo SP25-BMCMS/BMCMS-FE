@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Modal from './Modal'
 import { getBuildingDetail } from '@/services/building'
 import { toast } from 'react-hot-toast'
-import { Building, MapPin, Calendar, Home, Layers, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Building, MapPin, Calendar, Home, Layers, ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
@@ -30,6 +30,9 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
   const [currentDevicePage, setCurrentDevicePage] = useState(1)
   const [currentContractPage, setCurrentContractPage] = useState(1)
   const itemsPerPage = 6
+
+  // New state for device search
+  const [deviceSearch, setDeviceSearch] = useState<string>('')
 
   // Reset state when modal closes or buildingDetailId changes
   useEffect(() => {
@@ -94,14 +97,29 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
     setCurrentContractPage(page)
   }
 
-  // Calculate pagination for devices
-  const getDevicesPagination = () => {
+  // Add function to filter devices
+  const getFilteredDevices = () => {
     const devices = buildingDetail?.devices || []
-    const totalDevices = devices.length
+    const searchTerm = deviceSearch.toLowerCase()
+
+    if (!searchTerm) return devices
+
+    return devices.filter(device =>
+      device.name.toLowerCase().includes(searchTerm) ||
+      device.type.toLowerCase().includes(searchTerm) ||
+      device.model.toLowerCase().includes(searchTerm) ||
+      device.manufacturer.toLowerCase().includes(searchTerm)
+    )
+  }
+
+  // Update getDevicesPagination function
+  const getDevicesPagination = () => {
+    const filteredDevices = getFilteredDevices()
+    const totalDevices = filteredDevices.length
     const totalDevicePages = Math.ceil(totalDevices / itemsPerPage)
     const startIndex = (currentDevicePage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
-    const currentDevices = devices.slice(startIndex, endIndex)
+    const currentDevices = filteredDevices.slice(startIndex, endIndex)
 
     return {
       currentDevices,
@@ -408,93 +426,120 @@ const ViewBuildingDetail: React.FC<ViewBuildingDetailProps> = ({
               className="mt-6 bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm"
               variants={itemVariants}
             >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Building className="h-5 w-5 text-blue-500" />
-                Thiết bị ({buildingDetail.devices.length})
-              </h3>
+              <div className="flex flex-col space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Building className="h-5 w-5 text-blue-500" />
+                    Thiết bị ({buildingDetail.devices.length})
+                  </h3>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getDevicesPagination().currentDevices.map((device: any) => (
-                  <div
-                    key={device.id}
-                    className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">{device.name}</span>
-                    </div>
-
-                    <div className="space-y-1 text-sm">
-                      <div className="flex items-center">
-                        <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
-                        <span className="text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">Loại:</span> {device.type}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center">
-                        <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
-                        <span className="text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">Model:</span> {device.model}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center">
-                        <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
-                        <span className="text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">Nhà sản xuất:</span> {device.manufacturer}
-                        </span>
-                      </div>
-                    </div>
+                {/* Search input */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400" />
                   </div>
-                ))}
-              </div>
+                  <input
+                    type="text"
+                    value={deviceSearch}
+                    onChange={(e) => {
+                      setDeviceSearch(e.target.value)
+                      setCurrentDevicePage(1) // Reset to first page when searching
+                    }}
+                    placeholder={t('buildingManager.searchDevices')}
+                    className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
 
-              {/* Devices Pagination */}
-              {buildingDetail.devices.length > itemsPerPage && (
-                <div className="mt-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {t('common.pagination.showing')} {getDevicesPagination().startIndex + 1}-
-                    {Math.min(getDevicesPagination().endIndex, buildingDetail.devices.length)} {t('common.pagination.of')}{' '}
-                    {buildingDetail.devices.length} {t('common.pagination.items')}
+                {getDevicesPagination().currentDevices.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    {deviceSearch ? t('buildingManager.noDevicesFound') : t('buildingManager.noDevices')}
                   </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleDevicePageChange(currentDevicePage - 1)}
-                      disabled={currentDevicePage === 1}
-                      aria-label={t('common.previous')}
-                      className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === 1
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
-                        : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                        }`}
-                    >
-                      <ChevronLeft className="h-5 w-5" />
-                    </button>
-                    {[...Array(getDevicesPagination().totalDevicePages)].map((_, index) => (
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {getDevicesPagination().currentDevices.map((device: any) => (
+                      <div
+                        key={device.id}
+                        className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium">{device.name}</span>
+                        </div>
+
+                        <div className="space-y-1 text-sm">
+                          <div className="flex items-center">
+                            <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
+                            <span className="text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Loại:</span> {device.type}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center">
+                            <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
+                            <span className="text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Model:</span> {device.model}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center">
+                            <ArrowRight className="h-3 w-3 text-blue-500 mr-2 flex-shrink-0" />
+                            <span className="text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Nhà sản xuất:</span> {device.manufacturer}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Devices Pagination */}
+                {getDevicesPagination().totalDevices > itemsPerPage && (
+                  <div className="mt-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {t('common.pagination.showing')} {getDevicesPagination().startIndex + 1}-
+                      {Math.min(getDevicesPagination().endIndex, getDevicesPagination().totalDevices)} {t('common.pagination.of')}{' '}
+                      {getDevicesPagination().totalDevices} {t('common.items')}
+                    </div>
+                    <div className="flex space-x-2">
                       <button
-                        key={index}
-                        onClick={() => handleDevicePageChange(index + 1)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === index + 1
-                          ? 'bg-blue-500 text-white'
+                        onClick={() => handleDevicePageChange(currentDevicePage - 1)}
+                        disabled={currentDevicePage === 1}
+                        aria-label={t('common.previous')}
+                        className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === 1
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
                           : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                           }`}
                       >
-                        {index + 1}
+                        <ChevronLeft className="h-5 w-5" />
                       </button>
-                    ))}
-                    <button
-                      onClick={() => handleDevicePageChange(currentDevicePage + 1)}
-                      disabled={currentDevicePage === getDevicesPagination().totalDevicePages}
-                      aria-label={t('common.next')}
-                      className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === getDevicesPagination().totalDevicePages
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
-                        : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                        }`}
-                    >
-                      <ChevronRight className="h-5 w-5" />
-                    </button>
+                      {[...Array(getDevicesPagination().totalDevicePages)].map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleDevicePageChange(index + 1)}
+                          className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === index + 1
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                          {index + 1}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => handleDevicePageChange(currentDevicePage + 1)}
+                        disabled={currentDevicePage === getDevicesPagination().totalDevicePages}
+                        aria-label={t('common.next')}
+                        className={`px-3 py-1 rounded-md text-sm font-medium ${currentDevicePage === getDevicesPagination().totalDevicePages
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                          }`}
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </motion.div>
           )}
 

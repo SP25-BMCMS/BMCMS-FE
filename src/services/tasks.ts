@@ -264,6 +264,16 @@ export const useSendNotificationToResident = () => {
   })
 }
 
+const deleteTask = async (taskId: string): Promise<any> => {
+  try {
+    const endpoint = `/tasks/task/${taskId}`
+    const { data } = await apiInstance.delete(endpoint)
+    return data
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to delete task')
+  }
+}
+
 const tasksApi = {
   getTasks,
   getTasksByType,
@@ -275,6 +285,7 @@ const tasksApi = {
   updateCrackStatus,
   exportTaskCostPdf,
   sendNotificationToResident,
+  deleteTask,
 }
 
 export default tasksApi
