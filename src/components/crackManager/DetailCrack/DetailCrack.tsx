@@ -628,36 +628,29 @@ const DetailCrack: React.FC = () => {
                               {/* Progressive Image Loading */}
                               {visibleImages[`ai-${detail.crackDetailsId}`] && (
                                 <>
-                                  {/* Low quality blurred image (always visible) */}
-                                  <img
-                                    src={
-                                      detail.aiDetectionUrl ||
-                                      'https://via.placeholder.com/400x300?text=No+AI+Detection'
-                                    }
-                                    alt=""
-                                    className=" w-full h-full"
-                                    loading="lazy"
-                                  />
-
                                   {/* Full resolution image */}
                                   <img
-                                    src={
-                                      detail.aiDetectionUrl ||
-                                      'https://via.placeholder.com/400x300?text=No+AI+Detection'
-                                    }
+                                    src={detail.aiDetectionUrl || detail.photoUrl}
                                     alt={`${t('crackManagement.aiDetected')} ${index + 1}`}
                                     className={`w-full h-full object-cover transition-all duration-1000 ${imageLoadedStates[`ai-${detail.crackDetailsId}`]
                                       ? 'opacity-100 filter blur-0'
                                       : 'opacity-0 filter blur-xl'
                                       }`}
                                     onLoad={() => handleImageLoad(`ai-${detail.crackDetailsId}`)}
-                                    onError={() => handleImageError(`ai-${detail.crackDetailsId}`)}
+                                    onError={(e) => {
+                                      // If AI detection image fails, show original image
+                                      if (e.currentTarget.src === detail.aiDetectionUrl && detail.photoUrl) {
+                                        e.currentTarget.src = detail.photoUrl
+                                      } else {
+                                        handleImageError(`ai-${detail.crackDetailsId}`)
+                                      }
+                                    }}
                                     loading="lazy"
                                   />
                                 </>
                               )}
 
-                              {/* Error state */}
+                              {/* Error state - only show if both images fail */}
                               {visibleImages[`ai-${detail.crackDetailsId}`] &&
                                 imageErrorStates[`ai-${detail.crackDetailsId}`] && (
                                   <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
