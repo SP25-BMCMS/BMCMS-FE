@@ -293,9 +293,6 @@ const DetailCrack: React.FC = () => {
             </button>
             <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
               {t('crackManagement.crackDetails')}
-              <span className="ml-3 px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-normal text-gray-700 dark:text-gray-300">
-                ID: {crack.crackReportId.substring(0, 8)}...
-              </span>
             </h1>
           </div>
 
@@ -668,7 +665,6 @@ const DetailCrack: React.FC = () => {
 
                         <div className="text-sm text-gray-500 dark:text-gray-400 flex justify-between">
                           <span>{t('common.uploaded')}: {formatDate(detail.createdAt)}</span>
-                          <span>ID: {detail.crackDetailsId.substring(0, 8)}...</span>
                         </div>
                       </div>
                     )

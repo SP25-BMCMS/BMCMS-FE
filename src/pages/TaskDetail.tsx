@@ -67,255 +67,179 @@ const TaskDetail: React.FC = () => {
                 <h1 className="text-2xl font-bold dark:text-white">{t('taskManagement.detail.title')}</h1>
             </div>
 
-            <div className="grid grid-cols-12 gap-6">
-                {/* Left column - Task details */}
-                <div className="col-span-12 lg:col-span-4">
-                    {/* Task Info Card */}
-                    <div className="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 mb-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center">
-                                <FaClipboardList className="mr-2 text-blue-500" />
-                                <h2 className="text-xl font-semibold dark:text-white">{task.description}</h2>
-                            </div>
-                            <span
-                                className="px-3 py-1 rounded-full text-sm font-medium"
-                                style={{
-                                    backgroundColor: STATUS_COLORS[task.status]?.BG || STATUS_COLORS.DEFAULT.BG,
-                                    color: STATUS_COLORS[task.status]?.TEXT || STATUS_COLORS.DEFAULT.TEXT,
-                                    border: '1px solid',
-                                    borderColor: STATUS_COLORS[task.status]?.BORDER || STATUS_COLORS.DEFAULT.BORDER,
-                                }}
-                            >
-                                {t(`taskManagement.detail.taskStatus.${task.status?.toLowerCase()}`)}
-                            </span>
+            {/* Task details card */}
+            <div className="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 mb-6">
+                <div className="flex items-start justify-between mb-4">
+                    <div>
+                        <div className="flex items-center mb-2">
+                            <FaClipboardList className="mr-2 text-blue-500" />
+                            <h2 className="text-xl font-semibold dark:text-white">{task.description}</h2>
                         </div>
-
-                        <div className="space-y-4">
-                            <div className="flex items-center text-sm">
-                                <FaCalendarAlt className="mr-2 text-gray-500" />
-                                <span className="text-gray-700 dark:text-gray-300">
-                                    {t('taskManagement.detail.created')}: {FORMAT_DATE_TIME(task.created_at)}
-                                </span>
-                            </div>
-                            <div className="flex items-center text-sm">
-                                <FaCalendarAlt className="mr-2 text-gray-500" />
-                                <span className="text-gray-700 dark:text-gray-300">
-                                    {t('taskManagement.detail.updated')}: {FORMAT_DATE_TIME(task.updated_at)}
-                                </span>
-                            </div>
-
-                            {crackInfo && (
-                                <>
-                                    <div className="flex items-center text-sm">
-                                        <FaUser className="mr-2 text-gray-500" />
-                                        <span className="text-gray-700 dark:text-gray-300">
-                                            {t('taskManagement.detail.reportedBy')}: {crackInfo.reportedBy?.username || t('common.unknown')}
-                                        </span>
-                                    </div>
-                                    {crackInfo.verifiedBy && (
-                                        <div className="flex items-center text-sm">
-                                            <FaCheckCircle className="mr-2 text-gray-500" />
-                                            <span className="text-gray-700 dark:text-gray-300">
-                                                {t('taskManagement.detail.verifiedBy')}: {crackInfo.verifiedBy?.username || t('common.unknown')}
-                                            </span>
-                                        </div>
-                                    )}
-                                    {crackInfo.position && (
-                                        <div className="flex items-center text-sm">
-                                            <FaMapMarkerAlt className="mr-2 text-gray-500" />
-                                            <span className="text-gray-700 dark:text-gray-300">
-                                                {t('taskManagement.detail.location')}: {crackInfo.position}
-                                            </span>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
-
-                        {crackInfo?.isPrivatesAsset === false && task.status !== 'Completed' && (
-                            <div className="mt-6">
-                                {isLoadingSchedules ? (
-                                    <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
-                                        <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                                        <span className="text-sm text-gray-600 dark:text-gray-300">
-                                            {t('taskManagement.detail.loadingSchedules')}
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <button
-                                        onClick={handleOpenConfirmModal}
-                                        className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                                    >
-                                        <FaMailBulk className="w-5 h-5 mr-2" />
-                                        {t('taskManagement.detail.sendNotification')}
-                                    </button>
-                                )}
-                            </div>
-                        )}
                     </div>
+                    <span
+                        className="px-3 py-1 rounded-full text-sm font-medium"
+                        style={{
+                            backgroundColor: STATUS_COLORS[task.status]?.BG || STATUS_COLORS.DEFAULT.BG,
+                            color: STATUS_COLORS[task.status]?.TEXT || STATUS_COLORS.DEFAULT.TEXT,
+                            border: '1px solid',
+                            borderColor: STATUS_COLORS[task.status]?.BORDER || STATUS_COLORS.DEFAULT.BORDER,
+                        }}
+                    >
+                        {t(`taskManagement.detail.taskStatus.${task.status.toLowerCase()}`)}
+                    </span>
                 </div>
 
-                {/* Right column - Assignments and Inspections */}
-                <div className="col-span-12 lg:col-span-8">
-                    {/* Assignments Grid */}
-                    <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-                        {Object.entries(assignmentsByStatus).map(([status, assignments]) => (
-                            <div key={status} className="bg-white dark:bg-gray-700 rounded-lg shadow-md">
-                                <div className="p-4 border-b border-gray-200 dark:border-gray-600">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center">
-                                            <div
-                                                className="w-3 h-3 rounded-full mr-2"
-                                                style={{ backgroundColor: STATUS_COLORS[status.toUpperCase()]?.TEXT }}
-                                            ></div>
-                                            <h3 className="font-semibold dark:text-white">
-                                                {t(`taskManagement.detail.assignments.${status.toLowerCase()}`)}
-                                            </h3>
-                                        </div>
-                                        <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-xs rounded-full">
-                                            {assignments.length}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="p-2 h-[calc(100vh-500px)] overflow-y-auto custom-scrollbar">
-                                    {assignments.map((assignment, index) => (
-                                        <motion.div
-                                            key={assignment.assignment_id}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.2, delay: index * 0.05 }}
-                                            className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-3 border-l-4 hover:shadow-md transition cursor-pointer transform hover:-translate-y-0.5"
-                                            style={{ borderLeftColor: STATUS_COLORS[status.toUpperCase()]?.TEXT }}
-                                            onClick={() => handleAssignmentClick(assignment.assignment_id)}
-                                        >
-                                            <div className="flex justify-between items-start mb-3">
-                                                <h4 className="font-medium text-sm dark:text-white">
-                                                    {t('taskManagement.detail.assignments.assignment')} {index + 1}
-                                                </h4>
-                                                {getStatusIcon(assignment.status)}
-                                            </div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
-                                                {assignment.description}
-                                            </p>
-                                            <div className="text-xs space-y-2">
-                                                <div className="flex items-center text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                                                    <FaUser className="mr-2" />
-                                                    {displayStaffName(assignment)}
-                                                </div>
-                                                <div className="flex items-center text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                                                    <FaCalendarAlt className="mr-2" />
-                                                    {FORMAT_DATE_TIME(assignment.updated_at)}
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                    {assignments.length === 0 && (
-                                        <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-                                            <div className="mb-2">
-                                                <FaClipboardList className="w-8 h-8 mx-auto text-gray-400 dark:text-gray-600" />
-                                            </div>
-                                            {t('taskManagement.detail.assignments.noAssignments')}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center">
+                        <FaCalendarAlt className="mr-2 text-gray-500" />
+                        <span className="text-gray-700 dark:text-gray-300">
+                            {t('taskManagement.detail.created')}: {FORMAT_DATE_TIME(task.created_at)}
+                        </span>
+                    </div>
+                    <div className="flex items-center">
+                        <FaCalendarAlt className="mr-2 text-gray-500" />
+                        <span className="text-gray-700 dark:text-gray-300">
+                            {t('taskManagement.detail.updated')}: {FORMAT_DATE_TIME(task.updated_at)}
+                        </span>
                     </div>
 
-                    {/* Inspections Section */}
-                    {selectedAssignmentId && (
-                        <div className="bg-white dark:bg-gray-700 rounded-lg shadow-md">
-                            <div className="p-4 border-b border-gray-200 dark:border-gray-600">
-                                <h3 className="font-semibold dark:text-white flex items-center">
-                                    {t('taskManagement.detail.inspections.title')}
-                                    <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-xs rounded-full">
-                                        {getPaginatedInspections().totalItems}
+                    {/* Add user information if this is a crack repair task */}
+                    {crackInfo && (
+                        <>
+                            <div className="flex items-center">
+                                <FaUser className="mr-2 text-gray-500" />
+                                <span className="text-gray-700 dark:text-gray-300">
+                                    {t('taskManagement.detail.reportedBy')}: {crackInfo.reportedBy?.username || t('common.unknown')}
+                                </span>
+                            </div>
+                            {crackInfo.verifiedBy && (
+                                <div className="flex items-center">
+                                    <FaCheckCircle className="mr-2 text-gray-500" />
+                                    <span className="text-gray-700 dark:text-gray-300">
+                                        {t('taskManagement.detail.verifiedBy')}: {crackInfo.verifiedBy?.username || t('common.unknown')}
                                     </span>
-                                </h3>
-                            </div>
-
-                            <div className="p-4">
-                                <div className="h-[calc(100vh-500px)] overflow-y-auto custom-scrollbar">
-                                    {isLoadingInspections ? (
-                                        <div className="flex justify-center items-center h-full">
-                                            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                        </div>
-                                    ) : getPaginatedInspections().currentInspections.length > 0 ? (
-                                        <div className="space-y-4">
-                                            {getPaginatedInspections().currentInspections.map((inspection, index) => (
-                                                <motion.div
-                                                    key={inspection.inspection_id}
-                                                    initial={{ opacity: 0, y: 10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ duration: 0.2, delay: index * 0.05 }}
-                                                    className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg"
-                                                >
-                                                    {/* Inspection content */}
-                                                    <div className="grid grid-cols-2 gap-4 mb-4">
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center text-sm">
-                                                                <FaUser className="mr-2 text-gray-500" />
-                                                                <span className="text-gray-700 dark:text-gray-300">
-                                                                    {inspection.inspected_by_user.username}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center text-sm">
-                                                                <FaCalendarAlt className="mr-2 text-gray-500" />
-                                                                <span className="text-gray-700 dark:text-gray-300">
-                                                                    {FORMAT_DATE_TIME(inspection.inspection_date)}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        {inspection.confirmed_by_user && (
-                                                            <div className="space-y-2">
-                                                                <div className="flex items-center text-sm">
-                                                                    <FaCheckCircle className="mr-2 text-green-500" />
-                                                                    <span className="text-gray-700 dark:text-gray-300">
-                                                                        {inspection.confirmed_by_user.username}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="flex items-center text-sm">
-                                                                    <FaCalendarAlt className="mr-2 text-gray-500" />
-                                                                    <span className="text-gray-700 dark:text-gray-300">
-                                                                        {FORMAT_DATE_TIME(inspection.confirmation_date)}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                        {inspection.description}
-                                                    </p>
-                                                </motion.div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                            <FaClipboardList className="w-12 h-12 mx-auto mb-3 text-gray-400 dark:text-gray-600" />
-                                            <p>{t('taskManagement.detail.inspections.noInspections')}</p>
-                                        </div>
-                                    )}
                                 </div>
-
-                                {getPaginatedInspections().totalItems > itemsPerPage && (
-                                    <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-                                        <Pagination
-                                            currentPage={currentPage}
-                                            totalPages={getPaginatedInspections().totalPages}
-                                            onPageChange={setCurrentPage}
-                                            totalItems={getPaginatedInspections().totalItems}
-                                            itemsPerPage={itemsPerPage}
-                                            onLimitChange={setItemsPerPage}
-                                            limitOptions={[5, 10, 20, 50]}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                            )}
+                            {crackInfo.position && (
+                                <div className="flex items-center col-span-2">
+                                    <FaMapMarkerAlt className="mr-2 text-gray-500" />
+                                    <span className="text-gray-700 dark:text-gray-300">
+                                        {t('taskManagement.detail.location')}: {crackInfo.position}
+                                    </span>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
+
+                {crackInfo?.isPrivatesAsset === false && task.status !== 'Completed' && (
+                    <div className="mt-4">
+                        {isLoadingSchedules ? (
+                            <div className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md">
+                                <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <span className="text-sm text-gray-600 dark:text-gray-300">{t('taskManagement.detail.loadingSchedules')}</span>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={handleOpenConfirmModal}
+                                className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                            >
+                                <FaMailBulk className="w-5 h-5 mr-2" />
+                                {t('taskManagement.detail.sendNotification')}
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
+
+            {/* Task assignments section */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {Object.entries(assignmentsByStatus).map(([status, assignments]) => (
+                    <div key={status} className="bg-white dark:bg-gray-700 rounded-lg shadow">
+                        <div className="p-4 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
+                            <div className="flex items-center">
+                                <div
+                                    className="w-3 h-3 rounded-full mr-2"
+                                    style={{ backgroundColor: STATUS_COLORS[status.toUpperCase()]?.TEXT }}
+                                ></div>
+                                <h3 className="font-semibold dark:text-white">
+                                    {t(`taskManagement.detail.assignments.${status.toLowerCase()}`)}
+                                </h3>
+                            </div>
+                            <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-xs rounded-full">
+                                {assignments.length}
+                            </span>
+                        </div>
+                        <div className="p-2 h-[calc(100vh-400px)] overflow-y-auto custom-scrollbar">
+                            {assignments.map((assignment, index) => (
+                                <motion.div
+                                    key={`${status}-${index}`}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                                    className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-3 border-l-4 hover:shadow-md transition cursor-pointer transform hover:-translate-y-0.5"
+                                    style={{ borderLeftColor: STATUS_COLORS[status.toUpperCase()]?.TEXT }}
+                                    onClick={() => handleAssignmentClick(assignment.assignment_id)}
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h4 className="font-medium text-sm dark:text-white">
+                                            {t('taskManagement.detail.assignments.assignment')} {index + 1}
+                                        </h4>
+                                        {getStatusIcon(assignment.status)}
+                                    </div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                                        {assignment.description}
+                                    </p>
+                                    <div className="text-xs space-y-2">
+                                        <div className="flex items-center text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                            <FaUser className="mr-2" />
+                                            {displayStaffName(assignment)}
+                                        </div>
+                                        <div className="flex items-center text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                            <FaCalendarAlt className="mr-2" />
+                                            {FORMAT_DATE_TIME(assignment.updated_at)}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                            {assignments.length === 0 && (
+                                <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                                    <div className="mb-2">
+                                        <FaClipboardList className="w-8 h-8 mx-auto text-gray-400 dark:text-gray-600" />
+                                    </div>
+                                    {t('taskManagement.detail.assignments.noAssignments')}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Inspection Details Section */}
+            {task.taskAssignments && task.taskAssignments.length > 0 && (
+                <InspectionDetails taskAssignments={task.taskAssignments} />
+            )}
+
+            {/* Simple Inspection Modal */}
+            {selectedAssignmentId && selectedAssignment && (
+                <SimpleInspectionModal
+                    isOpen={!!selectedAssignmentId}
+                    onClose={handleCloseModal}
+                    assignment={selectedAssignment}
+                    inspections={inspections}
+                    isLoading={isLoadingInspections}
+                    error={inspectionsError ? String(inspectionsError) : undefined}
+                />
+            )}
+
+            {/* Add confirmation modal */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 relative">
+                        {/* ... existing modal content ... */}
+                    </div>
+                </div>
+            )}
 
             <style>
                 {`
@@ -353,9 +277,6 @@ const TaskDetail: React.FC = () => {
           }
         `}
             </style>
-
-            {/* Rest of the modals */}
-            {/* ... existing modals ... */}
         </div>
     )
 }

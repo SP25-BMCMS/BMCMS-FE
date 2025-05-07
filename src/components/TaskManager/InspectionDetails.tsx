@@ -371,8 +371,8 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
       )}
 
       {/* Inspections list */}
-      <div>
-        <div className="flex items-center mb-4">
+      <div className="h-[calc(100vh-400px)] overflow-y-auto custom-scrollbar">
+        <div className="flex items-center mb-4 sticky top-0 bg-white dark:bg-gray-700 py-2 z-10">
           <FaClipboardList className="mr-2 text-blue-500" />
           <h3 className="text-lg font-medium dark:text-white">
             {t('taskManagement.inspection.inspections')} ({inspectionsList.length})
@@ -526,6 +526,44 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
           </div>
         )}
       </div>
+
+      {/* Add custom scrollbar styles */}
+      <style>
+        {`
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+          }
+
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+          }
+
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+            border: 2px solid #f1f1f1;
+          }
+
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+          }
+
+          /* Dark mode scrollbar */
+          .dark .custom-scrollbar::-webkit-scrollbar-track {
+            background: #374151;
+          }
+
+          .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4B5563;
+            border: 2px solid #374151;
+          }
+
+          .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #6B7280;
+          }
+        `}
+      </style>
 
       {/* Full Image Modal */}
       {selectedImage && (

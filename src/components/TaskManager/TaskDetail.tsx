@@ -647,10 +647,6 @@ const TaskDetail: React.FC = () => {
               <FaClipboardList className="mr-2 text-blue-500" />
               <h2 className="text-xl font-semibold dark:text-white">{task.description}</h2>
             </div>
-            <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
-              <FaFileAlt className="mr-1" />
-              <span>{t('taskManagement.detail.taskReference')}: {task.task_id.substring(0, 8)}</span>
-            </div>
           </div>
           <span
             className="px-3 py-1 rounded-full text-sm font-medium"
