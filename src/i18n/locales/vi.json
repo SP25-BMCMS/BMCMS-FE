@@ -1138,6 +1138,7 @@
       "pending": "Chờ xử lý",
       "inprogress": "Đang xử lý",
       "inProgress": "Đang xử lý",
+      "infixing": "Đang sửa chữa",
       "waitingconfirm": "Chờ xác nhận",
       "reviewing": "Đang kiểm tra",
       "rejected": "Từ chối",

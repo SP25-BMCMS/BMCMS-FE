@@ -1194,6 +1194,7 @@
       "inprogress": "In Progress",
       "inProgress": "In Progress",
       "reviewing": "Reviewing",
+      "infixing": "In Fixing",
       "waitingconfirm": "Waiting Confirm",
       "rejected": "Rejected",
       "completed": "Completed",
