@@ -78,9 +78,9 @@ const DashboardLayout = () => {
       <Sidebar onToggle={setIsSidebarCollapsed} isCollapsed={isSidebarCollapsed} />
 
       {/* Main Content */}
-      <div className="flex-1 p-2 sm:p-4 md:p-6 transition-all duration-300">
+      <div className="flex-1 p-2 sm:p-4 md:p-6 transition-all duration-300 overflow-x-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 min-w-[800px]">
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white truncate">
             {currentTitle}
           </h1>
@@ -102,7 +102,7 @@ const DashboardLayout = () => {
         </div>
 
         {/* Outlet để render các trang con */}
-        <div className="overflow-x-auto relative">
+        <div className="min-w-[800px]">
           <Outlet />
         </div>
       </div>

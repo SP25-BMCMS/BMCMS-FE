@@ -428,20 +428,27 @@ const TaskManagement: React.FC = () => {
   // Update handleViewPdf function
   const handleViewPdf = async (taskId: string) => {
     try {
+      console.log('Opening PDF modal for task:', taskId)
       // Get task assignments for this task
       const response = await tasksApi.getTaskAssignmentsByTaskId(taskId)
-      if (response?.data?.taskAssignments) {
-        // Find the fixed assignment
-        const fixedAssignment = response.data.taskAssignments.find(
-          assignment => assignment.status === 'Fixed'
-        )
+      console.log('Task assignments response:', response)
 
-        if (fixedAssignment) {
-          setSelectedTaskAssignmentId(fixedAssignment.assignment_id)
+      if (response?.data?.taskAssignments) {
+        // Find the verified assignment
+        const verifiedAssignment = response.data.taskAssignments.find(
+          assignment => assignment.status === 'Verified'
+        )
+        console.log('Found verified assignment:', verifiedAssignment)
+
+        if (verifiedAssignment) {
+          setSelectedTaskAssignmentId(verifiedAssignment.assignment_id)
           setIsPdfModalOpen(true)
         } else {
           toast.error(t('taskManagement.noVerifiedAssignments'))
         }
+      } else {
+        console.log('No task assignments found in response')
+        toast.error(t('taskManagement.errorFetchingAssignments'))
       }
     } catch (error) {
       console.error('Error fetching task assignments:', error)

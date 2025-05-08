@@ -131,12 +131,8 @@ interface InspectionPdfResponse {
 }
 
 export const getInspectionPdf = async (taskAssignmentId: string): Promise<InspectionPdfResponse> => {
-  try {
-    const response = await apiInstance.get(`/inspections/inspection-pdf/${taskAssignmentId}`)
-    return response.data
-  } catch (error) {
-    throw error
-  }
+  const response = await apiInstance.get(`/inspections/inspection-pdf/${taskAssignmentId}`)
+  return response.data
 }
 
 const inspectionsApi = {

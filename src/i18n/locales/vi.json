@@ -548,7 +548,17 @@
           "noAssociatedCrack": "Không có vết nứt liên quan đến nhiệm vụ này"
         }
       }
-    }
+    },
+    "viewPdfTitle": "Xem báo cáo kiểm tra",
+    "noPdfTitle": "Không tìm thấy báo cáo",
+    "noPdfsFound": "Không tìm thấy tệp PDF cho báo cáo này",
+    "noPdfDescription": "Báo cáo kiểm tra chưa được tải lên hoặc không khả dụng.",
+    "noPdfSuggestions": "Bạn có thể thử các cách sau:",
+    "noPdfSuggestion1": "Kiểm tra lại trạng thái của nhiệm vụ",
+    "noPdfSuggestion2": "Liên hệ với người quản lý để được hỗ trợ",
+    "inspectionReport": "Báo cáo kiểm tra",
+    "viewPdf": "Xem PDF",
+    "downloadPdf": "Tải xuống PDF"
   },
   "sidebar": {
     "dashboard": "Tổng quan",
