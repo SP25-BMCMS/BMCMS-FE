@@ -1,52 +1,52 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react'
 
-type FilterOption = {
-  value: string;
-  label: string;
-};
+type FilterOption<T extends string> = {
+  value: T
+  label: string
+}
 
-type FilterDropdownProps = {
-  options: FilterOption[];
-  onSelect?: (value: string) => void;
-  buttonClassName?: string;
-  dropdownClassName?: string;
-  label?: string;
-  selectedValue?: string;
-};
+type FilterDropdownProps<T extends string> = {
+  options: FilterOption<T>[]
+  onSelect?: (value: T) => void
+  buttonClassName?: string
+  dropdownClassName?: string
+  label?: string
+  selectedValue?: T
+}
 
-const FilterDropdown: React.FC<FilterDropdownProps> = ({
+const FilterDropdown = <T extends string>({
   options,
   onSelect,
   buttonClassName = '',
   dropdownClassName = '',
   label = 'Filter',
-  selectedValue = 'all',
-}) => {
-  const [showDropdown, setShowDropdown] = useState<boolean>(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  selectedValue,
+}: FilterDropdownProps<T>) => {
+  const [showDropdown, setShowDropdown] = useState<boolean>(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
+        setShowDropdown(false)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
-  const handleSelect = (value: string) => {
-    onSelect && onSelect(value);
-    setShowDropdown(false);
-  };
+  const handleSelect = (value: T) => {
+    onSelect && onSelect(value)
+    setShowDropdown(false)
+  }
 
   // Find selected option label
-  const selectedOption = options.find(option => option.value === selectedValue);
-  const displayText = selectedOption ? selectedOption.label : label;
+  const selectedOption = options.find(option => option.value === selectedValue)
+  const displayText = selectedOption ? selectedOption.label : label
 
   // Define keyframe animations
   const dropdownAnimation = {
@@ -54,12 +54,12 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
     animationDuration: '0.3s',
     animationTimingFunction: 'ease-out',
     animationFillMode: 'forwards',
-  } as React.CSSProperties;
+  } as React.CSSProperties
 
   // Add keyframes to the document
   useEffect(() => {
     // Create style element
-    const styleElement = document.createElement('style');
+    const styleElement = document.createElement('style')
     // Add keyframe animations
     styleElement.textContent = `
       @keyframes dropdownFadeIn {
@@ -83,15 +83,15 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
           transform: translateX(0);
         }
       }
-    `;
+    `
     // Append to document head
-    document.head.appendChild(styleElement);
+    document.head.appendChild(styleElement)
 
     // Cleanup on component unmount
     return () => {
-      document.head.removeChild(styleElement);
-    };
-  }, []);
+      document.head.removeChild(styleElement)
+    }
+  }, [])
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -134,7 +134,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
       {showDropdown && (
         <div
-          className={`absolute right-0 mt-2 w-full min-w-[160px] bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-gray-900/30 z-10 border border-gray-200 dark:border-gray-700 overflow-hidden ${dropdownClassName}`}
+          className={`absolute right-0 mt-2 w-full min-w-[160px] bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-gray-900/30 z-50 border border-gray-200 dark:border-gray-700 overflow-hidden ${dropdownClassName}`}
           style={dropdownAnimation}
         >
           <div className="py-1 max-h-60 overflow-y-auto">
@@ -142,11 +142,10 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
               <button
                 key={option.value}
                 onClick={() => handleSelect(option.value)}
-                className={`flex items-center w-full px-4 py-2 text-sm text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors duration-150 ${
-                  selectedValue === option.value
-                    ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}
+                className={`flex items-center w-full px-4 py-2 text-sm text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors duration-150 ${selectedValue === option.value
+                  ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium'
+                  : 'text-gray-700 dark:text-gray-300'
+                  }`}
                 style={
                   {
                     animationName: 'optionFadeIn',
@@ -183,7 +182,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default FilterDropdown;
+export default FilterDropdown

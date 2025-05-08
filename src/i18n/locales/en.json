@@ -434,6 +434,7 @@
       "cancel": "Cancelled"
     },
     "table": {
+      "assetType": "Asset Type",
       "no": "No.",
       "title": "Title",
       "description": "Description",

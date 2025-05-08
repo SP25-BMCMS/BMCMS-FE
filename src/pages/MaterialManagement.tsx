@@ -41,7 +41,7 @@ const MaterialManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'ACTIVE' | 'INACTIVE'>('all')
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isUnitPriceModalOpen, setIsUnitPriceModalOpen] = useState(false)
@@ -52,17 +52,17 @@ const MaterialManagement: React.FC = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
   const statusOptions = [
-    { value: 'all', label: t('materialManagement.filterOptions.status.all') },
-    { value: 'ACTIVE', label: t('materialManagement.filterOptions.status.active') },
-    { value: 'INACTIVE', label: t('materialManagement.filterOptions.status.inactive') },
+    { value: 'all' as const, label: t('materialManagement.filterOptions.status.all') },
+    { value: 'ACTIVE' as const, label: t('materialManagement.filterOptions.status.active') },
+    { value: 'INACTIVE' as const, label: t('materialManagement.filterOptions.status.inactive') },
   ]
 
   const priceRangeOptions = [
-    { value: 'all', label: t('materialManagement.filterOptions.price.all') },
-    { value: '0-100000', label: t('materialManagement.filterOptions.price.under100k') },
-    { value: '100000-500000', label: t('materialManagement.filterOptions.price.100k-500k') },
-    { value: '500000-1000000', label: t('materialManagement.filterOptions.price.500k-1m') },
-    { value: '1000000+', label: t('materialManagement.filterOptions.price.above1m') },
+    { value: 'all' as const, label: t('materialManagement.filterOptions.price.all') },
+    { value: '0-100000' as const, label: t('materialManagement.filterOptions.price.under100k') },
+    { value: '100000-500000' as const, label: t('materialManagement.filterOptions.price.100k-500k') },
+    { value: '500000-1000000' as const, label: t('materialManagement.filterOptions.price.500k-1m') },
+    { value: '1000000+' as const, label: t('materialManagement.filterOptions.price.above1m') },
   ]
 
   // Build query params
@@ -76,10 +76,11 @@ const MaterialManagement: React.FC = () => {
       params.search = searchTerm
     }
 
-    if (selectedStatus !== 'all') {
-      params.status = selectedStatus as 'ACTIVE' | 'INACTIVE'
+    if (statusFilter !== 'all') {
+      params.statusFilter = statusFilter
     }
 
+    console.log('Query params:', params)
     return params
   }
 
@@ -111,10 +112,13 @@ const MaterialManagement: React.FC = () => {
     isLoading,
     isFetching,
   } = useQuery<MaterialResponse>({
-    queryKey: ['materials', currentPage, itemsPerPage, selectedStatus, searchTerm],
+    queryKey: ['materials', currentPage, itemsPerPage, statusFilter, searchTerm, selectedPriceRange],
     queryFn: async () => {
       const params = getQueryParams()
-      return materialsApi.getMaterialList(params)
+      console.log('Query params:', params)
+      const response = await materialsApi.getMaterialList(params)
+      console.log('API response:', response)
+      return response
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -201,12 +205,13 @@ const MaterialManagement: React.FC = () => {
     setCurrentPage(1)
   }
 
-  const handleStatusChange = (value: string) => {
-    setSelectedStatus(value)
+  const handleStatusChange = (value: 'all' | 'ACTIVE' | 'INACTIVE') => {
+    console.log('Selected status:', value)
+    setStatusFilter(value)
     setCurrentPage(1)
   }
 
-  const handlePriceRangeChange = (value: string) => {
+  const handlePriceRangeChange = (value: 'all' | '0-100000' | '100000-500000' | '500000-1000000' | '1000000+') => {
     setSelectedPriceRange(value)
     setCurrentPage(1)
   }
@@ -258,15 +263,6 @@ const MaterialManagement: React.FC = () => {
       ),
       width: '60px',
     },
-    // {
-    //     key: "materialId",
-    //     title: "Material ID",
-    //     render: (item) => (
-    //         <div className="text-sm text-gray-500 dark:text-gray-400">
-    //             {item.material_id ? item.material_id.substring(0, 8) + "..." : "N/A"}
-    //         </div>
-    //     ),
-    // },
     {
       key: 'name',
       title: t('materialManagement.table.name'),
@@ -363,18 +359,18 @@ const MaterialManagement: React.FC = () => {
           />
 
           <div className="flex flex-wrap gap-2 lg:gap-4">
-            <FilterDropdown
+            <FilterDropdown<'all' | '0-100000' | '100000-500000' | '500000-1000000' | '1000000+'>
               options={priceRangeOptions}
               onSelect={handlePriceRangeChange}
               buttonClassName="w-full sm:w-[200px] lg:w-[250px]"
-              selectedValue={selectedPriceRange}
+              selectedValue={selectedPriceRange as 'all' | '0-100000' | '100000-500000' | '500000-1000000' | '1000000+'}
               label={t('materialManagement.filterOptions.price.all')}
             />
-            <FilterDropdown
+            <FilterDropdown<'all' | 'ACTIVE' | 'INACTIVE'>
               options={statusOptions}
               onSelect={handleStatusChange}
               buttonClassName="w-full sm:w-[180px]"
-              selectedValue={selectedStatus}
+              selectedValue={statusFilter}
               label={t('materialManagement.filterOptions.status.all')}
             />
             <AddButton

@@ -505,24 +505,24 @@ const TaskManagement: React.FC = () => {
       title: t('taskManagement.table.title'),
       render: item => (
         <Tooltip content={item.title || ''}>
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px] md:max-w-[200px] lg:max-w-[250px]">
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[180px] md:max-w-[220px] lg:max-w-[280px]">
             {item.title}
           </div>
         </Tooltip>
       ),
-      width: '200px',
+      width: '220px',
     },
     {
       key: 'description',
       title: t('taskManagement.table.description'),
       render: item => (
         <Tooltip content={item.description || ''}>
-          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px] md:max-w-[250px] lg:max-w-[300px]">
+          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[220px] md:max-w-[280px] lg:max-w-[320px]">
             {item.description}
           </div>
         </Tooltip>
       ),
-      width: '250px',
+      width: '280px',
     },
     {
       key: 'building',
@@ -540,8 +540,8 @@ const TaskManagement: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <FaBuilding className="text-blue-500 flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="font-medium truncate max-w-[100px] md:max-w-[150px]">{buildingName}</div>
-                  <div className="text-xs truncate max-w-[100px] md:max-w-[150px]">{position}</div>
+                  <div className="font-medium truncate max-w-[120px] md:max-w-[160px]">{buildingName}</div>
+                  <div className="text-xs truncate max-w-[120px] md:max-w-[160px]">{position}</div>
                 </div>
               </div>
             </Tooltip>
@@ -558,8 +558,8 @@ const TaskManagement: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <FaBuilding className="text-green-500 flex-shrink-0" />
                   <div className="min-w-0">
-                    <div className="font-medium truncate max-w-[100px] md:max-w-[150px]">{buildingName}</div>
-                    <div className="text-xs truncate max-w-[100px] md:max-w-[150px]">{buildingDetailName}</div>
+                    <div className="font-medium truncate max-w-[120px] md:max-w-[160px]">{buildingName}</div>
+                    <div className="text-xs truncate max-w-[120px] md:max-w-[160px]">{buildingDetailName}</div>
                   </div>
                 </div>
               </Tooltip>
@@ -569,10 +569,33 @@ const TaskManagement: React.FC = () => {
 
         return buildingInfo || <div className="text-sm text-gray-400">-</div>
       },
-      width: '180px',
+      width: '160px',
     },
     ...(taskType === 'crack'
       ? [
+        {
+          key: 'asset_type',
+          title: t('taskManagement.table.assetType'),
+          render: item => {
+            if (item.crackInfo?.isSuccess && item.crackInfo.data.length > 0) {
+              const isPrivateAsset = item.crackInfo.data[0].isPrivatesAsset
+              return (
+                <div className="flex items-center">
+                  <span
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium ${isPrivateAsset
+                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300'
+                      : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+                      }`}
+                  >
+                    {isPrivateAsset ? t('crackManagement.privateAsset') : t('crackManagement.publicAsset')}
+                  </span>
+                </div>
+              )
+            }
+            return <div className="text-sm text-gray-400">-</div>
+          },
+          width: '140px',
+        },
         {
           key: 'crack_status',
           title: t('taskManagement.table.crackStatus'),
@@ -625,7 +648,7 @@ const TaskManagement: React.FC = () => {
 
             return (
               <span
-                className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80"
+                className="px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80 transition-opacity"
                 style={{
                   backgroundColor: bgColor,
                   color: textColor,
@@ -638,6 +661,7 @@ const TaskManagement: React.FC = () => {
               </span>
             )
           },
+          width: '160px',
         },
       ]
       : [
@@ -659,17 +683,17 @@ const TaskManagement: React.FC = () => {
             return (
               <Tooltip content={`${scheduleName} - ${deviceType} - ${runDate}`} position="bottom">
                 <div className="text-sm">
-                  <div className="font-medium text-gray-700 dark:text-gray-300 truncate max-w-[80px] xs:max-w-[100px] sm:max-w-[120px] md:max-w-[140px]">
+                  <div className="font-medium text-gray-700 dark:text-gray-300 truncate max-w-[100px] xs:max-w-[120px] sm:max-w-[140px] md:max-w-[160px]">
                     {scheduleName}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[80px] xs:max-w-[100px] sm:max-w-[120px] md:max-w-[140px]">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[100px] xs:max-w-[120px] sm:max-w-[140px] md:max-w-[160px]">
                     {deviceType} - {runDate}
                   </div>
                 </div>
               </Tooltip>
             )
           },
-          width: '110px xs:140px sm:160px',
+          width: '180px',
         },
         {
           key: 'schedule_status',
@@ -713,7 +737,7 @@ const TaskManagement: React.FC = () => {
 
             return (
               <span
-                className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                className="px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full"
                 style={{
                   backgroundColor: bgColor,
                   color: textColor,
@@ -725,6 +749,7 @@ const TaskManagement: React.FC = () => {
               </span>
             )
           },
+          width: '140px',
         },
       ]),
     {
@@ -735,14 +760,14 @@ const TaskManagement: React.FC = () => {
           {FORMAT_DATE(item.created_at)}
         </div>
       ),
-      width: '90px xs:100px sm:110px',
+      width: '120px',
     },
     {
       key: 'status',
       title: t('taskManagement.table.status'),
       render: item => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80 ${item.status === 'Completed'
+          className={`px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80 transition-opacity ${item.status === 'Completed'
             ? 'bg-[rgba(80,241,134,0.31)] text-[#00ff90] border border-[#50f186]'
             : item.status === 'In Progress'
               ? 'bg-[rgba(255,193,7,0.3)] text-[#ffc107] border border-[#ffc107]'
@@ -753,7 +778,7 @@ const TaskManagement: React.FC = () => {
           {t(`taskManagement.status.${item.status.toLowerCase()}`)}
         </span>
       ),
-      width: '90px xs:100px',
+      width: '120px',
     },
     {
       key: 'action',
@@ -771,7 +796,7 @@ const TaskManagement: React.FC = () => {
           />
         </div>
       ),
-      width: '60px xs:70px sm:80px',
+      width: '80px',
     },
   ]
 

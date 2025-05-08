@@ -381,6 +381,7 @@
       "cancel": "Đã hủy"
     },
     "table": {
+      "assetType": "Loại tài sản",
       "no": "STT",
       "title": "Tiêu đề",
       "description": "Mô tả",

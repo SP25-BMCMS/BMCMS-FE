@@ -27,7 +27,7 @@ interface InspectionDetailsProps {
 
 // Type for report status
 type ReportStatus = 'NoPending' | 'Pending' | 'Rejected' | 'Approved' | 'AutoApproved'
-type AssignmentStatus = 'Pending' | 'Verified' | 'Unverified' | 'InFixing' | 'Fixed' | 'Confirmed' | 'Reassigned' | 'Notcompleted'
+type AssignmentStatus = 'Pending' | 'Verified' | 'Unverified' | 'InFixing' | 'Fixed' | 'Confirmed' | 'Reassigned' | 'Notcompleted' | 'Approved'
 
 // Extended inspection type for our component
 interface EnhancedInspection extends Inspection {
@@ -284,6 +284,12 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
           text: '#ff0000',
           border: '#ff0000',
         }
+      case 'Approved':
+        return {
+          bg: 'rgba(80,241,134,0.31)', // Xanh lá nhạt
+          text: '#00ff90',
+          border: '#50f186',
+        }
       default:
         return {
           bg: 'rgba(229, 231, 235, 0.8)',
@@ -323,7 +329,30 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
       <div className="mb-6">
         <h3 className="text-md font-medium mb-2 dark:text-white">{t('taskManagement.inspection.selectAssignment')}</h3>
         <div className="flex flex-wrap gap-2">
-          {taskAssignments.map((assignment, index) => (
+          {taskAssignments.filter(assignment => assignment.status === 'Approved').length > 0 && (
+            <div className="w-full mb-4">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('taskManagement.detail.assignments.approved')}
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {taskAssignments
+                  .filter(assignment => assignment.status === 'Approved')
+                  .map((assignment, index) => (
+                    <button
+                      key={assignment.assignment_id}
+                      onClick={() => handleAssignmentSelect(assignment.assignment_id)}
+                      className={`px-3 py-2 text-sm rounded-md transition ${selectedAssignmentId === assignment.assignment_id
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-500'
+                        }`}
+                    >
+                      {t('taskManagement.inspection.assignment')} {index + 1} • {t(`taskManagement.detail.assignments.${assignment.status.toLowerCase()}`)}
+                    </button>
+                  ))}
+              </div>
+            </div>
+          )}
+          {taskAssignments.filter(assignment => assignment.status !== 'Approved').map((assignment, index) => (
             <button
               key={assignment.assignment_id}
               onClick={() => handleAssignmentSelect(assignment.assignment_id)}

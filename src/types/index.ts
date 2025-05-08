@@ -472,7 +472,8 @@ export interface TaskAssignment {
   employee_id: string
   employee_name?: string
   description: string
-  status: 'Confirmed' | 'Reassigned' | 'InFixing' | 'Fixed'
+  status: 'Verified' | 'Unverified' | 'Confirmed' | 'Reassigned' | 'InFixing' | 'Fixed' | 'Approved'
+  statusLabel?: string
   created_at: string
   updated_at: string
 }
