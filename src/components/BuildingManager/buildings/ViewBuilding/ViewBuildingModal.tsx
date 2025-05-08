@@ -273,6 +273,12 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
       // Fetch building detail by buildingId
       const buildingResponse = await getBuildingById(buildingId)
 
+      if (!buildingResponse.data) {
+        setError('Cannot find any information for this building')
+        toast.error('Cannot find any information for this building')
+        return
+      }
+
       // Fetch all building details
       const allBuildingDetailsResponse = await getAllBuildingDetails()
 
@@ -281,60 +287,38 @@ const ViewBuildingModal: React.FC<ViewBuildingModalProps> = ({ isOpen, onClose, 
         (detail: any) => detail.buildingId === buildingId
       )
 
-      if (!buildingDetail) {
-        // Trường hợp không tìm thấy buildingDetailId, chỉ hiển thị thông tin cơ bản
-        if (buildingResponse.data) {
-          setBuildingDetail({
-            ...buildingResponse.data,
-            // Thêm thông tin giả để hiển thị
-            buildingDetailId: null,
-            name: buildingResponse.data.name,
-            total_apartments: 0,
-            // Thông tin tòa nhà
-            building: buildingResponse.data,
-          })
-
-          // Reset buildingDetailId state để không gọi API contracts
-          setBuildingDetailId(null)
-
-          // Kiểm tra manager_id
-          const managerId = buildingResponse.data.manager_id
-          if (managerId) {
-            fetchManagerInfo(managerId)
-          }
-          return
-        } else {
-          setError('cannot find any information this building')
-          toast.error('cannot find any information this building')
-          return
-        }
+      // Set buildingDetailId for contract fetching
+      if (buildingDetail) {
+        setBuildingDetailId(buildingDetail.buildingDetailId)
       }
 
-      // Đặt buildingDetailId để TanStack Query có thể gọi API contracts
-      setBuildingDetailId(buildingDetail.buildingDetailId)
+      // Fetch specific building detail using buildingDetailId if available
+      let buildingDetailData = null
+      if (buildingDetail?.buildingDetailId) {
+        const buildingDetailResponse = await getBuildingDetail(buildingDetail.buildingDetailId)
+        buildingDetailData = buildingDetailResponse.data
+      }
 
-      // Fetch specific building detail using buildingDetailId
-      const buildingDetailResponse = await getBuildingDetail(buildingDetail.buildingDetailId)
+      // Combine data from both responses
+      const combinedData = {
+        ...buildingResponse.data,
+        ...(buildingDetailData || {}),
+        buildingDetailId: buildingDetail?.buildingDetailId || null,
+        name: buildingResponse.data.name,
+        total_apartments: buildingDetailData?.total_apartments || 0,
+        device: buildingDetailData?.device || [],
+        building: buildingResponse.data,
+      }
 
-      if (buildingResponse.data && buildingDetailResponse.data) {
-        // Combine data from both responses
-        const combinedData = {
-          ...buildingResponse.data,
-          ...buildingDetailResponse.data,
-        }
-        setBuildingDetail(combinedData)
+      setBuildingDetail(combinedData)
 
-        // Check for manager_id in different possible locations in the data structure
-        const managerId =
-          (buildingResponse.data && buildingResponse.data.manager_id) ||
-          (combinedData.building && combinedData.building.manager_id)
+      // Check for manager_id in different possible locations in the data structure
+      const managerId =
+        (buildingResponse.data && buildingResponse.data.manager_id) ||
+        (combinedData.building && combinedData.building.manager_id)
 
-        if (managerId) {
-          fetchManagerInfo(managerId)
-        }
-      } else {
-        setError('Unable to load building details')
-        toast.error('Unable to load building details')
+      if (managerId) {
+        fetchManagerInfo(managerId)
       }
     } catch (error: any) {
       console.error('Error fetching building detail:', error)

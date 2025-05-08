@@ -19,6 +19,7 @@ import ViewDetailResident from '@/components/Residents/ViewDetailResident'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import Tooltip from '@/components/Tooltip'
+import { useDebounce } from '@/hooks/useDebounce'
 
 interface ResidentsResponse {
   data: Residents[]
@@ -40,18 +41,30 @@ const Resident: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
 
   const queryClient = useQueryClient()
+  const debouncedSearchTerm = useDebounce(searchTerm, 1500)
 
   // Fetch residents with React Query
   const { data: residentsResponse, isLoading: isLoadingResidents } = useQuery<ResidentsResponse>({
-    queryKey: ['residents', currentPage, itemsPerPage, selectedStatus, searchTerm],
+    queryKey: ['residents', debouncedSearchTerm, currentPage, itemsPerPage, selectedStatus],
     queryFn: async () => {
-      const result = await getAllResidents({
-        search: searchTerm,
-        page: currentPage,
-        limit: itemsPerPage,
-        status: selectedStatus,
-      })
-      return result
+      try {
+        const result = await getAllResidents({
+          search: debouncedSearchTerm.trim() || undefined,
+          page: currentPage,
+          limit: itemsPerPage,
+          status: selectedStatus === 'all' ? undefined : selectedStatus,
+        })
+        return result
+      } catch (error) {
+        console.error('Error fetching residents:', error)
+        return {
+          data: [],
+          pagination: {
+            total: 0,
+            totalPages: 0
+          }
+        }
+      }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -60,6 +73,12 @@ const Resident: React.FC = () => {
     refetchOnReconnect: false,
     retry: false,
   })
+
+  // Format residents data with safe default
+  const residentsList = React.useMemo(() => {
+    if (!residentsResponse?.data) return []
+    return residentsResponse.data
+  }, [residentsResponse?.data])
 
   // Update status mutation
   const updateStatusMutation = useMutation({
@@ -316,14 +335,6 @@ const Resident: React.FC = () => {
     return <LoadingIndicator />
   }
 
-  if (!residentsResponse?.data || residentsResponse.data.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-gray-700 dark:text-gray-300">{t('residentManagement.noData')}</p>
-      </div>
-    )
-  }
-
   return (
     <div className="w-full mt-[30px] md:mt-[60px] px-3 sm:px-4 md:px-6 lg:px-8">
       <Toaster position="top-right" />
@@ -340,28 +351,30 @@ const Resident: React.FC = () => {
       <div className="w-full overflow-x-auto">
         <div className="min-w-[750px] h-[calc(100vh-340px)] overflow-y-auto">
           <Table<Residents>
-            data={residentsResponse?.data || []}
+            data={residentsList}
             columns={columns}
             keyExtractor={item => item.userId}
             onRowClick={item => { }}
             className="w-full"
             tableClassName="w-full"
             isLoading={isLoadingResidents}
-            emptyText="No resident data found"
+            emptyText={t('residentManagement.noData')}
           />
         </div>
       </div>
 
-      <div className="w-full mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={residentsResponse?.pagination.totalPages || 1}
-          onPageChange={setCurrentPage}
-          totalItems={residentsResponse?.pagination.total || 0}
-          itemsPerPage={itemsPerPage}
-          onLimitChange={setItemsPerPage}
-        />
-      </div>
+      {residentsResponse?.pagination?.total > 0 && (
+        <div className="w-full mt-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={residentsResponse.pagination.totalPages || 1}
+            onPageChange={setCurrentPage}
+            totalItems={residentsResponse.pagination.total || 0}
+            itemsPerPage={itemsPerPage}
+            onLimitChange={setItemsPerPage}
+          />
+        </div>
+      )}
 
       <style>
         {`

@@ -59,14 +59,29 @@ const StaffManagement: React.FC = () => {
   const { data: staffResponse, isLoading: isLoadingStaff } = useQuery<StaffResponse>({
     queryKey: ['staff', debouncedSearchTerm, currentPage, itemsPerPage, selectedRole],
     queryFn: async () => {
-      const params = {
-        page: currentPage,
-        limit: itemsPerPage,
-        search: debouncedSearchTerm,
-        role: selectedRole !== 'all' ? selectedRole : undefined
+      try {
+        const params = {
+          page: currentPage,
+          limit: itemsPerPage,
+          search: debouncedSearchTerm.trim() || undefined,
+          role: selectedRole !== 'all' ? selectedRole : undefined
+        }
+        const response = await getAllStaff(params)
+        return response
+      } catch (error) {
+        console.error('Error fetching staff:', error)
+        return {
+          isSuccess: false,
+          message: 'Error fetching staff data',
+          data: [],
+          pagination: {
+            total: 0,
+            page: 1,
+            limit: itemsPerPage,
+            totalPages: 0
+          }
+        }
       }
-      const response = await getAllStaff(params)
-      return response
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -76,18 +91,22 @@ const StaffManagement: React.FC = () => {
     retry: false,
   })
 
-  // Format staff data
-  const staffList = staffResponse?.data.map((staff: StaffData) => ({
-    id: staff.userId,
-    name: staff.username,
-    email: staff.email,
-    phone: staff.phone,
-    role: staff.role as Staff['role'],
-    dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
-    gender: staff.gender,
-    createdDate: new Date().toLocaleDateString(),
-    userDetails: staff.userDetails,
-  })) || []
+  // Format staff data with safe default
+  const staffList = React.useMemo(() => {
+    if (!staffResponse?.data) return []
+
+    return staffResponse.data.map((staff: StaffData) => ({
+      id: staff.userId,
+      name: staff.username,
+      email: staff.email,
+      phone: staff.phone,
+      role: staff.role as Staff['role'],
+      dateOfBirth: new Date(staff.dateOfBirth).toLocaleDateString(),
+      gender: staff.gender,
+      createdDate: new Date().toLocaleDateString(),
+      userDetails: staff.userDetails,
+    }))
+  }, [staffResponse?.data])
 
   const {
     isModalOpen,
@@ -336,7 +355,7 @@ const StaffManagement: React.FC = () => {
         </div>
       </div>
 
-      {staffResponse && (
+      {staffResponse?.pagination?.total > 0 && (
         <div className="w-[95%] mx-auto mt-4">
           <Pagination
             currentPage={staffResponse.pagination.page}
