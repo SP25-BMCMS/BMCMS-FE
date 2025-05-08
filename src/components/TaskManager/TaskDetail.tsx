@@ -355,6 +355,7 @@ const TaskDetail: React.FC = () => {
         return response
       } catch (error) {
         console.error('Error fetching crack details:', error)
+        console.log("🚀 Kha ne ~ crackInfo:", crackInfo)
         return null
       }
     },
@@ -366,12 +367,8 @@ const TaskDetail: React.FC = () => {
   // Update hasCrackInfo check
   const hasCrackInfo = !!crackInfoData
   const crackInfo = crackInfoData
+  console.log("🚀 Kha ne ~ crackInfo:", crackInfo)
 
-  // Add effect to log crack info for debugging
-  useEffect(() => {
-    if (crackInfo) {
-    }
-  }, [crackInfo])
 
   // Fetch inspections for selected assignment only when modal is open
   const {
@@ -701,7 +698,7 @@ const TaskDetail: React.FC = () => {
                   {t('taskManagement.detail.reportedBy')}: {crackInfo?.data[0].reportedBy?.username || 'Unknown User'}
                 </span>
               </div>
-              {crackInfo.verifiedBy && (
+              {crackInfo?.data[0] && (
                 <div className="flex items-center">
                   <FaCheckCircle className="mr-2 text-gray-500" />
                   <span className="text-gray-700 dark:text-gray-300">
@@ -709,11 +706,11 @@ const TaskDetail: React.FC = () => {
                   </span>
                 </div>
               )}
-              {crackInfo.position && (
+              {crackInfo?.data[0] && (
                 <div className="flex items-center">
                   <FaMapMarkerAlt className="mr-2 text-gray-500" />
                   <span className="text-gray-700 dark:text-gray-300">
-                    {t('taskManagement.detail.location')}: {crackInfo.position}
+                    {t('taskManagement.detail.location')}: {crackInfo?.data[0].position}
                   </span>
                 </div>
               )}
