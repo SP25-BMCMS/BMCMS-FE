@@ -215,15 +215,19 @@ const TaskDetail: React.FC = () => {
   const [selectedScheduleId, setSelectedScheduleId] = useState<string>('')
   const [selectedScheduleJobId, setSelectedScheduleJobId] = useState<string>('')
   const [scheduleSearch, setScheduleSearch] = useState<string>('')
+  const [isSendingNotification, setIsSendingNotification] = useState(false)
 
   // Add mutation for sending notification
   const sendNotificationMutation = useMutation({
-    mutationFn: async (data: { taskId: string; schedule_job_id: string }) => {
-      const response = await apiInstance.post('/tasks/notification-thanks-to-resident', data)
+    mutationFn: async ({ taskId, scheduleJobId }: { taskId: string; scheduleJobId: string }) => {
+      const response = await apiInstance.post('/tasks/notification-thanks-to-resident', {
+        taskId,
+        scheduleJobId
+      })
       return response.data
     },
-    onSuccess: async () => {
-      try {
+    onSuccess: async (response) => {
+      if (response.success) {
         // Invalidate and refetch all related queries
         await Promise.all([
           // Invalidate task detail
@@ -261,14 +265,12 @@ const TaskDetail: React.FC = () => {
 
         toast.success(t('taskManagement.detail.notificationSentSuccess'))
         navigate('/tasks')
-      } catch (error) {
-        console.error('Error updating data:', error)
-        toast.error(t('taskManagement.detail.errorUpdatingData'))
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || t('taskManagement.detail.failedToSendNotification'))
-    },
+      console.error('Notification error:', error)
+      toast.error(error?.response?.data?.message || t('taskManagement.detail.notificationError'))
+    }
   })
 
   // Get user data from localStorage
@@ -595,12 +597,16 @@ const TaskDetail: React.FC = () => {
     }
 
     try {
+      setIsSendingNotification(true)
       await sendNotificationMutation.mutateAsync({
         taskId: taskId,
-        schedule_job_id: selectedScheduleJobId
+        scheduleJobId: selectedScheduleJobId
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending notification:', error)
+      toast.error(error?.response?.data?.message || t('taskManagement.detail.notificationError'))
+    } finally {
+      setIsSendingNotification(false)
     }
   }
 
@@ -720,25 +726,27 @@ const TaskDetail: React.FC = () => {
                   </span>
                 </div>
               )}
-              {crackInfo?.data[0].isPrivatesAsset === false && task.status !== 'Completed' && (
-                <div className="mt-4">
-                  {isLoadingSchedules ? (
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md">
-                      <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm text-gray-600 dark:text-gray-300">{t('taskManagement.detail.loadingSchedules')}</span>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleOpenConfirmModal}
-                      className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                      title={t('taskManagement.detail.sendNotification')}
-                    >
-                      <FaMailBulk className="w-5 h-5 mr-2" />
-                      {t('taskManagement.detail.sendNotification')}
-                    </button>
-                  )}
-                </div>
-              )}
+              {crackInfo?.data[0].isPrivatesAsset === false && task.status !== 'Completed' &&
+                (
+                  <div className="mt-4">
+                    {isLoadingSchedules ? (
+                      <div className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md">
+                        <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">{t('taskManagement.detail.loadingSchedules')}</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleOpenConfirmModal}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                        title={t('taskManagement.detail.sendNotification')}
+                      >
+                        <FaMailBulk className="w-5 h-5 mr-2" />
+                        {t('taskManagement.detail.sendNotification')}
+                      </button>
+                    )}
+                  </div>
+                )
+              }
             </>
           )}
         </div>
@@ -1168,13 +1176,13 @@ const TaskDetail: React.FC = () => {
               <button
                 type="button"
                 onClick={handleConfirmAndSend}
-                disabled={!selectedScheduleId || !selectedScheduleJobId || isLoadingSchedules || sendNotificationMutation.isPending}
-                className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none ${selectedScheduleId && selectedScheduleJobId && !isLoadingSchedules && !sendNotificationMutation.isPending
+                disabled={!selectedScheduleId || !selectedScheduleJobId || isLoadingSchedules || isSendingNotification}
+                className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none ${selectedScheduleId && selectedScheduleJobId && !isLoadingSchedules && !isSendingNotification
                   ? 'bg-green-600 hover:bg-green-700'
                   : 'bg-green-400 cursor-not-allowed'
                   }`}
               >
-                {sendNotificationMutation.isPending ? (
+                {isSendingNotification ? (
                   <div className="flex items-center">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                     {t('common.sending')}
