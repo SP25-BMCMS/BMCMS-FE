@@ -28,7 +28,8 @@ import {
   FaUser,
 } from 'react-icons/fa'
 import { IoArrowBack } from 'react-icons/io5'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import crackApi from '@/services/cracks'
 
 // Extended task data interface that includes both task assignment and crack info
 interface ExtendedTaskData {
@@ -40,7 +41,6 @@ interface ExtendedTaskData {
   crack_id?: string
   schedule_job_id?: string
   taskAssignments: TaskAssignment[]
-  // Include crackInfo from TaskResponse type
   crackInfo?: TaskResponse['crackInfo']
 }
 
@@ -206,6 +206,7 @@ const getUserFromLocalStorage = () => {
 const TaskDetail: React.FC = () => {
   const { t } = useTranslation()
   const { taskId } = useParams<{ taskId: string }>()
+  const location = useLocation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null)
@@ -214,166 +215,6 @@ const TaskDetail: React.FC = () => {
   const [selectedScheduleId, setSelectedScheduleId] = useState<string>('')
   const [selectedScheduleJobId, setSelectedScheduleJobId] = useState<string>('')
   const [scheduleSearch, setScheduleSearch] = useState<string>('')
-
-  // Get user data from localStorage
-  const user = getUserFromLocalStorage()
-
-  // Fetch all staff data to map IDs to names
-  const { data: staffData } = useQuery({
-    queryKey: ['staff', 'all'],
-    queryFn: async () => {
-      const response = await getAllStaff({ page: '1', limit: '9999' })
-      return response.data || []
-    },
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    retry: 1,
-  })
-
-  // Create a map of staff IDs to names
-  const staffNameMap = React.useMemo(() => {
-    const map: { [key: string]: { username: string; position?: string; department?: string, positionNameLabel?: string } } = {}
-    if (staffData) {
-      staffData.forEach((staff: StaffData) => {
-        map[staff.userId] = {
-          username: staff.username,
-          position: staff.userDetails?.position?.positionNameLabel,
-          department: staff.userDetails?.department?.departmentName
-        }
-      })
-    }
-    return map
-  }, [staffData])
-
-  // Fetch task details and assignments
-  const { data: taskData, isLoading } = useQuery({
-    queryKey: ['task', 'detail', taskId],
-    queryFn: async () => {
-      try {
-        const response = await tasksApi.getTaskAssignmentsByTaskId(taskId || '')
-
-        // Also fetch the task details to get crack info if needed
-        if (response.data?.crack_id) {
-          try {
-            // Fetch task with crack info from the tasks API
-            const taskResponse = await tasksApi.getTasks({ search: response.data.task_id })
-            if (taskResponse.data && taskResponse.data.length > 0) {
-              const taskWithCrackInfo = taskResponse.data.find(
-                t => t.task_id === response.data.task_id
-              )
-              if (taskWithCrackInfo) {
-                // Merge the crack info with the task assignments data
-                return {
-                  ...response,
-                  data: {
-                    ...response.data,
-                    crackInfo: taskWithCrackInfo.crackInfo,
-                    taskAssignments: response.data.taskAssignments.map(assignment => ({
-                      ...assignment,
-                      employee_name: staffNameMap[assignment.employee_id]?.username || 'Unknown Staff',
-                    })),
-                  },
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching task with crack info:', error)
-          }
-        }
-
-        // If no crack info or error, return the original response with employee names
-        if (response.data && response.data.taskAssignments) {
-          return {
-            ...response,
-            data: {
-              ...response.data,
-              taskAssignments: response.data.taskAssignments.map(assignment => ({
-                ...assignment,
-                employee_name: staffNameMap[assignment.employee_id]?.username || 'Unknown Staff',
-              })),
-            },
-          }
-        }
-
-        return response
-      } catch (error) {
-        console.error('Error fetching task details:', error)
-        throw error
-      } finally {
-        setIsInitialLoading(false)
-      }
-    },
-    enabled: !!taskId && Object.keys(staffNameMap).length > 0,
-    staleTime: 0, // Set staleTime to 0 to always refetch on mount
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnMount: true, // Always refetch on mount
-    refetchOnWindowFocus: false,
-    retry: 1,
-    placeholderData: (previousData) => previousData, // Keep previous data while loading
-  })
-
-  // Fetch inspections for selected assignment only when modal is open
-  const {
-    data: inspections,
-    isLoading: isLoadingInspections,
-    error: inspectionsError,
-  } = useQuery({
-    queryKey: ['task', 'inspections', selectedAssignmentId],
-    queryFn: async () => {
-      try {
-        const response = await tasksApi.getInspectionsByAssignmentId(selectedAssignmentId || '')
-
-        // Enhance inspection data with staff names
-        if (response.data && response.data.length > 0) {
-          return {
-            ...response,
-            data: response.data.map(inspection => ({
-              ...inspection,
-              inspected_by_user: {
-                userId: inspection.inspected_by,
-                username: staffNameMap[inspection.inspected_by]?.username || 'Unknown Staff',
-              },
-              confirmed_by_user: inspection.confirmed_by
-                ? {
-                  userId: inspection.confirmed_by,
-                  username: staffNameMap[inspection.confirmed_by]?.username || 'Unknown Staff',
-                }
-                : null,
-            })),
-          }
-        }
-
-        return response
-      } catch (error) {
-        console.error('Error fetching inspections:', error)
-        throw error
-      }
-    },
-    enabled: !!selectedAssignmentId && Object.keys(staffNameMap).length > 0,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    retry: 1,
-    placeholderData: (previousData) => previousData, // Keep previous data while loading
-  })
-
-  // Add effect to handle initial loading
-  React.useEffect(() => {
-    if (taskId && Object.keys(staffNameMap).length > 0) {
-      setIsInitialLoading(true)
-    }
-  }, [taskId, staffNameMap])
-
-  // Get crack information
-  const hasCrackInfo =
-    taskData?.data?.crack_id &&
-    (taskData?.data as ExtendedTaskData)?.crackInfo?.isSuccess &&
-    (taskData?.data as ExtendedTaskData)?.crackInfo?.data?.length > 0
-
-  const crackInfo = hasCrackInfo ? (taskData?.data as ExtendedTaskData)?.crackInfo?.data[0] : null
 
   // Add mutation for sending notification
   const sendNotificationMutation = useMutation({
@@ -429,6 +270,161 @@ const TaskDetail: React.FC = () => {
       toast.error(error.response?.data?.message || t('taskManagement.detail.failedToSendNotification'))
     },
   })
+
+  // Get user data from localStorage
+  const user = getUserFromLocalStorage()
+
+  // Get crackInfo from location state
+  const crackInfoFromState = location.state?.crackInfo
+
+  // Fetch all staff data to map IDs to names
+  const { data: staffData } = useQuery({
+    queryKey: ['staff', 'all'],
+    queryFn: async () => {
+      const response = await getAllStaff({ page: '1', limit: '9999' })
+      return response.data || []
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  })
+
+  // Create a map of staff IDs to names
+  const staffNameMap = React.useMemo(() => {
+    const map: { [key: string]: { username: string; position?: string; department?: string, positionNameLabel?: string } } = {}
+    if (staffData) {
+      staffData.forEach((staff: StaffData) => {
+        map[staff.userId] = {
+          username: staff.username,
+          position: staff.userDetails?.position?.positionNameLabel,
+          department: staff.userDetails?.department?.departmentName
+        }
+      })
+    }
+    return map
+  }, [staffData])
+
+  // Fetch task details and assignments
+  const { data: taskData, isLoading } = useQuery({
+    queryKey: ['task', 'detail', taskId],
+    queryFn: async () => {
+      try {
+        const response = await tasksApi.getTaskAssignmentsByTaskId(taskId || '')
+
+        // Return response with employee names and crackInfo from state
+        if (response.data && response.data.taskAssignments) {
+          return {
+            ...response,
+            data: {
+              ...response.data,
+              crackInfo: crackInfoFromState,
+              taskAssignments: response.data.taskAssignments.map(assignment => ({
+                ...assignment,
+                employee_name: staffNameMap[assignment.employee_id]?.username || 'Unknown Staff',
+              })),
+            },
+          }
+        }
+
+        return response
+      } catch (error) {
+        console.error('Error fetching task details:', error)
+        throw error
+      } finally {
+        setIsInitialLoading(false)
+      }
+    },
+    enabled: !!taskId && Object.keys(staffNameMap).length > 0,
+    staleTime: 0, // Set staleTime to 0 to always refetch on mount
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnMount: true, // Always refetch on mount
+    refetchOnWindowFocus: false,
+    retry: 1,
+    placeholderData: (previousData) => previousData, // Keep previous data while loading
+  })
+
+  // Get crack information
+  const { data: crackInfoData } = useQuery({
+    queryKey: ['crack', 'detail', taskData?.data?.crack_id],
+    queryFn: async () => {
+      if (!taskData?.data?.crack_id) return null
+      try {
+        const response = await crackApi.getCrackDetail(taskData.data.crack_id)
+        return response
+      } catch (error) {
+        console.error('Error fetching crack details:', error)
+        return null
+      }
+    },
+    enabled: !!taskData?.data?.crack_id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  })
+
+  // Update hasCrackInfo check
+  const hasCrackInfo = !!crackInfoData
+  const crackInfo = crackInfoData
+
+  // Add effect to log crack info for debugging
+  useEffect(() => {
+    if (crackInfo) {
+    }
+  }, [crackInfo])
+
+  // Fetch inspections for selected assignment only when modal is open
+  const {
+    data: inspections,
+    isLoading: isLoadingInspections,
+    error: inspectionsError,
+  } = useQuery({
+    queryKey: ['task', 'inspections', selectedAssignmentId],
+    queryFn: async () => {
+      try {
+        const response = await tasksApi.getInspectionsByAssignmentId(selectedAssignmentId || '')
+
+        // Enhance inspection data with staff names
+        if (response.data && response.data.length > 0) {
+          return {
+            ...response,
+            data: response.data.map(inspection => ({
+              ...inspection,
+              inspected_by_user: {
+                userId: inspection.inspected_by,
+                username: staffNameMap[inspection.inspected_by]?.username || 'Unknown Staff',
+              },
+              confirmed_by_user: inspection.confirmed_by
+                ? {
+                  userId: inspection.confirmed_by,
+                  username: staffNameMap[inspection.confirmed_by]?.username || 'Unknown Staff',
+                }
+                : null,
+            })),
+          }
+        }
+
+        return response
+      } catch (error) {
+        console.error('Error fetching inspections:', error)
+        throw error
+      }
+    },
+    enabled: !!selectedAssignmentId && Object.keys(staffNameMap).length > 0,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    placeholderData: (previousData) => previousData, // Keep previous data while loading
+  })
+
+  // Add effect to handle initial loading
+  React.useEffect(() => {
+    if (taskId && Object.keys(staffNameMap).length > 0) {
+      setIsInitialLoading(true)
+    }
+  }, [taskId, staffNameMap])
 
   // Update schedules query to include limit 9999
   const { data: schedules, isLoading: isLoadingSchedules } = useQuery({
@@ -702,14 +698,14 @@ const TaskDetail: React.FC = () => {
               <div className="flex items-center">
                 <FaUser className="mr-2 text-gray-500" />
                 <span className="text-gray-700 dark:text-gray-300">
-                  {t('taskManagement.detail.reportedBy')}: {crackInfo.reportedBy?.username || 'Unknown User'}
+                  {t('taskManagement.detail.reportedBy')}: {crackInfo?.data[0].reportedBy?.username || 'Unknown User'}
                 </span>
               </div>
               {crackInfo.verifiedBy && (
                 <div className="flex items-center">
                   <FaCheckCircle className="mr-2 text-gray-500" />
                   <span className="text-gray-700 dark:text-gray-300">
-                    {t('taskManagement.detail.verifiedBy')}: {crackInfo.verifiedBy?.username || 'Unknown User'}
+                    {t('taskManagement.detail.verifiedBy')}: {crackInfo?.data[0].verifiedBy?.username || 'Unknown User'}
                   </span>
                 </div>
               )}
@@ -721,7 +717,7 @@ const TaskDetail: React.FC = () => {
                   </span>
                 </div>
               )}
-              {crackInfo.isPrivatesAsset === false && task.status !== 'Completed' && (
+              {crackInfo?.data[0].isPrivatesAsset === false && task.status !== 'Completed' && (
                 <div className="mt-4">
                   {isLoadingSchedules ? (
                     <div className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md">

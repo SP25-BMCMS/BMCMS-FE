@@ -412,7 +412,9 @@ const TaskManagement: React.FC = () => {
     } catch (error) {
       console.log('Error prefetching data:', error)
     } finally {
-      navigate(`/task-detail/${taskId}`)
+      // Find the task data to get crackInfo
+      const task = tasksData?.data?.find(t => t.task_id === taskId)
+      navigate(`/task-detail/${taskId}`, { state: { crackInfo: task?.crackInfo } })
     }
   }
 
