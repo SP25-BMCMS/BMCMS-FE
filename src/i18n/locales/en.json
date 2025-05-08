@@ -1115,6 +1115,8 @@
       "apply": "Apply"
     },
     "generateSchedule": {
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
       "title": "Generate Schedule",
       "tabs": {
         "cycles": "Maintenance Cycles",
@@ -1123,7 +1125,8 @@
       "select": "Select",
       "selected": "Selected",
       "duration": {
-        "label": "Duration (days)"
+        "label": "Duration (days)",
+        "help": "Enter the number of days to create the schedule"
       },
       "startDate": {
         "label": "Start Date"
@@ -1493,6 +1496,30 @@
       "completed": "Completed",
       "cancel": "Cancelled",
       "pending": "Pending"
+    },
+    "createScheduleJob": {
+      "title": "Create Schedule Job",
+      "building": "Building",
+      "selectBuilding": "Select Building",
+      "noBuildings": "No buildings available for this management",
+      "buildingInfo": {
+        "apartments": "apartments",
+        "floors": "floors",
+        "area": "area"
+      },
+      "runDate": "Run Date",
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create",
+        "creating": "Creating..."
+      },
+      "errors": {
+        "noSchedule": "No schedule selected",
+        "noBuilding": "Please select building",
+        "noRunDate": "Please select run date",
+        "createFailed": "Unable to create schedule job"
+      },
+      "success": "Schedule job created successfully"
     },
     "createSchedule": "Create Schedule",
     "scheduleDetails": "Schedule Details",

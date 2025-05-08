@@ -65,7 +65,23 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
         })
     }
 
-    const handleDurationChange = (cycleId: string, duration: number) => {
+    const handleDurationChange = (cycleId: string, value: string) => {
+        // Allow empty value for better UX
+        if (value === '') {
+            setSelectedCycles(prev =>
+                prev.map(c =>
+                    c.cycle_id === cycleId ? { ...c, duration_days: 1 } : c
+                )
+            )
+            return
+        }
+
+        // Convert to number and validate
+        const duration = parseInt(value)
+        if (isNaN(duration) || duration < 1) {
+            return // Don't update if invalid
+        }
+
         setSelectedCycles(prev =>
             prev.map(c =>
                 c.cycle_id === cycleId ? { ...c, duration_days: duration } : c
@@ -96,6 +112,37 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
             }
             return [...prev, buildingDetailId]
         })
+    }
+
+    const handleSelectAllCycles = () => {
+        if (!maintenanceCycles?.data) return
+
+        if (selectedCycles.length === maintenanceCycles.data.length) {
+            // If all are selected, deselect all
+            setSelectedCycles([])
+        } else {
+            // Select all cycles
+            const allCycles = maintenanceCycles.data.map(cycle => ({
+                cycle_id: cycle.cycle_id,
+                duration_days: 1,
+                auto_create_tasks: true,
+                start_date: format(new Date(), 'yyyy-MM-dd'),
+            }))
+            setSelectedCycles(allCycles)
+        }
+    }
+
+    const handleSelectAllBuildings = () => {
+        if (!buildingDetails) return
+
+        if (selectedBuildingDetails.length === buildingDetails.length) {
+            // If all are selected, deselect all
+            setSelectedBuildingDetails([])
+        } else {
+            // Select all building details
+            const allBuildingIds = buildingDetails.map(building => building.buildingDetailId)
+            setSelectedBuildingDetails(allBuildingIds)
+        }
     }
 
     const handleSubmit = async () => {
@@ -160,36 +207,61 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
             <div className="flex flex-col h-[calc(100vh-200px)]">
                 {/* Tabs */}
                 <div className="flex border-b border-gray-200">
-                    <button
-                        onClick={() => setActiveTab('cycles')}
-                        className={`flex items-center px-4 py-2 text-sm font-medium ${activeTab === 'cycles'
-                            ? 'border-b-2 border-blue-500 text-blue-600'
-                            : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        {t('maintenanceCycle.generateSchedule.tabs.cycles')}
-                        {selectedCycles.length > 0 && (
-                            <span className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
-                                {selectedCycles.length}
-                            </span>
+                    <div className="flex-1 flex items-center">
+                        <button
+                            onClick={() => setActiveTab('cycles')}
+                            className={`flex items-center px-4 py-2 text-sm font-medium ${activeTab === 'cycles'
+                                ? 'border-b-2 border-blue-500 text-blue-600'
+                                : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            <Calendar className="w-4 h-4 mr-2" />
+                            {t('maintenanceCycle.generateSchedule.tabs.cycles')}
+                            {selectedCycles.length > 0 && (
+                                <span className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
+                                    {selectedCycles.length}
+                                </span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('buildings')}
+                            className={`flex items-center px-4 py-2 text-sm font-medium ${activeTab === 'buildings'
+                                ? 'border-b-2 border-blue-500 text-blue-600'
+                                : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            <Building2 className="w-4 h-4 mr-2" />
+                            {t('maintenanceCycle.generateSchedule.tabs.buildings')}
+                            {selectedBuildingDetails.length > 0 && (
+                                <span className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
+                                    {selectedBuildingDetails.length}
+                                </span>
+                            )}
+                        </button>
+                    </div>
+                    <div className="flex items-center px-4">
+                        {activeTab === 'cycles' ? (
+                            <button
+                                onClick={handleSelectAllCycles}
+                                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center"
+                            >
+                                <CheckCircle2 className="w-4 h-4 mr-1" />
+                                {selectedCycles.length === maintenanceCycles?.data.length
+                                    ? t('maintenanceCycle.generateSchedule.deselectAll')
+                                    : t('maintenanceCycle.generateSchedule.selectAll')}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleSelectAllBuildings}
+                                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center"
+                            >
+                                <CheckCircle2 className="w-4 h-4 mr-1" />
+                                {selectedBuildingDetails.length === buildingDetails?.length
+                                    ? t('maintenanceCycle.generateSchedule.deselectAll')
+                                    : t('maintenanceCycle.generateSchedule.selectAll')}
+                            </button>
                         )}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('buildings')}
-                        className={`flex items-center px-4 py-2 text-sm font-medium ${activeTab === 'buildings'
-                            ? 'border-b-2 border-blue-500 text-blue-600'
-                            : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        <Building2 className="w-4 h-4 mr-2" />
-                        {t('maintenanceCycle.generateSchedule.tabs.buildings')}
-                        {selectedBuildingDetails.length > 0 && (
-                            <span className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">
-                                {selectedBuildingDetails.length}
-                            </span>
-                        )}
-                    </button>
+                    </div>
                 </div>
 
                 {/* Content */}
@@ -240,52 +312,59 @@ const GenerateScheduleModal: React.FC<GenerateScheduleModalProps> = ({ isOpen, o
                                                 <motion.div
                                                     initial={{ opacity: 0, height: 0 }}
                                                     animate={{ opacity: 1, height: 'auto' }}
-                                                    className="mt-4 space-y-3"
+                                                    className="mt-4 space-y-4 bg-white rounded-lg p-4 border border-blue-100"
                                                 >
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            {t('maintenanceCycle.generateSchedule.duration.label')}
-                                                        </label>
-                                                        <div className="relative">
-                                                            <input
-                                                                type="number"
-                                                                min="1"
-                                                                value={
-                                                                    selectedCycles.find(c => c.cycle_id === cycle.cycle_id)
-                                                                        ?.duration_days || 1
-                                                                }
-                                                                onChange={e =>
-                                                                    handleDurationChange(cycle.cycle_id, parseInt(e.target.value))
-                                                                }
-                                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                                aria-label={t('maintenanceCycle.generateSchedule.duration.label')}
-                                                            />
-                                                            <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                {t('maintenanceCycle.generateSchedule.duration.label')}
+                                                            </label>
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="number"
+                                                                    min="1"
+                                                                    value={selectedCycles.find(c => c.cycle_id === cycle.cycle_id)?.duration_days || ''}
+                                                                    onChange={e => handleDurationChange(cycle.cycle_id, e.target.value)}
+                                                                    onKeyDown={(e) => {
+                                                                        // Prevent negative numbers and decimal points
+                                                                        if (e.key === '-' || e.key === '.') {
+                                                                            e.preventDefault()
+                                                                        }
+                                                                    }}
+                                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10"
+                                                                    placeholder="Nhập số ngày"
+                                                                    aria-label={t('maintenanceCycle.generateSchedule.duration.label')}
+                                                                />
+                                                                <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                            </div>
+                                                            <p className="mt-1 text-xs text-gray-500">
+                                                                {t('maintenanceCycle.generateSchedule.duration.help')}
+                                                            </p>
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                {t('maintenanceCycle.generateSchedule.startDate.label')}
+                                                            </label>
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="date"
+                                                                    value={
+                                                                        selectedCycles.find(c => c.cycle_id === cycle.cycle_id)
+                                                                            ?.start_date || format(new Date(), 'yyyy-MM-dd')
+                                                                    }
+                                                                    onChange={e =>
+                                                                        handleStartDateChange(cycle.cycle_id, e.target.value)
+                                                                    }
+                                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10"
+                                                                    aria-label={t('maintenanceCycle.generateSchedule.startDate.label')}
+                                                                />
+                                                                <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                            </div>
                                                         </div>
                                                     </div>
 
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            {t('maintenanceCycle.generateSchedule.startDate.label')}
-                                                        </label>
-                                                        <div className="relative">
-                                                            <input
-                                                                type="date"
-                                                                value={
-                                                                    selectedCycles.find(c => c.cycle_id === cycle.cycle_id)
-                                                                        ?.start_date || format(new Date(), 'yyyy-MM-dd')
-                                                                }
-                                                                onChange={e =>
-                                                                    handleStartDateChange(cycle.cycle_id, e.target.value)
-                                                                }
-                                                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                                aria-label={t('maintenanceCycle.generateSchedule.startDate.label')}
-                                                            />
-                                                            <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex items-center">
+                                                    <div className="flex items-center mt-2">
                                                         <input
                                                             type="checkbox"
                                                             checked={

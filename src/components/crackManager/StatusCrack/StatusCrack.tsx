@@ -60,6 +60,18 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
       title: t('common.crackStatus.resolved'),
       label: t('common.crackStatus.resolved')
     },
+    reviewing: {
+      title: t('common.crackStatus.reviewing'),
+      label: t('common.crackStatus.reviewing')
+    },
+    rejected: {
+      title: t('common.crackStatus.rejected'),
+      label: t('common.crackStatus.rejected')
+    },
+    completed: {
+      title: t('common.crackStatus.completed'),
+      label: t('common.crackStatus.completed')
+    }
   }
 
   // Get the status title
@@ -69,7 +81,24 @@ const StatusCrack: React.FC<StatusCrackProps> = ({
 
   // Get the status label
   const getStatusLabel = () => {
-    return statusMapping[crackStatus as keyof typeof statusMapping]?.label || crackStatus
+    const status = crackStatus.toLowerCase()
+    switch (status) {
+      case 'pending':
+        return t('common.crackStatus.pending')
+      case 'inprogress':
+      case 'in_progress':
+        return t('common.crackStatus.inProgress')
+      case 'resolved':
+        return t('common.crackStatus.resolved')
+      case 'reviewing':
+        return t('common.crackStatus.reviewing')
+      case 'rejected':
+        return t('common.crackStatus.rejected')
+      case 'completed':
+        return t('common.crackStatus.completed')
+      default:
+        return t('common.crackStatus.pending')
+    }
   }
 
   // Fetch staff leader when modal is opened

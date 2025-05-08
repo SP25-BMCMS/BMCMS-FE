@@ -37,17 +37,16 @@
     "sending": "Đang gửi...",
     "crackStatus": {
       "title": "Trạng thái vết nứt",
-      "rejected": "Từ chối",
-      "infixing": "Đang sửa chữa",
-      "waitingConfirm": "Chờ xác nhận",
-      "waitingconfirm": "Chờ xác nhận",
-      "processing": "Đang xử lý",
-      "reviewing": "Đang xem xét",
+      "current": "Trạng thái hiện tại",
       "pending": "Chờ xử lý",
-      "inprogress": "Đang thực hiện",
+      "inProgress": "Đang xử lý",
+      "resolved": "Đã xử lý",
+      "reviewing": "Đang kiểm tra",
+      "rejected": "Từ chối",
       "completed": "Hoàn thành",
-      "updateError": "Cập nhật thất bại",
-      "updateSuccess": "Cập nhật thành công"
+      "processing": "Đang xử lý...",
+      "updateSuccess": "Cập nhật trạng thái thành công",
+      "updateError": "Không thể cập nhật trạng thái"
     },
     "action": "Thao tác",
     "createdDate": "Ngày tạo",
@@ -1069,6 +1068,8 @@
       "apply": "Áp dụng"
     },
     "generateSchedule": {
+      "selectAll": "Chọn tất cả",
+      "deselectAll": "Bỏ chọn tất cả",
       "title": "Tạo lịch trình",
       "tabs": {
         "cycles": "Chu kỳ bảo trì",
@@ -1077,7 +1078,8 @@
       "select": "Chọn",
       "selected": "Đã chọn",
       "duration": {
-        "label": "Thời gian (ngày)"
+        "label": "Thời gian (ngày)",
+        "help": "Nhập số ngày để tạo lịch trình"
       },
       "startDate": {
         "label": "Ngày bắt đầu"
@@ -1709,6 +1711,30 @@
         "creating": "Đang tạo..."
       },
       "taskExists": "Đã tồn tại nhiệm vụ cho công việc theo lịch này"
+    },
+    "createScheduleJob": {
+      "title": "Tạo công việc theo lịch",
+      "building": "Tòa nhà",
+      "selectBuilding": "Chọn tòa nhà",
+      "noBuildings": "Không có tòa nhà nào khả dụng cho quản lý này",
+      "buildingInfo": {
+        "apartments": "căn hộ",
+        "floors": "tầng",
+        "area": "Khu vực"
+      },
+      "runDate": "Ngày thực hiện",
+      "buttons": {
+        "cancel": "Hủy",
+        "create": "Tạo công việc",
+        "creating": "Đang tạo..."
+      },
+      "errors": {
+        "noSchedule": "Không có lịch trình được chọn",
+        "noBuilding": "Vui lòng chọn tòa nhà",
+        "noRunDate": "Vui lòng chọn ngày thực hiện",
+        "createFailed": "Không thể tạo công việc theo lịch"
+      },
+      "success": "Tạo công việc theo lịch thành công"
     }
   },
   "building": {
