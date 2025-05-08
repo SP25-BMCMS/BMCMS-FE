@@ -182,8 +182,20 @@ const InspectionDetails: React.FC<InspectionDetailsProps> = ({ taskAssignments }
 
   // Helper function to get status display text
   const getStatusDisplayText = (status: ReportStatus): string => {
-    if (status === 'NoPending') return 'Approved'
-    return status
+    switch (status) {
+      case 'NoPending':
+        return t('taskManagement.inspection.status.approved')
+      case 'Pending':
+        return t('taskManagement.inspection.status.pending')
+      case 'Approved':
+        return t('taskManagement.inspection.status.approved')
+      case 'Rejected':
+        return t('taskManagement.inspection.status.rejected')
+      case 'AutoApproved':
+        return t('taskManagement.inspection.status.autoApproved')
+      default:
+        return status
+    }
   }
 
   // Helper function to get status colors

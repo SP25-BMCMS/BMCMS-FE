@@ -796,55 +796,54 @@ const TaskDetail: React.FC = () => {
           </div>
         )}
         {/* Verified Column */}
-        <div className="bg-white dark:bg-gray-700 rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-600 flex items-center">
-            <div
-              className="w-3 h-3 rounded-full mr-2"
-              style={{ backgroundColor: '#50F186' }}
-            ></div>
-            <h3 className="font-semibold dark:text-white">
-              {t('taskManagement.detail.assignments.verified')} ({assignmentsByStatus.Verified.length})
-            </h3>
-          </div>
-          <div className="p-2 overflow-y-auto max-h-[70vh]">
-            {assignmentsByStatus.Verified.map((assignment, index) => (
+        {assignmentsByStatus.Verified.length > 0 && (
+          <div className="bg-white dark:bg-gray-700 rounded-lg shadow">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-600 flex items-center">
               <div
-                key={assignment.assignment_id}
-                className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
-                style={{ borderLeftColor: '#50F186' }}
-                onClick={() => handleAssignmentClick(assignment.assignment_id)}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-medium text-sm dark:text-white line-clamp-2">
-                    {t('taskManagement.detail.assignments.assignment')} {formatAssignmentNumber(index)}
-                  </h4>
-                  {getStatusIcon(assignment.status)}
-                </div>
-                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
-                  {assignment.description}
-                </p>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center mb-1">
-                    <FaUser className="mr-1" />
-                    <span>{displayStaffName(assignment)}</span>
+                className="w-3 h-3 rounded-full mr-2"
+                style={{ backgroundColor: '#50F186' }}
+              ></div>
+              <h3 className="font-semibold dark:text-white">
+                {t('taskManagement.detail.assignments.verified')} ({assignmentsByStatus.Verified.length})
+              </h3>
+            </div>
+            <div className="p-2 overflow-y-auto max-h-[70vh]">
+              {assignmentsByStatus.Verified.map((assignment, index) => (
+                <div
+                  key={assignment.assignment_id}
+                  className="bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 border-l-4 hover:shadow-md transition cursor-pointer"
+                  style={{ borderLeftColor: '#50F186' }}
+                  onClick={() => handleAssignmentClick(assignment.assignment_id)}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium text-sm dark:text-white line-clamp-2">
+                      {t('taskManagement.detail.assignments.assignment')} {formatAssignmentNumber(index)}
+                    </h4>
+                    {getStatusIcon(assignment.status)}
                   </div>
-                  <div className="flex items-center">
-                    <FaCalendarAlt className="mr-1" />
-                    <span>{FORMAT_DATE_TIME(assignment.updated_at)}</span>
+                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+                    {assignment.description}
+                  </p>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center mb-1">
+                      <FaUser className="mr-1" />
+                      <span>{displayStaffName(assignment)}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <FaCalendarAlt className="mr-1" />
+                      <span>{FORMAT_DATE_TIME(assignment.updated_at)}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {assignmentsByStatus.Verified.length === 0 && (
-              <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                {t('taskManagement.detail.assignments.noAssignments')}
-              </div>
-            )}
+              ))}
+              {assignmentsByStatus.Verified.length === 0 && (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+                  {t('taskManagement.detail.assignments.noAssignments')}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-
-
-
+        )}
         {/* Confirmed Column */}
         <div className="bg-white dark:bg-gray-700 rounded-lg shadow">
           <div className="p-4 border-b border-gray-200 dark:border-gray-600 flex items-center">
